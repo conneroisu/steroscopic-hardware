@@ -12,6 +12,8 @@ import (
 	"sync"
 	"syscall"
 	"time"
+
+	"github.com/conneroisu/steroscopic-hardware/pkg/despair"
 )
 
 const (
@@ -58,6 +60,16 @@ func Run(
 	var wg sync.WaitGroup
 
 	start := time.Now()
+	err := despair.RunSad("L_00001.png", "R_00001.png")
+	if err != nil {
+		return err
+	}
+
+	slog.Info(
+		"run completed",
+		slog.String("setup-time", time.Since(start).String()),
+	)
+	return nil
 
 	// Create a separate context for signal handling
 	innerCtx, cancel := signal.NotifyContext(
