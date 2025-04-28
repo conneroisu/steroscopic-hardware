@@ -27,15 +27,11 @@ func init() {
 }
 
 // sumAbsoluteDifferencesOptimized calculates SAD directly on image data
-func sumAbsoluteDifferencesOptimized(left, right *image.Gray, leftX, leftY, rightX, rightY, blockSize int) int {
-	var sad int
+func sumAbsoluteDifferencesOptimized(
+	left, right *image.Gray,
+	leftX, leftY, rightX, rightY, blockSize int,
+) int {
 	halfSize := blockSize / 2
-
-	// Direct access to the underlying pixel data
-	leftStride := left.Stride
-	rightStride := right.Stride
-	leftPix := left.Pix
-	rightPix := right.Pix
 
 	// Optimize bounds checking by doing it once
 	leftMinY := max(leftY-halfSize, 0)
@@ -46,24 +42,35 @@ func sumAbsoluteDifferencesOptimized(left, right *image.Gray, leftX, leftY, righ
 	rightMinY := max(rightY-halfSize, 0)
 	rightMinX := max(rightX-halfSize, 0)
 
-	// Process only the valid window
-	for ly := leftMinY; ly < leftMaxY; ly++ {
-		ry := rightMinY + (ly - leftMinY)
+	return calculateSAD(left, right, leftMinX, leftMaxX, leftMinY, leftMaxY, rightMinX, rightMinY)
+}
+
+// calculateSAD performs the actual SAD calculation
+func calculateSAD(
+	left, right *image.Gray,
+	leftMinX, leftMaxX, leftMinY, leftMaxY, rightMinX, rightMinY int,
+) int {
+	var (
+		sad            int
+		lx, ly, rx, ry int
+	)
+	for ly = leftMinY; ly < leftMaxY; ly++ {
+		ry = rightMinY + (ly - leftMinY)
 		if ry >= right.Rect.Max.Y {
 			break
 		}
 
-		leftRowStart := ly*leftStride + leftMinX
-		rightRowStart := ry*rightStride + rightMinX
+		leftRowStart := ly*left.Stride + leftMinX
+		rightRowStart := ry*right.Stride + rightMinX
 
-		for lx := leftMinX; lx < leftMaxX; lx++ {
-			rx := rightMinX + (lx - leftMinX)
+		for lx = leftMinX; lx < leftMaxX; lx++ {
+			rx = rightMinX + (lx - leftMinX)
 			if rx >= right.Rect.Max.X {
 				break
 			}
 
-			leftVal := leftPix[leftRowStart+lx-leftMinX]
-			rightVal := rightPix[rightRowStart+rx-rightMinX]
+			leftVal := left.Pix[leftRowStart+lx-leftMinX]
+			rightVal := right.Pix[rightRowStart+rx-rightMinX]
 
 			// Use abs without floating point
 			diff := int(leftVal) - int(rightVal)
@@ -75,6 +82,75 @@ func sumAbsoluteDifferencesOptimized(left, right *image.Gray, leftX, leftY, righ
 	}
 
 	return sad
+}
+
+// processChunk processes a chunk of rows for disparity calculation
+func processChunk(
+	chunk processingChunk,
+	left, right *image.Gray,
+	bounds image.Rectangle,
+	disparityMap *image.Gray,
+	blockSize, maxDisparity int,
+) {
+	for y := chunk.startY; y < chunk.endY; y++ {
+		processRow(
+			y,
+			left,
+			right,
+			bounds,
+			disparityMap,
+			blockSize,
+			maxDisparity,
+		)
+	}
+}
+
+// processRow processes a single row for disparity calculation
+func processRow(y int, left, right *image.Gray, bounds image.Rectangle, disparityMap *image.Gray, blockSize, maxDisparity int) {
+	var x, disparity int
+	for x = bounds.Min.X; x < bounds.Max.X; x++ {
+		disparity = findBestDisparity(
+			x,
+			y,
+			left,
+			right,
+			bounds,
+			blockSize,
+			maxDisparity,
+		)
+		disparityMap.SetGray(
+			x,
+			y,
+			color.Gray{Y: uint8((disparity * 255) / maxDisparity)},
+		)
+	}
+}
+
+// findBestDisparity finds the best disparity value for a given point
+func findBestDisparity(x, y int, left, right *image.Gray, bounds image.Rectangle, blockSize, maxDisparity int) int {
+	minSAD := math.MaxInt32
+	bestDisparity := 0
+
+	for d := 0; d <= maxDisparity; d++ {
+		// Skip if we would go beyond the left edge
+		if x-d < bounds.Min.X {
+			continue
+		}
+
+		sad := sumAbsoluteDifferencesOptimized(left, right, x, y, x-d, y, blockSize)
+
+		if sad < minSAD {
+			minSAD = sad
+			bestDisparity = d
+
+			// Early termination for perfect matches
+			if sad == 0 {
+				break
+			}
+		}
+	}
+
+	return bestDisparity
 }
 
 // calculateDisparityMapOptimized computes the disparity map with optimizations
@@ -92,39 +168,16 @@ func calculateDisparityMapOptimized(left, right *image.Gray, blockSize, maxDispa
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-
-			// Reuse arrays to reduce allocations
 			for chunk := range chunksChan {
-				for y := chunk.startY; y < chunk.endY; y++ {
-					for x := bounds.Min.X; x < bounds.Max.X; x++ {
-						minSAD := math.MaxInt32
-						bestDisparity := 0
-
-						// Search for best match within disparity range
-						for d := 0; d <= maxDisparity; d++ {
-							// Skip if we would go beyond the left edge
-							if x-d < bounds.Min.X {
-								continue
-							}
-
-							sad := sumAbsoluteDifferencesOptimized(left, right, x, y, x-d, y, blockSize)
-
-							if sad < minSAD {
-								minSAD = sad
-								bestDisparity = d
-
-								// Early termination for perfect matches
-								if sad == 0 {
-									break
-								}
-							}
-						}
-
-						// Normalize disparity value for better visualization
-						disparityValue := uint8((bestDisparity * 255) / maxDisparity)
-						disparityMap.SetGray(x, y, color.Gray{Y: disparityValue})
-					}
-				}
+				processChunk(
+					chunk,
+					left,
+					right,
+					bounds,
+					disparityMap,
+					blockSize,
+					maxDisparity,
+				)
 			}
 		}()
 	}
@@ -140,6 +193,38 @@ func calculateDisparityMapOptimized(left, right *image.Gray, blockSize, maxDispa
 	wg.Wait()
 
 	return disparityMap
+}
+
+// convertGrayToGray directly copies gray image data
+func convertGrayToGray(src *image.Gray, grayPix []uint8) {
+	copy(grayPix, src.Pix)
+}
+
+// convertRGBAToGray converts RGBA image to grayscale
+func convertRGBAToGray(src *image.RGBA, grayPix []uint8, stride int, bounds image.Rectangle) {
+	for y := bounds.Min.Y; y < bounds.Max.Y; y++ {
+		rowStart := (y - bounds.Min.Y) * stride
+		for x := bounds.Min.X; x < bounds.Max.X; x++ {
+			i := src.PixOffset(x, y)
+			r := src.Pix[i]
+			g := src.Pix[i+1]
+			b := src.Pix[i+2]
+
+			// Use integer arithmetic
+			grayPix[rowStart+x-bounds.Min.X] = uint8((19595*uint32(r) + 38470*uint32(g) + 7471*uint32(b) + 1<<15) >> 24)
+		}
+	}
+}
+
+// convertGenericToGray converts any image to grayscale
+func convertGenericToGray(src image.Image, grayPix []uint8, stride int, bounds image.Rectangle) {
+	for y := bounds.Min.Y; y < bounds.Max.Y; y++ {
+		rowStart := (y - bounds.Min.Y) * stride
+		for x := bounds.Min.X; x < bounds.Max.X; x++ {
+			r, g, b, _ := src.At(x, y).RGBA()
+			grayPix[rowStart+x-bounds.Min.X] = uint8((19595*r + 38470*g + 7471*b + 1<<15) >> 24)
+		}
+	}
 }
 
 // loadPNGAsGrayOptimized loads a PNG image and converts it to grayscale with optimizations
@@ -165,30 +250,11 @@ func loadPNGAsGrayOptimized(filename string) (*image.Gray, error) {
 	// Optimize by checking image type
 	switch img := img.(type) {
 	case *image.Gray:
-		copy(grayPix, img.Pix)
+		convertGrayToGray(img, grayPix)
 	case *image.RGBA:
-		// Direct access to RGBA pixel data
-		for y := bounds.Min.Y; y < bounds.Max.Y; y++ {
-			rowStart := (y - bounds.Min.Y) * stride
-			for x := bounds.Min.X; x < bounds.Max.X; x++ {
-				i := img.PixOffset(x, y)
-				r := img.Pix[i]
-				g := img.Pix[i+1]
-				b := img.Pix[i+2]
-
-				// Use integer arithmetic
-				grayPix[rowStart+x-bounds.Min.X] = uint8((19595*uint32(r) + 38470*uint32(g) + 7471*uint32(b) + 1<<15) >> 24)
-			}
-		}
+		convertRGBAToGray(img, grayPix, stride, bounds)
 	default:
-		// Fallback for other image types
-		for y := bounds.Min.Y; y < bounds.Max.Y; y++ {
-			rowStart := (y - bounds.Min.Y) * stride
-			for x := bounds.Min.X; x < bounds.Max.X; x++ {
-				r, g, b, _ := img.At(x, y).RGBA()
-				grayPix[rowStart+x-bounds.Min.X] = uint8((19595*r + 38470*g + 7471*b + 1<<15) >> 24)
-			}
-		}
+		convertGenericToGray(img, grayPix, stride, bounds)
 	}
 
 	return grayImg, nil
