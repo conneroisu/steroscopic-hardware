@@ -36,16 +36,26 @@ func AddRoutes(
 		&params,
 	)
 	mux.HandleFunc("/{$}", func(w http.ResponseWriter, _ *http.Request) {
-		if err := tmpl.ExecuteTemplate(w, "index", nil); err != nil {
+		err := tmpl.ExecuteTemplate(w, "index", nil)
+		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 	})
 	mux.HandleFunc("/ws", handlers.WSHandler)
 	mux.HandleFunc("/api/parameters", handlers.Make(handlers.ParametersHandler(&params)))
-	mux.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.FS(static))))
-	mux.HandleFunc("/api/capture", handlers.Make(handlers.CameraHandler(cameraSystem)))
-	mux.HandleFunc("/stream/left", handlers.Make(handlers.GetStreamHandler(cameraSystem, "left")))
+	mux.Handle(
+		"/static/",
+		http.StripPrefix(
+			"/static/",
+			http.FileServer(http.FS(static)),
+		))
+	mux.HandleFunc(
+		"/api/capture",
+		handlers.Make(handlers.CameraHandler(cameraSystem)),
+	)
+	mux.HandleFunc(
+		"/stream/left", handlers.Make(handlers.GetStreamHandler(cameraSystem, "left")))
 	mux.HandleFunc("/stream/right", handlers.Make(handlers.GetStreamHandler(cameraSystem, "right")))
 
 	return nil

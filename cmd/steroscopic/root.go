@@ -60,7 +60,7 @@ func Run(
 	start := time.Now()
 
 	innerCtx, cancel := signal.NotifyContext(
-		context.Background(), // Use a fresh context instead of the parent ctx
+		context.Background(), // Fresh Context
 		os.Interrupt,
 		syscall.SIGTERM,
 		syscall.SIGINT,
@@ -69,7 +69,7 @@ func Run(
 	)
 	defer cancel()
 
-	handler, err := NewServer(ctx) // Use original context for server setup
+	handler, err := NewServer(ctx)
 	if err != nil {
 		return err
 	}
@@ -115,7 +115,7 @@ func Run(
 
 		// Create shutdown context with timeout
 		shutdownCtx, cancel := context.WithTimeout(
-			context.Background(), // Use a fresh context for shutdown
+			context.Background(), // Fresh Context for shutdown
 			shutdownTimeout,
 		)
 		defer cancel()

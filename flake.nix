@@ -35,7 +35,7 @@
           exec = ''${pkgs.git}/bin/git clean -fdx'';
           description = "Clean Project";
         };
-        tests = {
+        test-go = {
           exec = ''${pkgs.go}/bin/go test -v ./...'';
           description = "Run all go tests";
         };
@@ -88,7 +88,7 @@
         (name: script: pkgs.writeShellScriptBin name script.exec)
         scripts;
     in {
-      devShell = pkgs.mkShell {
+      devShells.default = pkgs.mkShell {
         shellHook = ''
           export REPO_ROOT=$(git rev-parse --show-toplevel)
           export CGO_CFLAGS="-O2"
