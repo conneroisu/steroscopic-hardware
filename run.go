@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	if err := despair.RunSadPaths("./testdata/im0.png", "./testdata/im1.png", 16, 64); err != nil {
+	if err := despair.RunSadPaths("./testdata/L_00001.png", "./testdata/R_00001.png", 16, 64); err != nil {
 		panic(err)
 	}
 }

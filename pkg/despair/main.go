@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"image"
 	"image/color"
-	"log/slog"
 	"math"
 	"runtime"
 	"sync"
@@ -23,8 +22,8 @@ type processingChunk struct {
 	startY, endY int
 }
 
-// sumAbsoluteDifferencesOptimized calculates SAD directly on image data
-func sumAbsoluteDifferencesOptimized(
+// sumAbsoluteDifferences calculates SAD directly on image data
+func sumAbsoluteDifferences(
 	left, right *image.Gray,
 	leftX, leftY, rightX, rightY, blockSize int,
 ) int {
@@ -39,7 +38,16 @@ func sumAbsoluteDifferencesOptimized(
 	rightMinY := max(rightY-halfSize, 0)
 	rightMinX := max(rightX-halfSize, 0)
 
-	return calculateSAD(left, right, leftMinX, leftMaxX, leftMinY, leftMaxY, rightMinX, rightMinY)
+	return calculateSAD(
+		left,
+		right,
+		leftMinX,
+		leftMaxX,
+		leftMinY,
+		leftMaxY,
+		rightMinX,
+		rightMinY,
+	)
 }
 
 // calculateSAD performs the actual SAD calculation
@@ -82,27 +90,6 @@ func calculateSAD(
 	return sad
 }
 
-// processChunk processes a chunk of rows for disparity calculation
-func processChunk(
-	chunk processingChunk,
-	left, right *image.Gray,
-	bounds image.Rectangle,
-	disparityMap *image.Gray,
-	blockSize, maxDisparity int,
-) {
-	for y := chunk.startY; y < chunk.endY; y++ {
-		processRow(
-			y,
-			left,
-			right,
-			bounds,
-			disparityMap,
-			blockSize,
-			maxDisparity,
-		)
-	}
-}
-
 // processRow processes a single row for disparity calculation
 func processRow(
 	y int,
@@ -121,7 +108,7 @@ func processRow(
 				continue
 			}
 
-			sad := sumAbsoluteDifferencesOptimized(
+			sad := sumAbsoluteDifferences(
 				left,
 				right,
 				x,
@@ -167,18 +154,21 @@ func RunSad(
 	for range numWorkers { // i := 0; i < numWorkers; i++
 		wg.Add(1)
 		go func() {
-			defer wg.Done()
 			for chunk := range chunksChan {
-				processChunk(
-					chunk,
-					left,
-					right,
-					left.Rect,
-					disparityMap,
-					blockSize,
-					maxDisparity,
-				)
+				var bounds = left.Rect
+				for y := chunk.startY; y < chunk.endY; y++ {
+					processRow(
+						y,
+						left,
+						right,
+						bounds,
+						disparityMap,
+						blockSize,
+						maxDisparity,
+					)
+				}
 			}
+			wg.Done()
 		}()
 	}
 
@@ -203,12 +193,12 @@ func RunSadPaths(
 	// Load left and right images
 	leftImg, err := LoadPNG(left)
 	if err != nil {
-		return fmt.Errorf("error loading left image: %v", err)
+		return err
 	}
 
 	rightImg, err := LoadPNG(right)
 	if err != nil {
-		return fmt.Errorf("error loading right image: %v", err)
+		return err
 	}
 
 	// Calculate disparity map
@@ -216,7 +206,8 @@ func RunSadPaths(
 	fmt.Printf("Using %d CPU cores for parallel processing\n", runtime.NumCPU())
 	start := time.Now()
 	disparityMap := RunSad(leftImg, rightImg, blockSize, maxDisparity)
-	slog.Info("disparity map calculation took", "secs", time.Since(start))
+	end := time.Now()
+	fmt.Printf("Elapsed time: %s\n", end.Sub(start))
 
 	// Save disparity map
 	err = SavePNG("disparity_map.png", disparityMap)
