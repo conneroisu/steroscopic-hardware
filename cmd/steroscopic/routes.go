@@ -10,6 +10,11 @@ import (
 	"github.com/conneroisu/steroscopic-hardware/pkg/routing"
 )
 
+const (
+	defLeftPort  = "8080"
+	defRightPort = "8081"
+)
+
 //go:embed static/*
 var static embed.FS
 
@@ -25,6 +30,12 @@ func AddRoutes(
 	mux *http.ServeMux,
 ) error {
 	var params despair.Parameters
+	cameraSystem := handlers.NewCameraSystem(
+		defLeftPort,
+		defRightPort,
+		"static/images",
+		&params,
+	)
 	mux.HandleFunc("/{$}", func(w http.ResponseWriter, _ *http.Request) {
 		if err := tmpl.ExecuteTemplate(w, "index", nil); err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -34,6 +45,9 @@ func AddRoutes(
 	mux.HandleFunc("/ws", handlers.WSHandler)
 	mux.HandleFunc("/api/parameters", routing.Make(handlers.ParametersHandler(&params)))
 	mux.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.FS(static))))
+	mux.HandleFunc("/api/capture", routing.Make(handlers.CameraHandler(cameraSystem)))
+	mux.HandleFunc("/stream/left", routing.Make(handlers.GetStreamHandler(cameraSystem, "left")))
+	mux.HandleFunc("/stream/right", routing.Make(handlers.GetStreamHandler(cameraSystem, "right")))
 
 	return nil
 }

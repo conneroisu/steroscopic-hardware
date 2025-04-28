@@ -1,497 +1,163 @@
 {{define "index"}}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Stereoscopic Imaging System</title>
-    <style>
-        :root {
-            --primary-color: #3498db;
-            --secondary-color: #2c3e50;
-            --success-color: #2ecc71;
-            --error-color: #e74c3c;
-            --warning-color: #f39c12;
-            --bg-color: #f5f5f5;
-            --panel-bg: #ffffff;
-            --text-color: #333333;
-            --border-radius: 6px;
-            --box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            line-height: 1.6;
-            padding: 20px;
-        }
-
-        header {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        h1 {
-            color: var(--secondary-color);
-            margin-bottom: 10px;
-        }
-
-        h2 {
-            color: var(--secondary-color);
-            font-size: 1.2rem;
-            margin-bottom: 10px;
-        }
-
-        .container {
-            display: grid;
-            grid-template-columns: 3fr 1fr;
-            gap: 20px;
-            max-width: 1600px;
-            margin: 0 auto;
-        }
-
-        .main-content {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        .panel {
-            background-color: var(--panel-bg);
-            border-radius: var(--border-radius);
-            padding: 15px;
-            box-shadow: var(--box-shadow);
-        }
-
-        .camera-views {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-        }
-
-        .camera-view {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .camera-feed {
-            width: 100%;
-            height: 300px;
-            background-color: #000;
-            border-radius: var(--border-radius);
-            overflow: hidden;
-            position: relative;
-        }
-
-        .camera-feed::after {
-            content: 'Waiting for connection...';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: white;
-            font-size: 14px;
-        }
-
-        .capture-button {
-            margin-top: 20px;
-            padding: 10px 20px;
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            border-radius: var(--border-radius);
-            cursor: pointer;
-            font-weight: bold;
-            transition: background-color 0.3s;
-        }
-
-        .capture-button:hover {
-            background-color: #2980b9;
-        }
-
-        .capture-button:active {
-            transform: translateY(1px);
-        }
-
-        .depth-map {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .depth-map-image {
-            width: 100%;
-            height: 300px;
-            background-color: #000;
-            border-radius: var(--border-radius);
-            overflow: hidden;
-            position: relative;
-        }
-
-        .depth-map-image::after {
-            content: 'No depth map available';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: white;
-            font-size: 14px;
-        }
-
-        .algorithm-controls {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .control-group {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-
-        .control-row {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        label {
-            min-width: 120px;
-            font-weight: bold;
-        }
-
-        input[type="range"] {
-            flex-grow: 1;
-        }
-
-        input[type="number"] {
-            width: 60px;
-            padding: 5px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-
-        .tooltip {
-            position: relative;
-            display: inline-block;
-            margin-left: 8px;
-            cursor: help;
-        }
-
-        .tooltip-icon {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 18px;
-            height: 18px;
-            background-color: var(--secondary-color);
-            color: white;
-            border-radius: 50%;
-            font-size: 12px;
-            font-weight: bold;
-        }
-
-        .tooltip-text {
-            visibility: hidden;
-            width: 200px;
-            background-color: var(--secondary-color);
-            color: white;
-            text-align: center;
-            border-radius: var(--border-radius);
-            padding: 5px;
-            position: absolute;
-            z-index: 1;
-            bottom: 125%;
-            left: 50%;
-            transform: translateX(-50%);
-            opacity: 0;
-            transition: opacity 0.3s;
-            font-size: 12px;
-            font-weight: normal;
-        }
-
-        .tooltip:hover .tooltip-text {
-            visibility: visible;
-            opacity: 1;
-        }
-
-        .update-button {
-            padding: 10px 20px;
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            border-radius: var(--border-radius);
-            cursor: pointer;
-            font-weight: bold;
-            transition: background-color 0.3s;
-            margin-top: 10px;
-            align-self: flex-start;
-        }
-
-        .update-button:hover {
-            background-color: #2980b9;
-        }
-
-        .update-button:active {
-            transform: translateY(1px);
-        }
-
-        .sidebar {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        .status-panel {
-            flex-grow: 1;
-        }
-
-        .status-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 8px 0;
-            border-bottom: 1px solid #eee;
-        }
-
-        .status-label {
-            font-weight: bold;
-        }
-
-        .status-value {
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-size: 0.9rem;
-        }
-
-        .status-connected {
-            background-color: rgba(46, 204, 113, 0.2);
-            color: #27ae60;
-        }
-
-        .status-disconnected {
-            background-color: rgba(231, 76, 60, 0.2);
-            color: #c0392b;
-        }
-
-        .status-processing {
-            background-color: rgba(243, 156, 18, 0.2);
-            color: #d35400;
-        }
-
-        .log-container {
-            height: 300px;
-            overflow-y: auto;
-            padding: 10px;
-            background-color: #2c3e50;
-            color: #ecf0f1;
-            border-radius: var(--border-radius);
-            font-family: monospace;
-            font-size: 0.9rem;
-        }
-
-        .log-entry {
-            margin-bottom: 5px;
-            line-height: 1.3;
-            display: flex;
-        }
-
-        .log-time {
-            color: #bdc3c7;
-            margin-right: 10px;
-            flex-shrink: 0;
-        }
-
-        .log-message {
-            word-break: break-word;
-        }
-
-        .log-info {
-            color: #3498db;
-        }
-
-        .log-success {
-            color: #2ecc71;
-        }
-
-        .log-warning {
-            color: #f39c12;
-        }
-
-        .log-error {
-            color: #e74c3c;
-        }
-
-        .collapsible-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            cursor: pointer;
-            user-select: none;
-        }
-
-        .collapsible-icon {
-            transition: transform 0.3s ease;
-        }
-
-        .collapsed .collapsible-icon {
-            transform: rotate(-90deg);
-        }
-
-        .collapsible-content {
-            transition: max-height 0.3s ease;
-            max-height: 1000px;
-            overflow: hidden;
-        }
-
-        .collapsed .collapsible-content {
-            max-height: 0;
-        }
-
-        /* Responsive design */
-        @media (max-width: 1200px) {
-            .container {
-                grid-template-columns: 1fr;
-            }
-
-            .sidebar {
-                flex-direction: row;
-                flex-wrap: wrap;
-            }
-
-            .status-panel, .log-panel {
-                flex-basis: calc(50% - 10px);
-                flex-grow: 1;
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            DEFAULT: '#3b82f6',
+                            dark: '#2563eb'
+                        }
+                    }
+                }
             }
         }
-
-        @media (max-width: 768px) {
-            .camera-views {
-                grid-template-columns: 1fr;
-            }
-
-            .sidebar {
-                flex-direction: column;
-            }
-
-            .status-panel, .log-panel {
-                flex-basis: 100%;
-            }
-        }
-    </style>
+    </script>
 </head>
-<body>
-    <header>
-        <h1>Stereoscopic Imaging System</h1>
-        <p>ZedBoard FPGA-based depth mapping with SAD algorithm</p>
+<body class="bg-gray-900 text-gray-200 min-h-screen">
+    <header class="py-6 text-center">
+        <h1 class="text-3xl font-bold text-blue-400 mb-2">Stereoscopic Imaging System</h1>
+        <p class="text-gray-400">ZedBoard FPGA-based depth mapping with SAD algorithm</p>
     </header>
 
-    <div class="container">
-        <div class="main-content">
-            <div class="panel">
-                <div class="camera-views">
-                    <div class="camera-view">
-                        <h2>Left Camera</h2>
-                        <div class="camera-feed" id="left-camera-feed">
+    <div class="container mx-auto px-4 grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <div class="lg:col-span-3 space-y-6">
+            <!-- Camera Views Panel -->
+            <div class="bg-gray-800 rounded-lg shadow-lg p-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="flex flex-col items-center">
+                        <h2 class="text-xl font-semibold text-gray-200 mb-2">Left Camera</h2>
+                        <div id="left-camera-feed" class="w-full h-64 bg-black rounded-lg overflow-hidden relative">
                             <!-- Video feed will be inserted here via JavaScript -->
+                            <div class="absolute inset-0 flex items-center justify-center text-gray-500">
+                                Waiting for connection...
+                            </div>
                         </div>
                     </div>
-                    <div class="camera-view">
-                        <h2>Right Camera</h2>
-                        <div class="camera-feed" id="right-camera-feed">
+                    <div class="flex flex-col items-center">
+                        <h2 class="text-xl font-semibold text-gray-200 mb-2">Right Camera</h2>
+                        <div id="right-camera-feed" class="w-full h-64 bg-black rounded-lg overflow-hidden relative">
                             <!-- Video feed will be inserted here via JavaScript -->
+                            <div class="absolute inset-0 flex items-center justify-center text-gray-500">
+                                Waiting for connection...
+                            </div>
                         </div>
                     </div>
                 </div>
-                <div style="text-align: center;">
-                    <button class="capture-button" id="capture-button">Capture Both</button>
+                <div class="text-center mt-4">
+                    <button id="capture-button" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50">
+                        Capture Both
+                    </button>
                 </div>
             </div>
 
-            <div class="panel depth-map">
-                <h2>Depth Map</h2>
-                <div class="depth-map-image" id="depth-map-image">
+            <!-- Depth Map Panel -->
+            <div class="bg-gray-800 rounded-lg shadow-lg p-4">
+                <h2 class="text-xl font-semibold text-gray-200 mb-2 text-center">Depth Map</h2>
+                <div id="depth-map-image" class="w-full h-64 bg-black rounded-lg overflow-hidden relative">
                     <!-- Depth map will be inserted here via JavaScript -->
+                    <div class="absolute inset-0 flex items-center justify-center text-gray-500">
+                        No depth map available
+                    </div>
                 </div>
             </div>
 
-            <div class="panel algorithm-controls">
-                <h2>Algorithm Controls</h2>
-                <div class="control-group">
-                    <div class="control-row">
-                        <label for="block-size">Block Size:</label>
-                        <input type="range" id="block-size-slider" min="3" max="31" step="2" value="7">
-                        <input type="number" id="block-size-input" min="3" max="31" step="2" value="7">
-                        <div class="tooltip">
-                            <div class="tooltip-icon">?</div>
-                            <span class="tooltip-text">Size of matching block used in SAD algorithm. Must be an odd number (3-31).</span>
+            <!-- Algorithm Controls Panel -->
+            <div class="bg-gray-800 rounded-lg shadow-lg p-4">
+                <h2 class="text-xl font-semibold text-gray-200 mb-4">Algorithm Controls</h2>
+                
+                <div class="space-y-4">
+                    <div class="space-y-2">
+                        <div class="flex items-center">
+                            <label for="block-size-slider" class="w-32 font-medium">Block Size:</label>
+                            <input type="range" id="block-size-slider" min="3" max="31" step="2" value="7"
+                                class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer mx-4">
+                            <input type="number" id="block-size-input" min="3" max="31" step="2" value="7"
+                                class="w-16 bg-gray-700 text-white rounded p-1 text-center">
+                            <div class="relative ml-2 group">
+                                <div class="w-5 h-5 bg-gray-600 rounded-full flex items-center justify-center text-xs text-white cursor-help">?</div>
+                                <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-48 bg-gray-700 text-white text-xs p-2 rounded opacity-0 group-hover:opacity-100 transition pointer-events-none">
+                                    Size of matching block used in SAD algorithm. Must be an odd number (3-31).
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div class="control-group">
-                    <div class="control-row">
-                        <label for="max-disparity">Max Disparity:</label>
-                        <input type="range" id="max-disparity-slider" min="16" max="256" step="16" value="64">
-                        <input type="number" id="max-disparity-input" min="16" max="256" step="16" value="64">
-                        <div class="tooltip">
-                            <div class="tooltip-icon">?</div>
-                            <span class="tooltip-text">Maximum pixel displacement between left and right images (16-256).</span>
+                    
+                    <div class="space-y-2">
+                        <div class="flex items-center">
+                            <label for="max-disparity-slider" class="w-32 font-medium">Max Disparity:</label>
+                            <input type="range" id="max-disparity-slider" min="16" max="256" step="16" value="64"
+                                class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer mx-4">
+                            <input type="number" id="max-disparity-input" min="16" max="256" step="16" value="64"
+                                class="w-16 bg-gray-700 text-white rounded p-1 text-center">
+                            <div class="relative ml-2 group">
+                                <div class="w-5 h-5 bg-gray-600 rounded-full flex items-center justify-center text-xs text-white cursor-help">?</div>
+                                <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-48 bg-gray-700 text-white text-xs p-2 rounded opacity-0 group-hover:opacity-100 transition pointer-events-none">
+                                    Maximum pixel displacement between left and right images (16-256).
+                                </div>
+                            </div>
                         </div>
                     </div>
+                    
+                    <button id="update-button" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50 mt-2">
+                        Update Parameters
+                    </button>
                 </div>
-                <button class="update-button" id="update-button">Update Parameters</button>
             </div>
         </div>
 
-        <div class="sidebar">
-            <div class="panel status-panel">
-                <div class="collapsible-header">
-                    <h2>System Status</h2>
-                    <span class="collapsible-icon">▼</span>
+        <div class="lg:col-span-1 space-y-6">
+            <!-- System Status Panel -->
+            <div class="bg-gray-800 rounded-lg shadow-lg p-4">
+                <div class="flex justify-between items-center cursor-pointer" id="status-header">
+                    <h2 class="text-xl font-semibold text-gray-200">System Status</h2>
+                    <span class="transform transition-transform duration-300" id="status-icon">▼</span>
                 </div>
-                <div class="collapsible-content">
-                    <div class="status-item">
-                        <span class="status-label">ZedBoard 1 (Left):</span>
-                        <span class="status-value status-disconnected" id="zedboard1-status">Disconnected</span>
+                <div class="mt-4 space-y-2" id="status-content">
+                    <div class="flex justify-between py-2 border-b border-gray-700">
+                        <span class="font-medium">ZedBoard 1 (Left):</span>
+                        <span id="zedboard1-status" class="px-2 py-1 rounded text-sm bg-red-900/30 text-red-400">Disconnected</span>
                     </div>
-                    <div class="status-item">
-                        <span class="status-label">ZedBoard 2 (Right):</span>
-                        <span class="status-value status-disconnected" id="zedboard2-status">Disconnected</span>
+                    <div class="flex justify-between py-2 border-b border-gray-700">
+                        <span class="font-medium">ZedBoard 2 (Right):</span>
+                        <span id="zedboard2-status" class="px-2 py-1 rounded text-sm bg-red-900/30 text-red-400">Disconnected</span>
                     </div>
-                    <div class="status-item">
-                        <span class="status-label">Host PC:</span>
-                        <span class="status-value status-disconnected" id="host-status">Disconnected</span>
+                    <div class="flex justify-between py-2 border-b border-gray-700">
+                        <span class="font-medium">Host PC:</span>
+                        <span id="host-status" class="px-2 py-1 rounded text-sm bg-red-900/30 text-red-400">Disconnected</span>
                     </div>
-                    <div class="status-item">
-                        <span class="status-label">Depth Map:</span>
-                        <span class="status-value status-disconnected" id="depth-map-status">Not available</span>
+                    <div class="flex justify-between py-2 border-b border-gray-700">
+                        <span class="font-medium">Depth Map:</span>
+                        <span id="depth-map-status" class="px-2 py-1 rounded text-sm bg-red-900/30 text-red-400">Not available</span>
                     </div>
-                    <div class="status-item">
-                        <span class="status-label">Block Size:</span>
-                        <span class="status-value" id="block-size-status">7</span>
+                    <div class="flex justify-between py-2 border-b border-gray-700">
+                        <span class="font-medium">Block Size:</span>
+                        <span id="block-size-status" class="px-2 py-1 rounded text-sm bg-gray-700 text-gray-300">7</span>
                     </div>
-                    <div class="status-item">
-                        <span class="status-label">Max Disparity:</span>
-                        <span class="status-value" id="max-disparity-status">64</span>
+                    <div class="flex justify-between py-2 border-b border-gray-700">
+                        <span class="font-medium">Max Disparity:</span>
+                        <span id="max-disparity-status" class="px-2 py-1 rounded text-sm bg-gray-700 text-gray-300">64</span>
                     </div>
                 </div>
             </div>
 
-            <div class="panel log-panel">
-                <div class="collapsible-header">
-                    <h2>System Logs</h2>
-                    <span class="collapsible-icon">▼</span>
+            <!-- System Logs Panel -->
+            <div class="bg-gray-800 rounded-lg shadow-lg p-4">
+                <div class="flex justify-between items-center cursor-pointer" id="logs-header">
+                    <h2 class="text-xl font-semibold text-gray-200">System Logs</h2>
+                    <span class="transform transition-transform duration-300" id="logs-icon">▼</span>
                 </div>
-                <div class="collapsible-content">
-                    <div class="log-container" id="log-container">
+                <div class="mt-4" id="logs-content">
+                    <div id="log-container" class="h-64 overflow-y-auto p-2 bg-gray-900 text-gray-300 rounded font-mono text-sm">
                         <!-- Log entries will be inserted here via JavaScript -->
                     </div>
                 </div>
@@ -531,19 +197,23 @@
             maxDisparityInput: document.getElementById('max-disparity-input'),
             updateButton: document.getElementById('update-button'),
             logContainer: document.getElementById('log-container'),
-            zedboard1Status: document.getElementById('zedboard1-status'),
-            zedboard2Status: document.getElementById('zedboard2-status'),
-            hostStatus: document.getElementById('host-status'),
-            depthMapStatus: document.getElementById('depth-map-status'),
-            blockSizeStatus: document.getElementById('block-size-status'),
-            maxDisparityStatus: document.getElementById('max-disparity-status')
+            statusHeader: document.getElementById('status-header'),
+            statusIcon: document.getElementById('status-icon'),
+            statusContent: document.getElementById('status-content'),
+            logsHeader: document.getElementById('logs-header'),
+            logsIcon: document.getElementById('logs-icon'),
+            logsContent: document.getElementById('logs-content')
         };
 
-        // Collapsible panels
-        document.querySelectorAll('.collapsible-header').forEach(header => {
-            header.addEventListener('click', () => {
-                header.parentElement.classList.toggle('collapsed');
-            });
+        // Toggle collapsible sections
+        elements.statusHeader.addEventListener('click', () => {
+            elements.statusContent.classList.toggle('hidden');
+            elements.statusIcon.classList.toggle('rotate-180');
+        });
+
+        elements.logsHeader.addEventListener('click', () => {
+            elements.logsContent.classList.toggle('hidden');
+            elements.logsIcon.classList.toggle('rotate-180');
         });
 
         // Application state
@@ -561,7 +231,7 @@
         // Sync number inputs with sliders
         elements.blockSizeSlider.addEventListener('input', function() {
             elements.blockSizeInput.value = this.value;
-            elements.blockSizeStatus.textContent = this.value;
+            document.getElementById('block-size-status').textContent = this.value;
         });
 
         elements.blockSizeInput.addEventListener('input', function() {
@@ -573,35 +243,34 @@
                 this.value = value;
             }
             elements.blockSizeSlider.value = this.value;
-            elements.blockSizeStatus.textContent = this.value;
+            document.getElementById('block-size-status').textContent = this.value;
         });
 
         elements.maxDisparitySlider.addEventListener('input', function() {
             elements.maxDisparityInput.value = this.value;
-            elements.maxDisparityStatus.textContent = this.value;
+            document.getElementById('max-disparity-status').textContent = this.value;
         });
 
         elements.maxDisparityInput.addEventListener('input', function() {
             elements.maxDisparitySlider.value = this.value;
-            elements.maxDisparityStatus.textContent = this.value;
+            document.getElementById('max-disparity-status').textContent = this.value;
         });
 
         // Logger function
         function log(message, type = 'info') {
             const timestamp = new Date().toTimeString().split(' ')[0];
             const logEntry = document.createElement('div');
-            logEntry.className = 'log-entry';
+            logEntry.className = 'mb-1';
             
-            const timeSpan = document.createElement('span');
-            timeSpan.className = 'log-time';
-            timeSpan.textContent = timestamp;
+            let textColorClass = 'text-blue-400'; // info
+            if (type === 'success') textColorClass = 'text-green-400';
+            if (type === 'warning') textColorClass = 'text-yellow-400';
+            if (type === 'error') textColorClass = 'text-red-400';
             
-            const messageSpan = document.createElement('span');
-            messageSpan.className = `log-message log-${type}`;
-            messageSpan.textContent = message;
-            
-            logEntry.appendChild(timeSpan);
-            logEntry.appendChild(messageSpan);
+            logEntry.innerHTML = `
+                <span class="text-gray-500 mr-2">${timestamp}</span>
+                <span class="${textColorClass}">${message}</span>
+            `;
             
             elements.logContainer.appendChild(logEntry);
             elements.logContainer.scrollTop = elements.logContainer.scrollHeight;
@@ -609,23 +278,50 @@
 
         // Update connection status indicators
         function updateStatus(device, status) {
-            const statusElem = elements[`${device}Status`];
-            statusElem.className = 'status-value';
+            // Map the device name to the correct element ID
+            let statusElementId;
+            switch(device) {
+                case 'zedboard1':
+                    statusElementId = 'zedboard1-status';
+                    break;
+                case 'zedboard2':
+                    statusElementId = 'zedboard2-status';
+                    break;
+                case 'host':
+                    statusElementId = 'host-status';
+                    break;
+                case 'depth-map':
+                    statusElementId = 'depth-map-status';
+                    break;
+                default:
+                    console.error(`Unknown device: ${device}`);
+                    return;
+            }
+            
+            const statusElem = document.getElementById(statusElementId);
+            if (!statusElem) {
+                console.error(`Status element not found for device: ${device}, element ID: ${statusElementId}`);
+                return;
+            }
+            
+            // Reset classes
+            statusElem.className = 'px-2 py-1 rounded text-sm';
             
             switch (status) {
                 case 'connected':
-                    statusElem.classList.add('status-connected');
+                    statusElem.classList.add('bg-green-900/30', 'text-green-400');
                     statusElem.textContent = 'Connected';
                     break;
                 case 'disconnected':
-                    statusElem.classList.add('status-disconnected');
+                    statusElem.classList.add('bg-red-900/30', 'text-red-400');
                     statusElem.textContent = 'Disconnected';
                     break;
                 case 'processing':
-                    statusElem.classList.add('status-processing');
+                    statusElem.classList.add('bg-yellow-900/30', 'text-yellow-400');
                     statusElem.textContent = 'Processing';
                     break;
                 default:
+                    statusElem.classList.add('bg-gray-700', 'text-gray-300');
                     statusElem.textContent = status;
             }
         }
@@ -636,17 +332,13 @@
                 // Create video elements for each feed
                 const leftVideo = document.createElement('img');
                 leftVideo.src = CONFIG.streams.leftCamera;
-                leftVideo.style.width = '100%';
-                leftVideo.style.height = '100%';
-                leftVideo.style.objectFit = 'cover';
+                leftVideo.className = 'w-full h-full object-cover';
                 elements.leftCameraFeed.innerHTML = '';
                 elements.leftCameraFeed.appendChild(leftVideo);
                 
                 const rightVideo = document.createElement('img');
                 rightVideo.src = CONFIG.streams.rightCamera;
-                rightVideo.style.width = '100%';
-                rightVideo.style.height = '100%';
-                rightVideo.style.objectFit = 'cover';
+                rightVideo.className = 'w-full h-full object-cover';
                 elements.rightCameraFeed.innerHTML = '';
                 elements.rightCameraFeed.appendChild(rightVideo);
                 
@@ -812,9 +504,7 @@
         function updateDepthMap(imageUrl) {
             const depthMapImg = document.createElement('img');
             depthMapImg.src = imageUrl;
-            depthMapImg.style.width = '100%';
-            depthMapImg.style.height = '100%';
-            depthMapImg.style.objectFit = 'contain';
+            depthMapImg.className = 'w-full h-full object-contain';
             
             elements.depthMapImage.innerHTML = '';
             elements.depthMapImage.appendChild(depthMapImg);
@@ -830,8 +520,8 @@
             state.parameters.maxDisparity = parseInt(elements.maxDisparityInput.value);
             
             // Update status display
-            elements.blockSizeStatus.textContent = state.parameters.blockSize;
-            elements.maxDisparityStatus.textContent = state.parameters.maxDisparity;
+            document.getElementById('block-size-status').textContent = state.parameters.blockSize;
+            document.getElementById('max-disparity-status').textContent = state.parameters.maxDisparity;
             
             log(`Updating parameters: Block Size = ${state.parameters.blockSize}, Max Disparity = ${state.parameters.maxDisparity}`, 'info');
             

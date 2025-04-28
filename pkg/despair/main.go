@@ -14,8 +14,8 @@ import (
 // Parameters is a struct that holds the parameters for the stereoscopic
 // image processing.
 type Parameters struct {
-	BlockSize     int `json:"blockSize"`
-	MaxDispairity int `json:"maxDisparity"`
+	BlockSize    int `json:"blockSize"`
+	MaxDisparity int `json:"maxDisparity"`
 }
 
 // processingChunk represents a chunk of work for parallel processing
@@ -48,17 +48,16 @@ func calculateSAD(
 	leftMinX, leftMaxX, leftMinY, leftMaxY, rightMinX, rightMinY int,
 ) int {
 	var (
-		sad            int
-		lx, ly, rx, ry int
+		sad        int
+		lx, ly, rx int
 	)
 	for ly = leftMinY; ly < leftMaxY; ly++ {
-		ry = rightMinY + (ly - leftMinY)
-		if ry >= right.Rect.Max.Y {
+		if rightMinY+(ly-leftMinY) >= right.Rect.Max.Y {
 			break
 		}
 
 		leftRowStart := ly*left.Stride + leftMinX
-		rightRowStart := ry*right.Stride + rightMinX
+		rightRowStart := (rightMinY+(ly-leftMinY))*right.Stride + rightMinX
 
 		for lx = leftMinX; lx < leftMaxX; lx++ {
 			rx = rightMinX + (lx - leftMinX)
@@ -171,8 +170,7 @@ func findBestDisparity(
 
 // calculateDisparityMapOptimized computes the disparity map with optimizations
 func calculateDisparityMapOptimized(left, right *image.Gray, blockSize, maxDisparity int) *image.Gray {
-	bounds := left.Bounds()
-	disparityMap := image.NewGray(bounds)
+	disparityMap := image.NewGray(left.Rect)
 
 	// Create worker pool
 	numWorkers := runtime.NumCPU()
@@ -189,7 +187,7 @@ func calculateDisparityMapOptimized(left, right *image.Gray, blockSize, maxDispa
 					chunk,
 					left,
 					right,
-					bounds,
+					left.Rect,
 					disparityMap,
 					blockSize,
 					maxDisparity,
@@ -199,9 +197,9 @@ func calculateDisparityMapOptimized(left, right *image.Gray, blockSize, maxDispa
 	}
 
 	// Distribute work in larger chunks for better cache utilization
-	chunkSize := max(1, bounds.Dy()/(numWorkers*4))
-	for y := bounds.Min.Y; y < bounds.Max.Y; y += chunkSize {
-		endY := min(y+chunkSize, bounds.Max.Y)
+	chunkSize := max(1, left.Rect.Dy()/(numWorkers*4))
+	for y := left.Rect.Min.Y; y < left.Rect.Max.Y; y += chunkSize {
+		endY := min(y+chunkSize, left.Rect.Max.Y)
 		chunksChan <- processingChunk{startY: y, endY: endY}
 	}
 
@@ -257,7 +255,7 @@ func savePNG(filename string, img image.Image) error {
 }
 
 // RunSad runs the optimized SAD algorithm on the given images
-func RunSad(left, right string) error {
+func RunSad(left, right string, params *Parameters) error {
 	// Load left and right images
 	leftImg, err := loadPNGAsGrayOptimized(left)
 	if err != nil {
@@ -270,8 +268,8 @@ func RunSad(left, right string) error {
 	}
 
 	// Parameters for block matching
-	blockSize := 15
-	maxDisparity := 64
+	blockSize := params.BlockSize
+	maxDisparity := params.MaxDisparity
 
 	// Calculate disparity map
 	fmt.Println("Calculating disparity map...")
