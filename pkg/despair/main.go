@@ -48,16 +48,17 @@ func calculateSAD(
 	leftMinX, leftMaxX, leftMinY, leftMaxY, rightMinX, rightMinY int,
 ) int {
 	var (
-		sad        int
-		lx, ly, rx int
+		sad            int
+		lx, ly, rx, ry int
 	)
 	for ly = leftMinY; ly < leftMaxY; ly++ {
-		if rightMinY+(ly-leftMinY) >= right.Rect.Max.Y {
+		ry = rightMinY + (ly - leftMinY)
+		if ry >= right.Rect.Max.Y {
 			break
 		}
 
 		leftRowStart := ly*left.Stride + leftMinX
-		rightRowStart := (rightMinY+(ly-leftMinY))*right.Stride + rightMinX
+		rightRowStart := ry*right.Stride + rightMinX
 
 		for lx = leftMinX; lx < leftMaxX; lx++ {
 			rx = rightMinX + (lx - leftMinX)
