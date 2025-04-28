@@ -1,6 +1,10 @@
+// Package routing provides stdlib routing helpers.
 package routing
 
-import "net/http"
+import (
+	"fmt"
+	"net/http"
+)
 
 // APIFn is a function that handles an API request.
 type APIFn func(w http.ResponseWriter, r *http.Request) error
@@ -10,7 +14,14 @@ func Make(fn APIFn) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		err := fn(w, r)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			http.Error(
+				w,
+				fmt.Sprintf(
+					`{"success": false, "error": "%s"}`,
+					err.Error(),
+				),
+				http.StatusInternalServerError,
+			)
 		}
 	}
 }

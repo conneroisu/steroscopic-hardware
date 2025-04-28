@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"go.bug.st/serial"
-	"go.bug.st/serial/enumerator"
 )
 
 // SerialCameraConfig holds configuration for a camera connected via serial port
@@ -275,23 +274,6 @@ func (sc *SerialCamera) convertRawToImage(data []byte) (image.Image, error) {
 	}
 
 	return img, nil
-}
-
-// FindCameras searches for available serial cameras
-func FindCameras() ([]string, error) {
-	ports, err := enumerator.GetDetailedPortsList()
-	if err != nil {
-		return nil, fmt.Errorf("failed to get serial ports list: %v", err)
-	}
-
-	var cameras []string
-	for _, port := range ports {
-		// Add ports with specific VID/PID for ZedBoard (if known)
-		// or add all serial ports for the user to select from
-		cameras = append(cameras, port.Name)
-	}
-
-	return cameras, nil
 }
 
 // StereoCameraSystem represents a system with two cameras for stereoscopic imaging
