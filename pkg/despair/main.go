@@ -72,6 +72,7 @@ func calculateSAD(
 			// Use abs without floating point
 			diff := int(leftVal) - int(rightVal)
 			if diff < 0 {
+				// positive diff
 				diff = -diff
 			}
 			sad += diff
@@ -124,7 +125,9 @@ func processRow(
 		disparityMap.SetGray(
 			x,
 			y,
-			color.Gray{Y: uint8((disparity * 255) / maxDisparity)},
+			color.Gray{
+				Y: uint8((disparity * 255) / maxDisparity),
+			},
 		)
 	}
 }
