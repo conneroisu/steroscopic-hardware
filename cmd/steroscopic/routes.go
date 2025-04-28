@@ -2,6 +2,7 @@ package steroscopic
 
 import (
 	"embed"
+	"fmt"
 	"html/template"
 	"net/http"
 
@@ -18,9 +19,23 @@ var static embed.FS
 
 //go:embed html.tmpl
 var htmlTmpl string
-
 var tmpl = template.Must(
-	template.New("index").Parse(htmlTmpl),
+	template.New("index").Funcs(template.FuncMap{
+		"dict": func(values ...any) (map[string]any, error) {
+			if len(values)%2 != 0 {
+				return nil, fmt.Errorf("invalid dict call")
+			}
+			dict := make(map[string]any, len(values)/2)
+			for i := 0; i < len(values); i += 2 {
+				key, ok := values[i].(string)
+				if !ok {
+					return nil, fmt.Errorf("dict keys must be strings")
+				}
+				dict[key] = values[i+1]
+			}
+			return dict, nil
+		},
+	}).Parse(htmlTmpl),
 )
 
 // AddRoutes adds the routes/handlers to the mux.
@@ -34,13 +49,38 @@ func AddRoutes(
 		"static/images",
 		&params,
 	)
-	mux.HandleFunc("/{$}", func(w http.ResponseWriter, _ *http.Request) {
-		err := tmpl.ExecuteTemplate(w, "index", nil)
+
+	// Index page route
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/" {
+			http.NotFound(w, r)
+			return
+		}
+
+		data := map[string]any{
+			"CurrentPage": "index",
+		}
+
+		err := tmpl.ExecuteTemplate(w, "index-with-nav", data)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 	})
+
+	// Manual page route
+	mux.HandleFunc("/manual", func(w http.ResponseWriter, _ *http.Request) {
+		data := map[string]any{
+			"CurrentPage": "manual-page",
+		}
+
+		err := tmpl.ExecuteTemplate(w, "manual-page-with-nav", data)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	})
+
 	mux.HandleFunc(
 		"/ws",
 		handlers.WSHandler,
@@ -71,6 +111,9 @@ func AddRoutes(
 		"/wso",
 		handlers.Make(handlers.GetMapHandler(cameraSystem)),
 	)
-
+	mux.HandleFunc(
+		"/manual-calc-depth-map",
+		handlers.Make(handlers.ManualCalcDepthMapHandler(cameraSystem)),
+	)
 	return nil
 }
