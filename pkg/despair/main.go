@@ -7,19 +7,91 @@ import (
 	"math"
 	"runtime"
 	"sync"
-	"time"
 )
-
-// Parameters is a struct that holds the parameters for the stereoscopic
-// image processing.
-type Parameters struct {
-	BlockSize    int `json:"blockSize"`
-	MaxDisparity int `json:"maxDisparity"`
-}
 
 // processingChunk represents a chunk of work for parallel processing
 type processingChunk struct {
 	startY, endY int
+}
+
+// RunSad computes the disparity map with optimizations
+func RunSad(
+	left, right *image.Gray,
+	blockSize, maxDisparity int,
+) *image.Gray {
+	disparityMap := image.NewGray(left.Rect)
+
+	// Create worker pool
+	numWorkers := runtime.NumCPU() * 4
+	chunksChan := make(chan processingChunk, numWorkers*2)
+	var wg sync.WaitGroup
+
+	// Each worker processes chunks of rows
+	for range numWorkers { // i := 0; i < numWorkers; i++
+		wg.Add(1)
+		go func() {
+			for chunk := range chunksChan {
+				var bounds = left.Rect
+				for y := chunk.startY; y < chunk.endY; y++ {
+					processRow(
+						y,
+						left,
+						right,
+						bounds,
+						disparityMap,
+						blockSize,
+						maxDisparity,
+					)
+				}
+			}
+			wg.Done()
+		}()
+	}
+
+	// Distribute work in larger chunks for better cache utilization
+	chunkSize := max(1, left.Rect.Dy()/(numWorkers*4))
+	for y := left.Rect.Min.Y; y < left.Rect.Max.Y; y += chunkSize {
+		endY := min(y+chunkSize, left.Rect.Max.Y)
+		chunksChan <- processingChunk{startY: y, endY: endY}
+	}
+
+	close(chunksChan)
+	wg.Wait()
+
+	return disparityMap
+}
+
+// RunSadPaths runs the optimized SAD algorithm on the given images
+func RunSadPaths(
+	left, right string,
+	blockSize, maxDisparity int,
+) error {
+	// Load left and right images
+	leftImg, err := LoadPNG(left)
+	if err != nil {
+		return err
+	}
+
+	rightImg, err := LoadPNG(right)
+	if err != nil {
+		return err
+	}
+
+	disparityMap := RunSad(
+		leftImg,
+		rightImg,
+		blockSize,
+		maxDisparity,
+	)
+
+	// Save disparity map
+	err = SavePNG("disparity_map.png", disparityMap)
+	if err != nil {
+		return fmt.Errorf("error saving disparity map: %v", err)
+	}
+
+	fmt.Println("Disparity map saved successfully!")
+	return nil
 }
 
 // sumAbsoluteDifferences calculates SAD directly on image data
@@ -136,85 +208,4 @@ func processRow(
 			},
 		)
 	}
-}
-
-// RunSad computes the disparity map with optimizations
-func RunSad(
-	left, right *image.Gray,
-	blockSize, maxDisparity int,
-) *image.Gray {
-	disparityMap := image.NewGray(left.Rect)
-
-	// Create worker pool
-	numWorkers := runtime.NumCPU() * 4
-	chunksChan := make(chan processingChunk, numWorkers*2)
-	var wg sync.WaitGroup
-
-	// Each worker processes chunks of rows
-	for range numWorkers { // i := 0; i < numWorkers; i++
-		wg.Add(1)
-		go func() {
-			for chunk := range chunksChan {
-				var bounds = left.Rect
-				for y := chunk.startY; y < chunk.endY; y++ {
-					processRow(
-						y,
-						left,
-						right,
-						bounds,
-						disparityMap,
-						blockSize,
-						maxDisparity,
-					)
-				}
-			}
-			wg.Done()
-		}()
-	}
-
-	// Distribute work in larger chunks for better cache utilization
-	chunkSize := max(1, left.Rect.Dy()/(numWorkers*4))
-	for y := left.Rect.Min.Y; y < left.Rect.Max.Y; y += chunkSize {
-		endY := min(y+chunkSize, left.Rect.Max.Y)
-		chunksChan <- processingChunk{startY: y, endY: endY}
-	}
-
-	close(chunksChan)
-	wg.Wait()
-
-	return disparityMap
-}
-
-// RunSadPaths runs the optimized SAD algorithm on the given images
-func RunSadPaths(
-	left, right string,
-	blockSize, maxDisparity int,
-) error {
-	// Load left and right images
-	leftImg, err := LoadPNG(left)
-	if err != nil {
-		return err
-	}
-
-	rightImg, err := LoadPNG(right)
-	if err != nil {
-		return err
-	}
-
-	// Calculate disparity map
-	fmt.Println("Calculating disparity map...")
-	fmt.Printf("Using %d CPU cores for parallel processing\n", runtime.NumCPU())
-	start := time.Now()
-	disparityMap := RunSad(leftImg, rightImg, blockSize, maxDisparity)
-	end := time.Now()
-	fmt.Printf("Elapsed time: %s\n", end.Sub(start))
-
-	// Save disparity map
-	err = SavePNG("disparity_map.png", disparityMap)
-	if err != nil {
-		return fmt.Errorf("error saving disparity map: %v", err)
-	}
-
-	fmt.Println("Disparity map saved successfully!")
-	return nil
 }

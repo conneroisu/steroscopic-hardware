@@ -26,13 +26,13 @@ type CameraSystem struct {
 	rightImagePath string
 	depthMapPath   string
 	lastCapture    time.Time
-	parameters     *despair.Parameters
+	parameters     *Parameters
 }
 
 // NewCameraSystem creates a new camera system
 func NewCameraSystem(
 	leftPort, rightPort, imageSavePath string,
-	params *despair.Parameters,
+	params *Parameters,
 ) *CameraSystem {
 	return &CameraSystem{
 		stereoSystem:  camera.NewZedBoardStereoSystem(leftPort, rightPort),

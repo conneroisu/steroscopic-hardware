@@ -5,7 +5,6 @@ import (
 	"html/template"
 	"net/http"
 
-	"github.com/conneroisu/steroscopic-hardware/pkg/despair"
 	"github.com/conneroisu/steroscopic-hardware/pkg/handlers"
 )
 
@@ -28,7 +27,7 @@ var tmpl = template.Must(
 func AddRoutes(
 	mux *http.ServeMux,
 ) error {
-	var params despair.Parameters
+	var params handlers.Parameters
 	cameraSystem := handlers.NewCameraSystem(
 		defLeftPort,
 		defRightPort,
