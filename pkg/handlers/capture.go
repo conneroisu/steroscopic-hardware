@@ -111,7 +111,7 @@ func (cs *CameraSystem) processDepthMap() error {
 	log.Printf("Processing depth map with parameters: BlockSize=%d, MaxDisparity=%d",
 		cs.parameters.BlockSize, cs.parameters.MaxDisparity)
 
-	err := despair.RunSad(cs.leftImagePath, cs.rightImagePath, cs.parameters)
+	err := despair.RunSadPaths(cs.leftImagePath, cs.rightImagePath, cs.parameters)
 	if err != nil {
 		return err
 	}

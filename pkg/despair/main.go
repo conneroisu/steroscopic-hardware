@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"image"
 	"image/color"
-	"image/png"
+	"log/slog"
 	"math"
-	"os"
 	"runtime"
 	"sync"
+	"time"
 )
 
 // Parameters is a struct that holds the parameters for the stereoscopic
@@ -113,15 +113,34 @@ func processRow(
 ) {
 	var x, disparity int
 	for x = bounds.Min.X; x < bounds.Max.X; x++ {
-		disparity = findBestDisparity(
-			x,
-			y,
-			left,
-			right,
-			bounds,
-			blockSize,
-			maxDisparity,
-		)
+		minSAD := math.MaxInt32
+
+		for d := 0; d <= maxDisparity; d++ {
+			// Skip if we would go beyond the left edge
+			if x-d < bounds.Min.X {
+				continue
+			}
+
+			sad := sumAbsoluteDifferencesOptimized(
+				left,
+				right,
+				x,
+				y,
+				x-d,
+				y,
+				blockSize,
+			)
+
+			if sad < minSAD {
+				minSAD = sad
+				disparity = d
+
+				// Early termination for perfect matches
+				if sad == 0 {
+					break
+				}
+			}
+		}
 		disparityMap.SetGray(
 			x,
 			y,
@@ -132,48 +151,8 @@ func processRow(
 	}
 }
 
-// findBestDisparity finds the best disparity value for a given point
-func findBestDisparity(
-	x, y int,
-	left, right *image.Gray,
-	bounds image.Rectangle,
-	blockSize, maxDisparity int,
-) int {
-	minSAD := math.MaxInt32
-	bestDisparity := 0
-
-	for d := 0; d <= maxDisparity; d++ {
-		// Skip if we would go beyond the left edge
-		if x-d < bounds.Min.X {
-			continue
-		}
-
-		sad := sumAbsoluteDifferencesOptimized(
-			left,
-			right,
-			x,
-			y,
-			x-d,
-			y,
-			blockSize,
-		)
-
-		if sad < minSAD {
-			minSAD = sad
-			bestDisparity = d
-
-			// Early termination for perfect matches
-			if sad == 0 {
-				break
-			}
-		}
-	}
-
-	return bestDisparity
-}
-
-// calculateDisparityMapOptimized computes the disparity map with optimizations
-func calculateDisparityMapOptimized(left, right *image.Gray, blockSize, maxDisparity int) *image.Gray {
+// RunSad computes the disparity map with optimizations
+func RunSad(left, right *image.Gray, blockSize, maxDisparity int) *image.Gray {
 	disparityMap := image.NewGray(left.Rect)
 
 	// Create worker pool
@@ -213,72 +192,25 @@ func calculateDisparityMapOptimized(left, right *image.Gray, blockSize, maxDispa
 	return disparityMap
 }
 
-// loadPNGAsGrayOptimized loads a PNG image and converts it to grayscale with optimizations
-func loadPNGAsGrayOptimized(filename string) (*image.Gray, error) {
-	file, err := os.Open(filename)
-	if err != nil {
-		return nil, err
-	}
-	defer file.Close()
-
-	img, err := png.Decode(file)
-	if err != nil {
-		return nil, err
-	}
-
-	bounds := img.Bounds()
-	grayImg := image.NewGray(bounds)
-
-	// Direct access to pixel data
-	grayPix := grayImg.Pix
-	stride := grayImg.Stride
-
-	// Optimize by checking image type
-	switch img := img.(type) {
-	case *image.Gray:
-		convertGrayToGray(img, grayPix)
-	case *image.RGBA:
-		convertRGBAToGray(img, grayPix, stride, bounds)
-	default:
-		convertGenericToGray(img, grayPix, stride, bounds)
-	}
-
-	return grayImg, nil
-}
-
-func savePNG(filename string, img image.Image) error {
-	file, err := os.Create(filename)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-
-	// Use best compression for speed
-	encoder := png.Encoder{CompressionLevel: png.BestSpeed}
-	return encoder.Encode(file, img)
-}
-
-// RunSad runs the optimized SAD algorithm on the given images
-func RunSad(left, right string, params *Parameters) error {
+// RunSadPaths runs the optimized SAD algorithm on the given images
+func RunSadPaths(left, right string, blockSize, maxDisparity int) error {
 	// Load left and right images
-	leftImg, err := loadPNGAsGrayOptimized(left)
+	leftImg, err := LoadPNG(left)
 	if err != nil {
 		return fmt.Errorf("error loading left image: %v", err)
 	}
 
-	rightImg, err := loadPNGAsGrayOptimized(right)
+	rightImg, err := LoadPNG(right)
 	if err != nil {
 		return fmt.Errorf("error loading right image: %v", err)
 	}
 
-	// Parameters for block matching
-	blockSize := params.BlockSize
-	maxDisparity := params.MaxDisparity
-
 	// Calculate disparity map
 	fmt.Println("Calculating disparity map...")
 	fmt.Printf("Using %d CPU cores for parallel processing\n", runtime.NumCPU())
-	disparityMap := calculateDisparityMapOptimized(leftImg, rightImg, blockSize, maxDisparity)
+	start := time.Now()
+	disparityMap := RunSad(leftImg, rightImg, blockSize, maxDisparity)
+	slog.Info("disparity map calculation took", "secs", time.Since(start))
 
 	// Save disparity map
 	err = savePNG("disparity_map.png", disparityMap)
