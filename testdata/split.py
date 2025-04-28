@@ -5,16 +5,13 @@ from PIL import Image
 from skimage import color, transform
 
 
-def split_interlaced_stereo_frames_2(dirname):
+def split_interlaced_stereo_frames_2(dirname: str):
     """
     Input  - path to directory containing pgmyuv files extracted
              from a stereo video using mplayer.
 
     Output - left and right frames in the respective 'left' and
              'right' directories in the given input directory.
-
-    Author - Olaf Ronneberger
-             http://lmb.informatik.uni-freiburg.de/people/ronneber/
     """
     # Change to the specified directory
     os.chdir(dirname)
