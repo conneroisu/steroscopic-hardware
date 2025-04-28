@@ -11,6 +11,13 @@ import (
 	"sync"
 )
 
+// Parameters is a struct that holds the parameters for the stereoscopic
+// image processing.
+type Parameters struct {
+	BlockSize     int `json:"blockSize"`
+	MaxDispairity int `json:"maxDisparity"`
+}
+
 // processingChunk represents a chunk of work for parallel processing
 type processingChunk struct {
 	startY, endY int

@@ -1,0 +1,899 @@
+{{define "index"}}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stereoscopic Imaging System</title>
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2c3e50;
+            --success-color: #2ecc71;
+            --error-color: #e74c3c;
+            --warning-color: #f39c12;
+            --bg-color: #f5f5f5;
+            --panel-bg: #ffffff;
+            --text-color: #333333;
+            --border-radius: 6px;
+            --box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            color: var(--secondary-color);
+            margin-bottom: 10px;
+        }
+
+        h2 {
+            color: var(--secondary-color);
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 3fr 1fr;
+            gap: 20px;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .panel {
+            background-color: var(--panel-bg);
+            border-radius: var(--border-radius);
+            padding: 15px;
+            box-shadow: var(--box-shadow);
+        }
+
+        .camera-views {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .camera-view {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .camera-feed {
+            width: 100%;
+            height: 300px;
+            background-color: #000;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .camera-feed::after {
+            content: 'Waiting for connection...';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 14px;
+        }
+
+        .capture-button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+
+        .capture-button:hover {
+            background-color: #2980b9;
+        }
+
+        .capture-button:active {
+            transform: translateY(1px);
+        }
+
+        .depth-map {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .depth-map-image {
+            width: 100%;
+            height: 300px;
+            background-color: #000;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .depth-map-image::after {
+            content: 'No depth map available';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 14px;
+        }
+
+        .algorithm-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .control-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        label {
+            min-width: 120px;
+            font-weight: bold;
+        }
+
+        input[type="range"] {
+            flex-grow: 1;
+        }
+
+        input[type="number"] {
+            width: 60px;
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            margin-left: 8px;
+            cursor: help;
+        }
+
+        .tooltip-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 18px;
+            height: 18px;
+            background-color: var(--secondary-color);
+            color: white;
+            border-radius: 50%;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .tooltip-text {
+            visibility: hidden;
+            width: 200px;
+            background-color: var(--secondary-color);
+            color: white;
+            text-align: center;
+            border-radius: var(--border-radius);
+            padding: 5px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 12px;
+            font-weight: normal;
+        }
+
+        .tooltip:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .update-button {
+            padding: 10px 20px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+            margin-top: 10px;
+            align-self: flex-start;
+        }
+
+        .update-button:hover {
+            background-color: #2980b9;
+        }
+
+        .update-button:active {
+            transform: translateY(1px);
+        }
+
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .status-panel {
+            flex-grow: 1;
+        }
+
+        .status-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .status-label {
+            font-weight: bold;
+        }
+
+        .status-value {
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+
+        .status-connected {
+            background-color: rgba(46, 204, 113, 0.2);
+            color: #27ae60;
+        }
+
+        .status-disconnected {
+            background-color: rgba(231, 76, 60, 0.2);
+            color: #c0392b;
+        }
+
+        .status-processing {
+            background-color: rgba(243, 156, 18, 0.2);
+            color: #d35400;
+        }
+
+        .log-container {
+            height: 300px;
+            overflow-y: auto;
+            padding: 10px;
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            border-radius: var(--border-radius);
+            font-family: monospace;
+            font-size: 0.9rem;
+        }
+
+        .log-entry {
+            margin-bottom: 5px;
+            line-height: 1.3;
+            display: flex;
+        }
+
+        .log-time {
+            color: #bdc3c7;
+            margin-right: 10px;
+            flex-shrink: 0;
+        }
+
+        .log-message {
+            word-break: break-word;
+        }
+
+        .log-info {
+            color: #3498db;
+        }
+
+        .log-success {
+            color: #2ecc71;
+        }
+
+        .log-warning {
+            color: #f39c12;
+        }
+
+        .log-error {
+            color: #e74c3c;
+        }
+
+        .collapsible-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .collapsible-icon {
+            transition: transform 0.3s ease;
+        }
+
+        .collapsed .collapsible-icon {
+            transform: rotate(-90deg);
+        }
+
+        .collapsible-content {
+            transition: max-height 0.3s ease;
+            max-height: 1000px;
+            overflow: hidden;
+        }
+
+        .collapsed .collapsible-content {
+            max-height: 0;
+        }
+
+        /* Responsive design */
+        @media (max-width: 1200px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                flex-direction: row;
+                flex-wrap: wrap;
+            }
+
+            .status-panel, .log-panel {
+                flex-basis: calc(50% - 10px);
+                flex-grow: 1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .camera-views {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                flex-direction: column;
+            }
+
+            .status-panel, .log-panel {
+                flex-basis: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Stereoscopic Imaging System</h1>
+        <p>ZedBoard FPGA-based depth mapping with SAD algorithm</p>
+    </header>
+
+    <div class="container">
+        <div class="main-content">
+            <div class="panel">
+                <div class="camera-views">
+                    <div class="camera-view">
+                        <h2>Left Camera</h2>
+                        <div class="camera-feed" id="left-camera-feed">
+                            <!-- Video feed will be inserted here via JavaScript -->
+                        </div>
+                    </div>
+                    <div class="camera-view">
+                        <h2>Right Camera</h2>
+                        <div class="camera-feed" id="right-camera-feed">
+                            <!-- Video feed will be inserted here via JavaScript -->
+                        </div>
+                    </div>
+                </div>
+                <div style="text-align: center;">
+                    <button class="capture-button" id="capture-button">Capture Both</button>
+                </div>
+            </div>
+
+            <div class="panel depth-map">
+                <h2>Depth Map</h2>
+                <div class="depth-map-image" id="depth-map-image">
+                    <!-- Depth map will be inserted here via JavaScript -->
+                </div>
+            </div>
+
+            <div class="panel algorithm-controls">
+                <h2>Algorithm Controls</h2>
+                <div class="control-group">
+                    <div class="control-row">
+                        <label for="block-size">Block Size:</label>
+                        <input type="range" id="block-size-slider" min="3" max="31" step="2" value="7">
+                        <input type="number" id="block-size-input" min="3" max="31" step="2" value="7">
+                        <div class="tooltip">
+                            <div class="tooltip-icon">?</div>
+                            <span class="tooltip-text">Size of matching block used in SAD algorithm. Must be an odd number (3-31).</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <div class="control-row">
+                        <label for="max-disparity">Max Disparity:</label>
+                        <input type="range" id="max-disparity-slider" min="16" max="256" step="16" value="64">
+                        <input type="number" id="max-disparity-input" min="16" max="256" step="16" value="64">
+                        <div class="tooltip">
+                            <div class="tooltip-icon">?</div>
+                            <span class="tooltip-text">Maximum pixel displacement between left and right images (16-256).</span>
+                        </div>
+                    </div>
+                </div>
+                <button class="update-button" id="update-button">Update Parameters</button>
+            </div>
+        </div>
+
+        <div class="sidebar">
+            <div class="panel status-panel">
+                <div class="collapsible-header">
+                    <h2>System Status</h2>
+                    <span class="collapsible-icon">▼</span>
+                </div>
+                <div class="collapsible-content">
+                    <div class="status-item">
+                        <span class="status-label">ZedBoard 1 (Left):</span>
+                        <span class="status-value status-disconnected" id="zedboard1-status">Disconnected</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">ZedBoard 2 (Right):</span>
+                        <span class="status-value status-disconnected" id="zedboard2-status">Disconnected</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">Host PC:</span>
+                        <span class="status-value status-disconnected" id="host-status">Disconnected</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">Depth Map:</span>
+                        <span class="status-value status-disconnected" id="depth-map-status">Not available</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">Block Size:</span>
+                        <span class="status-value" id="block-size-status">7</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">Max Disparity:</span>
+                        <span class="status-value" id="max-disparity-status">64</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel log-panel">
+                <div class="collapsible-header">
+                    <h2>System Logs</h2>
+                    <span class="collapsible-icon">▼</span>
+                </div>
+                <div class="collapsible-content">
+                    <div class="log-container" id="log-container">
+                        <!-- Log entries will be inserted here via JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration - replace these with your actual endpoints
+        const CONFIG = {
+            // WebSocket endpoints
+            websocketUrl: 'ws://localhost:8080/ws',
+            
+            // REST API endpoints
+            api: {
+                captureImages: '/api/capture',
+                updateParameters: '/api/parameters',
+                getDepthMap: '/api/depth-map'
+            },
+            
+            // Video stream URLs (MJPEG or other formats supported by img/video tags)
+            streams: {
+                leftCamera: '/stream/left',
+                rightCamera: '/stream/right'
+            }
+        };
+
+        // DOM Elements
+        const elements = {
+            leftCameraFeed: document.getElementById('left-camera-feed'),
+            rightCameraFeed: document.getElementById('right-camera-feed'),
+            depthMapImage: document.getElementById('depth-map-image'),
+            captureButton: document.getElementById('capture-button'),
+            blockSizeSlider: document.getElementById('block-size-slider'),
+            blockSizeInput: document.getElementById('block-size-input'),
+            maxDisparitySlider: document.getElementById('max-disparity-slider'),
+            maxDisparityInput: document.getElementById('max-disparity-input'),
+            updateButton: document.getElementById('update-button'),
+            logContainer: document.getElementById('log-container'),
+            zedboard1Status: document.getElementById('zedboard1-status'),
+            zedboard2Status: document.getElementById('zedboard2-status'),
+            hostStatus: document.getElementById('host-status'),
+            depthMapStatus: document.getElementById('depth-map-status'),
+            blockSizeStatus: document.getElementById('block-size-status'),
+            maxDisparityStatus: document.getElementById('max-disparity-status')
+        };
+
+        // Collapsible panels
+        document.querySelectorAll('.collapsible-header').forEach(header => {
+            header.addEventListener('click', () => {
+                header.parentElement.classList.toggle('collapsed');
+            });
+        });
+
+        // Application state
+        const state = {
+            connected: false,
+            processing: false,
+            parameters: {
+                blockSize: 7,
+                maxDisparity: 64
+            },
+            lastCapture: null,
+            socket: null
+        };
+
+        // Sync number inputs with sliders
+        elements.blockSizeSlider.addEventListener('input', function() {
+            elements.blockSizeInput.value = this.value;
+            elements.blockSizeStatus.textContent = this.value;
+        });
+
+        elements.blockSizeInput.addEventListener('input', function() {
+            // Ensure odd number
+            let value = parseInt(this.value);
+            if (value % 2 === 0) {
+                value = value + 1;
+                if (value > 31) value = 31;
+                this.value = value;
+            }
+            elements.blockSizeSlider.value = this.value;
+            elements.blockSizeStatus.textContent = this.value;
+        });
+
+        elements.maxDisparitySlider.addEventListener('input', function() {
+            elements.maxDisparityInput.value = this.value;
+            elements.maxDisparityStatus.textContent = this.value;
+        });
+
+        elements.maxDisparityInput.addEventListener('input', function() {
+            elements.maxDisparitySlider.value = this.value;
+            elements.maxDisparityStatus.textContent = this.value;
+        });
+
+        // Logger function
+        function log(message, type = 'info') {
+            const timestamp = new Date().toTimeString().split(' ')[0];
+            const logEntry = document.createElement('div');
+            logEntry.className = 'log-entry';
+            
+            const timeSpan = document.createElement('span');
+            timeSpan.className = 'log-time';
+            timeSpan.textContent = timestamp;
+            
+            const messageSpan = document.createElement('span');
+            messageSpan.className = `log-message log-${type}`;
+            messageSpan.textContent = message;
+            
+            logEntry.appendChild(timeSpan);
+            logEntry.appendChild(messageSpan);
+            
+            elements.logContainer.appendChild(logEntry);
+            elements.logContainer.scrollTop = elements.logContainer.scrollHeight;
+        }
+
+        // Update connection status indicators
+        function updateStatus(device, status) {
+            const statusElem = elements[`${device}Status`];
+            statusElem.className = 'status-value';
+            
+            switch (status) {
+                case 'connected':
+                    statusElem.classList.add('status-connected');
+                    statusElem.textContent = 'Connected';
+                    break;
+                case 'disconnected':
+                    statusElem.classList.add('status-disconnected');
+                    statusElem.textContent = 'Disconnected';
+                    break;
+                case 'processing':
+                    statusElem.classList.add('status-processing');
+                    statusElem.textContent = 'Processing';
+                    break;
+                default:
+                    statusElem.textContent = status;
+            }
+        }
+
+        // Initialize video streams
+        function initializeVideoStreams() {
+            try {
+                // Create video elements for each feed
+                const leftVideo = document.createElement('img');
+                leftVideo.src = CONFIG.streams.leftCamera;
+                leftVideo.style.width = '100%';
+                leftVideo.style.height = '100%';
+                leftVideo.style.objectFit = 'cover';
+                elements.leftCameraFeed.innerHTML = '';
+                elements.leftCameraFeed.appendChild(leftVideo);
+                
+                const rightVideo = document.createElement('img');
+                rightVideo.src = CONFIG.streams.rightCamera;
+                rightVideo.style.width = '100%';
+                rightVideo.style.height = '100%';
+                rightVideo.style.objectFit = 'cover';
+                elements.rightCameraFeed.innerHTML = '';
+                elements.rightCameraFeed.appendChild(rightVideo);
+                
+                log('Video streams initialized', 'info');
+                updateStatus('zedboard1', 'connected');
+                updateStatus('zedboard2', 'connected');
+            } catch (error) {
+                log(`Error initializing video streams: ${error.message}`, 'error');
+            }
+        }
+
+        // Establish WebSocket connection
+        function connectWebSocket() {
+            try {
+                state.socket = new WebSocket(CONFIG.websocketUrl);
+                
+                state.socket.onopen = () => {
+                    log('WebSocket connection established', 'success');
+                    state.connected = true;
+                    updateStatus('host', 'connected');
+                    
+                    // Initialize with current parameters
+                    sendParameters();
+                };
+                
+                state.socket.onmessage = (event) => {
+                    try {
+                        const data = JSON.parse(event.data);
+                        
+                        // Handle different message types
+                        switch (data.type) {
+                            case 'status':
+                                // Handle status updates
+                                if (data.zedboard1) updateStatus('zedboard1', data.zedboard1);
+                                if (data.zedboard2) updateStatus('zedboard2', data.zedboard2);
+                                if (data.depthMap) updateStatus('depth-map', data.depthMap);
+                                log(`Status update: ${data.message || 'System status changed'}`, 'info');
+                                break;
+                                
+                            case 'depthMap':
+                                // New depth map available
+                                updateDepthMap(data.url);
+                                log('New depth map received', 'success');
+                                updateStatus('depth-map', 'Available');
+                                state.processing = false;
+                                break;
+                                
+                            case 'error':
+                                // Handle errors
+                                log(`Error from server: ${data.message}`, 'error');
+                                state.processing = false;
+                                break;
+                                
+                            default:
+                                log(`Received message: ${data.message || event.data}`, 'info');
+                        }
+                    } catch (error) {
+                        log(`Error parsing WebSocket message: ${error.message}`, 'error');
+                    }
+                };
+                
+                state.socket.onclose = () => {
+                    log('WebSocket connection closed', 'warning');
+                    state.connected = false;
+                    updateStatus('host', 'disconnected');
+                    
+                    // Try to reconnect after delay
+                    setTimeout(connectWebSocket, 5000);
+                };
+                
+                state.socket.onerror = (error) => {
+                    log(`WebSocket error: ${error.message || 'Unknown error'}`, 'error');
+                    updateStatus('host', 'disconnected');
+                };
+                
+            } catch (error) {
+                log(`Failed to connect WebSocket: ${error.message}`, 'error');
+                updateStatus('host', 'disconnected');
+                
+                // Try to reconnect after delay
+                setTimeout(connectWebSocket, 5000);
+            }
+        }
+
+        // Send a capture request to both ZedBoards
+        async function captureImages() {
+            if (state.processing) {
+                log('Already processing a capture, please wait', 'warning');
+                return;
+            }
+            
+            state.processing = true;
+            updateStatus('depth-map', 'processing');
+            log('Capturing images from both cameras...', 'info');
+            
+            try {
+                // Use WebSocket if connected, fallback to REST API
+                if (state.connected && state.socket.readyState === WebSocket.OPEN) {
+                    state.socket.send(JSON.stringify({
+                        action: 'capture',
+                        parameters: state.parameters
+                    }));
+                } else {
+                    const response = await fetch(CONFIG.api.captureImages, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(state.parameters)
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP error: ${response.status}`);
+                    }
+                    
+                    const data = await response.json();
+                    if (data.success) {
+                        log('Capture successful, processing depth map...', 'success');
+                        // Poll for depth map or wait for callback
+                        pollForDepthMap();
+                    } else {
+                        throw new Error(data.message || 'Capture failed');
+                    }
+                }
+            } catch (error) {
+                log(`Error during capture: ${error.message}`, 'error');
+                state.processing = false;
+                updateStatus('depth-map', 'Error');
+            }
+        }
+
+        // Poll for depth map result (fallback for REST API)
+        async function pollForDepthMap() {
+            try {
+                const response = await fetch(CONFIG.api.getDepthMap);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                if (data.status === 'processing') {
+                    // Still processing, poll again after delay
+                    setTimeout(pollForDepthMap, 1000);
+                } else if (data.status === 'ready') {
+                    // Depth map is ready
+                    updateDepthMap(data.url);
+                    log('Depth map processing complete', 'success');
+                    updateStatus('depth-map', 'Available');
+                    state.processing = false;
+                } else {
+                    throw new Error(data.message || 'Unknown error');
+                }
+            } catch (error) {
+                log(`Error polling for depth map: ${error.message}`, 'error');
+                state.processing = false;
+                updateStatus('depth-map', 'Error');
+            }
+        }
+
+        // Update the depth map display
+        function updateDepthMap(imageUrl) {
+            const depthMapImg = document.createElement('img');
+            depthMapImg.src = imageUrl;
+            depthMapImg.style.width = '100%';
+            depthMapImg.style.height = '100%';
+            depthMapImg.style.objectFit = 'contain';
+            
+            elements.depthMapImage.innerHTML = '';
+            elements.depthMapImage.appendChild(depthMapImg);
+            
+            // Store timestamp
+            state.lastCapture = new Date();
+        }
+
+        // Send updated algorithm parameters
+        async function sendParameters() {
+            // Get current values
+            state.parameters.blockSize = parseInt(elements.blockSizeInput.value);
+            state.parameters.maxDisparity = parseInt(elements.maxDisparityInput.value);
+            
+            // Update status display
+            elements.blockSizeStatus.textContent = state.parameters.blockSize;
+            elements.maxDisparityStatus.textContent = state.parameters.maxDisparity;
+            
+            log(`Updating parameters: Block Size = ${state.parameters.blockSize}, Max Disparity = ${state.parameters.maxDisparity}`, 'info');
+            
+            try {
+                // Use WebSocket if connected, fallback to REST API
+                if (state.connected && state.socket.readyState === WebSocket.OPEN) {
+                    state.socket.send(JSON.stringify({
+                        action: 'updateParameters',
+                        parameters: state.parameters
+                    }));
+                    log('Parameters updated via WebSocket', 'success');
+                } else {
+                    const response = await fetch(CONFIG.api.updateParameters, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(state.parameters)
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP error: ${response.status}`);
+                    }
+                    
+                    const data = await response.json();
+                    if (data.success) {
+                        log('Parameters updated successfully', 'success');
+                    } else {
+                        throw new Error(data.message || 'Failed to update parameters');
+                    }
+                }
+            } catch (error) {
+                log(`Error updating parameters: ${error.message}`, 'error');
+            }
+        }
+
+        // Event listeners
+        elements.captureButton.addEventListener('click', captureImages);
+        elements.updateButton.addEventListener('click', sendParameters);
+
+        // Initialization
+        function init() {
+            log('Stereoscopic Imaging System initializing...', 'info');
+            
+            // Set initial status
+            updateStatus('zedboard1', 'disconnected');
+            updateStatus('zedboard2', 'disconnected');
+            updateStatus('host', 'disconnected');
+            updateStatus('depth-map', 'Not available');
+            
+            // Initialize mock video streams (replace with actual implementation)
+            initializeVideoStreams();
+            
+            // Connect WebSocket
+            connectWebSocket();
+            
+            log('System initialized and ready', 'success');
+        }
+
+        // Start the application
+        window.addEventListener('load', init);
+    </script>
+</body>
+</html>
+{{end}}

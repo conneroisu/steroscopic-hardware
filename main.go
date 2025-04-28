@@ -7,11 +7,11 @@ import (
 	"os/exec"
 	"runtime"
 
-	"github.com/conneroisu/steroscopic-hardware/cmd"
+	"github.com/conneroisu/steroscopic-hardware/cmd/steroscopic"
 )
 
 func main() {
-	err := cmd.Run(context.Background(), openBrowser)
+	err := steroscopic.Run(context.Background(), openBrowser)
 	if err != nil {
 		fmt.Println(err)
 		return
