@@ -58,18 +58,7 @@ func Run(
 	var wg sync.WaitGroup
 
 	start := time.Now()
-	// err := despair.RunSad("L_00001.png", "R_00001.png")
-	// if err != nil {
-	// 	return err
-	// }
-	//
-	// slog.Info(
-	// 	"run completed",
-	// 	slog.String("setup-time", time.Since(start).String()),
-	// )
-	// return nil
 
-	// Create a separate context for signal handling
 	innerCtx, cancel := signal.NotifyContext(
 		context.Background(), // Use a fresh context instead of the parent ctx
 		os.Interrupt,
