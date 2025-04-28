@@ -26,7 +26,7 @@ const (
 
 // NewServer creates a new web-ui server
 func NewServer(
-	ctx context.Context,
+	_ context.Context,
 ) (http.Handler, error) {
 	mux := http.NewServeMux()
 	err := AddRoutes(mux)
