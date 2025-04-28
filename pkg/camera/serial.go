@@ -256,8 +256,8 @@ func (sc *SerialCamera) convertRawToImage(data []byte) (image.Image, error) {
 
 	if len(data) == expectedSize {
 		// Grayscale format (1 byte per pixel)
-		for y := 0; y < sc.config.ImageHeight; y++ {
-			for x := 0; x < sc.config.ImageWidth; x++ {
+		for y := range sc.config.ImageHeight { // y := 0; y < sc.config.ImageHeight; y++
+			for x := range sc.config.ImageWidth { // x := 0; x < sc.config.ImageWidth; x++
 				i := y*sc.config.ImageWidth + x
 				gray := data[i]
 				img.Set(x, y, color.RGBA{gray, gray, gray, 255})
@@ -265,8 +265,8 @@ func (sc *SerialCamera) convertRawToImage(data []byte) (image.Image, error) {
 		}
 	} else {
 		// RGB format (3 bytes per pixel)
-		for y := 0; y < sc.config.ImageHeight; y++ {
-			for x := 0; x < sc.config.ImageWidth; x++ {
+		for y := range sc.config.ImageHeight { // y := 0; y < sc.config.ImageHeight; y++
+			for x := range sc.config.ImageWidth { // x := 0; x < sc.config.ImageWidth; x++
 				i := (y*sc.config.ImageWidth + x) * 3
 				r, g, b := data[i], data[i+1], data[i+2]
 				img.Set(x, y, color.RGBA{r, g, b, 255})
