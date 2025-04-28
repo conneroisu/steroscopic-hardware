@@ -16,16 +16,6 @@ type processingChunk struct {
 	startY, endY int
 }
 
-// Precomputed lookup table for RGB to grayscale conversion
-var rgbToGrayLUT [256]uint16
-
-func init() {
-	// Precompute RGB to grayscale conversion factors
-	for i := range 256 { // i := 0; i < 256; i++
-		rgbToGrayLUT[i] = uint16(i) * 255
-	}
-}
-
 // sumAbsoluteDifferencesOptimized calculates SAD directly on image data
 func sumAbsoluteDifferencesOptimized(
 	left, right *image.Gray,
@@ -106,7 +96,13 @@ func processChunk(
 }
 
 // processRow processes a single row for disparity calculation
-func processRow(y int, left, right *image.Gray, bounds image.Rectangle, disparityMap *image.Gray, blockSize, maxDisparity int) {
+func processRow(
+	y int,
+	left, right *image.Gray,
+	bounds image.Rectangle,
+	disparityMap *image.Gray,
+	blockSize, maxDisparity int,
+) {
 	var x, disparity int
 	for x = bounds.Min.X; x < bounds.Max.X; x++ {
 		disparity = findBestDisparity(
@@ -127,7 +123,12 @@ func processRow(y int, left, right *image.Gray, bounds image.Rectangle, disparit
 }
 
 // findBestDisparity finds the best disparity value for a given point
-func findBestDisparity(x, y int, left, right *image.Gray, bounds image.Rectangle, blockSize, maxDisparity int) int {
+func findBestDisparity(
+	x, y int,
+	left, right *image.Gray,
+	bounds image.Rectangle,
+	blockSize, maxDisparity int,
+) int {
 	minSAD := math.MaxInt32
 	bestDisparity := 0
 
@@ -137,7 +138,15 @@ func findBestDisparity(x, y int, left, right *image.Gray, bounds image.Rectangle
 			continue
 		}
 
-		sad := sumAbsoluteDifferencesOptimized(left, right, x, y, x-d, y, blockSize)
+		sad := sumAbsoluteDifferencesOptimized(
+			left,
+			right,
+			x,
+			y,
+			x-d,
+			y,
+			blockSize,
+		)
 
 		if sad < minSAD {
 			minSAD = sad
@@ -195,38 +204,6 @@ func calculateDisparityMapOptimized(left, right *image.Gray, blockSize, maxDispa
 	return disparityMap
 }
 
-// convertGrayToGray directly copies gray image data
-func convertGrayToGray(src *image.Gray, grayPix []uint8) {
-	copy(grayPix, src.Pix)
-}
-
-// convertRGBAToGray converts RGBA image to grayscale
-func convertRGBAToGray(src *image.RGBA, grayPix []uint8, stride int, bounds image.Rectangle) {
-	for y := bounds.Min.Y; y < bounds.Max.Y; y++ {
-		rowStart := (y - bounds.Min.Y) * stride
-		for x := bounds.Min.X; x < bounds.Max.X; x++ {
-			i := src.PixOffset(x, y)
-			r := src.Pix[i]
-			g := src.Pix[i+1]
-			b := src.Pix[i+2]
-
-			// Use integer arithmetic
-			grayPix[rowStart+x-bounds.Min.X] = uint8((19595*uint32(r) + 38470*uint32(g) + 7471*uint32(b) + 1<<15) >> 24)
-		}
-	}
-}
-
-// convertGenericToGray converts any image to grayscale
-func convertGenericToGray(src image.Image, grayPix []uint8, stride int, bounds image.Rectangle) {
-	for y := bounds.Min.Y; y < bounds.Max.Y; y++ {
-		rowStart := (y - bounds.Min.Y) * stride
-		for x := bounds.Min.X; x < bounds.Max.X; x++ {
-			r, g, b, _ := src.At(x, y).RGBA()
-			grayPix[rowStart+x-bounds.Min.X] = uint8((19595*r + 38470*g + 7471*b + 1<<15) >> 24)
-		}
-	}
-}
-
 // loadPNGAsGrayOptimized loads a PNG image and converts it to grayscale with optimizations
 func loadPNGAsGrayOptimized(filename string) (*image.Gray, error) {
 	file, err := os.Open(filename)
@@ -260,7 +237,6 @@ func loadPNGAsGrayOptimized(filename string) (*image.Gray, error) {
 	return grayImg, nil
 }
 
-// savePNG saves an image as PNG
 func savePNG(filename string, img image.Image) error {
 	file, err := os.Create(filename)
 	if err != nil {

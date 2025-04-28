@@ -140,6 +140,7 @@
               (buildWithSpecificGo reftools)
               pprof
               graphviz
+              goreleaser
 
               tailwindcss # Web
               tailwindcss-language-server
