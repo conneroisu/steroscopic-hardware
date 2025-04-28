@@ -42,8 +42,14 @@ func AddRoutes(
 			return
 		}
 	})
-	mux.HandleFunc("/ws", handlers.WSHandler)
-	mux.HandleFunc("/api/parameters", handlers.Make(handlers.ParametersHandler(&params)))
+	mux.HandleFunc(
+		"/ws",
+		handlers.WSHandler,
+	)
+	mux.HandleFunc(
+		"/api/parameters",
+		handlers.Make(handlers.ParametersHandler(&params)),
+	)
 	mux.Handle(
 		"/static/",
 		http.StripPrefix(
@@ -55,8 +61,17 @@ func AddRoutes(
 		handlers.Make(handlers.CameraHandler(cameraSystem)),
 	)
 	mux.HandleFunc(
-		"/stream/left", handlers.Make(handlers.GetStreamHandler(cameraSystem, "left")))
-	mux.HandleFunc("/stream/right", handlers.Make(handlers.GetStreamHandler(cameraSystem, "right")))
+		"/wsl",
+		handlers.Make(handlers.GetStreamHandler(cameraSystem, "left")),
+	)
+	mux.HandleFunc(
+		"/wsr",
+		handlers.Make(handlers.GetStreamHandler(cameraSystem, "right")),
+	)
+	mux.HandleFunc(
+		"/wso",
+		handlers.Make(handlers.GetMapHandler(cameraSystem)),
+	)
 
 	return nil
 }

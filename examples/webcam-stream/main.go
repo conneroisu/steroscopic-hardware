@@ -1,3 +1,4 @@
+// Package main demonstrates how to stream video from a webcam using WebSockets and FFmpeg.
 package main
 
 import (

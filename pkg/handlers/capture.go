@@ -279,3 +279,11 @@ func GetStreamHandler(cameraSystem *CameraSystem, side string) APIFn {
 		}
 	}
 }
+
+// GetMapHandler is a handler for the websocket connection.
+func GetMapHandler(cameraSystem *CameraSystem) APIFn {
+	return func(w http.ResponseWriter, r *http.Request) error {
+		// TODO: implement
+		return nil
+	}
+}
