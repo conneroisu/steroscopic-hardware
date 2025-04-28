@@ -17,7 +17,12 @@ func convertGrayToGray(src *image.Gray, grayPix []uint8) {
 }
 
 // convertRGBAToGray converts RGBA image to grayscale
-func convertRGBAToGray(src *image.RGBA, grayPix []uint8, stride int, bounds image.Rectangle) {
+func convertRGBAToGray(
+	src *image.RGBA,
+	grayPix []uint8,
+	stride int,
+	bounds image.Rectangle,
+) {
 	for y := bounds.Min.Y; y < bounds.Max.Y; y++ {
 		rowStart := (y - bounds.Min.Y) * stride
 		for x := bounds.Min.X; x < bounds.Max.X; x++ {
@@ -33,7 +38,12 @@ func convertRGBAToGray(src *image.RGBA, grayPix []uint8, stride int, bounds imag
 }
 
 // convertGenericToGray converts any image to grayscale
-func convertGenericToGray(src image.Image, grayPix []uint8, stride int, bounds image.Rectangle) {
+func convertGenericToGray(
+	src image.Image,
+	grayPix []uint8,
+	stride int,
+	bounds image.Rectangle,
+) {
 	for y := bounds.Min.Y; y < bounds.Max.Y; y++ {
 		rowStart := (y - bounds.Min.Y) * stride
 		for x := bounds.Min.X; x < bounds.Max.X; x++ {

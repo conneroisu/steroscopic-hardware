@@ -123,30 +123,30 @@
           // Update the image source
           videoFrame.src = url;
 
-          // // Update stats
-          // frames++;
-          // frameCount.textContent = frames;
-          // lastFrameTime.textContent = new Date().toLocaleTimeString();
-          //
-          // // Add timestamp for FPS calculation
-          // frameTimestamps.push(Date.now());
-          //
-          // // Only keep the last 30 frames for FPS calculation
-          // if (frameTimestamps.length > 30) {
-          //   frameTimestamps.shift();
-          // }
-          //
-          // // Calculate FPS every 10 frames
-          // if (frames % 10 === 0 && frameTimestamps.length > 1) {
-          //   const timeElapsed =
-          //     frameTimestamps[frameTimestamps.length - 1] - frameTimestamps[0];
-          //   const fps = (
-          //     ((frameTimestamps.length - 1) / timeElapsed) *
-          //     1000
-          //   ).toFixed(1);
-          //   fpsElement.textContent = fps;
-          // }
-          //
+          // Update stats
+          frames++;
+          frameCount.textContent = frames;
+          lastFrameTime.textContent = new Date().toLocaleTimeString();
+
+          // Add timestamp for FPS calculation
+          frameTimestamps.push(Date.now());
+
+          // Only keep the last 30 frames for FPS calculation
+          if (frameTimestamps.length > 30) {
+            frameTimestamps.shift();
+          }
+
+          // Calculate FPS every 10 frames
+          if (frames % 10 === 0 && frameTimestamps.length > 1) {
+            const timeElapsed =
+              frameTimestamps[frameTimestamps.length - 1] - frameTimestamps[0];
+            const fps = (
+              ((frameTimestamps.length - 1) / timeElapsed) *
+              1000
+            ).toFixed(1);
+            fpsElement.textContent = fps;
+          }
+
           // Clean up old URL to prevent memory leaks
           videoFrame.onload = function () {
             if (oldUrl.startsWith("blob:")) {
