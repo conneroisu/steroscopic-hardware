@@ -1,578 +1,732 @@
 {{define "index"}}
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en" class="dark">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Stereoscopic Imaging System</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/htmx.org@2.0.4" integrity="sha384-HGfztofotfshcF7+8n44JQL2oJmowVChPTg48S+jvZoztPfvwD79OC/LTtG6dMp+" crossorigin="anonymous"></script>
+    <script
+      src="https://unpkg.com/htmx.org@2.0.4"
+      integrity="sha384-HGfztofotfshcF7+8n44JQL2oJmowVChPTg48S+jvZoztPfvwD79OC/LTtG6dMp+"
+      crossorigin="anonymous"
+    ></script>
     <script>
-        tailwind.config = { darkMode: 'class', theme: { extend: { colors: { primary: { DEFAULT: '#3b82f6', dark: '#2563eb' }}}}}
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: { primary: { DEFAULT: "#3b82f6", dark: "#2563eb" } },
+          },
+        },
+      };
     </script>
-</head>
-<body class="bg-gray-900 text-gray-200 min-h-screen">
+  </head>
+  <body class="bg-gray-900 text-gray-200 min-h-screen">
     <header class="py-6 text-center">
-        <h1 class="text-3xl font-bold text-blue-400 mb-2">Stereoscopic Imaging System</h1>
-        <p class="text-gray-400">ZedBoard FPGA-based depth mapping with SAD algorithm</p>
+      <h1 class="text-3xl font-bold text-blue-400 mb-2">
+        Stereoscopic Imaging System
+      </h1>
+      <p class="text-gray-400">
+        ZedBoard FPGA-based depth mapping with SAD algorithm
+      </p>
     </header>
 
     <div class="container mx-auto px-4 grid grid-cols-1 lg:grid-cols-4 gap-6">
-        <div class="lg:col-span-3 space-y-6">
-            <!-- Camera Views Panel -->
-            <div class="bg-gray-800 rounded-lg shadow-lg p-4">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="flex flex-col items-center">
-                        <h2 class="text-xl font-semibold text-gray-200 mb-2">Left Camera</h2>
-                        <div id="left-camera-feed" class="w-full h-64 bg-black rounded-lg overflow-hidden relative">
-                            <!-- Video feed will be inserted here via JavaScript -->
-                            <div class="absolute inset-0 flex items-center justify-center text-gray-500">
-                                Waiting for connection...
-                            </div>
-                        </div>
-                    </div>
-                    <div class="flex flex-col items-center">
-                        <h2 class="text-xl font-semibold text-gray-200 mb-2">Right Camera</h2>
-                        <div id="right-camera-feed" class="w-full h-64 bg-black rounded-lg overflow-hidden relative">
-                            <!-- Video feed will be inserted here via JavaScript -->
-                            <div class="absolute inset-0 flex items-center justify-center text-gray-500">
-                                Waiting for connection...
-                            </div>
-                        </div>
-                    </div>
+      <div class="lg:col-span-3 space-y-6">
+        <!-- Camera Views Panel -->
+        <div class="bg-gray-800 rounded-lg shadow-lg p-4">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="flex flex-col items-center">
+              <h2 class="text-xl font-semibold text-gray-200 mb-2">
+                Left Camera
+              </h2>
+              <div
+                id="left-camera-feed"
+                class="w-full h-64 bg-black rounded-lg overflow-hidden relative"
+              >
+                <!-- Video feed will be inserted here via JavaScript -->
+                <div
+                  class="absolute inset-0 flex items-center justify-center text-gray-500"
+                >
+                  Waiting for connection...
                 </div>
-                <div class="text-center mt-4">
-                    <button id="capture-button" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50">
-                        Capture Both
-                    </button>
-                </div>
+              </div>
             </div>
-
-            <!-- Depth Map Panel -->
-            <div class="bg-gray-800 rounded-lg shadow-lg p-4">
-                <h2 class="text-xl font-semibold text-gray-200 mb-2 text-center">Depth Map</h2>
-                <div id="depth-map-image" class="w-full h-64 bg-black rounded-lg overflow-hidden relative">
-                    <!-- Depth map will be inserted here via JavaScript -->
-                    <div class="absolute inset-0 flex items-center justify-center text-gray-500">
-                        No depth map available
-                    </div>
+            <div class="flex flex-col items-center">
+              <h2 class="text-xl font-semibold text-gray-200 mb-2">
+                Right Camera
+              </h2>
+              <div
+                id="right-camera-feed"
+                class="w-full h-64 bg-black rounded-lg overflow-hidden relative"
+              >
+                <!-- Video feed will be inserted here via JavaScript -->
+                <div
+                  class="absolute inset-0 flex items-center justify-center text-gray-500"
+                >
+                  Waiting for connection...
                 </div>
+              </div>
             </div>
-
-            <!-- Algorithm Controls Panel -->
-            <div class="bg-gray-800 rounded-lg shadow-lg p-4">
-                <h2 class="text-xl font-semibold text-gray-200 mb-4">Algorithm Controls</h2>
-                
-                <div class="space-y-4">
-                    <div class="space-y-2">
-                        <div class="flex items-center">
-                            <label for="block-size-slider" class="w-32 font-medium">Block Size:</label>
-                            <input type="range" id="block-size-slider" min="3" max="31" step="2" value="7"
-                                class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer mx-4">
-                            <input type="number" id="block-size-input" min="3" max="31" step="2" value="7"
-                                class="w-16 bg-gray-700 text-white rounded p-1 text-center">
-                            <div class="relative ml-2 group">
-                                <div class="w-5 h-5 bg-gray-600 rounded-full flex items-center justify-center text-xs text-white cursor-help">?</div>
-                                <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-48 bg-gray-700 text-white text-xs p-2 rounded opacity-0 group-hover:opacity-100 transition pointer-events-none">
-                                    Size of matching block used in SAD algorithm. Must be an odd number (3-31).
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="space-y-2">
-                        <div class="flex items-center">
-                            <label for="max-disparity-slider" class="w-32 font-medium">Max Disparity:</label>
-                            <input type="range" id="max-disparity-slider" min="16" max="256" step="16" value="64"
-                                class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer mx-4">
-                            <input type="number" id="max-disparity-input" min="16" max="256" step="16" value="64"
-                                class="w-16 bg-gray-700 text-white rounded p-1 text-center">
-                            <div class="relative ml-2 group">
-                                <div class="w-5 h-5 bg-gray-600 rounded-full flex items-center justify-center text-xs text-white cursor-help">?</div>
-                                <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-48 bg-gray-700 text-white text-xs p-2 rounded opacity-0 group-hover:opacity-100 transition pointer-events-none">
-                                    Maximum pixel displacement between left and right images (16-256).
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <button id="update-button" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50 mt-2">
-                        Update Parameters
-                    </button>
-                </div>
-            </div>
+          </div>
+          <div class="text-center mt-4">
+            <button
+              id="capture-button"
+              class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50"
+            >
+              Capture Both
+            </button>
+          </div>
         </div>
 
-        <div class="lg:col-span-1 space-y-6">
-            <!-- System Status Panel -->
-            <div class="bg-gray-800 rounded-lg shadow-lg p-4">
-                <div class="flex justify-between items-center cursor-pointer" id="status-header">
-                    <h2 class="text-xl font-semibold text-gray-200">System Status</h2>
-                    <span class="transform transition-transform duration-300" id="status-icon">▼</span>
+        <!-- Depth Map Panel -->
+        <div class="bg-gray-800 rounded-lg shadow-lg p-4">
+          <h2 class="text-xl font-semibold text-gray-200 mb-2 text-center">
+            Depth Map
+          </h2>
+          <div
+            id="depth-map-image"
+            class="w-full h-64 bg-black rounded-lg overflow-hidden relative"
+          >
+            <!-- Depth map will be inserted here via JavaScript -->
+            <div
+              class="absolute inset-0 flex items-center justify-center text-gray-500"
+            >
+              No depth map available
+            </div>
+          </div>
+        </div>
+
+        <!-- Algorithm Controls Panel -->
+        <div class="bg-gray-800 rounded-lg shadow-lg p-4">
+          <h2 class="text-xl font-semibold text-gray-200 mb-4">
+            Algorithm Controls
+          </h2>
+
+          <div class="space-y-4">
+            <div class="space-y-2">
+              <div class="flex items-center">
+                <label for="block-size-slider" class="w-32 font-medium"
+                  >Block Size:</label
+                >
+                <input
+                  type="range"
+                  id="block-size-slider"
+                  min="3"
+                  max="31"
+                  step="2"
+                  value="7"
+                  class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer mx-4"
+                />
+                <input
+                  type="number"
+                  id="block-size-input"
+                  min="3"
+                  max="31"
+                  step="2"
+                  value="7"
+                  class="w-16 bg-gray-700 text-white rounded p-1 text-center"
+                />
+                <div class="relative ml-2 group">
+                  <div
+                    class="w-5 h-5 bg-gray-600 rounded-full flex items-center justify-center text-xs text-white cursor-help"
+                  >
+                    ?
+                  </div>
+                  <div
+                    class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-48 bg-gray-700 text-white text-xs p-2 rounded opacity-0 group-hover:opacity-100 transition pointer-events-none"
+                  >
+                    Size of matching block used in SAD algorithm. Must be an odd
+                    number (3-31).
+                  </div>
                 </div>
-                <div class="mt-4 space-y-2" id="status-content">
-                    <div class="flex justify-between py-2 border-b border-gray-700">
-                        <span class="font-medium">ZedBoard 1 (Left):</span>
-                        <span id="zedboard1-status" class="px-2 py-1 rounded text-sm bg-red-900/30 text-red-400">Disconnected</span>
-                    </div>
-                    <div class="flex justify-between py-2 border-b border-gray-700">
-                        <span class="font-medium">ZedBoard 2 (Right):</span>
-                        <span id="zedboard2-status" class="px-2 py-1 rounded text-sm bg-red-900/30 text-red-400">Disconnected</span>
-                    </div>
-                    <div class="flex justify-between py-2 border-b border-gray-700">
-                        <span class="font-medium">Host PC:</span>
-                        <span id="host-status" class="px-2 py-1 rounded text-sm bg-red-900/30 text-red-400">Disconnected</span>
-                    </div>
-                    <div class="flex justify-between py-2 border-b border-gray-700">
-                        <span class="font-medium">Depth Map:</span>
-                        <span id="depth-map-status" class="px-2 py-1 rounded text-sm bg-red-900/30 text-red-400">Not available</span>
-                    </div>
-                    <div class="flex justify-between py-2 border-b border-gray-700">
-                        <span class="font-medium">Block Size:</span>
-                        <span id="block-size-status" class="px-2 py-1 rounded text-sm bg-gray-700 text-gray-300">7</span>
-                    </div>
-                    <div class="flex justify-between py-2 border-b border-gray-700">
-                        <span class="font-medium">Max Disparity:</span>
-                        <span id="max-disparity-status" class="px-2 py-1 rounded text-sm bg-gray-700 text-gray-300">64</span>
-                    </div>
-                </div>
+              </div>
             </div>
 
-            <!-- System Logs Panel -->
-            <div class="bg-gray-800 rounded-lg shadow-lg p-4">
-                <div class="flex justify-between items-center cursor-pointer" id="logs-header">
-                    <h2 class="text-xl font-semibold text-gray-200">System Logs</h2>
-                    <span class="transform transition-transform duration-300" id="logs-icon">▼</span>
+            <div class="space-y-2">
+              <div class="flex items-center">
+                <label for="max-disparity-slider" class="w-32 font-medium"
+                  >Max Disparity:</label
+                >
+                <input
+                  type="range"
+                  id="max-disparity-slider"
+                  min="16"
+                  max="256"
+                  step="16"
+                  value="64"
+                  class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer mx-4"
+                />
+                <input
+                  type="number"
+                  id="max-disparity-input"
+                  min="16"
+                  max="256"
+                  step="16"
+                  value="64"
+                  class="w-16 bg-gray-700 text-white rounded p-1 text-center"
+                />
+                <div class="relative ml-2 group">
+                  <div
+                    class="w-5 h-5 bg-gray-600 rounded-full flex items-center justify-center text-xs text-white cursor-help"
+                  >
+                    ?
+                  </div>
+                  <div
+                    class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-48 bg-gray-700 text-white text-xs p-2 rounded opacity-0 group-hover:opacity-100 transition pointer-events-none"
+                  >
+                    Maximum pixel displacement between left and right images
+                    (16-256).
+                  </div>
                 </div>
-                <div class="mt-4" id="logs-content">
-                    <div id="log-container" class="h-64 overflow-y-auto p-2 bg-gray-900 text-gray-300 rounded font-mono text-sm">
-                        <!-- Log entries will be inserted here via JavaScript -->
-                    </div>
-                </div>
+              </div>
             </div>
+
+            <button
+              id="update-button"
+              class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50 mt-2"
+            >
+              Update Parameters
+            </button>
+          </div>
         </div>
+      </div>
+
+      <div class="lg:col-span-1 space-y-6">
+        <!-- System Status Panel -->
+        <div class="bg-gray-800 rounded-lg shadow-lg p-4">
+          <div
+            class="flex justify-between items-center cursor-pointer"
+            id="status-header"
+          >
+            <h2 class="text-xl font-semibold text-gray-200">System Status</h2>
+            <span
+              class="transform transition-transform duration-300"
+              id="status-icon"
+              >▼</span
+            >
+          </div>
+          <div class="mt-4 space-y-2" id="status-content">
+            <div class="flex justify-between py-2 border-b border-gray-700">
+              <span class="font-medium">ZedBoard 1 (Left):</span>
+              <span
+                id="zedboard1-status"
+                class="px-2 py-1 rounded text-sm bg-red-900/30 text-red-400"
+                >Disconnected</span
+              >
+            </div>
+            <div class="flex justify-between py-2 border-b border-gray-700">
+              <span class="font-medium">ZedBoard 2 (Right):</span>
+              <span
+                id="zedboard2-status"
+                class="px-2 py-1 rounded text-sm bg-red-900/30 text-red-400"
+                >Disconnected</span
+              >
+            </div>
+            <div class="flex justify-between py-2 border-b border-gray-700">
+              <span class="font-medium">Host PC:</span>
+              <span
+                id="host-status"
+                class="px-2 py-1 rounded text-sm bg-red-900/30 text-red-400"
+                >Disconnected</span
+              >
+            </div>
+            <div class="flex justify-between py-2 border-b border-gray-700">
+              <span class="font-medium">Depth Map:</span>
+              <span
+                id="depth-map-status"
+                class="px-2 py-1 rounded text-sm bg-red-900/30 text-red-400"
+                >Not available</span
+              >
+            </div>
+            <div class="flex justify-between py-2 border-b border-gray-700">
+              <span class="font-medium">Block Size:</span>
+              <span
+                id="block-size-status"
+                class="px-2 py-1 rounded text-sm bg-gray-700 text-gray-300"
+                >7</span
+              >
+            </div>
+            <div class="flex justify-between py-2 border-b border-gray-700">
+              <span class="font-medium">Max Disparity:</span>
+              <span
+                id="max-disparity-status"
+                class="px-2 py-1 rounded text-sm bg-gray-700 text-gray-300"
+                >64</span
+              >
+            </div>
+          </div>
+        </div>
+
+        <!-- System Logs Panel -->
+        <div class="bg-gray-800 rounded-lg shadow-lg p-4">
+          <div
+            class="flex justify-between items-center cursor-pointer"
+            id="logs-header"
+          >
+            <h2 class="text-xl font-semibold text-gray-200">System Logs</h2>
+            <span
+              class="transform transition-transform duration-300"
+              id="logs-icon"
+              >▼</span
+            >
+          </div>
+          <div class="mt-4" id="logs-content">
+            <div
+              id="log-container"
+              class="h-64 overflow-y-auto p-2 bg-gray-900 text-gray-300 rounded font-mono text-sm"
+            >
+              <!-- Log entries will be inserted here via JavaScript -->
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <script>
-        // Configuration - replace these with your actual endpoints
-        const CONFIG = {
-            // WebSocket endpoints
-            websocketUrl: 'ws://localhost:8080/ws',
-            
-            // REST API endpoints
-            api: {
-                captureImages: '/api/capture',
-                updateParameters: '/api/parameters',
-                getDepthMap: '/api/depth-map'
-            },
-            
-            // Video stream URLs (MJPEG or other formats supported by img/video tags)
-            streams: {
-                leftCamera: '/stream/left',
-                rightCamera: '/stream/right'
-            }
-        };
+      // Configuration - replace these with your actual endpoints
+      const CONFIG = {
+        // WebSocket endpoints
+        websocketUrl: "ws://localhost:8080/ws",
 
-        // DOM Elements
-        const elements = {
-            leftCameraFeed: document.getElementById('left-camera-feed'),
-            rightCameraFeed: document.getElementById('right-camera-feed'),
-            depthMapImage: document.getElementById('depth-map-image'),
-            captureButton: document.getElementById('capture-button'),
-            blockSizeSlider: document.getElementById('block-size-slider'),
-            blockSizeInput: document.getElementById('block-size-input'),
-            maxDisparitySlider: document.getElementById('max-disparity-slider'),
-            maxDisparityInput: document.getElementById('max-disparity-input'),
-            updateButton: document.getElementById('update-button'),
-            logContainer: document.getElementById('log-container'),
-            statusHeader: document.getElementById('status-header'),
-            statusIcon: document.getElementById('status-icon'),
-            statusContent: document.getElementById('status-content'),
-            logsHeader: document.getElementById('logs-header'),
-            logsIcon: document.getElementById('logs-icon'),
-            logsContent: document.getElementById('logs-content')
-        };
+        // REST API endpoints
+        api: {
+          captureImages: "/api/capture",
+          updateParameters: "/api/parameters",
+          getDepthMap: "/api/depth-map",
+        },
 
-        // Toggle collapsible sections
-        elements.statusHeader.addEventListener('click', () => {
-            elements.statusContent.classList.toggle('hidden');
-            elements.statusIcon.classList.toggle('rotate-180');
-        });
+        // Video stream URLs (MJPEG or other formats supported by img/video tags)
+        streams: {
+          leftCamera: "/stream/left",
+          rightCamera: "/stream/right",
+        },
+      };
 
-        elements.logsHeader.addEventListener('click', () => {
-            elements.logsContent.classList.toggle('hidden');
-            elements.logsIcon.classList.toggle('rotate-180');
-        });
+      // DOM Elements
+      const elements = {
+        leftCameraFeed: document.getElementById("left-camera-feed"),
+        rightCameraFeed: document.getElementById("right-camera-feed"),
+        depthMapImage: document.getElementById("depth-map-image"),
+        captureButton: document.getElementById("capture-button"),
+        blockSizeSlider: document.getElementById("block-size-slider"),
+        blockSizeInput: document.getElementById("block-size-input"),
+        maxDisparitySlider: document.getElementById("max-disparity-slider"),
+        maxDisparityInput: document.getElementById("max-disparity-input"),
+        updateButton: document.getElementById("update-button"),
+        logContainer: document.getElementById("log-container"),
+        statusHeader: document.getElementById("status-header"),
+        statusIcon: document.getElementById("status-icon"),
+        statusContent: document.getElementById("status-content"),
+        logsHeader: document.getElementById("logs-header"),
+        logsIcon: document.getElementById("logs-icon"),
+        logsContent: document.getElementById("logs-content"),
+      };
 
-        // Application state
-        const state = {
-            connected: false,
-            processing: false,
-            parameters: {
-                blockSize: 7,
-                maxDisparity: 64
-            },
-            lastCapture: null,
-            socket: null
-        };
+      // Toggle collapsible sections
+      elements.statusHeader.addEventListener("click", () => {
+        elements.statusContent.classList.toggle("hidden");
+        elements.statusIcon.classList.toggle("rotate-180");
+      });
 
-        // Sync number inputs with sliders
-        elements.blockSizeSlider.addEventListener('input', function() {
-            elements.blockSizeInput.value = this.value;
-            document.getElementById('block-size-status').textContent = this.value;
-        });
+      elements.logsHeader.addEventListener("click", () => {
+        elements.logsContent.classList.toggle("hidden");
+        elements.logsIcon.classList.toggle("rotate-180");
+      });
 
-        elements.blockSizeInput.addEventListener('input', function() {
-            // Ensure odd number
-            let value = parseInt(this.value);
-            if (value % 2 === 0) {
-                value = value + 1;
-                if (value > 31) value = 31;
-                this.value = value;
-            }
-            elements.blockSizeSlider.value = this.value;
-            document.getElementById('block-size-status').textContent = this.value;
-        });
+      // Application state
+      const state = {
+        connected: false,
+        processing: false,
+        parameters: {
+          blockSize: 7,
+          maxDisparity: 64,
+        },
+        lastCapture: null,
+        socket: null,
+      };
 
-        elements.maxDisparitySlider.addEventListener('input', function() {
-            elements.maxDisparityInput.value = this.value;
-            document.getElementById('max-disparity-status').textContent = this.value;
-        });
+      // Sync number inputs with sliders
+      elements.blockSizeSlider.addEventListener("input", function () {
+        elements.blockSizeInput.value = this.value;
+        document.getElementById("block-size-status").textContent = this.value;
+      });
 
-        elements.maxDisparityInput.addEventListener('input', function() {
-            elements.maxDisparitySlider.value = this.value;
-            document.getElementById('max-disparity-status').textContent = this.value;
-        });
+      elements.blockSizeInput.addEventListener("input", function () {
+        // Ensure odd number
+        let value = parseInt(this.value);
+        if (value % 2 === 0) {
+          value = value + 1;
+          if (value > 31) value = 31;
+          this.value = value;
+        }
+        elements.blockSizeSlider.value = this.value;
+        document.getElementById("block-size-status").textContent = this.value;
+      });
 
-        // Logger function
-        function log(message, type = 'info') {
-            const timestamp = new Date().toTimeString().split(' ')[0];
-            const logEntry = document.createElement('div');
-            logEntry.className = 'mb-1';
-            
-            let textColorClass = 'text-blue-400'; // info
-            if (type === 'success') textColorClass = 'text-green-400';
-            if (type === 'warning') textColorClass = 'text-yellow-400';
-            if (type === 'error') textColorClass = 'text-red-400';
-            
-            logEntry.innerHTML = `
+      elements.maxDisparitySlider.addEventListener("input", function () {
+        elements.maxDisparityInput.value = this.value;
+        document.getElementById("max-disparity-status").textContent =
+          this.value;
+      });
+
+      elements.maxDisparityInput.addEventListener("input", function () {
+        elements.maxDisparitySlider.value = this.value;
+        document.getElementById("max-disparity-status").textContent =
+          this.value;
+      });
+
+      // Logger function
+      function log(message, type = "info") {
+        const timestamp = new Date().toTimeString().split(" ")[0];
+        const logEntry = document.createElement("div");
+        logEntry.className = "mb-1";
+
+        let textColorClass = "text-blue-400"; // info
+        if (type === "success") textColorClass = "text-green-400";
+        if (type === "warning") textColorClass = "text-yellow-400";
+        if (type === "error") textColorClass = "text-red-400";
+
+        logEntry.innerHTML = `
                 <span class="text-gray-500 mr-2">${timestamp}</span>
                 <span class="${textColorClass}">${message}</span>
             `;
-            
-            elements.logContainer.appendChild(logEntry);
-            elements.logContainer.scrollTop = elements.logContainer.scrollHeight;
+
+        elements.logContainer.appendChild(logEntry);
+        elements.logContainer.scrollTop = elements.logContainer.scrollHeight;
+      }
+
+      // Update connection status indicators
+      function updateStatus(device, status) {
+        // Map the device name to the correct element ID
+        let statusElementId;
+        switch (device) {
+          case "zedboard1":
+            statusElementId = "zedboard1-status";
+            break;
+          case "zedboard2":
+            statusElementId = "zedboard2-status";
+            break;
+          case "host":
+            statusElementId = "host-status";
+            break;
+          case "depth-map":
+            statusElementId = "depth-map-status";
+            break;
+          default:
+            console.error(`Unknown device: ${device}`);
+            return;
         }
 
-        // Update connection status indicators
-        function updateStatus(device, status) {
-            // Map the device name to the correct element ID
-            let statusElementId;
-            switch(device) {
-                case 'zedboard1':
-                    statusElementId = 'zedboard1-status';
-                    break;
-                case 'zedboard2':
-                    statusElementId = 'zedboard2-status';
-                    break;
-                case 'host':
-                    statusElementId = 'host-status';
-                    break;
-                case 'depth-map':
-                    statusElementId = 'depth-map-status';
-                    break;
+        const statusElem = document.getElementById(statusElementId);
+        if (!statusElem) {
+          console.error(
+            `Status element not found for device: ${device}, element ID: ${statusElementId}`,
+          );
+          return;
+        }
+
+        // Reset classes
+        statusElem.className = "px-2 py-1 rounded text-sm";
+
+        switch (status) {
+          case "connected":
+            statusElem.classList.add("bg-green-900/30", "text-green-400");
+            statusElem.textContent = "Connected";
+            break;
+          case "disconnected":
+            statusElem.classList.add("bg-red-900/30", "text-red-400");
+            statusElem.textContent = "Disconnected";
+            break;
+          case "processing":
+            statusElem.classList.add("bg-yellow-900/30", "text-yellow-400");
+            statusElem.textContent = "Processing";
+            break;
+          default:
+            statusElem.classList.add("bg-gray-700", "text-gray-300");
+            statusElem.textContent = status;
+        }
+      }
+
+      // Initialize video streams
+      function initializeVideoStreams() {
+        try {
+          // Create video elements for each feed
+          const leftVideo = document.createElement("img");
+          leftVideo.src = CONFIG.streams.leftCamera;
+          leftVideo.className = "w-full h-full object-cover";
+          elements.leftCameraFeed.innerHTML = "";
+          elements.leftCameraFeed.appendChild(leftVideo);
+
+          const rightVideo = document.createElement("img");
+          rightVideo.src = CONFIG.streams.rightCamera;
+          rightVideo.className = "w-full h-full object-cover";
+          elements.rightCameraFeed.innerHTML = "";
+          elements.rightCameraFeed.appendChild(rightVideo);
+
+          log("Video streams initialized", "info");
+          updateStatus("zedboard1", "connected");
+          updateStatus("zedboard2", "connected");
+        } catch (error) {
+          log(`Error initializing video streams: ${error.message}`, "error");
+        }
+      }
+
+      // Establish WebSocket connection
+      function connectWebSocket() {
+        try {
+          state.socket = new WebSocket(CONFIG.websocketUrl);
+
+          state.socket.onopen = () => {
+            log("WebSocket connection established", "success");
+            state.connected = true;
+            updateStatus("host", "connected");
+
+            // Initialize with current parameters
+            sendParameters();
+          };
+
+          state.socket.onmessage = (event) => {
+            try {
+              const data = JSON.parse(event.data);
+
+              // Handle different message types
+              switch (data.type) {
+                case "status":
+                  // Handle status updates
+                  if (data.zedboard1) updateStatus("zedboard1", data.zedboard1);
+                  if (data.zedboard2) updateStatus("zedboard2", data.zedboard2);
+                  if (data.depthMap) updateStatus("depth-map", data.depthMap);
+                  log(
+                    `Status update: ${data.message || "System status changed"}`,
+                    "info",
+                  );
+                  break;
+
+                case "depthMap":
+                  // New depth map available
+                  updateDepthMap(data.url);
+                  log("New depth map received", "success");
+                  updateStatus("depth-map", "Available");
+                  state.processing = false;
+                  break;
+
+                case "error":
+                  // Handle errors
+                  log(`Error from server: ${data.message}`, "error");
+                  state.processing = false;
+                  break;
+
                 default:
-                    console.error(`Unknown device: ${device}`);
-                    return;
-            }
-            
-            const statusElem = document.getElementById(statusElementId);
-            if (!statusElem) {
-                console.error(`Status element not found for device: ${device}, element ID: ${statusElementId}`);
-                return;
-            }
-            
-            // Reset classes
-            statusElem.className = 'px-2 py-1 rounded text-sm';
-            
-            switch (status) {
-                case 'connected':
-                    statusElem.classList.add('bg-green-900/30', 'text-green-400');
-                    statusElem.textContent = 'Connected';
-                    break;
-                case 'disconnected':
-                    statusElem.classList.add('bg-red-900/30', 'text-red-400');
-                    statusElem.textContent = 'Disconnected';
-                    break;
-                case 'processing':
-                    statusElem.classList.add('bg-yellow-900/30', 'text-yellow-400');
-                    statusElem.textContent = 'Processing';
-                    break;
-                default:
-                    statusElem.classList.add('bg-gray-700', 'text-gray-300');
-                    statusElem.textContent = status;
-            }
-        }
-
-        // Initialize video streams
-        function initializeVideoStreams() {
-            try {
-                // Create video elements for each feed
-                const leftVideo = document.createElement('img');
-                leftVideo.src = CONFIG.streams.leftCamera;
-                leftVideo.className = 'w-full h-full object-cover';
-                elements.leftCameraFeed.innerHTML = '';
-                elements.leftCameraFeed.appendChild(leftVideo);
-                
-                const rightVideo = document.createElement('img');
-                rightVideo.src = CONFIG.streams.rightCamera;
-                rightVideo.className = 'w-full h-full object-cover';
-                elements.rightCameraFeed.innerHTML = '';
-                elements.rightCameraFeed.appendChild(rightVideo);
-                
-                log('Video streams initialized', 'info');
-                updateStatus('zedboard1', 'connected');
-                updateStatus('zedboard2', 'connected');
+                  log(
+                    `Received message: ${data.message || event.data}`,
+                    "info",
+                  );
+              }
             } catch (error) {
-                log(`Error initializing video streams: ${error.message}`, 'error');
+              log(`Error parsing WebSocket message: ${error.message}`, "error");
             }
+          };
+
+          state.socket.onclose = () => {
+            log("WebSocket connection closed", "warning");
+            state.connected = false;
+            updateStatus("host", "disconnected");
+
+            // Try to reconnect after delay
+            setTimeout(connectWebSocket, 5000);
+          };
+
+          state.socket.onerror = (error) => {
+            log(
+              `WebSocket error: ${error.message || "Unknown error"}`,
+              "error",
+            );
+            updateStatus("host", "disconnected");
+          };
+        } catch (error) {
+          log(`Failed to connect WebSocket: ${error.message}`, "error");
+          updateStatus("host", "disconnected");
+
+          // Try to reconnect after delay
+          setTimeout(connectWebSocket, 5000);
+        }
+      }
+
+      // Send a capture request to both ZedBoards
+      async function captureImages() {
+        if (state.processing) {
+          log("Already processing a capture, please wait", "warning");
+          return;
         }
 
-        // Establish WebSocket connection
-        function connectWebSocket() {
-            try {
-                state.socket = new WebSocket(CONFIG.websocketUrl);
-                
-                state.socket.onopen = () => {
-                    log('WebSocket connection established', 'success');
-                    state.connected = true;
-                    updateStatus('host', 'connected');
-                    
-                    // Initialize with current parameters
-                    sendParameters();
-                };
-                
-                state.socket.onmessage = (event) => {
-                    try {
-                        const data = JSON.parse(event.data);
-                        
-                        // Handle different message types
-                        switch (data.type) {
-                            case 'status':
-                                // Handle status updates
-                                if (data.zedboard1) updateStatus('zedboard1', data.zedboard1);
-                                if (data.zedboard2) updateStatus('zedboard2', data.zedboard2);
-                                if (data.depthMap) updateStatus('depth-map', data.depthMap);
-                                log(`Status update: ${data.message || 'System status changed'}`, 'info');
-                                break;
-                                
-                            case 'depthMap':
-                                // New depth map available
-                                updateDepthMap(data.url);
-                                log('New depth map received', 'success');
-                                updateStatus('depth-map', 'Available');
-                                state.processing = false;
-                                break;
-                                
-                            case 'error':
-                                // Handle errors
-                                log(`Error from server: ${data.message}`, 'error');
-                                state.processing = false;
-                                break;
-                                
-                            default:
-                                log(`Received message: ${data.message || event.data}`, 'info');
-                        }
-                    } catch (error) {
-                        log(`Error parsing WebSocket message: ${error.message}`, 'error');
-                    }
-                };
-                
-                state.socket.onclose = () => {
-                    log('WebSocket connection closed', 'warning');
-                    state.connected = false;
-                    updateStatus('host', 'disconnected');
-                    
-                    // Try to reconnect after delay
-                    setTimeout(connectWebSocket, 5000);
-                };
-                
-                state.socket.onerror = (error) => {
-                    log(`WebSocket error: ${error.message || 'Unknown error'}`, 'error');
-                    updateStatus('host', 'disconnected');
-                };
-                
-            } catch (error) {
-                log(`Failed to connect WebSocket: ${error.message}`, 'error');
-                updateStatus('host', 'disconnected');
-                
-                // Try to reconnect after delay
-                setTimeout(connectWebSocket, 5000);
+        state.processing = true;
+        updateStatus("depth-map", "processing");
+        log("Capturing images from both cameras...", "info");
+
+        try {
+          // Use WebSocket if connected, fallback to REST API
+          if (state.connected && state.socket.readyState === WebSocket.OPEN) {
+            state.socket.send(
+              JSON.stringify({
+                action: "capture",
+                parameters: state.parameters,
+              }),
+            );
+          } else {
+            const response = await fetch(CONFIG.api.captureImages, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(state.parameters),
+            });
+
+            if (!response.ok) {
+              throw new Error(`HTTP error: ${response.status}`);
             }
-        }
 
-        // Send a capture request to both ZedBoards
-        async function captureImages() {
-            if (state.processing) {
-                log('Already processing a capture, please wait', 'warning');
-                return;
+            const data = await response.json();
+            if (data.success) {
+              log("Capture successful, processing depth map...", "success");
+              // Poll for depth map or wait for callback
+              pollForDepthMap();
+            } else {
+              throw new Error(data.message || "Capture failed");
             }
-            
-            state.processing = true;
-            updateStatus('depth-map', 'processing');
-            log('Capturing images from both cameras...', 'info');
-            
-            try {
-                // Use WebSocket if connected, fallback to REST API
-                if (state.connected && state.socket.readyState === WebSocket.OPEN) {
-                    state.socket.send(JSON.stringify({
-                        action: 'capture',
-                        parameters: state.parameters
-                    }));
-                } else {
-                    const response = await fetch(CONFIG.api.captureImages, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify(state.parameters)
-                    });
-                    
-                    if (!response.ok) {
-                        throw new Error(`HTTP error: ${response.status}`);
-                    }
-                    
-                    const data = await response.json();
-                    if (data.success) {
-                        log('Capture successful, processing depth map...', 'success');
-                        // Poll for depth map or wait for callback
-                        pollForDepthMap();
-                    } else {
-                        throw new Error(data.message || 'Capture failed');
-                    }
-                }
-            } catch (error) {
-                log(`Error during capture: ${error.message}`, 'error');
-                state.processing = false;
-                updateStatus('depth-map', 'Error');
+          }
+        } catch (error) {
+          log(`Error during capture: ${error.message}`, "error");
+          state.processing = false;
+          updateStatus("depth-map", "Error");
+        }
+      }
+
+      // Poll for depth map result (fallback for REST API)
+      async function pollForDepthMap() {
+        try {
+          const response = await fetch(CONFIG.api.getDepthMap);
+
+          if (!response.ok) {
+            throw new Error(`HTTP error: ${response.status}`);
+          }
+
+          const data = await response.json();
+
+          if (data.status === "processing") {
+            // Still processing, poll again after delay
+            setTimeout(pollForDepthMap, 1000);
+          } else if (data.status === "ready") {
+            // Depth map is ready
+            updateDepthMap(data.url);
+            log("Depth map processing complete", "success");
+            updateStatus("depth-map", "Available");
+            state.processing = false;
+          } else {
+            throw new Error(data.message || "Unknown error");
+          }
+        } catch (error) {
+          log(`Error polling for depth map: ${error.message}`, "error");
+          state.processing = false;
+          updateStatus("depth-map", "Error");
+        }
+      }
+
+      // Update the depth map display
+      function updateDepthMap(imageUrl) {
+        const depthMapImg = document.createElement("img");
+        depthMapImg.src = imageUrl;
+        depthMapImg.className = "w-full h-full object-contain";
+
+        elements.depthMapImage.innerHTML = "";
+        elements.depthMapImage.appendChild(depthMapImg);
+
+        // Store timestamp
+        state.lastCapture = new Date();
+      }
+
+      // Send updated algorithm parameters
+      async function sendParameters() {
+        // Get current values
+        state.parameters.blockSize = parseInt(elements.blockSizeInput.value);
+        state.parameters.maxDisparity = parseInt(
+          elements.maxDisparityInput.value,
+        );
+
+        // Update status display
+        document.getElementById("block-size-status").textContent =
+          state.parameters.blockSize;
+        document.getElementById("max-disparity-status").textContent =
+          state.parameters.maxDisparity;
+
+        log(
+          `Updating parameters: Block Size = ${state.parameters.blockSize}, Max Disparity = ${state.parameters.maxDisparity}`,
+          "info",
+        );
+
+        try {
+          // Use WebSocket if connected, fallback to REST API
+          if (state.connected && state.socket.readyState === WebSocket.OPEN) {
+            state.socket.send(
+              JSON.stringify({
+                action: "updateParameters",
+                parameters: state.parameters,
+              }),
+            );
+            log("Parameters updated via WebSocket", "success");
+          } else {
+            const response = await fetch(CONFIG.api.updateParameters, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(state.parameters),
+            });
+
+            if (!response.ok) {
+              throw new Error(`HTTP error: ${response.status}`);
             }
-        }
 
-        // Poll for depth map result (fallback for REST API)
-        async function pollForDepthMap() {
-            try {
-                const response = await fetch(CONFIG.api.getDepthMap);
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP error: ${response.status}`);
-                }
-                
-                const data = await response.json();
-                
-                if (data.status === 'processing') {
-                    // Still processing, poll again after delay
-                    setTimeout(pollForDepthMap, 1000);
-                } else if (data.status === 'ready') {
-                    // Depth map is ready
-                    updateDepthMap(data.url);
-                    log('Depth map processing complete', 'success');
-                    updateStatus('depth-map', 'Available');
-                    state.processing = false;
-                } else {
-                    throw new Error(data.message || 'Unknown error');
-                }
-            } catch (error) {
-                log(`Error polling for depth map: ${error.message}`, 'error');
-                state.processing = false;
-                updateStatus('depth-map', 'Error');
+            const data = await response.json();
+            if (data.success) {
+              log("Parameters updated successfully", "success");
+            } else {
+              throw new Error(data.message || "Failed to update parameters");
             }
+          }
+        } catch (error) {
+          log(`Error updating parameters: ${error.message}`, "error");
         }
+      }
 
-        // Update the depth map display
-        function updateDepthMap(imageUrl) {
-            const depthMapImg = document.createElement('img');
-            depthMapImg.src = imageUrl;
-            depthMapImg.className = 'w-full h-full object-contain';
-            
-            elements.depthMapImage.innerHTML = '';
-            elements.depthMapImage.appendChild(depthMapImg);
-            
-            // Store timestamp
-            state.lastCapture = new Date();
-        }
+      // Event listeners
+      elements.captureButton.addEventListener("click", captureImages);
+      elements.updateButton.addEventListener("click", sendParameters);
 
-        // Send updated algorithm parameters
-        async function sendParameters() {
-            // Get current values
-            state.parameters.blockSize = parseInt(elements.blockSizeInput.value);
-            state.parameters.maxDisparity = parseInt(elements.maxDisparityInput.value);
-            
-            // Update status display
-            document.getElementById('block-size-status').textContent = state.parameters.blockSize;
-            document.getElementById('max-disparity-status').textContent = state.parameters.maxDisparity;
-            
-            log(`Updating parameters: Block Size = ${state.parameters.blockSize}, Max Disparity = ${state.parameters.maxDisparity}`, 'info');
-            
-            try {
-                // Use WebSocket if connected, fallback to REST API
-                if (state.connected && state.socket.readyState === WebSocket.OPEN) {
-                    state.socket.send(JSON.stringify({
-                        action: 'updateParameters',
-                        parameters: state.parameters
-                    }));
-                    log('Parameters updated via WebSocket', 'success');
-                } else {
-                    const response = await fetch(CONFIG.api.updateParameters, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify(state.parameters)
-                    });
-                    
-                    if (!response.ok) {
-                        throw new Error(`HTTP error: ${response.status}`);
-                    }
-                    
-                    const data = await response.json();
-                    if (data.success) {
-                        log('Parameters updated successfully', 'success');
-                    } else {
-                        throw new Error(data.message || 'Failed to update parameters');
-                    }
-                }
-            } catch (error) {
-                log(`Error updating parameters: ${error.message}`, 'error');
-            }
-        }
+      // Initialization
+      function init() {
+        log("Stereoscopic Imaging System initializing...", "info");
 
-        // Event listeners
-        elements.captureButton.addEventListener('click', captureImages);
-        elements.updateButton.addEventListener('click', sendParameters);
+        // Set initial status
+        updateStatus("zedboard1", "disconnected");
+        updateStatus("zedboard2", "disconnected");
+        updateStatus("host", "disconnected");
+        updateStatus("depth-map", "Not available");
 
-        // Initialization
-        function init() {
-            log('Stereoscopic Imaging System initializing...', 'info');
-            
-            // Set initial status
-            updateStatus('zedboard1', 'disconnected');
-            updateStatus('zedboard2', 'disconnected');
-            updateStatus('host', 'disconnected');
-            updateStatus('depth-map', 'Not available');
-            
-            // Initialize mock video streams (replace with actual implementation)
-            initializeVideoStreams();
-            
-            // Connect WebSocket
-            connectWebSocket();
-            
-            log('System initialized and ready', 'success');
-        }
+        // Initialize mock video streams (replace with actual implementation)
+        initializeVideoStreams();
 
-        // Start the application
-        window.addEventListener('load', init);
+        // Connect WebSocket
+        connectWebSocket();
+
+        log("System initialized and ready", "success");
+      }
+
+      // Start the application
+      window.addEventListener("load", init);
     </script>
-</body>
+  </body>
 </html>
 {{end}}
