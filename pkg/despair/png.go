@@ -18,8 +18,8 @@ func LoadPNG(filename string) (*image.Gray, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	bounds := img.Bounds()
+
 	grayImg := image.NewGray(bounds)
 
 	// Direct access to pixel data
