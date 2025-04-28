@@ -1,3 +1,4 @@
+// Package main is an quick way to run the stereoscopic disparity algorithm.
 package main
 
 import (
