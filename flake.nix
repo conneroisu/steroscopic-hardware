@@ -35,6 +35,10 @@
           exec = ''${pkgs.git}/bin/git clean -fdx'';
           description = "Clean Project";
         };
+        build-go = {
+          exec = ''${pkgs.go}/bin/go build .'';
+          description = "Build all go packages";
+        };
         test-go = {
           exec = ''${pkgs.go}/bin/go test -v ./...'';
           description = "Run all go tests";
