@@ -26,8 +26,12 @@ jobs:
         run: |
           echo "Building Go project..."
           nix run .\#build-go
+      - name: Test
+        run: |
           echo "Testing Go project..."
           nix run .\#test-go
+      - name: Lint
+        run: |
           echo "Linting Go project..."
           nix run .\#lint-go
   nixci:
@@ -43,7 +47,7 @@ jobs:
           extra_nix_config: |
             experimental-features = nix-command flakes
             accept-flake-config = true
-      - name: Build
+      - name: Checks
         run: |
           echo "Linting Nix project..."
           nix run .\#lint-nix
