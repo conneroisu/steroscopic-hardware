@@ -730,3 +730,657 @@
   </body>
 </html>
 {{end}}
+{{define "manual-page"}}
+<!doctype html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Manual Depth Map Generator</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script
+      src="https://unpkg.com/htmx.org@2.0.4"
+      integrity="sha384-HGfztofotfshcF7+8n44JQL2oJmowVChPTg48S+jvZoztPfvwD79OC/LTtG6dMp+"
+      crossorigin="anonymous"
+    ></script>
+    <script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: { primary: { DEFAULT: "#3b82f6", dark: "#2563eb" } },
+          },
+        },
+      };
+    </script>
+  </head>
+  <body class="bg-gray-900 text-gray-200 min-h-screen">
+    <header class="py-6 text-center">
+      <h1 class="text-3xl font-bold text-blue-400 mb-2">
+        Manual Depth Map Generator
+      </h1>
+      <p class="text-gray-400">
+        Upload stereo images to generate a depth map using SAD algorithm
+      </p>
+    </header>
+
+    <div class="container mx-auto px-4 grid grid-cols-1 lg:grid-cols-4 gap-6">
+      <div class="lg:col-span-3 space-y-6">
+        <!-- Image Upload Panel -->
+        <div class="bg-gray-800 rounded-lg shadow-lg p-4">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="flex flex-col items-center">
+              <h2 class="text-xl font-semibold text-gray-200 mb-2">
+                Left Image
+              </h2>
+              <div
+                id="left-image-container"
+                class="w-full h-64 bg-black rounded-lg overflow-hidden relative"
+              >
+                <div
+                  class="absolute inset-0 flex items-center justify-center text-gray-500"
+                  id="left-image-placeholder"
+                >
+                  No image uploaded
+                </div>
+                <img
+                  id="left-image-preview"
+                  class="w-full h-full object-contain hidden"
+                  alt="Left image preview"
+                />
+              </div>
+              <input
+                type="file"
+                id="left-image-input"
+                accept="image/*"
+                class="hidden"
+              />
+              <button
+                id="left-image-upload-btn"
+                class="mt-3 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50"
+              >
+                Upload Left Image
+              </button>
+            </div>
+            <div class="flex flex-col items-center">
+              <h2 class="text-xl font-semibold text-gray-200 mb-2">
+                Right Image
+              </h2>
+              <div
+                id="right-image-container"
+                class="w-full h-64 bg-black rounded-lg overflow-hidden relative"
+              >
+                <div
+                  class="absolute inset-0 flex items-center justify-center text-gray-500"
+                  id="right-image-placeholder"
+                >
+                  No image uploaded
+                </div>
+                <img
+                  id="right-image-preview"
+                  class="w-full h-full object-contain hidden"
+                  alt="Right image preview"
+                />
+              </div>
+              <input
+                type="file"
+                id="right-image-input"
+                accept="image/*"
+                class="hidden"
+              />
+              <button
+                id="right-image-upload-btn"
+                class="mt-3 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50"
+              >
+                Upload Right Image
+              </button>
+            </div>
+          </div>
+          <div class="text-center mt-4">
+            <button
+              id="generate-button"
+              class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled
+            >
+              Generate Depth Map
+            </button>
+          </div>
+        </div>
+
+        <!-- Depth Map Panel -->
+        <div class="bg-gray-800 rounded-lg shadow-lg p-4">
+          <h2 class="text-xl font-semibold text-gray-200 mb-2 text-center">
+            Depth Map Result
+          </h2>
+          <div
+            id="depth-map-image"
+            class="w-full h-64 bg-black rounded-lg overflow-hidden relative"
+          >
+            <div
+              class="absolute inset-0 flex items-center justify-center text-gray-500"
+              id="depth-map-placeholder"
+            >
+              No depth map available
+            </div>
+            <img
+              id="depth-map-preview"
+              class="w-full h-full object-contain hidden"
+              alt="Depth map preview"
+            />
+          </div>
+          <div class="flex justify-center mt-3">
+            <button
+              id="download-button"
+              class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled
+            >
+              Download Depth Map
+            </button>
+          </div>
+        </div>
+
+        <!-- Algorithm Controls Panel -->
+        <div class="bg-gray-800 rounded-lg shadow-lg p-4">
+          <h2 class="text-xl font-semibold text-gray-200 mb-4">
+            Algorithm Controls
+          </h2>
+
+          <div class="space-y-4">
+            <div class="space-y-2">
+              <div class="flex items-center">
+                <label for="block-size-slider" class="w-32 font-medium"
+                  >Block Size:</label
+                >
+                <input
+                  type="range"
+                  id="block-size-slider"
+                  min="3"
+                  max="31"
+                  step="2"
+                  value="7"
+                  class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer mx-4"
+                />
+                <input
+                  type="number"
+                  id="block-size-input"
+                  min="3"
+                  max="31"
+                  step="2"
+                  value="7"
+                  class="w-16 bg-gray-700 text-white rounded p-1 text-center"
+                />
+                <div class="relative ml-2 group">
+                  <div
+                    class="w-5 h-5 bg-gray-600 rounded-full flex items-center justify-center text-xs text-white cursor-help"
+                  >
+                    ?
+                  </div>
+                  <div
+                    class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-48 bg-gray-700 text-white text-xs p-2 rounded opacity-0 group-hover:opacity-100 transition pointer-events-none"
+                  >
+                    Size of matching block used in SAD algorithm. Must be an odd
+                    number (3-31).
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="space-y-2">
+              <div class="flex items-center">
+                <label for="max-disparity-slider" class="w-32 font-medium"
+                  >Max Disparity:</label
+                >
+                <input
+                  type="range"
+                  id="max-disparity-slider"
+                  min="16"
+                  max="256"
+                  step="16"
+                  value="64"
+                  class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer mx-4"
+                />
+                <input
+                  type="number"
+                  id="max-disparity-input"
+                  min="16"
+                  max="256"
+                  step="16"
+                  value="64"
+                  class="w-16 bg-gray-700 text-white rounded p-1 text-center"
+                />
+                <div class="relative ml-2 group">
+                  <div
+                    class="w-5 h-5 bg-gray-600 rounded-full flex items-center justify-center text-xs text-white cursor-help"
+                  >
+                    ?
+                  </div>
+                  <div
+                    class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-48 bg-gray-700 text-white text-xs p-2 rounded opacity-0 group-hover:opacity-100 transition pointer-events-none"
+                  >
+                    Maximum pixel displacement between left and right images
+                    (16-256).
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="lg:col-span-1 space-y-6">
+        <!-- System Status Panel -->
+        <div class="bg-gray-800 rounded-lg shadow-lg p-4">
+          <div
+            class="flex justify-between items-center cursor-pointer"
+            id="status-header"
+          >
+            <h2 class="text-xl font-semibold text-gray-200">System Status</h2>
+            <span
+              class="transform transition-transform duration-300"
+              id="status-icon"
+              >▼</span
+            >
+          </div>
+          <div class="mt-4 space-y-2" id="status-content">
+            <div class="flex justify-between py-2 border-b border-gray-700">
+              <span class="font-medium">Left Image:</span>
+              <span
+                id="left-image-status"
+                class="px-2 py-1 rounded text-sm bg-red-900/30 text-red-400"
+                >Not uploaded</span
+              >
+            </div>
+            <div class="flex justify-between py-2 border-b border-gray-700">
+              <span class="font-medium">Right Image:</span>
+              <span
+                id="right-image-status"
+                class="px-2 py-1 rounded text-sm bg-red-900/30 text-red-400"
+                >Not uploaded</span
+              >
+            </div>
+            <div class="flex justify-between py-2 border-b border-gray-700">
+              <span class="font-medium">Depth Map:</span>
+              <span
+                id="depth-map-status"
+                class="px-2 py-1 rounded text-sm bg-red-900/30 text-red-400"
+                >Not available</span
+              >
+            </div>
+            <div class="flex justify-between py-2 border-b border-gray-700">
+              <span class="font-medium">Block Size:</span>
+              <span
+                id="block-size-status"
+                class="px-2 py-1 rounded text-sm bg-gray-700 text-gray-300"
+                >7</span
+              >
+            </div>
+            <div class="flex justify-between py-2 border-b border-gray-700">
+              <span class="font-medium">Max Disparity:</span>
+              <span
+                id="max-disparity-status"
+                class="px-2 py-1 rounded text-sm bg-gray-700 text-gray-300"
+                >64</span
+              >
+            </div>
+          </div>
+        </div>
+
+        <!-- System Logs Panel -->
+        <div class="bg-gray-800 rounded-lg shadow-lg p-4">
+          <div
+            class="flex justify-between items-center cursor-pointer"
+            id="logs-header"
+          >
+            <h2 class="text-xl font-semibold text-gray-200">System Logs</h2>
+            <span
+              class="transform transition-transform duration-300"
+              id="logs-icon"
+              >▼</span
+            >
+          </div>
+          <div class="mt-4" id="logs-content">
+            <div
+              id="log-container"
+              class="h-64 overflow-y-auto p-2 bg-gray-900 text-gray-300 rounded font-mono text-sm"
+            >
+              <!-- Log entries will be inserted here via JavaScript -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // DOM Elements
+      const elements = {
+        leftImageInput: document.getElementById("left-image-input"),
+        rightImageInput: document.getElementById("right-image-input"),
+        leftImageUploadBtn: document.getElementById("left-image-upload-btn"),
+        rightImageUploadBtn: document.getElementById("right-image-upload-btn"),
+        leftImagePreview: document.getElementById("left-image-preview"),
+        rightImagePreview: document.getElementById("right-image-preview"),
+        leftImagePlaceholder: document.getElementById("left-image-placeholder"),
+        rightImagePlaceholder: document.getElementById("right-image-placeholder"),
+        depthMapImage: document.getElementById("depth-map-image"),
+        depthMapPreview: document.getElementById("depth-map-preview"),
+        depthMapPlaceholder: document.getElementById("depth-map-placeholder"),
+        generateButton: document.getElementById("generate-button"),
+        downloadButton: document.getElementById("download-button"),
+        blockSizeSlider: document.getElementById("block-size-slider"),
+        blockSizeInput: document.getElementById("block-size-input"),
+        maxDisparitySlider: document.getElementById("max-disparity-slider"),
+        maxDisparityInput: document.getElementById("max-disparity-input"),
+        logContainer: document.getElementById("log-container"),
+        statusHeader: document.getElementById("status-header"),
+        statusIcon: document.getElementById("status-icon"),
+        statusContent: document.getElementById("status-content"),
+        logsHeader: document.getElementById("logs-header"),
+        logsIcon: document.getElementById("logs-icon"),
+        logsContent: document.getElementById("logs-content"),
+      };
+
+      // Toggle collapsible sections
+      elements.statusHeader.addEventListener("click", () => {
+        elements.statusContent.classList.toggle("hidden");
+        elements.statusIcon.classList.toggle("rotate-180");
+      });
+
+      elements.logsHeader.addEventListener("click", () => {
+        elements.logsContent.classList.toggle("hidden");
+        elements.logsIcon.classList.toggle("rotate-180");
+      });
+
+      // Application state
+      const state = {
+        leftImage: null,
+        rightImage: null,
+        depthMap: null,
+        processing: false,
+        parameters: {
+          blockSize: 7,
+          maxDisparity: 64,
+        },
+      };
+
+      // Sync number inputs with sliders
+      elements.blockSizeSlider.addEventListener("input", function () {
+        elements.blockSizeInput.value = this.value;
+        document.getElementById("block-size-status").textContent = this.value;
+        state.parameters.blockSize = parseInt(this.value);
+      });
+
+      elements.blockSizeInput.addEventListener("input", function () {
+        // Ensure odd number
+        let value = parseInt(this.value);
+        if (value % 2 === 0) {
+          value = value + 1;
+          if (value > 31) value = 31;
+          this.value = value;
+        }
+        elements.blockSizeSlider.value = this.value;
+        document.getElementById("block-size-status").textContent = this.value;
+        state.parameters.blockSize = parseInt(this.value);
+      });
+
+      elements.maxDisparitySlider.addEventListener("input", function () {
+        elements.maxDisparityInput.value = this.value;
+        document.getElementById("max-disparity-status").textContent = this.value;
+        state.parameters.maxDisparity = parseInt(this.value);
+      });
+
+      elements.maxDisparityInput.addEventListener("input", function () {
+        elements.maxDisparitySlider.value = this.value;
+        document.getElementById("max-disparity-status").textContent = this.value;
+        state.parameters.maxDisparity = parseInt(this.value);
+      });
+
+      // Logger function
+      function log(message, type = "info") {
+        const timestamp = new Date().toTimeString().split(" ")[0];
+        const logEntry = document.createElement("div");
+        logEntry.className = "mb-1";
+
+        let textColorClass = "text-blue-400"; // info
+        if (type === "success") textColorClass = "text-green-400";
+        if (type === "warning") textColorClass = "text-yellow-400";
+        if (type === "error") textColorClass = "text-red-400";
+
+        logEntry.innerHTML = `
+          <span class="text-gray-500 mr-2">${timestamp}</span>
+          <span class="${textColorClass}">${message}</span>
+        `;
+
+        elements.logContainer.appendChild(logEntry);
+        elements.logContainer.scrollTop = elements.logContainer.scrollHeight;
+      }
+
+      // Update status indicators
+      function updateStatus(item, status) {
+        // Map the item name to the correct element ID
+        let statusElementId;
+        switch (item) {
+          case "leftImage":
+            statusElementId = "left-image-status";
+            break;
+          case "rightImage":
+            statusElementId = "right-image-status";
+            break;
+          case "depthMap":
+            statusElementId = "depth-map-status";
+            break;
+          default:
+            console.error(`Unknown status item: ${item}`);
+            return;
+        }
+
+        const statusElem = document.getElementById(statusElementId);
+        if (!statusElem) {
+          console.error(`Status element not found for item: ${item}`);
+          return;
+        }
+
+        // Reset classes
+        statusElem.className = "px-2 py-1 rounded text-sm";
+
+        switch (status) {
+          case "uploaded":
+            statusElem.classList.add("bg-green-900/30", "text-green-400");
+            statusElem.textContent = "Uploaded";
+            break;
+          case "notUploaded":
+            statusElem.classList.add("bg-red-900/30", "text-red-400");
+            statusElem.textContent = "Not uploaded";
+            break;
+          case "processing":
+            statusElem.classList.add("bg-yellow-900/30", "text-yellow-400");
+            statusElem.textContent = "Processing";
+            break;
+          case "available":
+            statusElem.classList.add("bg-green-900/30", "text-green-400");
+            statusElem.textContent = "Available";
+            break;
+          case "error":
+            statusElem.classList.add("bg-red-900/30", "text-red-400");
+            statusElem.textContent = "Error";
+            break;
+          default:
+            statusElem.classList.add("bg-gray-700", "text-gray-300");
+            statusElem.textContent = status;
+        }
+
+        // Update generate button state
+        updateGenerateButtonState();
+      }
+
+      // Update the generate button enabled/disabled state
+      function updateGenerateButtonState() {
+        if (state.leftImage && state.rightImage && !state.processing) {
+          elements.generateButton.disabled = false;
+        } else {
+          elements.generateButton.disabled = true;
+        }
+      }
+
+      // Handle image upload for left image
+      elements.leftImageUploadBtn.addEventListener("click", () => {
+        elements.leftImageInput.click();
+      });
+
+      elements.leftImageInput.addEventListener("change", (event) => {
+        const file = event.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            // Display the image
+            elements.leftImagePreview.src = e.target.result;
+            elements.leftImagePreview.classList.remove("hidden");
+            elements.leftImagePlaceholder.classList.add("hidden");
+            
+            // Update state and status
+            state.leftImage = file;
+            updateStatus("leftImage", "uploaded");
+            log(`Left image uploaded: ${file.name}`, "success");
+          };
+          reader.readAsDataURL(file);
+        }
+      });
+
+      // Handle image upload for right image
+      elements.rightImageUploadBtn.addEventListener("click", () => {
+        elements.rightImageInput.click();
+      });
+
+      elements.rightImageInput.addEventListener("change", (event) => {
+        const file = event.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            // Display the image
+            elements.rightImagePreview.src = e.target.result;
+            elements.rightImagePreview.classList.remove("hidden");
+            elements.rightImagePlaceholder.classList.add("hidden");
+            
+            // Update state and status
+            state.rightImage = file;
+            updateStatus("rightImage", "uploaded");
+            log(`Right image uploaded: ${file.name}`, "success");
+          };
+          reader.readAsDataURL(file);
+        }
+      });
+
+      // Generate depth map handler
+      elements.generateButton.addEventListener("click", async () => {
+        if (!state.leftImage || !state.rightImage) {
+          log("Please upload both left and right images", "error");
+          return;
+        }
+
+        state.processing = true;
+        updateStatus("depthMap", "processing");
+        elements.generateButton.disabled = true;
+        log("Generating depth map with current parameters...", "info");
+
+        try {
+          // In a real application, you would send the images to a server for processing
+          // For this demo, we'll simulate a network request with a timeout
+          await simulateDepthMapGeneration();
+          
+          // Update UI after processing
+          state.processing = false;
+          updateStatus("depthMap", "available");
+          elements.downloadButton.disabled = false;
+          log("Depth map generated successfully", "success");
+        } catch (error) {
+          state.processing = false;
+          updateStatus("depthMap", "error");
+          log(`Error generating depth map: ${error.message}`, "error");
+        }
+        
+        updateGenerateButtonState();
+      });
+
+      // Simulate depth map generation
+      async function simulateDepthMapGeneration() {
+        return new Promise((resolve) => {
+          setTimeout(() => {
+            // Create a mock depth map (gradient image)
+            const canvas = document.createElement("canvas");
+            canvas.width = 640;
+            canvas.height = 480;
+            const ctx = canvas.getContext("2d");
+            
+            // Create a gradient
+            const gradient = ctx.createLinearGradient(0, 0, canvas.width, 0);
+            gradient.addColorStop(0, "black");
+            gradient.addColorStop(1, "white");
+            
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Apply some noise for texture
+            for (let i = 0; i < 5000; i++) {
+              const x = Math.random() * canvas.width;
+              const y = Math.random() * canvas.height;
+              const radius = Math.random() * 2;
+              ctx.beginPath();
+              ctx.arc(x, y, radius, 0, Math.PI * 2);
+              ctx.fillStyle = `rgba(255, 255, 255, ${Math.random() * 0.1})`;
+              ctx.fill();
+            }
+            
+            // Display the depth map
+            const dataUrl = canvas.toDataURL("image/png");
+            elements.depthMapPreview.src = dataUrl;
+            elements.depthMapPreview.classList.remove("hidden");
+            elements.depthMapPlaceholder.classList.add("hidden");
+            
+            // Store the depth map
+            state.depthMap = dataUrl;
+            
+            resolve();
+          }, 3000); // Simulate 3 second processing time
+        });
+      }
+
+      // Download depth map handler
+      elements.downloadButton.addEventListener("click", () => {
+        if (!state.depthMap) {
+          log("No depth map available to download", "error");
+          return;
+        }
+        
+        // Create a temporary anchor to download the image
+        const link = document.createElement("a");
+        link.href = state.depthMap;
+        link.download = "depth_map.png";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        log("Depth map downloaded", "success");
+      });
+
+      // Initialization
+      function init() {
+        log("Manual Depth Map Generator initializing...", "info");
+
+        // Set initial status
+        updateStatus("leftImage", "notUploaded");
+        updateStatus("rightImage", "notUploaded");
+        updateStatus("depthMap", "Not available");
+
+        // Disable the generate and download buttons initially
+        elements.generateButton.disabled = true;
+        elements.downloadButton.disabled = true;
+
+        log("System initialized and ready", "success");
+      }
+
+      // Start the application
+      window.addEventListener("load", init);
+    </script>
+  </body>
+</html>
+{{end}}
