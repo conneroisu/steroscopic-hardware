@@ -14,7 +14,6 @@ import (
 
 	"github.com/conneroisu/steroscopic-hardware/pkg/camera"
 	"github.com/conneroisu/steroscopic-hardware/pkg/despair"
-	"github.com/conneroisu/steroscopic-hardware/pkg/routing"
 )
 
 // CameraSystem manages the stereoscopic camera system
@@ -190,7 +189,7 @@ func saveJPEGImage(img image.Image, path string) error {
 }
 
 // CameraHandler handles HTTP requests for camera operations
-func CameraHandler(cameraSystem *CameraSystem) routing.APIFn {
+func CameraHandler(cameraSystem *CameraSystem) APIFn {
 	return func(w http.ResponseWriter, r *http.Request) error {
 		w.Header().Set("Content-Type", "application/json")
 
@@ -236,7 +235,7 @@ func CameraHandler(cameraSystem *CameraSystem) routing.APIFn {
 }
 
 // GetStreamHandler returns a handler for streaming camera images
-func GetStreamHandler(cameraSystem *CameraSystem, side string) routing.APIFn {
+func GetStreamHandler(cameraSystem *CameraSystem, side string) APIFn {
 	return func(w http.ResponseWriter, r *http.Request) error {
 		// Set headers for MJPEG stream
 		w.Header().Set("Content-Type", "multipart/x-mixed-replace; boundary=frame")

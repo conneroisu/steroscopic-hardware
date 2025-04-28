@@ -1,5 +1,4 @@
-// Package routing provides stdlib routing helpers.
-package routing
+package handlers
 
 import (
 	"fmt"

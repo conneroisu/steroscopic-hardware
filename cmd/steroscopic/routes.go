@@ -7,7 +7,6 @@ import (
 
 	"github.com/conneroisu/steroscopic-hardware/pkg/despair"
 	"github.com/conneroisu/steroscopic-hardware/pkg/handlers"
-	"github.com/conneroisu/steroscopic-hardware/pkg/routing"
 )
 
 const (
@@ -43,11 +42,11 @@ func AddRoutes(
 		}
 	})
 	mux.HandleFunc("/ws", handlers.WSHandler)
-	mux.HandleFunc("/api/parameters", routing.Make(handlers.ParametersHandler(&params)))
+	mux.HandleFunc("/api/parameters", handlers.Make(handlers.ParametersHandler(&params)))
 	mux.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.FS(static))))
-	mux.HandleFunc("/api/capture", routing.Make(handlers.CameraHandler(cameraSystem)))
-	mux.HandleFunc("/stream/left", routing.Make(handlers.GetStreamHandler(cameraSystem, "left")))
-	mux.HandleFunc("/stream/right", routing.Make(handlers.GetStreamHandler(cameraSystem, "right")))
+	mux.HandleFunc("/api/capture", handlers.Make(handlers.CameraHandler(cameraSystem)))
+	mux.HandleFunc("/stream/left", handlers.Make(handlers.GetStreamHandler(cameraSystem, "left")))
+	mux.HandleFunc("/stream/right", handlers.Make(handlers.GetStreamHandler(cameraSystem, "right")))
 
 	return nil
 }

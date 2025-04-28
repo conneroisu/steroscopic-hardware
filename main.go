@@ -1,3 +1,4 @@
+// Package main is the main entry point for the stereoscopic disparity algorithm web app.
 package main
 
 import (
