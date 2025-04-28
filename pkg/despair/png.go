@@ -39,8 +39,8 @@ func LoadPNG(filename string) (*image.Gray, error) {
 	return grayImg, nil
 }
 
-// MustLoadPNG loads a PNG image and converts it to grayscale with optimizations
-// and panics if an error occurs.
+// MustLoadPNG loads a PNG image and converts it to grayscale with
+// optimizations and panics if an error occurs.
 func MustLoadPNG(filename string) *image.Gray {
 	img, err := LoadPNG(filename)
 	if err != nil {
@@ -49,7 +49,9 @@ func MustLoadPNG(filename string) *image.Gray {
 	return img
 }
 
-func savePNG(filename string, img image.Image) error {
+// SavePNG saves a PNG image with optimizations to the given filename
+// and returns an error if one occurs.
+func SavePNG(filename string, img image.Image) error {
 	file, err := os.Create(filename)
 	if err != nil {
 		return err
@@ -59,4 +61,13 @@ func savePNG(filename string, img image.Image) error {
 	// Use best compression for speed
 	encoder := png.Encoder{CompressionLevel: png.BestSpeed}
 	return encoder.Encode(file, img)
+}
+
+// MustSavePNG saves a PNG image with optimizations to the given filename
+// and panics if an error occurs.
+func MustSavePNG(filename string, img image.Image) {
+	err := SavePNG(filename, img)
+	if err != nil {
+		panic(err)
+	}
 }

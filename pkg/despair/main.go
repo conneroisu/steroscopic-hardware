@@ -152,11 +152,14 @@ func processRow(
 }
 
 // RunSad computes the disparity map with optimizations
-func RunSad(left, right *image.Gray, blockSize, maxDisparity int) *image.Gray {
+func RunSad(
+	left, right *image.Gray,
+	blockSize, maxDisparity int,
+) *image.Gray {
 	disparityMap := image.NewGray(left.Rect)
 
 	// Create worker pool
-	numWorkers := runtime.NumCPU()
+	numWorkers := runtime.NumCPU() * 4
 	chunksChan := make(chan processingChunk, numWorkers*2)
 	var wg sync.WaitGroup
 
@@ -193,7 +196,10 @@ func RunSad(left, right *image.Gray, blockSize, maxDisparity int) *image.Gray {
 }
 
 // RunSadPaths runs the optimized SAD algorithm on the given images
-func RunSadPaths(left, right string, blockSize, maxDisparity int) error {
+func RunSadPaths(
+	left, right string,
+	blockSize, maxDisparity int,
+) error {
 	// Load left and right images
 	leftImg, err := LoadPNG(left)
 	if err != nil {
@@ -213,7 +219,7 @@ func RunSadPaths(left, right string, blockSize, maxDisparity int) error {
 	slog.Info("disparity map calculation took", "secs", time.Since(start))
 
 	// Save disparity map
-	err = savePNG("disparity_map.png", disparityMap)
+	err = SavePNG("disparity_map.png", disparityMap)
 	if err != nil {
 		return fmt.Errorf("error saving disparity map: %v", err)
 	}
