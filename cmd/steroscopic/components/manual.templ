@@ -1,0 +1,252 @@
+package components
+
+templ Manual() {
+	<header class="py-6 text-center">
+		<h1 class="text-3xl font-bold text-blue-400 mb-2">
+			Manual Depth Map Generator
+		</h1>
+		<p class="text-gray-400">
+			Upload stereo images to generate a depth map using SAD algorithm
+		</p>
+	</header>
+	<div class="container mx-auto px-4 grid grid-cols-1 lg:grid-cols-4 gap-6">
+		<div class="lg:col-span-3 space-y-6">
+			// Image Upload Panel
+			<div class="bg-gray-800 rounded-lg shadow-lg p-4">
+				<form id="depth-map-form" action="/manual-calc-depth-map" method="post" enctype="multipart/form-data">
+					<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+						<div class="flex flex-col items-center">
+							<h2 class="text-xl font-semibold text-gray-200 mb-2">
+								Left Image
+							</h2>
+							<form id="form" hx-encoding="multipart/form-data" hx-post="/upload">
+								<input type="file" name="file" id="imageInput" accept="image/*" onchange="previewImage(this)"/>
+								<div id="imagePreview-l"></div>
+								<button>
+									Upload
+								</button>
+								<progress id="progress" value="0" max="100"></progress>
+							</form>
+							<script>
+    // Function to preview the image before upload
+    function previewImage(input) {
+        const preview = document.getElementById('imagePreview-');
+        preview.innerHTML = '';
+        
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                const img = document.createElement('img');
+                img.src = e.target.result;
+                img.style.maxWidth = '300px';
+                img.style.maxHeight = '300px';
+                img.style.marginTop = '10px';
+                preview.appendChild(img);
+            }
+            
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    // Progress tracking for upload
+    htmx.on('#form', 'htmx:xhr:progress', function(evt) {
+        htmx.find('#progress').setAttribute('value', evt.detail.loaded/evt.detail.total * 100);
+    });
+</script>
+							<div
+								id="left-image-container"
+								class="w-full h-64 bg-black rounded-lg overflow-hidden relative"
+							>
+								<div
+									class="absolute inset-0 flex items-center justify-center text-gray-500"
+									id="left-image-placeholder"
+								>
+									No image uploaded
+								</div>
+								<img
+									id="left-image-preview"
+									class="w-full h-full object-contain hidden"
+									alt="Left image preview"
+								/>
+							</div>
+							<div class="flex items-center mt-3">
+								<label for="leftImage" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50 cursor-pointer">
+									Select Left Image
+								</label>
+								<input
+									type="file"
+									id="leftImage"
+									name="leftImage"
+									accept="image/*"
+									class="hidden"
+									required
+								/>
+								<span id="left-file-name" class="ml-2 text-gray-400 text-sm truncate max-w-[150px]"></span>
+							</div>
+						</div>
+						<div class="flex flex-col items-center">
+							<h2 class="text-xl font-semibold text-gray-200 mb-2">
+								Right Image
+							</h2>
+							<div
+								id="right-image-container"
+								class="w-full h-64 bg-black rounded-lg overflow-hidden relative"
+							>
+								<div
+									class="absolute inset-0 flex items-center justify-center text-gray-500"
+									id="right-image-placeholder"
+								>
+									No image uploaded
+								</div>
+								<img
+									id="right-image-preview"
+									class="w-full h-full object-contain hidden"
+									alt="Right image preview"
+								/>
+							</div>
+							<div class="flex items-center mt-3">
+								<label for="rightImage" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50 cursor-pointer">
+									Select Right Image
+								</label>
+								<input
+									type="file"
+									id="rightImage"
+									name="rightImage"
+									accept="image/*"
+									class="hidden"
+									required
+								/>
+								<span id="right-file-name" class="ml-2 text-gray-400 text-sm truncate max-w-[150px]"></span>
+							</div>
+						</div>
+					</div>
+					<!-- Hidden form fields for parameters -->
+					<input type="hidden" id="blockSizeField" name="blockSize" value="7"/>
+					<input type="hidden" id="maxDisparityField" name="maxDisparity" value="64"/>
+					<div class="text-center mt-4">
+						<button
+							type="submit"
+							id="generate-button"
+							class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed"
+						>
+							Generate Depth Map
+						</button>
+					</div>
+				</form>
+			</div>
+			<!-- Depth Map Panel -->
+			<div class="bg-gray-800 rounded-lg shadow-lg p-4">
+				<h2 class="text-xl font-semibold text-gray-200 mb-2 text-center">
+					Depth Map Result
+				</h2>
+				<div
+					id="depth-map-image"
+					class="w-full h-64 bg-black rounded-lg overflow-hidden relative"
+				>
+					<div
+						class="absolute inset-0 flex items-center justify-center text-gray-500"
+						id="depth-map-placeholder"
+					>
+						No depth map available
+					</div>
+					<img
+						id="depth-map-preview"
+						class="w-full h-full object-contain hidden"
+						alt="Depth map preview"
+					/>
+				</div>
+				<div class="flex justify-center mt-3">
+					<button
+						id="download-button"
+						class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed"
+						disabled
+					>
+						Download Depth Map
+					</button>
+				</div>
+			</div>
+			<!-- Algorithm Controls Panel -->
+			<div class="bg-gray-800 rounded-lg shadow-lg p-4">
+				<h2 class="text-xl font-semibold text-gray-200 mb-4">
+					Algorithm Controls
+				</h2>
+				<div class="space-y-4">
+					<div class="space-y-2">
+						<div class="flex items-center">
+							<label for="block-size-slider" class="w-32 font-medium">Block Size:</label>
+							<input
+								type="range"
+								id="block-size-slider"
+								min="3"
+								max="31"
+								step="2"
+								value="7"
+								class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer mx-4"
+							/>
+							<input
+								type="number"
+								id="block-size-input"
+								min="3"
+								max="31"
+								step="2"
+								value="7"
+								class="w-16 bg-gray-700 text-white rounded p-1 text-center"
+							/>
+							<div class="relative ml-2 group">
+								<div
+									class="w-5 h-5 bg-gray-600 rounded-full flex items-center justify-center text-xs text-white cursor-help"
+								>
+									?
+								</div>
+								<div
+									class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-48 bg-gray-700 text-white text-xs p-2 rounded opacity-0 group-hover:opacity-100 transition pointer-events-none"
+								>
+									Size of matching block used in SAD algorithm. Must be an odd
+									number (3-31).
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="space-y-2">
+						<div class="flex items-center">
+							<label for="max-disparity-slider" class="w-32 font-medium">Max Disparity:</label>
+							<input
+								type="range"
+								id="max-disparity-slider"
+								min="16"
+								max="256"
+								step="16"
+								value="64"
+								class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer mx-4"
+							/>
+							<input
+								type="number"
+								id="max-disparity-input"
+								min="16"
+								max="256"
+								step="16"
+								value="64"
+								class="w-16 bg-gray-700 text-white rounded p-1 text-center"
+							/>
+							<div class="relative ml-2 group">
+								<div
+									class="w-5 h-5 bg-gray-600 rounded-full flex items-center justify-center text-xs text-white cursor-help"
+								>
+									?
+								</div>
+								<div
+									class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-48 bg-gray-700 text-white text-xs p-2 rounded opacity-0 group-hover:opacity-100 transition pointer-events-none"
+								>
+									Maximum pixel displacement between left and right images
+									(16-256).
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			@status()
+		</div>
+	</div>
+}

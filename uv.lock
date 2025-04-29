@@ -161,12 +161,14 @@ name = "steroscopic-hardware"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
+    { name = "numpy" },
     { name = "pillow" },
     { name = "scikit-image" },
 ]
 
 [package.metadata]
 requires-dist = [
+    { name = "numpy", specifier = ">=2.2.5" },
     { name = "pillow", specifier = ">=11.2.1" },
     { name = "scikit-image", specifier = ">=0.25.2" },
 ]

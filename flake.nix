@@ -43,6 +43,13 @@
           exec = ''${pkgs.go}/bin/go test -v ./...'';
           description = "Run all go tests";
         };
+        live-reload = {
+          exec = ''
+            export REPO_ROOT=$(git rev-parse --show-toplevel)
+            ${pkgs.templ}/bin/templ generate $REPO_ROOT
+          '';
+          description = "Reload the application for air";
+        };
         lint-go = {
           exec = ''
             export REPO_ROOT=$(git rev-parse --show-toplevel)

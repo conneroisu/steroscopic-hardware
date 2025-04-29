@@ -35,7 +35,7 @@ func NewServer(
 	}
 	slogLogHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		slog.Info(
-			"request",
+			"reqwuest",
 			slog.String("method", r.Method),
 			slog.String("url", r.URL.String()),
 		)

@@ -26,6 +26,9 @@ Then, run the following commands (from the root of the repository):
 # Install dependencies
 go mod tidy
 
+# Run Code Generation Step
+go generate ./...
+
 # Run the webserver
 go run main.go
 ```

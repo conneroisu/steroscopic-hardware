@@ -1,0 +1,149 @@
+package components
+
+templ Live() {
+	<div class="container mx-auto px-4 grid grid-cols-1 lg:grid-cols-4 gap-6">
+		<div class="lg:col-span-3 space-y-6">
+			// Camera Views Panel 
+			<div class="bg-gray-800 rounded-lg shadow-lg p-4">
+				<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+					<div class="flex flex-col items-center">
+						<h2 class="text-xl font-semibold text-gray-200 mb-2">
+							Left Camera
+						</h2>
+						<div
+							id="left-camera-feed"
+							class="w-full h-64 bg-black rounded-lg overflow-hidden relative"
+						>
+							<div
+								class="absolute inset-0 flex items-center justify-center text-gray-500"
+								hx-ws-connect="/wsl"
+							>
+								Waiting for connection...
+							</div>
+						</div>
+					</div>
+					<div class="flex flex-col items-center">
+						<h2 class="text-xl font-semibold text-gray-200 mb-2">
+							Right Camera
+						</h2>
+						<div
+							id="right-camera-feed"
+							class="w-full h-64 bg-black rounded-lg overflow-hidden relative"
+						>
+							<div
+								class="absolute inset-0 flex items-center justify-center text-gray-500"
+								hx-ws-connect="/wsr"
+							>
+								Waiting for connection...
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			// Depth Map Panel
+			<div class="bg-gray-800 rounded-lg shadow-lg p-4">
+				<h2 class="text-xl font-semibold text-gray-200 mb-2 text-center">
+					Depth Map
+				</h2>
+				<div
+					id="depth-map-image"
+					class="w-full h-64 bg-black rounded-lg overflow-hidden relative"
+				>
+					// Depth map will be inserted here via JavaScript
+					<div
+						class="absolute inset-0 flex items-center justify-center text-gray-500"
+					>
+						No depth map available
+					</div>
+				</div>
+			</div>
+			// Algorithm Controls Panel
+			<div class="bg-gray-800 rounded-lg shadow-lg p-4">
+				<h2 class="text-xl font-semibold text-gray-200 mb-4">
+					Algorithm Controls
+				</h2>
+				<div class="space-y-4">
+					<div class="space-y-2">
+						<div class="flex items-center">
+							<label for="block-size-slider" class="w-32 font-medium">Block Size:</label>
+							<input
+								type="range"
+								id="block-size-slider"
+								min="3"
+								max="31"
+								step="2"
+								value="7"
+								class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer mx-4"
+							/>
+							<input
+								type="number"
+								id="block-size-input"
+								min="3"
+								max="31"
+								step="2"
+								value="7"
+								class="w-16 bg-gray-700 text-white rounded p-1 text-center"
+							/>
+							<div class="relative ml-2 group">
+								<div
+									class="w-5 h-5 bg-gray-600 rounded-full flex items-center justify-center text-xs text-white cursor-help"
+								>
+									?
+								</div>
+								<div
+									class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-48 bg-gray-700 text-white text-xs p-2 rounded opacity-0 group-hover:opacity-100 transition pointer-events-none"
+								>
+									Size of matching block used in SAD algorithm. Must be an odd
+									number (3-31).
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="space-y-2">
+						<div class="flex items-center">
+							<label for="max-disparity-slider" class="w-32 font-medium">Max Disparity:</label>
+							<input
+								type="range"
+								id="max-disparity-slider"
+								min="16"
+								max="256"
+								step="16"
+								value="64"
+								class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer mx-4"
+							/>
+							<input
+								type="number"
+								id="max-disparity-input"
+								min="16"
+								max="256"
+								step="16"
+								value="64"
+								class="w-16 bg-gray-700 text-white rounded p-1 text-center"
+							/>
+							<div class="relative ml-2 group">
+								<div
+									class="w-5 h-5 bg-gray-600 rounded-full flex items-center justify-center text-xs text-white cursor-help"
+								>
+									?
+								</div>
+								<div
+									class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-48 bg-gray-700 text-white text-xs p-2 rounded opacity-0 group-hover:opacity-100 transition pointer-events-none"
+								>
+									Maximum pixel displacement between left and right images
+									(16-256).
+								</div>
+							</div>
+						</div>
+					</div>
+					<button
+						id="update-button"
+						class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50 mt-2"
+					>
+						Update Parameters
+					</button>
+				</div>
+			</div>
+		</div>
+		@status()
+	</div>
+}
