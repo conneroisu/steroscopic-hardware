@@ -29,15 +29,130 @@ func Manual() templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<header class=\"py-6 text-center\"><h1 class=\"text-3xl font-bold text-blue-400 mb-2\">Manual Depth Map Generator</h1><p class=\"text-gray-400\">Upload stereo images to generate a depth map using SAD algorithm</p></header><div class=\"container mx-auto px-4 grid grid-cols-1 lg:grid-cols-4 gap-6\"><div class=\"lg:col-span-3 space-y-6\"><div class=\"bg-gray-800 rounded-lg shadow-lg p-4\"><form id=\"depth-map-form\" action=\"/manual-calc-depth-map\" method=\"post\" enctype=\"multipart/form-data\"><div class=\"grid grid-cols-1 md:grid-cols-2 gap-4\"><div class=\"flex flex-col items-center\"><h2 class=\"text-xl font-semibold text-gray-200 mb-2\">Left Image</h2><form id=\"form\" hx-encoding=\"multipart/form-data\" hx-post=\"/upload\"><input type=\"file\" name=\"file\" id=\"imageInput\" accept=\"image/*\" onchange=\"previewImage(this)\"><div id=\"imagePreview-l\"></div><button>Upload</button> <progress id=\"progress\" value=\"0\" max=\"100\"></progress></form><script>\n    // Function to preview the image before upload\n    function previewImage(input) {\n        const preview = document.getElementById('imagePreview-');\n        preview.innerHTML = '';\n        \n        if (input.files && input.files[0]) {\n            const reader = new FileReader();\n            \n            reader.onload = function(e) {\n                const img = document.createElement('img');\n                img.src = e.target.result;\n                img.style.maxWidth = '300px';\n                img.style.maxHeight = '300px';\n                img.style.marginTop = '10px';\n                preview.appendChild(img);\n            }\n            \n            reader.readAsDataURL(input.files[0]);\n        }\n    }\n\n    // Progress tracking for upload\n    htmx.on('#form', 'htmx:xhr:progress', function(evt) {\n        htmx.find('#progress').setAttribute('value', evt.detail.loaded/evt.detail.total * 100);\n    });\n</script><div id=\"left-image-container\" class=\"w-full h-64 bg-black rounded-lg overflow-hidden relative\"><div class=\"absolute inset-0 flex items-center justify-center text-gray-500\" id=\"left-image-placeholder\">No image uploaded</div><img id=\"left-image-preview\" class=\"w-full h-full object-contain hidden\" alt=\"Left image preview\"></div><div class=\"flex items-center mt-3\"><label for=\"leftImage\" class=\"bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50 cursor-pointer\">Select Left Image</label> <input type=\"file\" id=\"leftImage\" name=\"leftImage\" accept=\"image/*\" class=\"hidden\" required> <span id=\"left-file-name\" class=\"ml-2 text-gray-400 text-sm truncate max-w-[150px]\"></span></div></div><div class=\"flex flex-col items-center\"><h2 class=\"text-xl font-semibold text-gray-200 mb-2\">Right Image</h2><div id=\"right-image-container\" class=\"w-full h-64 bg-black rounded-lg overflow-hidden relative\"><div class=\"absolute inset-0 flex items-center justify-center text-gray-500\" id=\"right-image-placeholder\">No image uploaded</div><img id=\"right-image-preview\" class=\"w-full h-full object-contain hidden\" alt=\"Right image preview\"></div><div class=\"flex items-center mt-3\"><label for=\"rightImage\" class=\"bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50 cursor-pointer\">Select Right Image</label> <input type=\"file\" id=\"rightImage\" name=\"rightImage\" accept=\"image/*\" class=\"hidden\" required> <span id=\"right-file-name\" class=\"ml-2 text-gray-400 text-sm truncate max-w-[150px]\"></span></div></div></div><!-- Hidden form fields for parameters --><input type=\"hidden\" id=\"blockSizeField\" name=\"blockSize\" value=\"7\"> <input type=\"hidden\" id=\"maxDisparityField\" name=\"maxDisparity\" value=\"64\"><div class=\"text-center mt-4\"><button type=\"submit\" id=\"generate-button\" class=\"bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed\">Generate Depth Map</button></div></form></div><!-- Depth Map Panel --><div class=\"bg-gray-800 rounded-lg shadow-lg p-4\"><h2 class=\"text-xl font-semibold text-gray-200 mb-2 text-center\">Depth Map Result</h2><div id=\"depth-map-image\" class=\"w-full h-64 bg-black rounded-lg overflow-hidden relative\"><div class=\"absolute inset-0 flex items-center justify-center text-gray-500\" id=\"depth-map-placeholder\">No depth map available</div><img id=\"depth-map-preview\" class=\"w-full h-full object-contain hidden\" alt=\"Depth map preview\"></div><div class=\"flex justify-center mt-3\"><button id=\"download-button\" class=\"bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed\" disabled>Download Depth Map</button></div></div><!-- Algorithm Controls Panel --><div class=\"bg-gray-800 rounded-lg shadow-lg p-4\"><h2 class=\"text-xl font-semibold text-gray-200 mb-4\">Algorithm Controls</h2><div class=\"space-y-4\"><div class=\"space-y-2\"><div class=\"flex items-center\"><label for=\"block-size-slider\" class=\"w-32 font-medium\">Block Size:</label> <input type=\"range\" id=\"block-size-slider\" min=\"3\" max=\"31\" step=\"2\" value=\"7\" class=\"w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer mx-4\"> <input type=\"number\" id=\"block-size-input\" min=\"3\" max=\"31\" step=\"2\" value=\"7\" class=\"w-16 bg-gray-700 text-white rounded p-1 text-center\"><div class=\"relative ml-2 group\"><div class=\"w-5 h-5 bg-gray-600 rounded-full flex items-center justify-center text-xs text-white cursor-help\">?</div><div class=\"absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-48 bg-gray-700 text-white text-xs p-2 rounded opacity-0 group-hover:opacity-100 transition pointer-events-none\">Size of matching block used in SAD algorithm. Must be an odd number (3-31).</div></div></div></div><div class=\"space-y-2\"><div class=\"flex items-center\"><label for=\"max-disparity-slider\" class=\"w-32 font-medium\">Max Disparity:</label> <input type=\"range\" id=\"max-disparity-slider\" min=\"16\" max=\"256\" step=\"16\" value=\"64\" class=\"w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer mx-4\"> <input type=\"number\" id=\"max-disparity-input\" min=\"16\" max=\"256\" step=\"16\" value=\"64\" class=\"w-16 bg-gray-700 text-white rounded p-1 text-center\"><div class=\"relative ml-2 group\"><div class=\"w-5 h-5 bg-gray-600 rounded-full flex items-center justify-center text-xs text-white cursor-help\">?</div><div class=\"absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-48 bg-gray-700 text-white text-xs p-2 rounded opacity-0 group-hover:opacity-100 transition pointer-events-none\">Maximum pixel displacement between left and right images (16-256).</div></div></div></div></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<header class=\"py-6 text-center\"><h1 class=\"text-3xl font-bold text-blue-400 mb-2\">Manual Depth Map Generator</h1><p class=\"text-gray-400\">Upload stereo images to generate a depth map using SAD algorithm</p></header><script>\nfunction previewImage() {\n    return {\n\t    imageUrl: \"\",\n\n        fileChosen(event) {\n            this.fileToDataUrl(event, (src) => (this.imageUrl = src));\n        },\n\n        fileToDataUrl(event, callback) {\n            if (!event.target.files.length) return;\n\n            let file = event.target.files[0],\n                reader = new FileReader();\n\n            reader.readAsDataURL(file);\n            reader.onload = (e) => callback(e.target.result);\n        },\n    };\n}\n</script><div class=\"container mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-6\"><div class=\"col-span-1 md:col-span-3 space-y-6\"><!-- Image Upload Panel --><div class=\"bg-gray-800 rounded-lg shadow-lg p-4\"><form id=\"depth-map-form\" action=\"/manual-calc-depth-map\" method=\"post\" enctype=\"multipart/form-data\"><div class=\"grid grid-cols-1 md:grid-cols-2 gap-4\"><div class=\"flex flex-col items-center\"><h2 class=\"text-xl font-semibold text-gray-200 mb-2\">Left Image</h2>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = status().Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = UploadViewer("left-image").Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</div><div class=\"flex flex-col items-center\"><h2 class=\"text-xl font-semibold text-gray-200 mb-2\">Right Image</h2>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = UploadViewer("right-image").Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</div></div><!-- Hidden form fields for parameters --><input type=\"hidden\" id=\"blockSizeField\" name=\"blockSize\" value=\"7\"> <input type=\"hidden\" id=\"maxDisparityField\" name=\"maxDisparity\" value=\"64\"><div class=\"text-center mt-4\"><button type=\"submit\" id=\"generate-button\" class=\"bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed\">Generate Depth Map</button></div></form></div><!-- Depth Map Panel --><div class=\"bg-gray-800 rounded-lg shadow-lg p-4\"><h2 class=\"text-xl font-semibold text-gray-200 mb-2 text-center\">Depth Map Result</h2><div id=\"depth-map-image\" class=\"w-full h-64 bg-black rounded-lg overflow-hidden relative\"><div class=\"absolute inset-0 flex items-center justify-center text-gray-500\" id=\"depth-map-placeholder\">No depth map available</div><img id=\"depth-map-preview\" class=\"w-full h-full object-contain hidden\" alt=\"Depth map preview\"></div><div class=\"flex justify-center mt-3\"><button id=\"download-button\" class=\"bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed\" disabled>Download Depth Map</button></div></div><!-- Algorithm Controls Panel --><div class=\"bg-gray-800 rounded-lg shadow-lg p-4\"><h2 class=\"text-xl font-semibold text-gray-200 mb-4\">Algorithm Controls</h2><div class=\"space-y-4\"><div class=\"space-y-2\"><div class=\"flex items-center\"><label for=\"block-size-slider\" class=\"w-32 font-medium text-gray-300\">Block Size:</label> <input type=\"range\" id=\"block-size-slider\" min=\"3\" max=\"31\" step=\"2\" value=\"7\" class=\"w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer mx-4\"> <input type=\"number\" id=\"block-size-input\" min=\"3\" max=\"31\" step=\"2\" value=\"7\" class=\"w-16 bg-gray-700 text-white rounded p-1 text-center\"><div class=\"relative ml-2 group\"><div class=\"w-5 h-5 bg-gray-600 rounded-full flex items-center justify-center text-xs text-white cursor-help\">?</div><div class=\"absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-48 bg-gray-700 text-white text-xs p-2 rounded opacity-0 group-hover:opacity-100 transition pointer-events-none\">Size of matching block used in SAD algorithm. Must be an odd number (3-31).</div></div></div></div><div class=\"space-y-2\"><div class=\"flex items-center\"><label for=\"max-disparity-slider\" class=\"w-32 font-medium text-gray-300\">Max Disparity:</label> <input type=\"range\" id=\"max-disparity-slider\" min=\"16\" max=\"256\" step=\"16\" value=\"64\" class=\"w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer mx-4\"> <input type=\"number\" id=\"max-disparity-input\" min=\"16\" max=\"256\" step=\"16\" value=\"64\" class=\"w-16 bg-gray-700 text-white rounded p-1 text-center\"><div class=\"relative ml-2 group\"><div class=\"w-5 h-5 bg-gray-600 rounded-full flex items-center justify-center text-xs text-white cursor-help\">?</div><div class=\"absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-48 bg-gray-700 text-white text-xs p-2 rounded opacity-0 group-hover:opacity-100 transition pointer-events-none\">Maximum pixel displacement between left and right images (16-256).</div></div></div></div></div></div><!-- Status Component -->")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = StatusComponent().Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</div></div><!-- Include Alpine.js if not already included --><script defer src=\"https://cdnjs.cloudflare.com/ajax/libs/alpinejs/3.10.5/cdn.min.js\"></script><!-- Initialize sliders and connect UI --><script>\n\t\tdocument.addEventListener('DOMContentLoaded', function() {\n\t\t\t// Connect block size slider and input\n\t\t\tconst blockSizeSlider = document.getElementById('block-size-slider');\n\t\t\tconst blockSizeInput = document.getElementById('block-size-input');\n\t\t\tconst blockSizeField = document.getElementById('blockSizeField');\n\t\t\t\n\t\t\tblockSizeSlider.addEventListener('input', function() {\n\t\t\t\tblockSizeInput.value = this.value;\n\t\t\t\tblockSizeField.value = this.value;\n\t\t\t});\n\t\t\t\n\t\t\tblockSizeInput.addEventListener('input', function() {\n\t\t\t\tblockSizeSlider.value = this.value;\n\t\t\t\tblockSizeField.value = this.value;\n\t\t\t});\n\t\t\t\n\t\t\t// Connect max disparity slider and input\n\t\t\tconst maxDisparitySlider = document.getElementById('max-disparity-slider');\n\t\t\tconst maxDisparityInput = document.getElementById('max-disparity-input');\n\t\t\tconst maxDisparityField = document.getElementById('maxDisparityField');\n\t\t\t\n\t\t\tmaxDisparitySlider.addEventListener('input', function() {\n\t\t\t\tmaxDisparityInput.value = this.value;\n\t\t\t\tmaxDisparityField.value = this.value;\n\t\t\t});\n\t\t\t\n\t\t\tmaxDisparityInput.addEventListener('input', function() {\n\t\t\t\tmaxDisparitySlider.value = this.value;\n\t\t\t\tmaxDisparityField.value = this.value;\n\t\t\t});\n\t\t\t\n\t\t\t// Form submission handling\n\t\t\tconst form = document.getElementById('depth-map-form');\n\t\t\tform.addEventListener('submit', function(e) {\n\t\t\t\te.preventDefault();\n\t\t\t\t\n\t\t\t\t// Show loading state\n\t\t\t\tdocument.getElementById('status-message').textContent = 'Processing...';\n\t\t\t\tdocument.getElementById('status-container').classList.remove('hidden');\n\t\t\t\t\n\t\t\t\t// Submit form via fetch API\n\t\t\t\tfetch(this.action, {\n\t\t\t\t\tmethod: 'POST',\n\t\t\t\t\tbody: new FormData(this)\n\t\t\t\t})\n\t\t\t\t.then(response => response.json())\n\t\t\t\t.then(data => {\n\t\t\t\t\tif (data.success) {\n\t\t\t\t\t\t// Show depth map\n\t\t\t\t\t\tdocument.getElementById('depth-map-preview').src = data.depthMapUrl;\n\t\t\t\t\t\tdocument.getElementById('depth-map-preview').classList.remove('hidden');\n\t\t\t\t\t\tdocument.getElementById('depth-map-placeholder').classList.add('hidden');\n\t\t\t\t\t\tdocument.getElementById('download-button').disabled = false;\n\t\t\t\t\t\t\n\t\t\t\t\t\t// Update status\n\t\t\t\t\t\tdocument.getElementById('status-message').textContent = 'Depth map generated successfully!';\n\t\t\t\t\t\tsetTimeout(() => {\n\t\t\t\t\t\t\tdocument.getElementById('status-container').classList.add('hidden');\n\t\t\t\t\t\t}, 3000);\n\t\t\t\t\t} else {\n\t\t\t\t\t\t// Show error\n\t\t\t\t\t\tdocument.getElementById('status-message').textContent = data.error || 'An error occurred';\n\t\t\t\t\t\tsetTimeout(() => {\n\t\t\t\t\t\t\tdocument.getElementById('status-container').classList.add('hidden');\n\t\t\t\t\t\t}, 5000);\n\t\t\t\t\t}\n\t\t\t\t})\n\t\t\t\t.catch(error => {\n\t\t\t\t\tdocument.getElementById('status-message').textContent = 'An error occurred';\n\t\t\t\t\tsetTimeout(() => {\n\t\t\t\t\t\tdocument.getElementById('status-container').classList.add('hidden');\n\t\t\t\t\t}, 5000);\n\t\t\t\t});\n\t\t\t});\n\t\t\t\n\t\t\t// Download button handler\n\t\t\tdocument.getElementById('download-button').addEventListener('click', function() {\n\t\t\t\tconst img = document.getElementById('depth-map-preview');\n\t\t\t\tif (img.src) {\n\t\t\t\t\tconst a = document.createElement('a');\n\t\t\t\t\ta.href = img.src;\n\t\t\t\t\ta.download = 'depth-map.png';\n\t\t\t\t\tdocument.body.appendChild(a);\n\t\t\t\t\ta.click();\n\t\t\t\t\tdocument.body.removeChild(a);\n\t\t\t\t}\n\t\t\t});\n\t\t});\n\t</script>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		return nil
+	})
+}
+
+// Modified UploadViewer to accept an ID parameter for unique file inputs
+func UploadViewer(id string) templ.Component {
+	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
+			return templ_7745c5c3_CtxErr
+		}
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+		if !templ_7745c5c3_IsBuffer {
+			defer func() {
+				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err == nil {
+					templ_7745c5c3_Err = templ_7745c5c3_BufErr
+				}
+			}()
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var2 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var2 == nil {
+			templ_7745c5c3_Var2 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<div class=\"upload-viewer w-full\"><div class=\"p-4 text-sm w-full\"><div x-data=\"previewImage()\"><label for=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var3 string
+		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(id)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/steroscopic/components/manual.templ`, Line: 281, Col: 19}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "\"><div class=\"w-full h-48 rounded bg-gray-700 border border-gray-600 flex items-center justify-center overflow-hidden\"><img x-show=\"imageUrl\" :src=\"imageUrl\" class=\"w-full h-full object-contain\"><div x-show=\"!imageUrl\" class=\"text-gray-300 flex flex-col items-center\"><svg xmlns=\"http://www.w3.org/2000/svg\" class=\"h-8 w-8\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\" stroke-width=\"2\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12\"></path></svg><div class=\"mt-2\">Drop image or click to upload</div></div></div></label><div class=\"mt-2\"><input class=\"w-full text-gray-300 bg-gray-700 rounded p-2 cursor-pointer\" type=\"file\" name=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var4 string
+		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(id)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/steroscopic/components/manual.templ`, Line: 293, Col: 101}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "\" id=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var5 string
+		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(id)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/steroscopic/components/manual.templ`, Line: 293, Col: 111}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "\" @change=\"fileChosen\" accept=\"image/*\"></div></div></div></div>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		return nil
+	})
+}
+
+// New status component for better feedback
+func StatusComponent() templ.Component {
+	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
+			return templ_7745c5c3_CtxErr
+		}
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+		if !templ_7745c5c3_IsBuffer {
+			defer func() {
+				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err == nil {
+					templ_7745c5c3_Err = templ_7745c5c3_BufErr
+				}
+			}()
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var6 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var6 == nil {
+			templ_7745c5c3_Var6 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "<div id=\"status-container\" class=\"fixed bottom-4 right-4 bg-gray-800 text-white px-6 py-3 rounded-lg shadow-lg hidden\"><p id=\"status-message\">Processing...</p></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

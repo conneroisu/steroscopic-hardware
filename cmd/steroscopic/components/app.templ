@@ -1,5 +1,10 @@
 package components
 
+import (
+	"github.com/conneroisu/steroscopic-hardware/pkg/handlers"
+	"github.com/conneroisu/steroscopic-hardware/pkg/svg"
+)
+
 templ App(title string, comp templ.Component) {
 	<!DOCTYPE html>
 	<html>
@@ -11,6 +16,7 @@ templ App(title string, comp templ.Component) {
 			<script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/cdn.min.js"></script>
 			<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 		</head>
+		<style>[x-cloak] { display: none !important; }</style>
 		<body class="bg-gray-900 text-gray-200 min-h-screen">
 			@header()
 			<div id="app" class="pt-4">
@@ -40,47 +46,39 @@ templ header() {
 						ZedBoard Stereo Vision
 					</h1>
 				</div>
-				// Bug Report Button
-				<div class="align-middle items-center flex flex-row bg-black">
-					<a
-						href="https://github.com/conneroisu/steroscopic-hardware/issues/new"
-						class="px-4 py-2 rounded-lg transition"
-					>
-						<svg
-							xmlns="http://www.w3.org/2000/svg"
-							class="h-6 w-6"
-							fill="none"
-							viewBox="0 0 24 24"
-							stroke="currentColor"
-							stroke-width="2"
-						>
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-							></path>
-						</svg>
-						Report a Bug
-					</a>
-				</div>
+				<a
+					href="https://github.com/conneroisu/steroscopic-hardware/issues/new"
+					class="px-4 py-2 rounded-lg transition inline-flex items-center gap-1 text-gray-300 hover:text-white"
+				>
+					@svg.CircleQuestion
+					Report a Bug
+				</a>
 				<div
 					class="flex space-x-4"
 				>
 					<a
 						hx-get="/"
 						hx-target="#app"
+						hx-push-url="true"
 						class="px-4 py-2 rounded-lg transition"
 						@click="index = true"
-						:class="{ 'bg-blue-700': index }"
+						:class="{ 
+							'bg-blue-700 hover:bg-gray-600': index,
+							'bg-gray-800 hover:bg-blue-300': !index
+						}"
 					>
 						Live Camera System
 					</a>
 					<a
 						hx-get="/manual"
 						hx-target="#app"
+						hx-push-url="true"
 						class="px-4 py-2 rounded-lg transition"
 						@click="index = false"
-						:class="{ 'bg-blue-700': !index }"
+						:class="{
+							'bg-blue-700 hover:bg-gray-600': !index,
+							'bg-gray-800 hover:bg-blue-300': index
+						}"
 					>
 						Manual Upload
 					</a>
@@ -91,104 +89,91 @@ templ header() {
 }
 
 templ status() {
-	<div class="lg:col-span-1 space-y-6" x-data="{ open_stats: true, open_logs: false }">
+	<div
+		class="lg:col-span-1 space-y-6"
+		x-data="{ open_stats: true, open_logs: false }"
+	>
 		<!-- System Status Panel -->
 		<div class="bg-gray-800 rounded-lg shadow-lg p-4">
 			<div
 				class="flex justify-between items-center cursor-pointer"
-				id="status-header"
 				@click="open_stats = !open_stats"
+				x-data="{ text: '▶' }"
+				x-on:click="open_stats ? text = '▶' : text = '▼'"
 			>
 				<h2 class="text-xl font-semibold text-gray-200">System Status</h2>
-				<span
-					class="transform transition-transform duration-300"
-					id="status-icon"
-					x-show="open_stats"
-					x-transition:enter="transition ease-out duration-300"
-					x-cloak
-				>▼</span>
-				<span
-					class="transform transition-transform duration-300"
-					id="status-icon"
-					x-show="!open_stats"
-					x-transition:enter="transition ease-out duration-300"
-					x-cloak
-				>▶</span>
+				<span x-text="text"></span>
 			</div>
-			<div class="mt-4 space-y-2" id="status-content" x-show="open_stats" x-collapse>
-				<div class="flex justify-between py-2 border-b border-gray-700">
-					<span class="font-medium">Left Image:</span>
-					<span
-						id="left-image-status"
-						class="px-2 py-1 rounded text-sm bg-red-900/30 text-red-400"
-					>Not uploaded</span>
-				</div>
-				<div class="flex justify-between py-2 border-b border-gray-700">
-					<span class="font-medium">Right Image:</span>
-					<span
-						id="right-image-status"
-						class="px-2 py-1 rounded text-sm bg-red-900/30 text-red-400"
-					>Not uploaded</span>
-				</div>
-				<div class="flex justify-between py-2 border-b border-gray-700">
-					<span class="font-medium">Depth Map:</span>
-					<span
-						id="depth-map-status"
-						class="px-2 py-1 rounded text-sm bg-red-900/30 text-red-400"
-					>Not available</span>
-				</div>
-				<div class="flex justify-between py-2 border-b border-gray-700">
-					<span class="font-medium">Block Size:</span>
-					<span
-						id="block-size-status"
-						class="px-2 py-1 rounded text-sm bg-gray-700 text-gray-300"
-					>7</span>
-				</div>
-				<div class="flex justify-between py-2 border-b border-gray-700">
-					<span class="font-medium">Max Disparity:</span>
-					<span
-						id="max-disparity-status"
-						class="px-2 py-1 rounded text-sm bg-gray-700 text-gray-300"
-					>64</span>
-				</div>
-			</div>
+			@statusContent()
 		</div>
 		<!-- System Logs Panel -->
 		<div class="bg-gray-800 rounded-lg shadow-lg p-4">
 			<div
 				class="flex justify-between items-center cursor-pointer"
-				id="logs-header"
 				@click="open_logs = !open_logs"
+				x-data="{ text: '▼' }"
+				x-on:click="open_logs ? text = '▶' : text = '▼'"
 			>
 				<h2 class="text-xl font-semibold text-gray-200">System Logs</h2>
-				<span
-					class="transform transition-transform duration-300"
-					id="logs-icon"
-					x-show="open_logs"
-					x-transition:enter="transition ease-out duration-300"
-					x-cloak
-				>▼</span>
-				<span
-					class="transform transition-transform duration-300"
-					id="logs-icon"
-					x-show="!open_logs"
-					x-transition:enter="transition ease-out duration-300"
-					x-cloak
-				>▶</span>
+				<span id="logs-icon" x-text="text"></span>
 			</div>
 			<div
 				class="mt-4"
-				id="logs-content"
 				x-show="open_logs"
 				x-collapse
 			>
 				<div
-					id="log-container"
+					id={ handlers.TargetLogContainer.ID }
 					class="h-64 overflow-y-auto p-2 bg-gray-900 text-gray-300 rounded font-mono text-sm"
 				>
 					<!-- Log entries will be inserted here via HTMX -->
 				</div>
 			</div>
+		</div>
+	</div>
+}
+
+templ statusContent() {
+	<div
+		class="mt-4 space-y-2"
+		id={ handlers.TargetStatusContent.ID }
+		x-show="open_stats"
+		x-collapse
+	>
+		<div class="flex justify-between py-2 border-b border-gray-700">
+			<span class="font-medium">Left Image:</span>
+			<span
+				id="left-image-status"
+				class="px-2 py-1 rounded text-sm bg-red-900/30 text-red-400"
+			>Not uploaded</span>
+		</div>
+		<div class="flex justify-between py-2 border-b border-gray-700">
+			<span class="font-medium">Right Image:</span>
+			<span
+				id="right-image-status"
+				class="px-2 py-1 rounded text-sm bg-red-900/30 text-red-400"
+			>Not uploaded</span>
+		</div>
+		<div class="flex justify-between py-2 border-b border-gray-700">
+			<span class="font-medium">Depth Map:</span>
+			<span
+				id="depth-map-status"
+				class="px-2 py-1 rounded text-sm bg-red-900/30 text-red-400"
+			>Not available</span>
+		</div>
+		<div class="flex justify-between py-2 border-b border-gray-700">
+			<span class="font-medium">Block Size:</span>
+			<span
+				id="block-size-status"
+				class="px-2 py-1 rounded text-sm bg-gray-700 text-gray-300"
+			>7</span>
+		</div>
+		<div class="flex justify-between py-2 border-b border-gray-700">
+			<span class="font-medium">Max Disparity:</span>
+			<span
+				id="max-disparity-status"
+				class="px-2 py-1 rounded text-sm bg-gray-700 text-gray-300"
+			>64</span>
 		</div>
 	</div>
 }

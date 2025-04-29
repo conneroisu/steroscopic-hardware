@@ -9,9 +9,30 @@ templ Manual() {
 			Upload stereo images to generate a depth map using SAD algorithm
 		</p>
 	</header>
-	<div class="container mx-auto px-4 grid grid-cols-1 lg:grid-cols-4 gap-6">
-		<div class="lg:col-span-3 space-y-6">
-			// Image Upload Panel
+	<script>
+function previewImage() {
+    return {
+	    imageUrl: "",
+
+        fileChosen(event) {
+            this.fileToDataUrl(event, (src) => (this.imageUrl = src));
+        },
+
+        fileToDataUrl(event, callback) {
+            if (!event.target.files.length) return;
+
+            let file = event.target.files[0],
+                reader = new FileReader();
+
+            reader.readAsDataURL(file);
+            reader.onload = (e) => callback(e.target.result);
+        },
+    };
+}
+</script>
+	<div class="container mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-6">
+		<div class="col-span-1 md:col-span-3 space-y-6">
+			<!-- Image Upload Panel -->
 			<div class="bg-gray-800 rounded-lg shadow-lg p-4">
 				<form id="depth-map-form" action="/manual-calc-depth-map" method="post" enctype="multipart/form-data">
 					<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -19,106 +40,13 @@ templ Manual() {
 							<h2 class="text-xl font-semibold text-gray-200 mb-2">
 								Left Image
 							</h2>
-							<form id="form" hx-encoding="multipart/form-data" hx-post="/upload">
-								<input type="file" name="file" id="imageInput" accept="image/*" onchange="previewImage(this)"/>
-								<div id="imagePreview-l"></div>
-								<button>
-									Upload
-								</button>
-								<progress id="progress" value="0" max="100"></progress>
-							</form>
-							<script>
-    // Function to preview the image before upload
-    function previewImage(input) {
-        const preview = document.getElementById('imagePreview-');
-        preview.innerHTML = '';
-        
-        if (input.files && input.files[0]) {
-            const reader = new FileReader();
-            
-            reader.onload = function(e) {
-                const img = document.createElement('img');
-                img.src = e.target.result;
-                img.style.maxWidth = '300px';
-                img.style.maxHeight = '300px';
-                img.style.marginTop = '10px';
-                preview.appendChild(img);
-            }
-            
-            reader.readAsDataURL(input.files[0]);
-        }
-    }
-
-    // Progress tracking for upload
-    htmx.on('#form', 'htmx:xhr:progress', function(evt) {
-        htmx.find('#progress').setAttribute('value', evt.detail.loaded/evt.detail.total * 100);
-    });
-</script>
-							<div
-								id="left-image-container"
-								class="w-full h-64 bg-black rounded-lg overflow-hidden relative"
-							>
-								<div
-									class="absolute inset-0 flex items-center justify-center text-gray-500"
-									id="left-image-placeholder"
-								>
-									No image uploaded
-								</div>
-								<img
-									id="left-image-preview"
-									class="w-full h-full object-contain hidden"
-									alt="Left image preview"
-								/>
-							</div>
-							<div class="flex items-center mt-3">
-								<label for="leftImage" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50 cursor-pointer">
-									Select Left Image
-								</label>
-								<input
-									type="file"
-									id="leftImage"
-									name="leftImage"
-									accept="image/*"
-									class="hidden"
-									required
-								/>
-								<span id="left-file-name" class="ml-2 text-gray-400 text-sm truncate max-w-[150px]"></span>
-							</div>
+							@UploadViewer("left-image")
 						</div>
 						<div class="flex flex-col items-center">
 							<h2 class="text-xl font-semibold text-gray-200 mb-2">
 								Right Image
 							</h2>
-							<div
-								id="right-image-container"
-								class="w-full h-64 bg-black rounded-lg overflow-hidden relative"
-							>
-								<div
-									class="absolute inset-0 flex items-center justify-center text-gray-500"
-									id="right-image-placeholder"
-								>
-									No image uploaded
-								</div>
-								<img
-									id="right-image-preview"
-									class="w-full h-full object-contain hidden"
-									alt="Right image preview"
-								/>
-							</div>
-							<div class="flex items-center mt-3">
-								<label for="rightImage" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50 cursor-pointer">
-									Select Right Image
-								</label>
-								<input
-									type="file"
-									id="rightImage"
-									name="rightImage"
-									accept="image/*"
-									class="hidden"
-									required
-								/>
-								<span id="right-file-name" class="ml-2 text-gray-400 text-sm truncate max-w-[150px]"></span>
-							</div>
+							@UploadViewer("right-image")
 						</div>
 					</div>
 					<!-- Hidden form fields for parameters -->
@@ -174,7 +102,7 @@ templ Manual() {
 				<div class="space-y-4">
 					<div class="space-y-2">
 						<div class="flex items-center">
-							<label for="block-size-slider" class="w-32 font-medium">Block Size:</label>
+							<label for="block-size-slider" class="w-32 font-medium text-gray-300">Block Size:</label>
 							<input
 								type="range"
 								id="block-size-slider"
@@ -210,7 +138,7 @@ templ Manual() {
 					</div>
 					<div class="space-y-2">
 						<div class="flex items-center">
-							<label for="max-disparity-slider" class="w-32 font-medium">Max Disparity:</label>
+							<label for="max-disparity-slider" class="w-32 font-medium text-gray-300">Max Disparity:</label>
 							<input
 								type="range"
 								id="max-disparity-slider"
@@ -246,7 +174,132 @@ templ Manual() {
 					</div>
 				</div>
 			</div>
-			@status()
+			<!-- Status Component -->
+			@StatusComponent()
 		</div>
+	</div>
+	<!-- Include Alpine.js if not already included -->
+	<script defer src="https://cdnjs.cloudflare.com/ajax/libs/alpinejs/3.10.5/cdn.min.js"></script>
+	<!-- Initialize sliders and connect UI -->
+	<script>
+		document.addEventListener('DOMContentLoaded', function() {
+			// Connect block size slider and input
+			const blockSizeSlider = document.getElementById('block-size-slider');
+			const blockSizeInput = document.getElementById('block-size-input');
+			const blockSizeField = document.getElementById('blockSizeField');
+			
+			blockSizeSlider.addEventListener('input', function() {
+				blockSizeInput.value = this.value;
+				blockSizeField.value = this.value;
+			});
+			
+			blockSizeInput.addEventListener('input', function() {
+				blockSizeSlider.value = this.value;
+				blockSizeField.value = this.value;
+			});
+			
+			// Connect max disparity slider and input
+			const maxDisparitySlider = document.getElementById('max-disparity-slider');
+			const maxDisparityInput = document.getElementById('max-disparity-input');
+			const maxDisparityField = document.getElementById('maxDisparityField');
+			
+			maxDisparitySlider.addEventListener('input', function() {
+				maxDisparityInput.value = this.value;
+				maxDisparityField.value = this.value;
+			});
+			
+			maxDisparityInput.addEventListener('input', function() {
+				maxDisparitySlider.value = this.value;
+				maxDisparityField.value = this.value;
+			});
+			
+			// Form submission handling
+			const form = document.getElementById('depth-map-form');
+			form.addEventListener('submit', function(e) {
+				e.preventDefault();
+				
+				// Show loading state
+				document.getElementById('status-message').textContent = 'Processing...';
+				document.getElementById('status-container').classList.remove('hidden');
+				
+				// Submit form via fetch API
+				fetch(this.action, {
+					method: 'POST',
+					body: new FormData(this)
+				})
+				.then(response => response.json())
+				.then(data => {
+					if (data.success) {
+						// Show depth map
+						document.getElementById('depth-map-preview').src = data.depthMapUrl;
+						document.getElementById('depth-map-preview').classList.remove('hidden');
+						document.getElementById('depth-map-placeholder').classList.add('hidden');
+						document.getElementById('download-button').disabled = false;
+						
+						// Update status
+						document.getElementById('status-message').textContent = 'Depth map generated successfully!';
+						setTimeout(() => {
+							document.getElementById('status-container').classList.add('hidden');
+						}, 3000);
+					} else {
+						// Show error
+						document.getElementById('status-message').textContent = data.error || 'An error occurred';
+						setTimeout(() => {
+							document.getElementById('status-container').classList.add('hidden');
+						}, 5000);
+					}
+				})
+				.catch(error => {
+					document.getElementById('status-message').textContent = 'An error occurred';
+					setTimeout(() => {
+						document.getElementById('status-container').classList.add('hidden');
+					}, 5000);
+				});
+			});
+			
+			// Download button handler
+			document.getElementById('download-button').addEventListener('click', function() {
+				const img = document.getElementById('depth-map-preview');
+				if (img.src) {
+					const a = document.createElement('a');
+					a.href = img.src;
+					a.download = 'depth-map.png';
+					document.body.appendChild(a);
+					a.click();
+					document.body.removeChild(a);
+				}
+			});
+		});
+	</script>
+}
+
+// Modified UploadViewer to accept an ID parameter for unique file inputs
+templ UploadViewer(id string) {
+	<div class="upload-viewer w-full">
+		<div class="p-4 text-sm w-full">
+			<div x-data="previewImage()">
+				<label for={ id }>
+					<div class="w-full h-48 rounded bg-gray-700 border border-gray-600 flex items-center justify-center overflow-hidden">
+						<img x-show="imageUrl" :src="imageUrl" class="w-full h-full object-contain"/>
+						<div x-show="!imageUrl" class="text-gray-300 flex flex-col items-center">
+							<svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+								<path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+							</svg>
+							<div class="mt-2">Drop image or click to upload</div>
+						</div>
+					</div>
+				</label>
+				<div class="mt-2">
+					<input class="w-full text-gray-300 bg-gray-700 rounded p-2 cursor-pointer" type="file" name={ id } id={ id } @change="fileChosen" accept="image/*"/>
+				</div>
+			</div>
+		</div>
+	</div>
+}
+
+// New status component for better feedback
+templ StatusComponent() {
+	<div id="status-container" class="fixed bottom-4 right-4 bg-gray-800 text-white px-6 py-3 rounded-lg shadow-lg hidden">
+		<p id="status-message">Processing...</p>
 	</div>
 }
