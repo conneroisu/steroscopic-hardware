@@ -277,7 +277,7 @@ function previewImage() {
 templ UploadViewer(id string) {
 	<div class="upload-viewer w-full">
 		<div class="p-4 text-sm w-full">
-			<div x-data="previewImage()">
+			<div x-data="previewImage()" class="cursor-pointer mt-2">
 				<label for={ id }>
 					<div class="w-full h-48 rounded bg-gray-700 border border-gray-600 flex items-center justify-center overflow-hidden">
 						<img x-show="imageUrl" :src="imageUrl" class="w-full h-full object-contain"/>

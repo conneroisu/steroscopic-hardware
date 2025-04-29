@@ -30,13 +30,13 @@ func AddRoutes(
 
 	// Index page route
 	mux.Handle("/", handlers.MorphableHandler(
-		components.App("Live Camera System", components.Live()),
+		components.App(handlers.LivePageTitle, components.Live()),
 		components.Live(),
 	))
 	// Manual page route
 	// mux.Handle("/manual", templ.Handler(components.Manual()))
 	mux.Handle("/manual", handlers.MorphableHandler(
-		components.App("Manual Depth Map Generator", components.Manual()),
+		components.App(handlers.ManualPageTitle, components.Manual()),
 		components.Manual(),
 	))
 

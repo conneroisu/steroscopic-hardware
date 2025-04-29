@@ -32,7 +32,9 @@ func convertRGBAToGray(
 			b := src.Pix[i+2]
 
 			// Use integer arithmetic
-			grayPix[rowStart+x-bounds.Min.X] = uint8((19595*uint32(r) + 38470*uint32(g) + 7471*uint32(b) + 1<<15) >> 24)
+			grayPix[rowStart+x-bounds.Min.X] = uint8((19595*uint32(r) +
+				38470*uint32(g) +
+				7471*uint32(b) + 1<<15) >> 24)
 		}
 	}
 }
@@ -48,7 +50,9 @@ func convertGenericToGray(
 		rowStart := (y - bounds.Min.Y) * stride
 		for x := bounds.Min.X; x < bounds.Max.X; x++ {
 			r, g, b, _ := src.At(x, y).RGBA()
-			grayPix[rowStart+x-bounds.Min.X] = uint8((19595*r + 38470*g + 7471*b + 1<<15) >> 24)
+			grayPix[rowStart+x-bounds.Min.X] = uint8((19595*r +
+				38470*g +
+				7471*b + 1<<15) >> 24)
 		}
 	}
 }

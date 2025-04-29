@@ -21,3 +21,8 @@ var (
 		Sel: "#status-content",
 	}
 )
+
+var (
+	ManualPageTitle = "Manual Depth Map Generator"
+	LivePageTitle   = "Live Camera System"
+)

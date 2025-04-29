@@ -13,7 +13,6 @@ import (
 	"time"
 
 	"github.com/conneroisu/steroscopic-hardware/pkg/camera"
-	"github.com/conneroisu/steroscopic-hardware/pkg/despair"
 )
 
 // CameraSystem manages the stereoscopic camera system
@@ -95,38 +94,11 @@ func (cs *CameraSystem) Capture() error {
 		return fmt.Errorf("failed to save right image: %v", err)
 	}
 
-	// Process depth map (this would call your SAD algorithm)
-	if err := cs.processDepthMap(); err != nil {
-		return fmt.Errorf("failed to process depth map: %v", err)
-	}
+	// Process depth map (this would call oyr SAD algorithm)
+	print("Processing depth map")
 
 	cs.lastCapture = time.Now()
 	return nil
-}
-
-// processDepthMap processes the depth map using the SAD algorithm
-func (cs *CameraSystem) processDepthMap() error {
-	// This is a placeholder for your actual depth map processing
-	// You would call your SAD algorithm implementation here
-	log.Printf("Processing depth map with parameters: BlockSize=%d, MaxDisparity=%d",
-		cs.parameters.BlockSize, cs.parameters.MaxDisparity)
-
-	err := despair.RunSadPaths(cs.leftImagePath, cs.rightImagePath, cs.parameters.BlockSize, cs.parameters.MaxDisparity)
-	if err != nil {
-		return err
-	}
-
-	// Create a mock depth map file (in real implementation, the SAD algorithm would create this)
-	// This is just a placeholder
-	f, err := os.Create(cs.depthMapPath)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-
-	// Write something to the file
-	_, err = f.WriteString("Depth map placeholder")
-	return err
 }
 
 // Close closes the camera system

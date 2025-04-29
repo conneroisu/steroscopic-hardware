@@ -9,89 +9,40 @@ import (
 	"sync"
 )
 
-// processingChunk represents a chunk of work for parallel processing
-type processingChunk struct {
-	startY, endY int
-}
-
-// RunSad computes the disparity map with optimizations
-func RunSad(
+// RunSingleSad computes the disparity map with optimizations, using the concurrent infrastructure
+func RunSingleSad(
 	left, right *image.Gray,
 	blockSize, maxDisparity int,
 ) *image.Gray {
-	disparityMap := image.NewGray(left.Rect)
-
-	// Create worker pool
+	// Determine number of workers
 	numWorkers := runtime.NumCPU() * 4
-	chunksChan := make(chan processingChunk, numWorkers*2)
-	var wg sync.WaitGroup
 
-	// Each worker processes chunks of rows
-	for range numWorkers { // i := 0; i < numWorkers; i++
-		wg.Add(1)
-		go func() {
-			for chunk := range chunksChan {
-				var bounds = left.Rect
-				for y := chunk.startY; y < chunk.endY; y++ {
-					processRow(
-						y,
-						left,
-						right,
-						bounds,
-						disparityMap,
-						blockSize,
-						maxDisparity,
-					)
-				}
-			}
-			wg.Done()
-		}()
-	}
+	// Set up the processing pipeline
+	inputChan, outputChan := SetupConcurrentSAD(blockSize, maxDisparity, numWorkers)
 
-	// Distribute work in larger chunks for better cache utilization
+	// Distribute work in row-based chunks for better cache utilization
+	// This mimics the behavior of the original RunSingleSad function
 	chunkSize := max(1, left.Rect.Dy()/(numWorkers*4))
-	for y := left.Rect.Min.Y; y < left.Rect.Max.Y; y += chunkSize {
-		endY := min(y+chunkSize, left.Rect.Max.Y)
-		chunksChan <- processingChunk{startY: y, endY: endY}
-	}
 
-	close(chunksChan)
-	wg.Wait()
+	// Start a goroutine to feed chunks into the pipeline
+	go func() {
+		for y := left.Rect.Min.Y; y < left.Rect.Max.Y; y += chunkSize {
+			endY := min(y+chunkSize, left.Rect.Max.Y)
 
-	return disparityMap
-}
+			// Create a rectangular region for this chunk of rows
+			region := image.Rect(left.Rect.Min.X, y, left.Rect.Max.X, endY)
 
-// RunSadPaths runs the optimized SAD algorithm on the given images
-func RunSadPaths(
-	left, right string,
-	blockSize, maxDisparity int,
-) error {
-	// Load left and right images
-	leftImg, err := LoadPNG(left)
-	if err != nil {
-		return err
-	}
+			inputChan <- InputChunk{
+				Left:   left,
+				Right:  right,
+				Region: region,
+			}
+		}
+		close(inputChan)
+	}()
 
-	rightImg, err := LoadPNG(right)
-	if err != nil {
-		return err
-	}
-
-	disparityMap := RunSad(
-		leftImg,
-		rightImg,
-		blockSize,
-		maxDisparity,
-	)
-
-	// Save disparity map
-	err = SavePNG("disparity_map.png", disparityMap)
-	if err != nil {
-		return fmt.Errorf("error saving disparity map: %v", err)
-	}
-
-	fmt.Println("Disparity map saved successfully!")
-	return nil
+	// Assemble and return the disparity map
+	return AssembleDisparityMap(outputChan, left.Rect)
 }
 
 // sumAbsoluteDifferences calculates SAD directly on image data
@@ -162,50 +113,236 @@ func calculateSAD(
 	return sad
 }
 
-// processRow processes a single row for disparity calculation
-func processRow(
-	y int,
-	left, right *image.Gray,
-	bounds image.Rectangle,
-	disparityMap *image.Gray,
+// InputChunk represents a portion of the image to process
+type InputChunk struct {
+	Left, Right *image.Gray
+	Region      image.Rectangle
+}
+
+// OutputChunk represents the processed disparity data for a region
+type OutputChunk struct {
+	DisparityData []uint8
+	Region        image.Rectangle
+}
+
+// SetupConcurrentSAD sets up a concurrent SAD processing pipeline
+// It returns an input channel to feed image chunks into and an
+// output channel to receive results from.
+//
+// If the input channel is closed, the processing pipeline will stop.
+func SetupConcurrentSAD(
 	blockSize, maxDisparity int,
-) {
-	var x, disparity int
-	for x = bounds.Min.X; x < bounds.Max.X; x++ {
-		minSAD := math.MaxInt32
+	numWorkers int, // Allow configurable worker count
+) (chan<- InputChunk, <-chan OutputChunk) {
+	if numWorkers <= 0 {
+		numWorkers = runtime.NumCPU() * 4
+	}
 
-		for d := 0; d <= maxDisparity; d++ {
-			// Skip if we would go beyond the left edge
-			if x-d < bounds.Min.X {
-				continue
-			}
+	inputChan := make(chan InputChunk, numWorkers*2)
+	outputChan := make(chan OutputChunk, numWorkers*2)
 
-			sad := sumAbsoluteDifferences(
-				left,
-				right,
-				x,
-				y,
-				x-d,
-				y,
-				blockSize,
-			)
+	var wg sync.WaitGroup
 
-			if sad < minSAD {
-				minSAD = sad
-				disparity = d
+	for range numWorkers { // i := 0; i < numWorkers; i++
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
 
-				// Early termination for perfect matches
-				if sad == 0 {
-					break
+			// Process chunks until the input channel is closed
+			for chunk := range inputChan {
+				left := chunk.Left
+				right := chunk.Right
+				region := chunk.Region
+
+				// Create output data for this region
+				width := region.Dx()
+				height := region.Dy()
+				disparityData := make([]uint8, width*height)
+
+				// Process each row in the region
+				for y := range height { // y := 0; y < height; y++
+					globalY := region.Min.Y + y
+					for x := range width { // x := 0; x < width; x++
+						globalX := region.Min.X + x
+
+						// Calculate disparity for this pixel
+						minSAD := math.MaxInt32
+						bestDisparity := 0
+
+						for d := 0; d <= maxDisparity; d++ {
+							// Skip if we would go beyond the left edge
+							if globalX-d < left.Rect.Min.X {
+								continue
+							}
+
+							sad := sumAbsoluteDifferences(
+								left,
+								right,
+								globalX,
+								globalY,
+								globalX-d,
+								globalY,
+								blockSize,
+							)
+
+							if sad < minSAD {
+								minSAD = sad
+								bestDisparity = d
+
+								// Early termination for perfect matches
+								if sad == 0 {
+									break
+								}
+							}
+						}
+
+						// Store the disparity value
+						disparityData[y*width+x] = uint8((bestDisparity * 255) / maxDisparity)
+					}
+				}
+
+				// Send the processed chunk to the output channel
+				outputChan <- OutputChunk{
+					DisparityData: disparityData,
+					Region:        region,
 				}
 			}
-		}
-		disparityMap.SetGray(
-			x,
-			y,
-			color.Gray{
-				Y: uint8((disparity * 255) / maxDisparity),
-			},
-		)
+		}()
 	}
+
+	// Goroutine to close output channel when all workers are done
+	go func() {
+		wg.Wait()
+		close(outputChan)
+	}()
+
+	return inputChan, outputChan
+}
+
+// AssembleDisparityMap assembles the disparity map from output chunks
+func AssembleDisparityMap(
+	outputChan <-chan OutputChunk,
+	dimensions image.Rectangle,
+) *image.Gray {
+	disparityMap := image.NewGray(dimensions)
+
+	for chunk := range outputChan {
+		// Copy the disparity data to the appropriate location in the output image
+		width := chunk.Region.Dx()
+		for y := range chunk.Region.Dy() { // y := 0; y < chunk.Region.Dy(); y++
+			globalY := chunk.Region.Min.Y + y
+			for x := range width { // x := 0; x < width; x++
+				globalX := chunk.Region.Min.X + x
+
+				disparityValue := chunk.DisparityData[y*width+x]
+				disparityMap.SetGray(
+					globalX,
+					globalY,
+					color.Gray{Y: disparityValue},
+				)
+			}
+		}
+	}
+
+	return disparityMap
+}
+
+// SplitImage divides an image into rectangular chunks for parallel processing
+func SplitImage(
+	dimensions image.Rectangle,
+	numChunks int,
+) []image.Rectangle {
+	chunks := make([]image.Rectangle, 0, numChunks)
+
+	// Try to make roughly square chunks
+	totalPixels := dimensions.Dx() * dimensions.Dy()
+	pixelsPerChunk := totalPixels / numChunks
+
+	// Approximate width and height that gives square chunks
+	chunkWidth := int(math.Sqrt(float64(pixelsPerChunk)))
+
+	// Adjust to make sure we don't have too many chunks
+	horChunks := max(1, dimensions.Dx()/chunkWidth)
+	verChunks := max(1, numChunks/horChunks)
+
+	chunkWidth = dimensions.Dx() / horChunks
+	chunkHeight := dimensions.Dy() / verChunks
+
+	// Create the chunks
+	for startY := dimensions.Min.Y; startY < dimensions.Max.Y; startY += chunkHeight {
+		endY := min(startY+chunkHeight, dimensions.Max.Y)
+
+		for startX := dimensions.Min.X; startX < dimensions.Max.X; startX += chunkWidth {
+			endX := min(startX+chunkWidth, dimensions.Max.X)
+
+			chunks = append(chunks, image.Rect(startX, startY, endX, endY))
+		}
+	}
+
+	return chunks
+}
+
+// RunConcurrentSad is a convenience function that sets up the pipeline,
+// feeds the images, and assembles the disparity map
+func RunConcurrentSad(
+	left, right *image.Gray,
+	blockSize, maxDisparity int,
+) *image.Gray {
+	// Determine number of workers and chunks
+	numWorkers := runtime.NumCPU() * 4
+	numChunks := numWorkers * 4 // Create more chunks than workers for better load balancing
+
+	// Set up the processing pipeline
+	inputChan, outputChan := SetupConcurrentSAD(blockSize, maxDisparity, numWorkers)
+
+	// Split the images into chunks
+	chunks := SplitImage(left.Rect, numChunks)
+
+	// Start a goroutine to feed chunks into the pipeline
+	go func() {
+		for _, chunk := range chunks {
+			inputChan <- InputChunk{
+				Left:   left,
+				Right:  right,
+				Region: chunk,
+			}
+		}
+		close(inputChan)
+	}()
+
+	// Assemble and return the disparity map
+	return AssembleDisparityMap(outputChan, left.Rect)
+}
+
+// RunConcurrentSadPaths runs the optimized concurrent SAD algorithm on the given images
+func RunConcurrentSadPaths(
+	left, right string,
+	blockSize, maxDisparity int,
+) error {
+	// Load left and right images
+	leftImg, err := LoadPNG(left)
+	if err != nil {
+		return err
+	}
+
+	rightImg, err := LoadPNG(right)
+	if err != nil {
+		return err
+	}
+
+	disparityMap := RunConcurrentSad(
+		leftImg,
+		rightImg,
+		blockSize,
+		maxDisparity,
+	)
+
+	// Save disparity map
+	err = SavePNG("disparity_map.png", disparityMap)
+	if err != nil {
+		return fmt.Errorf("error saving disparity map: %v", err)
+	}
+
+	fmt.Println("Disparity map saved successfully!")
+	return nil
 }

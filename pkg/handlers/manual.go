@@ -85,21 +85,23 @@ func ManualCalcDepthMapHandler(cameraSystem *CameraSystem) APIFn {
 			return fmt.Errorf("failed to save right image: %v", err)
 		}
 
-		// Process the depth map using the despair package
-		err = despair.RunSadPaths(leftImagePath, rightImagePath, blockSize, maxDisparity)
+		leftImage, err := despair.LoadPNG(leftImagePath)
 		if err != nil {
-			return fmt.Errorf("failed to generate depth map: %v", err)
+			return err
 		}
-
-		// Get the resulting depth map path (the despair package saves it to a fixed location)
-		// We need to move it to our desired location
-		err = os.Rename("disparity_map.png", depthMapPath)
+		rightImage, err := despair.LoadPNG(rightImagePath)
+		if err != nil {
+			return err
+		}
+		// Process the depth map using the despair package
+		output := despair.RunSingleSad(leftImage, rightImage, blockSize, maxDisparity)
+		err = despair.SavePNG(depthMapPath, output)
 		if err != nil {
 			return fmt.Errorf("failed to move depth map: %v", err)
 		}
 
 		// Return the path to the depth map image
-		response := map[string]interface{}{
+		response := map[string]any{
 			"success":     true,
 			"message":     "Depth map generated successfully",
 			"depthMapUrl": "/static/images/uploads/" + filepath.Base(depthMapPath),
@@ -122,13 +124,13 @@ func saveUploadedFile(file io.Reader, destinationPath string) error {
 }
 
 // Helper function to parse integer parameters with validation
-func parseIntParam(val string, min, max int) (int, error) {
+func parseIntParam(val string, mini, maxi int) (int, error) {
 	var result int
 	if _, err := fmt.Sscanf(val, "%d", &result); err != nil {
 		return 0, err
 	}
-	if result < min || result > max {
-		return 0, fmt.Errorf("value must be between %d and %d", min, max)
+	if result < mini || result > maxi {
+		return 0, fmt.Errorf("value must be between %d and %d", mini, maxi)
 	}
 	return result, nil
 }

@@ -1,9 +1,20 @@
 package components
 
 import (
+	"fmt"
 	"github.com/conneroisu/steroscopic-hardware/pkg/handlers"
 	"github.com/conneroisu/steroscopic-hardware/pkg/svg"
 )
+
+func indexed(title string) bool {
+	return title == handlers.LivePageTitle
+}
+func booled(b bool) string {
+	if b {
+		return "true"
+	}
+	return "false"
+}
 
 templ App(title string, comp templ.Component) {
 	<!DOCTYPE html>
@@ -18,7 +29,7 @@ templ App(title string, comp templ.Component) {
 		</head>
 		<style>[x-cloak] { display: none !important; }</style>
 		<body class="bg-gray-900 text-gray-200 min-h-screen">
-			@header()
+			@header(indexed(title))
 			<div id="app" class="pt-4">
 				@comp
 			</div>
@@ -26,10 +37,11 @@ templ App(title string, comp templ.Component) {
 	</html>
 }
 
-templ header() {
+templ header(index bool) {
 	<nav
 		class="bg-gray-800 border-b border-gray-700 shadow-md"
-		x-data="{ index: true }"
+		x-data={ fmt.Sprintf(`{ index: %s }`, booled(index)) }
+		id="main-nav"
 	>
 		<div
 			class="container mx-auto px-4"
@@ -60,8 +72,9 @@ templ header() {
 						hx-get="/"
 						hx-target="#app"
 						hx-push-url="true"
+						hx-on::after-request="Alpine.store('navigation').setIndex(true)"
 						class="px-4 py-2 rounded-lg transition"
-						@click="index = true"
+						x-on:click="index = true"
 						:class="{ 
 							'bg-blue-700 hover:bg-gray-600': index,
 							'bg-gray-800 hover:bg-blue-300': !index
@@ -73,8 +86,9 @@ templ header() {
 						hx-get="/manual"
 						hx-target="#app"
 						hx-push-url="true"
+						hx-on::after-request="Alpine.store('navigation').setIndex(false)"
 						class="px-4 py-2 rounded-lg transition"
-						@click="index = false"
+						x-on:click="index = false"
 						:class="{
 							'bg-blue-700 hover:bg-gray-600': !index,
 							'bg-gray-800 hover:bg-blue-300': index

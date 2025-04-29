@@ -83,7 +83,7 @@ func UploadViewer(id string) templ.Component {
 			templ_7745c5c3_Var2 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<div class=\"upload-viewer w-full\"><div class=\"p-4 text-sm w-full\"><div x-data=\"previewImage()\"><label for=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<div class=\"upload-viewer w-full\"><div class=\"p-4 text-sm w-full\"><div x-data=\"previewImage()\" class=\"cursor-pointer mt-2\"><label for=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
