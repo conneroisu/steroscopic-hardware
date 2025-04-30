@@ -121,7 +121,22 @@ func RunSad(
 	inputChan, outputChan := SetupConcurrentSAD(blockSize, maxDisparity, numWorkers)
 
 	// Split the images into chunks
-	chunks := splitImage(left.Rect, numChunks)
+	var dimensions = left.Rect
+	chunks := make([]image.Rectangle, 0, numChunks)
+	totalPixels := dimensions.Dx() * dimensions.Dy()
+	pixelsPerChunk := totalPixels / numChunks
+	chunkWidth := int(math.Sqrt(float64(pixelsPerChunk)))
+	horChunks := max(1, dimensions.Dx()/chunkWidth)
+	verChunks := max(1, numChunks/horChunks)
+	chunkWidth = dimensions.Dx() / horChunks
+	chunkHeight := dimensions.Dy() / verChunks
+	for startY := dimensions.Min.Y; startY < dimensions.Max.Y; startY += chunkHeight {
+		endY := min(startY+chunkHeight, dimensions.Max.Y)
+		for startX := dimensions.Min.X; startX < dimensions.Max.X; startX += chunkWidth {
+			endX := min(startX+chunkWidth, dimensions.Max.X)
+			chunks = append(chunks, image.Rect(startX, startY, endX, endY))
+		}
+	}
 
 	// Start a goroutine to feed chunks into the pipeline
 	go func() {
@@ -188,88 +203,27 @@ func sumAbsoluteDifferences(
 	rightMinY := max(rightY-halfSize, 0)
 	rightMinX := max(rightX-halfSize, 0)
 
-	return calculateSAD(
-		left,
-		right,
-		leftMinX,
-		leftMaxX,
-		leftMinY,
-		leftMaxY,
-		rightMinX,
-		rightMinY,
-	)
-}
-
-// calculateSAD performs the actual SAD calculation
-func calculateSAD(
-	left, right *image.Gray,
-	leftMinX, leftMaxX, leftMinY, leftMaxY, rightMinX, rightMinY int,
-) int {
+	// calculateSAD
 	var (
-		sad    int
-		lx, rx int
+		sad, lx int
 	)
 	for ly := leftMinY; ly < leftMaxY; ly++ {
 		if rightMinY+(ly-leftMinY) >= right.Rect.Max.Y {
 			break
 		}
-
 		leftRowStart := ly*left.Stride + leftMinX
-		rightRowStart := rightMinY + (ly-leftMinY)*right.Stride + rightMinX
-
+		rightRowStart := (rightMinY+(ly-leftMinY))*right.Stride + rightMinX
 		for lx = leftMinX; lx < leftMaxX; lx++ {
-			rx = rightMinX + (lx - leftMinX)
-			if rx >= right.Rect.Max.X {
+			if rightMinX+(lx-leftMinX) >= right.Rect.Max.X {
 				break
 			}
-
-			leftVal := left.Pix[leftRowStart+lx-leftMinX]
-			rightVal := right.Pix[rightRowStart+rx-rightMinX]
-
-			// Use abs without floating point
-			diff := int(leftVal) - int(rightVal)
+			diff := int(left.Pix[leftRowStart+lx-leftMinX]) -
+				int(right.Pix[rightRowStart+(rightMinX+(lx-leftMinX))-rightMinX])
 			if diff < 0 {
-				// positive diff
 				diff = -diff
 			}
 			sad += diff
 		}
 	}
-
 	return sad
-}
-
-// splitImage divides an image into rectangular chunks for parallel processing
-func splitImage(
-	dimensions image.Rectangle,
-	numChunks int,
-) []image.Rectangle {
-	chunks := make([]image.Rectangle, 0, numChunks)
-
-	// Try to make roughly square chunks
-	totalPixels := dimensions.Dx() * dimensions.Dy()
-	pixelsPerChunk := totalPixels / numChunks
-
-	// Approximate width and height that gives square chunks
-	chunkWidth := int(math.Sqrt(float64(pixelsPerChunk)))
-
-	// Adjust to make sure we don't have too many chunks
-	horChunks := max(1, dimensions.Dx()/chunkWidth)
-	verChunks := max(1, numChunks/horChunks)
-
-	chunkWidth = dimensions.Dx() / horChunks
-	chunkHeight := dimensions.Dy() / verChunks
-
-	// Create the chunks
-	for startY := dimensions.Min.Y; startY < dimensions.Max.Y; startY += chunkHeight {
-		endY := min(startY+chunkHeight, dimensions.Max.Y)
-
-		for startX := dimensions.Min.X; startX < dimensions.Max.X; startX += chunkWidth {
-			endX := min(startX+chunkWidth, dimensions.Max.X)
-
-			chunks = append(chunks, image.Rect(startX, startY, endX, endY))
-		}
-	}
-
-	return chunks
 }
