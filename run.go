@@ -27,7 +27,7 @@ func run() error {
 	if err != nil {
 		return err
 	}
-	got := despair.RunSingleSad(leftImg, rightImg, 16, 64)
+	got := despair.RunSad(leftImg, rightImg, 16, 64)
 	err = despair.SavePNG("output.png", got)
 	if err != nil {
 		return err

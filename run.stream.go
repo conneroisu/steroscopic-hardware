@@ -35,8 +35,9 @@ func run() error {
 		if err != nil {
 			return err
 		}
-
 		chunkSize := max(1, leftImg.Rect.Dy()/(numWorkers*4))
+		numChunks := (leftImg.Rect.Dy() + chunkSize - 1) / chunkSize
+
 		start := time.Now()
 		for y := leftImg.Rect.Min.Y; y < leftImg.Rect.Max.Y; y += chunkSize {
 			endY := min(y+chunkSize, leftImg.Rect.Max.Y)
@@ -50,10 +51,9 @@ func run() error {
 				Region: region,
 			}
 		}
-
-		numChunks := (leftImg.Rect.Dy() + chunkSize - 1) / chunkSize
 		got := despair.AssembleDisparityMap(outs, leftImg.Rect, numChunks)
 		end := time.Now()
+
 		fmt.Printf("Elapsed time: %v\n", end.Sub(start))
 		err = despair.SavePNG("output.png", got)
 		if err != nil {
