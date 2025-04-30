@@ -115,7 +115,7 @@ func RunSad(
 ) *image.Gray {
 	// Determine number of workers and chunks
 	numWorkers := runtime.NumCPU() * 4
-	numChunks := numWorkers * 4 // Create more chunks than workers for better load balancing
+	numChunks := numWorkers * 4
 
 	// Set up the processing pipeline
 	inputChan, outputChan := SetupConcurrentSAD(blockSize, maxDisparity, numWorkers)
@@ -206,17 +206,16 @@ func calculateSAD(
 	leftMinX, leftMaxX, leftMinY, leftMaxY, rightMinX, rightMinY int,
 ) int {
 	var (
-		sad        int
-		lx, rx, ry int
+		sad    int
+		lx, rx int
 	)
 	for ly := leftMinY; ly < leftMaxY; ly++ {
-		ry = rightMinY + (ly - leftMinY)
-		if ry >= right.Rect.Max.Y {
+		if rightMinY+(ly-leftMinY) >= right.Rect.Max.Y {
 			break
 		}
 
 		leftRowStart := ly*left.Stride + leftMinX
-		rightRowStart := ry*right.Stride + rightMinX
+		rightRowStart := rightMinY + (ly-leftMinY)*right.Stride + rightMinX
 
 		for lx = leftMinX; lx < leftMaxX; lx++ {
 			rx = rightMinX + (lx - leftMinX)
