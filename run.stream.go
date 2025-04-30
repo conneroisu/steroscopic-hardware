@@ -12,6 +12,12 @@ import (
 	"github.com/conneroisu/steroscopic-hardware/pkg/despair"
 )
 
+const (
+	blockSize  = 16
+	maxDespair = 32
+	numWorkers = 32
+)
+
 func main() {
 	if err := run(); err != nil {
 		panic(err)
@@ -20,8 +26,10 @@ func main() {
 
 func run() error {
 
-	numWorkers := 32
-	inps, outs := despair.SetupConcurrentSAD(16, 64, numWorkers)
+	fmt.Printf("Using %d workers (green threads)\n", numWorkers)
+	fmt.Printf("Block size: %d\n", blockSize)
+	fmt.Printf("Max despair: %d\n", maxDespair)
+	inps, outs := despair.SetupConcurrentSAD(blockSize, maxDespair, numWorkers)
 	defer close(inps)
 
 	for i := 0; i < 10; i++ {
