@@ -13,7 +13,6 @@ import (
 )
 
 func main() {
-
 	if err := run(); err != nil {
 		panic(err)
 	}
@@ -40,15 +39,15 @@ func run() error {
 
 		start := time.Now()
 		for y := leftImg.Rect.Min.Y; y < leftImg.Rect.Max.Y; y += chunkSize {
-			endY := min(y+chunkSize, leftImg.Rect.Max.Y)
-
-			// Create a rectangular region for this chunk of rows
-			region := image.Rect(leftImg.Rect.Min.X, y, leftImg.Rect.Max.X, endY)
-
 			inps <- despair.InputChunk{
-				Left:   leftImg,
-				Right:  rightImg,
-				Region: region,
+				Left:  leftImg,
+				Right: rightImg,
+				Region: image.Rect(
+					leftImg.Rect.Min.X,
+					y,
+					leftImg.Rect.Max.X,
+					min(y+chunkSize, leftImg.Rect.Max.Y),
+				),
 			}
 		}
 		got := despair.AssembleDisparityMap(outs, leftImg.Rect, numChunks)
