@@ -257,7 +257,7 @@ func startWebcamStream(ctx context.Context, manager *ClientManager) {
 					select {
 					case <-ctx.Done():
 						return
-					case <-time.After(time.Millisecond * 3): // ~30 FPS
+					case <-time.After(time.Millisecond * 30): // ~30 FPS
 						// Continue after delay
 					}
 					break
