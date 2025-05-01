@@ -29,7 +29,7 @@ func Manual() templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<header class=\"py-6 text-center\"><h1 class=\"text-3xl font-bold text-blue-400 mb-2\">Manual Depth Map Generator</h1><p class=\"text-gray-400\">Upload stereo images to generate a depth map using SAD algorithm</p></header><script>\nfunction previewImage() {\n    return {\n\t    imageUrl: \"\",\n\n        fileChosen(event) {\n            this.fileToDataUrl(event, (src) => (this.imageUrl = src));\n        },\n\n        fileToDataUrl(event, callback) {\n            if (!event.target.files.length) return;\n\n            let file = event.target.files[0],\n                reader = new FileReader();\n\n            reader.readAsDataURL(file);\n            reader.onload = (e) => callback(e.target.result);\n        },\n    };\n}\n</script><div class=\"container mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-6\"><div class=\"col-span-1 md:col-span-3 space-y-6\"><!-- Image Upload Panel --><div class=\"bg-gray-800 rounded-lg shadow-lg p-4\"><form id=\"depth-map-form\" action=\"/manual-calc-depth-map\" method=\"post\" enctype=\"multipart/form-data\"><div class=\"grid grid-cols-1 md:grid-cols-2 gap-4\"><div class=\"flex flex-col items-center\"><h2 class=\"text-xl font-semibold text-gray-200 mb-2\">Left Image</h2>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<header class=\"py-6 text-center\"><h1 class=\"text-3xl font-bold text-blue-400 mb-2\">Manual Depth Map Generator</h1><p class=\"text-gray-400\">Upload stereo images to generate a depth map using SAD algorithm</p></header><div class=\"container mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-6\"><div class=\"col-span-1 md:col-span-3 space-y-6\"><!-- Image Upload Panel --><div class=\"bg-gray-800 rounded-lg shadow-lg p-4\"><form id=\"depth-map-form\" action=\"/manual-calc-depth-map\" method=\"post\" enctype=\"multipart/form-data\"><div class=\"grid grid-cols-1 md:grid-cols-2 gap-4\"><div class=\"flex flex-col items-center\"><h2 class=\"text-xl font-semibold text-gray-200 mb-2\">Left Image</h2>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -53,7 +53,7 @@ func Manual() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</div></div><!-- Include Alpine.js if not already included --><script defer src=\"https://cdnjs.cloudflare.com/ajax/libs/alpinejs/3.10.5/cdn.min.js\"></script><!-- Initialize sliders and connect UI --><script>\n\t\tdocument.addEventListener('DOMContentLoaded', function() {\n\t\t\t// Connect block size slider and input\n\t\t\tconst blockSizeSlider = document.getElementById('block-size-slider');\n\t\t\tconst blockSizeInput = document.getElementById('block-size-input');\n\t\t\tconst blockSizeField = document.getElementById('blockSizeField');\n\t\t\t\n\t\t\tblockSizeSlider.addEventListener('input', function() {\n\t\t\t\tblockSizeInput.value = this.value;\n\t\t\t\tblockSizeField.value = this.value;\n\t\t\t});\n\t\t\t\n\t\t\tblockSizeInput.addEventListener('input', function() {\n\t\t\t\tblockSizeSlider.value = this.value;\n\t\t\t\tblockSizeField.value = this.value;\n\t\t\t});\n\t\t\t\n\t\t\t// Connect max disparity slider and input\n\t\t\tconst maxDisparitySlider = document.getElementById('max-disparity-slider');\n\t\t\tconst maxDisparityInput = document.getElementById('max-disparity-input');\n\t\t\tconst maxDisparityField = document.getElementById('maxDisparityField');\n\t\t\t\n\t\t\tmaxDisparitySlider.addEventListener('input', function() {\n\t\t\t\tmaxDisparityInput.value = this.value;\n\t\t\t\tmaxDisparityField.value = this.value;\n\t\t\t});\n\t\t\t\n\t\t\tmaxDisparityInput.addEventListener('input', function() {\n\t\t\t\tmaxDisparitySlider.value = this.value;\n\t\t\t\tmaxDisparityField.value = this.value;\n\t\t\t});\n\t\t\t\n\t\t\t// Form submission handling\n\t\t\tconst form = document.getElementById('depth-map-form');\n\t\t\tform.addEventListener('submit', function(e) {\n\t\t\t\te.preventDefault();\n\t\t\t\t\n\t\t\t\t// Show loading state\n\t\t\t\tdocument.getElementById('status-message').textContent = 'Processing...';\n\t\t\t\tdocument.getElementById('status-container').classList.remove('hidden');\n\t\t\t\t\n\t\t\t\t// Submit form via fetch API\n\t\t\t\tfetch(this.action, {\n\t\t\t\t\tmethod: 'POST',\n\t\t\t\t\tbody: new FormData(this)\n\t\t\t\t})\n\t\t\t\t.then(response => response.json())\n\t\t\t\t.then(data => {\n\t\t\t\t\tif (data.success) {\n\t\t\t\t\t\t// Show depth map\n\t\t\t\t\t\tdocument.getElementById('depth-map-preview').src = data.depthMapUrl;\n\t\t\t\t\t\tdocument.getElementById('depth-map-preview').classList.remove('hidden');\n\t\t\t\t\t\tdocument.getElementById('depth-map-placeholder').classList.add('hidden');\n\t\t\t\t\t\tdocument.getElementById('download-button').disabled = false;\n\t\t\t\t\t\t\n\t\t\t\t\t\t// Update status\n\t\t\t\t\t\tdocument.getElementById('status-message').textContent = 'Depth map generated successfully!';\n\t\t\t\t\t\tsetTimeout(() => {\n\t\t\t\t\t\t\tdocument.getElementById('status-container').classList.add('hidden');\n\t\t\t\t\t\t}, 3000);\n\t\t\t\t\t} else {\n\t\t\t\t\t\t// Show error\n\t\t\t\t\t\tdocument.getElementById('status-message').textContent = data.error || 'An error occurred';\n\t\t\t\t\t\tsetTimeout(() => {\n\t\t\t\t\t\t\tdocument.getElementById('status-container').classList.add('hidden');\n\t\t\t\t\t\t}, 5000);\n\t\t\t\t\t}\n\t\t\t\t})\n\t\t\t\t.catch(error => {\n\t\t\t\t\tdocument.getElementById('status-message').textContent = 'An error occurred';\n\t\t\t\t\tsetTimeout(() => {\n\t\t\t\t\t\tdocument.getElementById('status-container').classList.add('hidden');\n\t\t\t\t\t}, 5000);\n\t\t\t\t});\n\t\t\t});\n\t\t\t\n\t\t\t// Download button handler\n\t\t\tdocument.getElementById('download-button').addEventListener('click', function() {\n\t\t\t\tconst img = document.getElementById('depth-map-preview');\n\t\t\t\tif (img.src) {\n\t\t\t\t\tconst a = document.createElement('a');\n\t\t\t\t\ta.href = img.src;\n\t\t\t\t\ta.download = 'depth-map.png';\n\t\t\t\t\tdocument.body.appendChild(a);\n\t\t\t\t\ta.click();\n\t\t\t\t\tdocument.body.removeChild(a);\n\t\t\t\t}\n\t\t\t});\n\t\t});\n\t</script>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -83,14 +83,14 @@ func UploadViewer(id string) templ.Component {
 			templ_7745c5c3_Var2 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<div class=\"upload-viewer w-full\"><div class=\"p-4 text-sm w-full\"><div x-data=\"previewImage()\" class=\"cursor-pointer mt-2\"><label for=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<script>\nfunction previewImage() {\n    return {\n\t    imageUrl: \"\",\n\n        fileChosen(event) {\n            this.fileToDataUrl(event, (src) => (this.imageUrl = src));\n        },\n\n        fileToDataUrl(event, callback) {\n            if (!event.target.files.length) return;\n\n            let file = event.target.files[0],\n                reader = new FileReader();\n\n            reader.readAsDataURL(file);\n            reader.onload = (e) => callback(e.target.result);\n        },\n    };\n}\n</script><div class=\"upload-viewer w-full\"><div class=\"p-4 text-sm w-full\"><div x-data=\"previewImage()\" class=\"cursor-pointer mt-2\"><label for=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var3 string
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(id)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/steroscopic/components/manual.templ`, Line: 281, Col: 19}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/steroscopic/components/manual.templ`, Line: 188, Col: 19}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
@@ -103,7 +103,7 @@ func UploadViewer(id string) templ.Component {
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(id)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/steroscopic/components/manual.templ`, Line: 293, Col: 101}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/steroscopic/components/manual.templ`, Line: 200, Col: 101}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
@@ -116,7 +116,7 @@ func UploadViewer(id string) templ.Component {
 		var templ_7745c5c3_Var5 string
 		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(id)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/steroscopic/components/manual.templ`, Line: 293, Col: 111}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/steroscopic/components/manual.templ`, Line: 200, Col: 111}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {

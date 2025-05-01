@@ -12,6 +12,8 @@ import (
 	"sync"
 	"syscall"
 	"time"
+
+	"github.com/conneroisu/steroscopic-hardware/pkg/camera"
 )
 
 const (
@@ -22,6 +24,8 @@ const (
 	writeTimeout      = 15 * time.Second
 	idleTimeout       = 60 * time.Second
 	readHeaderTimeout = 5 * time.Second
+	defaultLeftPort   = "12"
+	defaultRightPort  = "13"
 )
 
 // NewServer creates a new web-ui server
@@ -29,7 +33,9 @@ func NewServer(
 	_ context.Context,
 ) (http.Handler, error) {
 	mux := http.NewServeMux()
-	err := AddRoutes(mux)
+	leftCamera := camera.NewZedBoardCamera(defaultLeftPort)
+	rightCamera := camera.NewZedBoardCamera(defaultRightPort)
+	err := AddRoutes(mux, leftCamera, rightCamera)
 	if err != nil {
 		return nil, err
 	}

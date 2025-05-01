@@ -2,9 +2,11 @@ package steroscopic
 
 import (
 	"embed"
+	"image"
 	"net/http"
 
 	"github.com/conneroisu/steroscopic-hardware/cmd/steroscopic/components"
+	"github.com/conneroisu/steroscopic-hardware/pkg/camera"
 	"github.com/conneroisu/steroscopic-hardware/pkg/handlers"
 )
 
@@ -19,15 +21,17 @@ var static embed.FS
 // AddRoutes adds the routes/handlers to the mux.
 func AddRoutes(
 	mux *http.ServeMux,
+	leftCamera camera.Camer,
+	rightCamera camera.Camer,
 ) error {
 	var params handlers.Parameters
-	cameraSystem := handlers.NewCameraSystem(
-		defLeftPort,
-		defRightPort,
-		"static/images",
-		&params,
-	)
+	var leftImgCh = make(chan *image.Gray)
+	var rightImgCh = make(chan *image.Gray)
 
+	mux.Handle("/static/", http.StripPrefix(
+		"/static/",
+		http.FileServer(http.FS(static)),
+	))
 	// Index page route
 	mux.Handle("/", handlers.MorphableHandler(
 		components.App(handlers.LivePageTitle, components.Live()),
@@ -48,27 +52,21 @@ func AddRoutes(
 		"/api/parameters",
 		handlers.Make(handlers.ParametersHandler(&params)),
 	)
-	mux.Handle(
-		"/static/",
-		http.StripPrefix(
-			"/static/",
-			http.FileServer(http.FS(static)),
-		))
 	mux.HandleFunc(
 		"/wsl", // Left Camera WebSocket
-		handlers.Make(handlers.GetStreamHandler(cameraSystem, "left")),
+		handlers.Make(handlers.StreamHandlerFn(leftCamera, leftImgCh)),
 	)
 	mux.HandleFunc(
 		"/wsr", // Right Camera WebSocket
-		handlers.Make(handlers.GetStreamHandler(cameraSystem, "right")),
+		handlers.Make(handlers.StreamHandlerFn(rightCamera, rightImgCh)),
 	)
 	mux.HandleFunc(
 		"/wso", // Depth Map WebSocket
-		handlers.Make(handlers.GetMapHandler(cameraSystem)),
+		handlers.Make(handlers.GetMapHandler(leftImgCh, rightImgCh)),
 	)
 	mux.HandleFunc(
-		"/manual-calc-depth-map",
-		handlers.Make(handlers.ManualCalcDepthMapHandler(cameraSystem)),
+		"POST /manual-calc-depth-map",
+		handlers.Make(handlers.ManualCalcDepthMapHandler()),
 	)
 	return nil
 }
