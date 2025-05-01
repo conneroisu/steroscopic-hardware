@@ -12,7 +12,7 @@ import (
 )
 
 func main() {
-	err := steroscopic.Run(context.Background(), openBrowser)
+	err := steroscopic.Run(context.Background(), func() {})
 	if err != nil {
 		fmt.Println(err)
 		return

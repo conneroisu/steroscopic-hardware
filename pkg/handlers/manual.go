@@ -94,7 +94,7 @@ func ManualCalcDepthMapHandler(cameraSystem *CameraSystem) APIFn {
 			return err
 		}
 		// Process the depth map using the despair package
-		output := despair.RunSingleSad(leftImage, rightImage, blockSize, maxDisparity)
+		output := despair.RunSad(leftImage, rightImage, blockSize, maxDisparity)
 		err = despair.SavePNG(depthMapPath, output)
 		if err != nil {
 			return fmt.Errorf("failed to move depth map: %v", err)

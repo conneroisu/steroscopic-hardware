@@ -1,20 +1,9 @@
 package components
 
 import (
-	"fmt"
 	"github.com/conneroisu/steroscopic-hardware/pkg/handlers"
 	"github.com/conneroisu/steroscopic-hardware/pkg/svg"
 )
-
-func indexed(title string) bool {
-	return title == handlers.LivePageTitle
-}
-func booled(b bool) string {
-	if b {
-		return "true"
-	}
-	return "false"
-}
 
 templ App(title string, comp templ.Component) {
 	<!DOCTYPE html>
@@ -25,11 +14,12 @@ templ App(title string, comp templ.Component) {
 			<script src="https://unpkg.com/htmx.org@2.0.4" integrity="sha384-HGfztofotfshcF7+8n44JQL2oJmowVChPTg48S+jvZoztPfvwD79OC/LTtG6dMp+" crossorigin="anonymous"></script>
 			<script> tailwind.config = { darkMode: "class", theme: { extend: { colors: { primary: { DEFAULT: "#3b82f6", dark: "#2563eb" } }, }, }, }; </script>
 			<script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/cdn.min.js"></script>
+			<script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/persist@3.x.x/dist/cdn.min.js"></script>
 			<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 		</head>
 		<style>[x-cloak] { display: none !important; }</style>
 		<body class="bg-gray-900 text-gray-200 min-h-screen">
-			@header(indexed(title))
+			@header()
 			<div id="app" class="pt-4">
 				@comp
 			</div>
@@ -37,10 +27,10 @@ templ App(title string, comp templ.Component) {
 	</html>
 }
 
-templ header(index bool) {
+templ header() {
 	<nav
 		class="bg-gray-800 border-b border-gray-700 shadow-md"
-		x-data={ fmt.Sprintf(`{ index: %s }`, booled(index)) }
+		x-data="{ index: $persist(true) }"
 		id="main-nav"
 	>
 		<div
@@ -72,9 +62,8 @@ templ header(index bool) {
 						hx-get="/"
 						hx-target="#app"
 						hx-push-url="true"
-						hx-on::after-request="Alpine.store('navigation').setIndex(true)"
 						class="px-4 py-2 rounded-lg transition"
-						x-on:click="index = true"
+						@click="index = true"
 						:class="{ 
 							'bg-blue-700 hover:bg-gray-600': index,
 							'bg-gray-800 hover:bg-blue-300': !index
@@ -86,9 +75,8 @@ templ header(index bool) {
 						hx-get="/manual"
 						hx-target="#app"
 						hx-push-url="true"
-						hx-on::after-request="Alpine.store('navigation').setIndex(false)"
 						class="px-4 py-2 rounded-lg transition"
-						x-on:click="index = false"
+						@click="index = false"
 						:class="{
 							'bg-blue-700 hover:bg-gray-600': !index,
 							'bg-gray-800 hover:bg-blue-300': index
