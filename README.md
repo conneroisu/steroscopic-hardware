@@ -2,6 +2,8 @@
 
 Steroscopic Depth Map in HW
 
+Downlaod the latest release [here](https://github.com/conneroisu/steroscopic-hardware/releases)
+
 ## Webserver
 
 The webserver is a simple go server that connects to the two zedboards, streams their feeds to a browser, and calculates and displays the depth map.
