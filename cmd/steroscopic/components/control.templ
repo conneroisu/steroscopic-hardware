@@ -1,0 +1,93 @@
+package components
+
+import "strconv"
+
+templ Control(
+	blockSize int,
+	maxDisparity int,
+) {
+	<div
+		class="bg-gray-800 rounded-lg shadow-lg p-4"
+		id="algorithm-controls"
+	>
+		<h2
+			class="text-xl font-semibold text-gray-200 mb-4"
+		>
+			Algorithm Controls
+		</h2>
+		<div class="space-y-4">
+			<div class="space-y-2">
+				<div class="flex items-center">
+					<label for="block-size-slider" class="w-32 font-medium">Block Size:</label>
+					<input
+						type="range"
+						id="block-size-slider"
+						min="3"
+						max="31"
+						step="2"
+						value={ strconv.Itoa(blockSize) }
+						class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer mx-4"
+					/>
+					<input
+						type="number"
+						id="block-size-input"
+						min="3"
+						max="31"
+						step="2"
+						value={ strconv.Itoa(blockSize) }
+						class="w-16 bg-gray-700 text-white rounded p-1 text-center"
+					/>
+					<div class="relative ml-2 group">
+						<div
+							class="w-5 h-5 bg-gray-600 rounded-full flex items-center justify-center text-xs text-white cursor-help"
+						>
+							?
+						</div>
+						<div
+							class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-48 bg-gray-700 text-white text-xs p-2 rounded opacity-0 group-hover:opacity-100 transition pointer-events-none"
+						>
+							Size of matching block used in SAD algorithm. Must be an odd
+							number (3-31).
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="space-y-2">
+				<div class="flex items-center">
+					<label for="max-disparity-slider" class="w-32 font-medium">Max Disparity:</label>
+					<input
+						type="range"
+						id="max-disparity-slider"
+						min="16"
+						max="256"
+						step="16"
+						value={ strconv.Itoa(maxDisparity) }
+						class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer mx-4"
+					/>
+					<input
+						type="number"
+						id="max-disparity-input"
+						min="16"
+						max="256"
+						step="16"
+						value={ strconv.Itoa(maxDisparity) }
+						class="w-16 bg-gray-700 text-white rounded p-1 text-center"
+					/>
+					<div class="relative ml-2 group">
+						<div
+							class="w-5 h-5 bg-gray-600 rounded-full flex items-center justify-center text-xs text-white cursor-help"
+						>
+							?
+						</div>
+						<div
+							class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-48 bg-gray-700 text-white text-xs p-2 rounded opacity-0 group-hover:opacity-100 transition pointer-events-none"
+						>
+							Maximum pixel displacement between left and right images
+							(16-256).
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+}

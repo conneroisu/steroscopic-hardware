@@ -8,7 +8,10 @@ package components
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-func Manual() templ.Component {
+func Manual(
+	blockSize int,
+	maxDisparity int,
+) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -45,7 +48,15 @@ func Manual() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</div></div><!-- Hidden form fields for parameters --><input type=\"hidden\" id=\"blockSizeField\" name=\"blockSize\" value=\"7\"> <input type=\"hidden\" id=\"maxDisparityField\" name=\"maxDisparity\" value=\"64\"><div class=\"text-center mt-4\"><button type=\"submit\" id=\"generate-button\" class=\"bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed\">Generate Depth Map</button></div></form></div><!-- Depth Map Panel --><div class=\"bg-gray-800 rounded-lg shadow-lg p-4\"><h2 class=\"text-xl font-semibold text-gray-200 mb-2 text-center\">Depth Map Result</h2><div id=\"depth-map-image\" class=\"w-full h-64 bg-black rounded-lg overflow-hidden relative\"><div class=\"absolute inset-0 flex items-center justify-center text-gray-500\" id=\"depth-map-placeholder\">No depth map available</div><img id=\"depth-map-preview\" class=\"w-full h-full object-contain hidden\" alt=\"Depth map preview\"></div><div class=\"flex justify-center mt-3\"><button id=\"download-button\" class=\"bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed\" disabled>Download Depth Map</button></div></div><!-- Algorithm Controls Panel --><div class=\"bg-gray-800 rounded-lg shadow-lg p-4\"><h2 class=\"text-xl font-semibold text-gray-200 mb-4\">Algorithm Controls</h2><div class=\"space-y-4\"><div class=\"space-y-2\"><div class=\"flex items-center\"><label for=\"block-size-slider\" class=\"w-32 font-medium text-gray-300\">Block Size:</label> <input type=\"range\" id=\"block-size-slider\" min=\"3\" max=\"31\" step=\"2\" value=\"7\" class=\"w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer mx-4\"> <input type=\"number\" id=\"block-size-input\" min=\"3\" max=\"31\" step=\"2\" value=\"7\" class=\"w-16 bg-gray-700 text-white rounded p-1 text-center\"><div class=\"relative ml-2 group\"><div class=\"w-5 h-5 bg-gray-600 rounded-full flex items-center justify-center text-xs text-white cursor-help\">?</div><div class=\"absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-48 bg-gray-700 text-white text-xs p-2 rounded opacity-0 group-hover:opacity-100 transition pointer-events-none\">Size of matching block used in SAD algorithm. Must be an odd number (3-31).</div></div></div></div><div class=\"space-y-2\"><div class=\"flex items-center\"><label for=\"max-disparity-slider\" class=\"w-32 font-medium text-gray-300\">Max Disparity:</label> <input type=\"range\" id=\"max-disparity-slider\" min=\"16\" max=\"256\" step=\"16\" value=\"64\" class=\"w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer mx-4\"> <input type=\"number\" id=\"max-disparity-input\" min=\"16\" max=\"256\" step=\"16\" value=\"64\" class=\"w-16 bg-gray-700 text-white rounded p-1 text-center\"><div class=\"relative ml-2 group\"><div class=\"w-5 h-5 bg-gray-600 rounded-full flex items-center justify-center text-xs text-white cursor-help\">?</div><div class=\"absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-48 bg-gray-700 text-white text-xs p-2 rounded opacity-0 group-hover:opacity-100 transition pointer-events-none\">Maximum pixel displacement between left and right images (16-256).</div></div></div></div></div></div><!-- Status Component -->")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</div></div><!-- Hidden form fields for parameters --><input type=\"hidden\" id=\"blockSizeField\" name=\"blockSize\" value=\"7\"> <input type=\"hidden\" id=\"maxDisparityField\" name=\"maxDisparity\" value=\"64\"><div class=\"text-center mt-4\"><button type=\"submit\" id=\"generate-button\" class=\"bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed\">Generate Depth Map</button></div></form></div><!-- Depth Map Panel --><div class=\"bg-gray-800 rounded-lg shadow-lg p-4\"><h2 class=\"text-xl font-semibold text-gray-200 mb-2 text-center\">Depth Map Result</h2><div id=\"depth-map-image\" class=\"w-full h-64 bg-black rounded-lg overflow-hidden relative\"><div class=\"absolute inset-0 flex items-center justify-center text-gray-500\" id=\"depth-map-placeholder\">No depth map available</div><img id=\"depth-map-preview\" class=\"w-full h-full object-contain hidden\" alt=\"Depth map preview\"></div><div class=\"flex justify-center mt-3\"><button id=\"download-button\" class=\"bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed\" disabled>Download Depth Map</button></div></div><!-- Algorithm Controls Panel -->")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = Control(blockSize, maxDisparity).Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<!-- Status Component -->")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -53,7 +64,7 @@ func Manual() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -83,46 +94,46 @@ func UploadViewer(id string) templ.Component {
 			templ_7745c5c3_Var2 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<script>\n\t\tfunction previewImage() {\n\t\t    return {\n\t\t\t    imageUrl: \"\",\n\n\t\t\tfileChosen(event) {\n\t\t\t    this.fileToDataUrl(event, (src) => (this.imageUrl = src));\n\t\t\t},\n\n\t\t\tfileToDataUrl(event, callback) {\n\t\t\t    if (!event.target.files.length) return;\n\n\t\t\t    let file = event.target.files[0],\n\t\t\t\treader = new FileReader();\n\n\t\t\t    reader.readAsDataURL(file);\n\t\t\t    reader.onload = (e) => callback(e.target.result);\n\t\t\t},\n\t\t    };\n\t\t}\n\t</script><div class=\"upload-viewer w-full\"><div class=\"p-4 text-sm w-full\"><div x-data=\"previewImage()\" class=\"cursor-pointer mt-2\"><label for=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<script>\n\t\tfunction previewImage() {\n\t\t    return {\n\t\t\t    imageUrl: \"\",\n\n\t\t\tfileChosen(event) {\n\t\t\t    this.fileToDataUrl(event, (src) => (this.imageUrl = src));\n\t\t\t},\n\n\t\t\tfileToDataUrl(event, callback) {\n\t\t\t    if (!event.target.files.length) return;\n\n\t\t\t    let file = event.target.files[0],\n\t\t\t\treader = new FileReader();\n\n\t\t\t    reader.readAsDataURL(file);\n\t\t\t    reader.onload = (e) => callback(e.target.result);\n\t\t\t},\n\t\t    };\n\t\t}\n\t</script><div class=\"upload-viewer w-full\"><div class=\"p-4 text-sm w-full\"><div x-data=\"previewImage()\" class=\"cursor-pointer mt-2\"><label for=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var3 string
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(id)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/steroscopic/components/manual.templ`, Line: 188, Col: 19}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/steroscopic/components/manual.templ`, Line: 113, Col: 19}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "\"><div class=\"w-full h-48 rounded bg-gray-700 border border-gray-600 flex items-center justify-center overflow-hidden\"><img x-show=\"imageUrl\" :src=\"imageUrl\" class=\"w-full h-full object-contain\"><div x-show=\"!imageUrl\" class=\"text-gray-300 flex flex-col items-center\"><svg xmlns=\"http://www.w3.org/2000/svg\" class=\"h-8 w-8\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\" stroke-width=\"2\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12\"></path></svg><div class=\"mt-2\">Drop image or click to upload</div></div></div></label><div class=\"mt-2\"><input class=\"w-full text-gray-300 bg-gray-700 rounded p-2 cursor-pointer\" type=\"file\" name=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "\"><div class=\"w-full h-48 rounded bg-gray-700 border border-gray-600 flex items-center justify-center overflow-hidden\"><img x-show=\"imageUrl\" :src=\"imageUrl\" class=\"w-full h-full object-contain\"><div x-show=\"!imageUrl\" class=\"text-gray-300 flex flex-col items-center\"><svg xmlns=\"http://www.w3.org/2000/svg\" class=\"h-8 w-8\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\" stroke-width=\"2\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12\"></path></svg><div class=\"mt-2\">Drop image or click to upload</div></div></div></label><div class=\"mt-2\"><input class=\"w-full text-gray-300 bg-gray-700 rounded p-2 cursor-pointer\" type=\"file\" name=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(id)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/steroscopic/components/manual.templ`, Line: 200, Col: 101}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/steroscopic/components/manual.templ`, Line: 125, Col: 101}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "\" id=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "\" id=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var5 string
 		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(id)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/steroscopic/components/manual.templ`, Line: 200, Col: 111}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/steroscopic/components/manual.templ`, Line: 125, Col: 111}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "\" @change=\"fileChosen\" accept=\"image/*\"></div></div></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "\" @change=\"fileChosen\" accept=\"image/*\"></div></div></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -152,7 +163,7 @@ func StatusComponent() templ.Component {
 			templ_7745c5c3_Var6 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "<div id=\"status-container\" class=\"fixed bottom-4 right-4 bg-gray-800 text-white px-6 py-3 rounded-lg shadow-lg hidden\"><p id=\"status-message\">Processing...</p></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "<div id=\"status-container\" class=\"fixed bottom-4 right-4 bg-gray-800 text-white px-6 py-3 rounded-lg shadow-lg hidden\"><p id=\"status-message\">Processing...</p></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

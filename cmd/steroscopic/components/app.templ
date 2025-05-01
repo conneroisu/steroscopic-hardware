@@ -5,6 +5,13 @@ import (
 	"github.com/conneroisu/steroscopic-hardware/pkg/svg"
 )
 
+// AppFn returns a function that wraps the given component with the app template.
+func AppFn(title string) func(templ.Component) templ.Component {
+	return func(c templ.Component) templ.Component {
+		return App(title, c)
+	}
+}
+
 templ App(title string, comp templ.Component) {
 	<!DOCTYPE html>
 	<html>

@@ -11,11 +11,6 @@ import (
 	"github.com/conneroisu/steroscopic-hardware/pkg/handlers"
 )
 
-const (
-	defLeftPort  = "8080"
-	defRightPort = "8081"
-)
-
 //go:embed static/*
 var static embed.FS
 
@@ -26,24 +21,23 @@ func AddRoutes(
 	leftCamera camera.Camer,
 	rightCamera camera.Camer,
 ) error {
-	var params handlers.Parameters
-	var leftImgCh = make(chan *image.Gray)
-	var rightImgCh = make(chan *image.Gray)
-
+	var (
+		params     handlers.Parameters
+		leftImgCh  = make(chan *image.Gray)
+		rightImgCh = make(chan *image.Gray)
+	)
 	mux.Handle("/static/", http.StripPrefix(
 		"/static/",
 		http.FileServer(http.FS(static)),
 	))
-	// Index page route
+
 	mux.Handle("/", handlers.MorphableHandler(
-		components.App(handlers.LivePageTitle, components.Live()),
-		components.Live(),
+		components.AppFn(handlers.LivePageTitle),
+		components.Live(params.BlockSize, params.MaxDisparity),
 	))
-	// Manual page route
-	// mux.Handle("/manual", templ.Handler(components.Manual()))
 	mux.Handle("/manual", handlers.MorphableHandler(
-		components.App(handlers.ManualPageTitle, components.Manual()),
-		components.Manual(),
+		components.AppFn(handlers.ManualPageTitle),
+		components.Manual(params.BlockSize, params.MaxDisparity),
 	))
 
 	mux.HandleFunc(
