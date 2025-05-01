@@ -33,13 +33,6 @@
         box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
       }
 
-      .status {
-        margin-top: 10px;
-        padding: 10px;
-        background-color: #f0f0f0;
-        border-radius: 4px;
-      }
-
       h1,
       h2 {
         color: #333;
@@ -55,19 +48,10 @@
   <body hx-ext="ws">
     <h1>Server Webcam Stream</h1>
 
-    <div class="status">
-      Connection Status: <span id="connection-status">Disconnected</span>
-      <br />
-      <button
-        id="connect-btn"
+    <div 
+      class="video-container"
         hx-ws="connect:/ws/video"
-        hx-target="#connection-status"
-      >
-        Connect to Stream
-      </button>
-    </div>
-
-    <div class="video-container">
+    >
       <h2>Live Webcam Feed</h2>
       <img id="video-frame" src="placeholder.png" alt="Webcam Stream" />
       <div class="stats">
@@ -79,7 +63,6 @@
     <script>
       // Elements
       const videoFrame = document.getElementById("video-frame");
-      const connectionStatus = document.getElementById("connection-status");
       const frameCount = document.getElementById("frame-count");
       const lastFrameTime = document.getElementById("last-frame-time");
       const fpsElement = document.getElementById("fps");
@@ -88,24 +71,6 @@
       let frames = 0;
       let lastTime = Date.now();
       let frameTimestamps = [];
-
-      // Handle WebSocket open event
-      document.body.addEventListener("htmx:wsOpen", function (evt) {
-        connectionStatus.innerText = "Connected";
-        connectionStatus.style.color = "green";
-      });
-
-      // Handle WebSocket close event
-      document.body.addEventListener("htmx:wsClose", function (evt) {
-        connectionStatus.innerText = "Disconnected";
-        connectionStatus.style.color = "red";
-      });
-
-      // Handle WebSocket error event
-      document.body.addEventListener("htmx:wsError", function (evt) {
-        connectionStatus.innerText = "Error: " + evt.detail.error;
-        connectionStatus.style.color = "red";
-      });
 
       // Handle incoming WebSocket messages
       document.body.addEventListener("htmx:wsBeforeMessage", function (evt) {

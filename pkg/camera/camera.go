@@ -2,11 +2,13 @@
 package camera
 
 import (
+	"context"
 	"image"
 )
 
 // Camer is the interface for a camera.
 type Camer interface {
-	Stream(chan *image.Gray)
+	Stream(context.Context, chan *image.Gray)
 	Close() error
+	ID() string
 }

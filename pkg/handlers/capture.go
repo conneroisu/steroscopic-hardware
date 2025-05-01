@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"fmt"
 	"image"
 	"image/jpeg"
@@ -11,13 +12,17 @@ import (
 )
 
 // StreamHandlerFn returns a handler for streaming camera images
-func StreamHandlerFn(camera camera.Camer, outCh chan *image.Gray) APIFn {
+func StreamHandlerFn(
+	ctx context.Context,
+	camera camera.Camer,
+	outCh chan *image.Gray,
+) APIFn {
 	return func(w http.ResponseWriter, r *http.Request) error {
 		// Set headers for MJPEG stream
 		w.Header().Set("Content-Type", "multipart/x-mixed-replace; boundary=frame")
 
 		var imgCh = make(chan *image.Gray)
-		go camera.Stream(imgCh)
+		go camera.Stream(ctx, imgCh)
 		// Continuously send frames
 		for {
 			select {
@@ -39,8 +44,6 @@ func StreamHandlerFn(camera camera.Camer, outCh chan *image.Gray) APIFn {
 						}
 					}
 				}
-			default:
-				// Continue
 			}
 		}
 	}

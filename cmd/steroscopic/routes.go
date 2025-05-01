@@ -1,6 +1,7 @@
 package steroscopic
 
 import (
+	"context"
 	"embed"
 	"image"
 	"net/http"
@@ -20,6 +21,7 @@ var static embed.FS
 
 // AddRoutes adds the routes/handlers to the mux.
 func AddRoutes(
+	ctx context.Context,
 	mux *http.ServeMux,
 	leftCamera camera.Camer,
 	rightCamera camera.Camer,
@@ -54,11 +56,11 @@ func AddRoutes(
 	)
 	mux.HandleFunc(
 		"/wsl", // Left Camera WebSocket
-		handlers.Make(handlers.StreamHandlerFn(leftCamera, leftImgCh)),
+		handlers.Make(handlers.StreamHandlerFn(ctx, leftCamera, leftImgCh)),
 	)
 	mux.HandleFunc(
 		"/wsr", // Right Camera WebSocket
-		handlers.Make(handlers.StreamHandlerFn(rightCamera, rightImgCh)),
+		handlers.Make(handlers.StreamHandlerFn(ctx, rightCamera, rightImgCh)),
 	)
 	mux.HandleFunc(
 		"/wso", // Depth Map WebSocket

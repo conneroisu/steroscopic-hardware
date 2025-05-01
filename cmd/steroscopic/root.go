@@ -24,18 +24,16 @@ const (
 	writeTimeout      = 15 * time.Second
 	idleTimeout       = 60 * time.Second
 	readHeaderTimeout = 5 * time.Second
-	defaultLeftPort   = "12"
-	defaultRightPort  = "13"
 )
 
 // NewServer creates a new web-ui server
 func NewServer(
-	_ context.Context,
+	ctx context.Context,
 ) (http.Handler, error) {
 	mux := http.NewServeMux()
-	leftCamera := camera.NewZedBoardCamera(defaultLeftPort)
-	rightCamera := camera.NewZedBoardCamera(defaultRightPort)
-	err := AddRoutes(mux, leftCamera, rightCamera)
+	leftCamera := camera.NewStaticCamera("./testdata/L_00001.png")
+	rightCamera := camera.NewStaticCamera("./testdata/R_00001.png")
+	err := AddRoutes(ctx, mux, leftCamera, rightCamera)
 	if err != nil {
 		return nil, err
 	}
