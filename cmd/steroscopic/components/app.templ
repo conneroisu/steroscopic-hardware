@@ -23,9 +23,11 @@ templ App(title string, comp templ.Component) {
 			<script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/cdn.min.js"></script>
 			<script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/persist@3.x.x/dist/cdn.min.js"></script>
 			<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+			<script type="module" src="https://cdn.jsdelivr.net/gh/starfederation/datastar@v1.0.0-beta.11/bundles/datastar.js"></script>
 		</head>
 		<style>[x-cloak] { display: none !important; }</style>
 		<body class="bg-gray-900 text-gray-200 min-h-screen">
+			<div data-on-load="@get('/logs')"></div>
 			@header()
 			<div id="app" class="pt-4">
 				@comp

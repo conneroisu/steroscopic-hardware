@@ -37,10 +37,6 @@ func AddRoutes(
 	))
 
 	mux.HandleFunc(
-		"/ws",
-		handlers.WSHandler,
-	)
-	mux.HandleFunc(
 		"/api/parameters",
 		handlers.Make(handlers.ParametersHandler(params)),
 	)
@@ -60,5 +56,8 @@ func AddRoutes(
 		"POST /manual-calc-depth-map",
 		handlers.Make(handlers.ManualCalcDepthMapHandler()),
 	)
+	mux.HandleFunc(
+		"GET /logs",
+		handlers.Make(handlers.LogHandler()))
 	return nil
 }

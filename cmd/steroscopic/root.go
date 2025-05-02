@@ -15,6 +15,7 @@ import (
 
 	"github.com/conneroisu/steroscopic-hardware/pkg/camera"
 	"github.com/conneroisu/steroscopic-hardware/pkg/despair"
+	"github.com/conneroisu/steroscopic-hardware/pkg/logger"
 )
 
 const (
@@ -72,6 +73,7 @@ func Run(
 	ctx context.Context,
 	onStart func(),
 ) error {
+	logger.SetDefaultSlog()
 	var wg sync.WaitGroup
 
 	start := time.Now()
