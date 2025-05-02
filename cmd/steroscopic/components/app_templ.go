@@ -136,7 +136,7 @@ func status() templ.Component {
 			templ_7745c5c3_Var4 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<div class=\"lg:col-span-1 space-y-6\" x-data=\"{ open_stats: true, open_logs: false }\"><!-- System Status Panel --><div class=\"bg-gray-800 rounded-lg shadow-lg p-4\"><div class=\"flex justify-between items-center cursor-pointer\" @click=\"open_stats = !open_stats\" x-data=\"{ text: &#39;▶&#39; }\" x-on:click=\"open_stats ? text = &#39;▶&#39; : text = &#39;▼&#39;\"><h2 class=\"text-xl font-semibold text-gray-200\">System Status</h2><span x-text=\"text\"></span></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<div class=\"lg:col-span-1 space-y-6\" x-data=\"{ open_stats: true }\"><!-- System Status Panel --><div class=\"bg-gray-800 rounded-lg shadow-lg p-4\"><div class=\"flex justify-between items-center cursor-pointer\" @click=\"open_stats = !open_stats\" x-data=\"{ text: &#39;▶&#39; }\" x-on:click=\"open_stats ? text = &#39;▶&#39; : text = &#39;▼&#39;\"><h2 class=\"text-xl font-semibold text-gray-200\">System Status</h2><span x-text=\"text\"></span></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -144,20 +144,7 @@ func status() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "</div><!-- System Logs Panel --><div class=\"bg-gray-800 rounded-lg shadow-lg p-4\"><div class=\"flex justify-between items-center cursor-pointer\" @click=\"open_logs = !open_logs\" x-data=\"{ text: &#39;▼&#39; }\" x-on:click=\"open_logs ? text = &#39;▶&#39; : text = &#39;▼&#39;\"><h2 class=\"text-xl font-semibold text-gray-200\">System Logs</h2><span id=\"logs-icon\" x-text=\"text\"></span></div><div class=\"mt-4\" x-show=\"open_logs\" x-collapse><div id=\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var5 string
-		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(handlers.TargetLogContainer.ID)
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/steroscopic/components/app.templ`, Line: 135, Col: 40}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "\" class=\"h-64 overflow-y-auto p-2 bg-gray-900 text-gray-300 rounded font-mono text-sm\"><!-- Log entries will be inserted here via HTMX --></div></div></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "</div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -181,25 +168,25 @@ func statusContent() templ.Component {
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var6 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var6 == nil {
-			templ_7745c5c3_Var6 = templ.NopComponent
+		templ_7745c5c3_Var5 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var5 == nil {
+			templ_7745c5c3_Var5 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "<div class=\"mt-4 space-y-2\" id=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "<div class=\"mt-4 space-y-2\" id=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var7 string
-		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(handlers.TargetStatusContent.ID)
+		var templ_7745c5c3_Var6 string
+		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(handlers.TargetStatusContent.ID)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/steroscopic/components/app.templ`, Line: 148, Col: 38}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/steroscopic/components/app.templ`, Line: 124, Col: 38}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "\" x-show=\"open_stats\" x-collapse><div class=\"flex justify-between py-2 border-b border-gray-700\"><span class=\"font-medium\">Left Image:</span> <span id=\"left-image-status\" class=\"px-2 py-1 rounded text-sm bg-red-900/30 text-red-400\">Not uploaded</span></div><div class=\"flex justify-between py-2 border-b border-gray-700\"><span class=\"font-medium\">Right Image:</span> <span id=\"right-image-status\" class=\"px-2 py-1 rounded text-sm bg-red-900/30 text-red-400\">Not uploaded</span></div><div class=\"flex justify-between py-2 border-b border-gray-700\"><span class=\"font-medium\">Depth Map:</span> <span id=\"depth-map-status\" class=\"px-2 py-1 rounded text-sm bg-red-900/30 text-red-400\">Not available</span></div><div class=\"flex justify-between py-2 border-b border-gray-700\"><span class=\"font-medium\">Block Size:</span> <span id=\"block-size-status\" class=\"px-2 py-1 rounded text-sm bg-gray-700 text-gray-300\">7</span></div><div class=\"flex justify-between py-2 border-b border-gray-700\"><span class=\"font-medium\">Max Disparity:</span> <span id=\"max-disparity-status\" class=\"px-2 py-1 rounded text-sm bg-gray-700 text-gray-300\">64</span></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "\" x-show=\"open_stats\" x-collapse><div class=\"flex justify-between py-2 border-b border-gray-700\"><span class=\"font-medium\">Left Image:</span> <span id=\"left-image-status\" class=\"px-2 py-1 rounded text-sm bg-red-900/30 text-red-400\">Not uploaded</span></div><div class=\"flex justify-between py-2 border-b border-gray-700\"><span class=\"font-medium\">Right Image:</span> <span id=\"right-image-status\" class=\"px-2 py-1 rounded text-sm bg-red-900/30 text-red-400\">Not uploaded</span></div><div class=\"flex justify-between py-2 border-b border-gray-700\"><span class=\"font-medium\">Depth Map:</span> <span id=\"depth-map-status\" class=\"px-2 py-1 rounded text-sm bg-red-900/30 text-red-400\">Not available</span></div><div class=\"flex justify-between py-2 border-b border-gray-700\"><span class=\"font-medium\">Block Size:</span> <span id=\"block-size-status\" class=\"px-2 py-1 rounded text-sm bg-gray-700 text-gray-300\">7</span></div><div class=\"flex justify-between py-2 border-b border-gray-700\"><span class=\"font-medium\">Max Disparity:</span> <span id=\"max-disparity-status\" class=\"px-2 py-1 rounded text-sm bg-gray-700 text-gray-300\">64</span></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

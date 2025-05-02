@@ -23,7 +23,6 @@ templ App(title string, comp templ.Component) {
 			<script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/cdn.min.js"></script>
 			<script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/persist@3.x.x/dist/cdn.min.js"></script>
 			<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-			<script src="/static/index.js"></script>
 		</head>
 		<style>[x-cloak] { display: none !important; }</style>
 		<body class="bg-gray-900 text-gray-200 min-h-screen">
@@ -101,7 +100,7 @@ templ header() {
 templ status() {
 	<div
 		class="lg:col-span-1 space-y-6"
-		x-data="{ open_stats: true, open_logs: false }"
+		x-data="{ open_stats: true }"
 	>
 		<!-- System Status Panel -->
 		<div class="bg-gray-800 rounded-lg shadow-lg p-4">
@@ -115,31 +114,6 @@ templ status() {
 				<span x-text="text"></span>
 			</div>
 			@statusContent()
-		</div>
-		<!-- System Logs Panel -->
-		<div class="bg-gray-800 rounded-lg shadow-lg p-4">
-			<div
-				class="flex justify-between items-center cursor-pointer"
-				@click="open_logs = !open_logs"
-				x-data="{ text: '▼' }"
-				x-on:click="open_logs ? text = '▶' : text = '▼'"
-			>
-				<h2 class="text-xl font-semibold text-gray-200">System Logs</h2>
-				<span id="logs-icon" x-text="text"></span>
-			</div>
-			<div
-				class="mt-4"
-				x-show="open_logs"
-				x-collapse
-			>
-				<div
-					id={ handlers.TargetLogContainer.ID }
-					class="h-64 overflow-y-auto p-2 bg-gray-900 text-gray-300 rounded font-mono text-sm"
-				>
-					@Logs()
-					<!-- Log entries will be inserted here via HTMX -->
-				</div>
-			</div>
 		</div>
 	</div>
 }
