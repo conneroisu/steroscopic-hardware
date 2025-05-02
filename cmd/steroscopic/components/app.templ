@@ -23,7 +23,7 @@ templ App(title string, comp templ.Component) {
 			<script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/cdn.min.js"></script>
 			<script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/persist@3.x.x/dist/cdn.min.js"></script>
 			<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-			<script defer src="https://unpkg.com/htmx-ext-ws@2.0.2" integrity="sha384-932iIqjARv+Gy0+r6RTGrfCkCKS5MsF539Iqf6Vt8L4YmbnnWI2DSFoMD90bvXd0" crossorigin="anonymous"></script>
+			<script src="/static/index.js"></script>
 		</head>
 		<style>[x-cloak] { display: none !important; }</style>
 		<body class="bg-gray-900 text-gray-200 min-h-screen">
@@ -136,6 +136,7 @@ templ status() {
 					id={ handlers.TargetLogContainer.ID }
 					class="h-64 overflow-y-auto p-2 bg-gray-900 text-gray-300 rounded font-mono text-sm"
 				>
+					@Logs()
 					<!-- Log entries will be inserted here via HTMX -->
 				</div>
 			</div>

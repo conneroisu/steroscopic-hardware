@@ -29,12 +29,10 @@ templ Live(
 							id="left-camera-feed"
 							class="w-full h-64 bg-black rounded-lg overflow-hidden relative"
 						>
-							<div
+							<img
 								class="absolute inset-0 flex items-center justify-center text-gray-500"
-								hx-ws-connect="/wsl"
-							>
-								Waiting for connection...
-							</div>
+								src="/stream/left"
+							/>
 						</div>
 					</div>
 					<div class="flex flex-col items-center">
@@ -45,12 +43,10 @@ templ Live(
 							id="right-camera-feed"
 							class="w-full h-64 bg-black rounded-lg overflow-hidden relative"
 						>
-							<div
+							<img
 								class="absolute inset-0 flex items-center justify-center text-gray-500"
-								hx-ws-connect="/wsr"
-							>
-								Waiting for connection...
-							</div>
+								src="/stream/right"
+							/>
 						</div>
 					</div>
 				</div>
@@ -68,12 +64,10 @@ templ Live(
 					id="depth-map-image"
 					class="w-full h-64 bg-black rounded-lg overflow-hidden relative"
 				>
-					// Depth map will be inserted here via JavaScript
-					<div
+					<img
 						class="absolute inset-0 flex items-center justify-center text-gray-500"
-					>
-						No depth map available
-					</div>
+						src="/stream/out"
+					/>
 				</div>
 			</div>
 			// Algorithm Controls Panel

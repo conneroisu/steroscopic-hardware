@@ -8,6 +8,8 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
+
+	"github.com/conneroisu/steroscopic-hardware/pkg/despair"
 )
 
 // StaticCamera represents a ZedBoard camera
@@ -30,10 +32,13 @@ func (z *StaticCamera) ID() string {
 }
 
 // Stream streams the camera
-func (z *StaticCamera) Stream(_ context.Context, outCh chan *image.Gray) {
+func (z *StaticCamera) Stream(ctx context.Context, outCh chan *image.Gray) {
 	var errChan = make(chan error, 1)
 	for {
 		select {
+		case <-ctx.Done():
+			slog.Debug("stopping stream")
+			return
 		case err := <-errChan:
 			slog.Error("Error reading image", "err", err)
 			return
@@ -65,21 +70,32 @@ func (z *StaticCamera) getImage() (*image.Gray, error) {
 	}
 	defer file.Close()
 
-	// Decode the image (works for both PNG and JPEG automatically)
-	img, _, err := image.Decode(file)
-	if err != nil {
-		return nil, fmt.Errorf("error decoding image: %w", err)
-	}
-
-	// Create a new grayscale image with the same dimensions
-	bounds := img.Bounds()
-	grayImg := image.NewGray(bounds)
-
-	// Convert to grayscale
-	for y := bounds.Min.Y; y < bounds.Max.Y; y++ {
-		for x := bounds.Min.X; x < bounds.Max.X; x++ {
-			grayImg.Set(x, y, color.GrayModel.Convert(img.At(x, y)))
+	var grayImg *image.Gray
+	ext := filepath.Ext(z.Path)
+	switch ext {
+	case ".png":
+		grayImg, err = despair.LoadPNG(z.Path)
+		if err != nil {
+			return nil, err
 		}
+	case ".jpg", ".jpeg":
+		// Decode the image
+		img, _, err := image.Decode(file)
+		if err != nil {
+			return nil, fmt.Errorf("error decoding image (%s): %w", z.Path, err)
+		}
+		// Create a new grayscale image with the same dimensions
+		bounds := img.Bounds()
+		grayImg = image.NewGray(bounds)
+
+		// Convert to grayscale
+		for y := bounds.Min.Y; y < bounds.Max.Y; y++ {
+			for x := bounds.Min.X; x < bounds.Max.X; x++ {
+				grayImg.Set(x, y, color.GrayModel.Convert(img.At(x, y)))
+			}
+		}
+	default:
+		return nil, fmt.Errorf("unsupported image format: %s", ext)
 	}
 
 	return grayImg, nil

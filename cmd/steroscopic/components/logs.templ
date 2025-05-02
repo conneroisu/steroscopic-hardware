@@ -1,0 +1,46 @@
+package components
+
+import (
+	"fmt"
+	"github.com/conneroisu/steroscopic-hardware/pkg/logger"
+)
+
+templ Logs() {
+	<div
+		id="log-container"
+		class="log-container"
+		hx-get="?lastIndex=0"
+		hx-trigger="newLogsLoaded from:body delay:1s, every 1s"
+		hx-swap="beforeend"
+	>
+		<div class="empty-state">
+			<p>No logs available</p>
+		</div>
+	</div>
+}
+
+templ LogEntries(logs []logger.HTMLRecord) {
+	for _, log := range logs {
+		<div class="log-entry" data-log-content={ log.Message }>
+			<div>
+				<span class="log-time">
+					{ log.Time.Format("2006-01-02 15:04:05.000") }
+				</span>
+				<span class="log-level">
+					{ log.Level.String() }
+				</span>
+			</div>
+			<div class="log-message">{ log.Message }</div>
+			if log.Attrs != nil {
+				<div class="log-attrs">
+					for key, value := range log.Attrs {
+						<div class="log-attr">
+							<div class="log-attr-key">{ key }</div>
+							<div class="log-attr-value">{ fmt.Sprintf("%v", value) }</div>
+						</div>
+					}
+				</div>
+			}
+		</div>
+	}
+}

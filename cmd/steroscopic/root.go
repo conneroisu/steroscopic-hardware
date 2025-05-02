@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/conneroisu/steroscopic-hardware/pkg/camera"
+	"github.com/conneroisu/steroscopic-hardware/pkg/despair"
 )
 
 const (
@@ -26,14 +27,26 @@ const (
 	readHeaderTimeout = 5 * time.Second
 )
 
+var (
+	defaultParams = despair.Parameters{
+		BlockSize:    16,
+		MaxDisparity: 32,
+	}
+)
+
 // NewServer creates a new web-ui server
 func NewServer(
 	ctx context.Context,
 ) (http.Handler, error) {
+	var params = defaultParams
 	mux := http.NewServeMux()
 	leftCamera := camera.NewStaticCamera("./testdata/L_00001.png")
 	rightCamera := camera.NewStaticCamera("./testdata/R_00001.png")
-	err := AddRoutes(ctx, mux, leftCamera, rightCamera)
+	leftStreamManager := camera.NewStreamManager(leftCamera)
+	rightStreamManager := camera.NewStreamManager(rightCamera)
+	outputCamera := camera.NewOutputCamera(&params, leftStreamManager, rightStreamManager)
+	outputStreamManager := camera.NewStreamManager(outputCamera)
+	err := AddRoutes(ctx, mux, &params, leftStreamManager, rightStreamManager, outputStreamManager)
 	if err != nil {
 		return nil, err
 	}
