@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/conneroisu/steroscopic-hardware/pkg/despair"
+	"github.com/conneroisu/steroscopic-hardware/pkg/logger"
 )
 
 // OutputCamera represents a the camera output of a sad output.
@@ -18,6 +19,7 @@ type OutputCamera struct {
 	OutputCh      <-chan despair.OutputChunk // OutputCh receives output chunks from sad algo.
 	Left          *StreamManager
 	Right         *StreamManager
+	logger        *logger.Logger
 }
 
 var _ Camer = (*OutputCamera)(nil)
@@ -25,8 +27,17 @@ var _ Camer = (*OutputCamera)(nil)
 const defaultNumWorkers = 32
 
 // NewOutputCamera creates a new OutputCamera
-func NewOutputCamera(params *despair.Parameters, left, right *StreamManager) *OutputCamera {
-	oC := &OutputCamera{Left: left, Right: right, Params: params}
+func NewOutputCamera(
+	logger *logger.Logger,
+	params *despair.Parameters,
+	left, right *StreamManager,
+) *OutputCamera {
+	oC := &OutputCamera{
+		Left:   left,
+		Right:  right,
+		Params: params,
+		logger: logger,
+	}
 	// ensure both streams are started
 	left.Start()
 	right.Start()
@@ -37,7 +48,7 @@ func NewOutputCamera(params *despair.Parameters, left, right *StreamManager) *Ou
 	left.Register <- oC.LeftClientCh
 	right.Register <- oC.RightClientCh
 	oC.InputCh, oC.OutputCh = despair.SetupConcurrentSAD(
-		params.BlockSize, params.MaxDisparity, defaultNumWorkers,
+		params, defaultNumWorkers,
 	)
 
 	return oC
@@ -69,6 +80,8 @@ func (o *OutputCamera) Stream(
 }
 
 func (o *OutputCamera) read(_ chan error) <-chan *image.Gray {
+	o.Params.Lock()
+	defer o.Params.Unlock()
 	mkdCh := make(chan *image.Gray, 1)
 	leftImg := <-o.LeftClientCh
 	rightImg := <-o.RightClientCh
@@ -91,7 +104,7 @@ func (o *OutputCamera) read(_ chan error) <-chan *image.Gray {
 	}
 	got := despair.AssembleDisparityMap(o.OutputCh, leftImg.Rect, numChunks)
 	end := time.Now()
-	slog.Debug("Elapsed time", "elapsed", end.Sub(start))
+	o.logger.Debug("Elapsed time", "elapsed", end.Sub(start))
 	mkdCh <- got
 	return mkdCh
 }

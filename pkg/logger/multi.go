@@ -2,9 +2,7 @@ package logger
 
 import (
 	"context"
-	"fmt"
 	"log/slog"
-	"os"
 	"sync"
 )
 
@@ -31,13 +29,11 @@ func (h *MultiHandler) Enabled(ctx context.Context, level slog.Level) bool {
 
 // Handle implements slog.Handler.Handle
 func (h *MultiHandler) Handle(ctx context.Context, r slog.Record) error {
+	var err error
 	for _, handler := range h.handlers {
-		if err := handler.Handle(ctx, r); err != nil {
-			fmt.Fprintf(os.Stderr, "Error handling log record: %v\n", err)
-			return err
-		}
+		err = handler.Handle(ctx, r)
 	}
-	return nil
+	return err
 }
 
 // WithAttrs implements slog.Handler.WithAttrs

@@ -1,3 +1,4 @@
+// Package svg contains SVG templates for the web UI.
 package svg
 
 import (

@@ -18,11 +18,9 @@ templ App(title string, comp templ.Component) {
 		<head>
 			<title>{ title }</title>
 			<script defer src="/static/index.js"></script>
-			<script defer src="/static/ds.js"></script>
-			<script defer src="/static/tailwind.js"></script>
-			<script> tailwind.config = { darkMode: "class", theme: { extend: { colors: { primary: { DEFAULT: "#3b82f6", dark: "#2563eb" } }, }, }, }; </script>
+			<script type="module" src="/static/ds.js"></script>
+			<script type="module" src="/static/tw.js"></script>
 		</head>
-		<style>[x-cloak] { display: none !important; }</style>
 		<body class="bg-gray-900 text-gray-200 min-h-screen">
 			<div data-on-load="@get('/logs')"></div>
 			@header()

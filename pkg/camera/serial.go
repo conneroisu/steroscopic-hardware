@@ -100,6 +100,7 @@ func (sc *SerialCamera) Close() error {
 	return nil
 }
 
+// ID returns the ID of the camera.
 func (sc *SerialCamera) ID() string {
 	return sc.portID
 }

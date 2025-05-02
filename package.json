@@ -17,6 +17,7 @@
     "@types/alpinejs__collapse": "^3.13.4",
     "@types/alpinejs__persist": "^3.13.4",
     "alpinejs": "^3.14.9",
-    "htmx.org": "2.0.4"
+    "htmx.org": "2.0.4",
+    "tailwindcss": "^4.1.5"
   }
 }

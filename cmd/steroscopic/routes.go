@@ -8,6 +8,7 @@ import (
 	"github.com/conneroisu/steroscopic-hardware/pkg/camera"
 	"github.com/conneroisu/steroscopic-hardware/pkg/despair"
 	"github.com/conneroisu/steroscopic-hardware/pkg/handlers"
+	"github.com/conneroisu/steroscopic-hardware/pkg/logger"
 )
 
 //go:embed static/*
@@ -16,12 +17,13 @@ var static embed.FS
 // AddRoutes adds the routes/handlers to the mux.
 func AddRoutes(
 	mux *http.ServeMux,
+	logger *logger.Logger,
 	params *despair.Parameters,
 	leftStream, rightStream, outputStream *camera.StreamManager,
 ) error {
-	// Add static files
-	mux.Handle("GET /",
-		http.FileServer(http.FS(static)),
+	mux.Handle(
+		"GET /",
+		http.FileServer(http.FS(static)), // adds `/static/*` to path
 	)
 
 	mux.Handle("GET /{$}", handlers.MorphableHandler(
@@ -34,8 +36,8 @@ func AddRoutes(
 	))
 
 	mux.HandleFunc(
-		"GET /update-params",
-		handlers.Make(handlers.ParametersHandler(params)),
+		"POST /update-params",
+		handlers.Make(handlers.ParametersHandler(logger, params)),
 	)
 	mux.HandleFunc(
 		"GET /stream/left", // Left Camera
@@ -51,10 +53,10 @@ func AddRoutes(
 	)
 	mux.HandleFunc(
 		"POST /manual-calc-depth-map",
-		handlers.Make(handlers.ManualCalcDepthMapHandler()),
+		handlers.Make(handlers.ManualCalcDepthMapHandler(logger)),
 	)
 	mux.HandleFunc(
 		"GET /logs",
-		handlers.Make(handlers.LogHandler()))
+		handlers.Make(handlers.LogHandler(logger)))
 	return nil
 }

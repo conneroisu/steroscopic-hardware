@@ -2,17 +2,19 @@ package handlers
 
 import (
 	"fmt"
-	"log/slog"
 	"net/http"
 	"strconv"
 
 	"github.com/conneroisu/steroscopic-hardware/pkg/despair"
+	"github.com/conneroisu/steroscopic-hardware/pkg/logger"
 )
 
 // ParametersHandler handles client requests to change the parameters of the
 // desparity map generator.
-func ParametersHandler(params *despair.Parameters) APIFn {
+func ParametersHandler(logger *logger.Logger, params *despair.Parameters) APIFn {
 	return func(_ http.ResponseWriter, r *http.Request) error {
+		params.Lock()
+		defer params.Unlock()
 		// Parse form data
 		if err := r.ParseForm(); err != nil {
 			return fmt.Errorf("failed to parse form data: %w", err)
@@ -34,7 +36,7 @@ func ParametersHandler(params *despair.Parameters) APIFn {
 		}
 		params.BlockSize = blockSize
 		params.MaxDisparity = maxDisparity
-		slog.Info(
+		logger.Info(
 			"received parameters:", "blocksize", params.BlockSize, "maxdisparity", params.MaxDisparity)
 		return nil
 	}

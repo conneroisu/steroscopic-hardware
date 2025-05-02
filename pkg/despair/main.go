@@ -26,7 +26,7 @@ type OutputChunk struct {
 //
 // If the input channel is closed, the processing pipeline will stop.
 func SetupConcurrentSAD(
-	blockSize, maxDisparity int,
+	params *Parameters,
 	numWorkers int, // Allow configurable worker count
 ) (chan<- InputChunk, <-chan OutputChunk) {
 	if numWorkers <= 0 {
@@ -45,32 +45,33 @@ func SetupConcurrentSAD(
 
 			// Process chunks until the input channel is closed
 			for chunk := range inputChan {
-				disparityData := make([]uint8, chunk.Region.Dx()*chunk.Region.Dy())
+				data := make([]uint8,
+					chunk.Region.Dx()*chunk.Region.Dy(),
+				)
 
 				// Process each row in the region
 				for y := range chunk.Region.Dy() { // y := 0; y < height; y++
 					globalY := chunk.Region.Min.Y + y
 					for x := range chunk.Region.Dx() { // x := 0; x < width; x++
-						globalX := chunk.Region.Min.X + x
-
 						// Calculate disparity for this pixel
 						minSAD := math.MaxInt32
 						bestDisparity := 0
 
-						for d := 0; d <= maxDisparity; d++ {
+						for d := 0; d <= params.MaxDisparity; d++ {
 							// Skip if we would go beyond the left edge
-							if globalX-d < chunk.Left.Rect.Min.X {
+							if (chunk.Region.Min.X+x)-d <
+								chunk.Left.Rect.Min.X {
 								continue
 							}
 
 							sad := sumAbsoluteDifferences(
 								chunk.Left,
 								chunk.Right,
-								globalX,
+								chunk.Region.Min.X+x,
 								globalY,
-								globalX-d,
+								chunk.Region.Min.X+x-d,
 								globalY,
-								blockSize,
+								params.BlockSize,
 							)
 
 							if sad < minSAD {
@@ -85,13 +86,15 @@ func SetupConcurrentSAD(
 						}
 
 						// Store the disparity value
-						disparityData[y*chunk.Region.Dx()+x] = uint8((bestDisparity * 255) / maxDisparity)
+						data[y*chunk.Region.Dx()+x] = uint8(
+							(bestDisparity * 255) / params.MaxDisparity,
+						)
 					}
 				}
 
 				// Send the processed chunk to the output channel
 				outputChan <- OutputChunk{
-					DisparityData: disparityData,
+					DisparityData: data,
 					Region:        chunk.Region,
 				}
 			}
@@ -108,7 +111,9 @@ func SetupConcurrentSAD(
 }
 
 // RunSad is a convenience function that sets up the pipeline,
-// feeds the images, and assembles the disparity map
+// feeds the images, and assembles the disparity map.
+//
+// This is not used in the web UI, but is useful for testing.
 func RunSad(
 	left, right *image.Gray,
 	blockSize, maxDisparity int,
@@ -118,22 +123,28 @@ func RunSad(
 	numChunks := numWorkers * 4
 
 	// Set up the processing pipeline
-	inputChan, outputChan := SetupConcurrentSAD(blockSize, maxDisparity, numWorkers)
+	inputChan, outputChan := SetupConcurrentSAD(&Parameters{
+		BlockSize:    blockSize,
+		MaxDisparity: maxDisparity,
+	}, numWorkers)
 
 	// Split the images into chunks
-	var dimensions = left.Rect
+	var dims = left.Rect
 	chunks := make([]image.Rectangle, 0, numChunks)
-	totalPixels := dimensions.Dx() * dimensions.Dy()
-	pixelsPerChunk := totalPixels / numChunks
-	chunkWidth := int(math.Sqrt(float64(pixelsPerChunk)))
-	horChunks := max(1, dimensions.Dx()/chunkWidth)
+
+	chunkWidth := int(
+		math.Sqrt(
+			float64((dims.Dx() * dims.Dy()) / numChunks),
+		),
+	)
+	horChunks := max(1, dims.Dx()/chunkWidth)
 	verChunks := max(1, numChunks/horChunks)
-	chunkWidth = dimensions.Dx() / horChunks
-	chunkHeight := dimensions.Dy() / verChunks
-	for startY := dimensions.Min.Y; startY < dimensions.Max.Y; startY += chunkHeight {
-		endY := min(startY+chunkHeight, dimensions.Max.Y)
-		for startX := dimensions.Min.X; startX < dimensions.Max.X; startX += chunkWidth {
-			endX := min(startX+chunkWidth, dimensions.Max.X)
+	chunkWidth = dims.Dx() / horChunks
+	chunkHeight := dims.Dy() / verChunks
+	for startY := dims.Min.Y; startY < dims.Max.Y; startY += chunkHeight {
+		endY := min(startY+chunkHeight, dims.Max.Y)
+		for startX := dims.Min.X; startX < dims.Max.X; startX += chunkWidth {
+			endX := min(startX+chunkWidth, dims.Max.X)
 			chunks = append(chunks, image.Rect(startX, startY, endX, endY))
 		}
 	}

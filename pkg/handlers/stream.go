@@ -20,7 +20,7 @@ func StreamHandlerFn(manager *camera.StreamManager) APIFn {
 	// Make sure manager is running
 	manager.Start()
 	var jpegPool = sync.Pool{
-		New: func() interface{} {
+		New: func() any {
 			return &jpeg.Options{Quality: 75} // Lower quality for faster encoding
 		},
 	}
@@ -108,26 +108,27 @@ func StreamHandlerFn(manager *camera.StreamManager) APIFn {
 }
 
 // LogHandler returns a handler for streaming logs to the browser console
-func LogHandler() APIFn {
-	ch := logger.Default()
+func LogHandler(
+	logger *logger.Logger,
+) APIFn {
+	logCh := logger.Channel()
 	return func(w http.ResponseWriter, r *http.Request) error {
+		w.Header().Set("Cache-Control", "no-cache")
+		w.Header().Set("Connection", "close")
+		w.Header().Set("Pragma", "no-cache")
 		sse := datastar.NewSSE(w, r)
 		for {
 			select {
 			case <-r.Context().Done():
 				return nil
-			case log := <-ch:
+			case log := <-logCh:
 				println("logging using slog")
-				// err := sse.ConsoleLogf("%s %s - %s", log.Level, log.Time.Format(time.RFC3339), log.Message)
-				// if err != nil {
-				// 	slog.Error("failed to log to browser console", "err", err.Error())
-				// }
-				err := sse.ConsoleError(fmt.Errorf(
+				err := sse.ConsoleLog(fmt.Sprintf(
 					"%s %s - %s",
 					log.Level,
 					log.Time.Format(time.RFC3339),
 					log.Message,
-				), datastar.WithExecuteScriptAutoRemove(false))
+				), datastar.WithExecuteScriptAutoRemove(true))
 				if err != nil {
 					return err
 				}

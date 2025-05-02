@@ -54,7 +54,7 @@ func App(title string, comp templ.Component) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</title><script defer src=\"/static/index.js\"></script><script defer src=\"/static/ds.js\"></script><script defer src=\"/static/tailwind.js\"></script><script> tailwind.config = { darkMode: \"class\", theme: { extend: { colors: { primary: { DEFAULT: \"#3b82f6\", dark: \"#2563eb\" } }, }, }, }; </script></head><style>[x-cloak] { display: none !important; }</style><body class=\"bg-gray-900 text-gray-200 min-h-screen\"><div data-on-load=\"@get(&#39;/logs&#39;)\"></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</title><script defer src=\"/static/index.js\"></script><script type=\"module\" src=\"/static/ds.js\"></script><script type=\"module\" src=\"/static/tw.js\"></script></head><body class=\"bg-gray-900 text-gray-200 min-h-screen\"><div data-on-load=\"@get(&#39;/logs&#39;)\"></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -180,7 +180,7 @@ func statusContent() templ.Component {
 		var templ_7745c5c3_Var6 string
 		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(handlers.TargetStatusContent.ID)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/steroscopic/components/app.templ`, Line: 123, Col: 38}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/steroscopic/components/app.templ`, Line: 121, Col: 38}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 		if templ_7745c5c3_Err != nil {
