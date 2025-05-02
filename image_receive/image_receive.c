@@ -34,7 +34,7 @@ int main()
 
     struct termios tty;
 
-    const char PORT_NAME[] = "/dev/ttyUSB0";
+    const char PORT_NAME[] = "/dev/ttyS22";
 
     // Open the port
     int port = open_port(PORT_NAME);
