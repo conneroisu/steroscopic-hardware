@@ -147,7 +147,6 @@ void camera_loop(camera_config_t *config)
 			for(int i = 0; i < (IMAGE_WIDTH * IMAGE_HEIGHT); i++)
 			{
 				outbyte((char) (snapshot[i] & 0xFF));
-				outbyte((char) ((snapshot[i] & 0xFF00) >> 8));
 			}
 		}
 		else if(!opcode)

@@ -30,7 +30,7 @@ int open_port(const char* port_name)
 int main()
 {
 
-    uint16_t* image = malloc(IMAGE_HEIGHT * IMAGE_WIDTH * sizeof(uint16_t));
+    uint8_t* image = calloc(IMAGE_HEIGHT * IMAGE_WIDTH, sizeof(uint8_t));
 
     struct termios tty;
 
@@ -53,9 +53,39 @@ int main()
         return status;
     }
 
-    // Disable echo
-    tty.c_lflag &= ~ECHO;
+    // Setup UART config.
+    tty.c_cflag &= ~PARENB;
+    tty.c_cflag &= ~CSTOPB;
+    tty.c_cflag &= ~CSIZE;
+    tty.c_cflag |= CS8;
+    tty.c_cflag &= ~CRTSCTS;
+    tty.c_cflag |= CREAD | CLOCAL;
 
+    tty.c_lflag &= ~ICANON;
+    tty.c_lflag &= ~ECHO;
+    tty.c_lflag &= ~ISIG;
+
+    tty.c_iflag |= ~(IXON | IXOFF | IXANY);
+    tty.c_iflag &= ~(IGNBRK | BRKINT | PARMRK | ISTRIP | INLCR | IGNCR | ICRNL);
+
+    tty.c_oflag &= ~OPOST;
+    tty.c_oflag &= ~ONLCR;
+
+    // Always block
+    tty.c_cc[VTIME] = 0;
+    tty.c_cc[VMIN] = 1;
+
+    cfsetspeed(&tty, B115200);
+
+    // Apply settings.
+    status = tcsetattr(port, TCSANOW, &tty);
+    if(status < 0)
+    {
+        perror("Could not apply the tty config!");
+        return status;
+    }
+
+    printf("Getting picture!\n");
     char write_buf = 1;
 
     // Request an image
@@ -67,15 +97,49 @@ int main()
 
     if(read_byte == 1)
     {
+        printf("Got reply from MP-2 hardware!\n");
         // Each sensor reading is 16 bits.
        for(int i = 0; i < (IMAGE_WIDTH * IMAGE_HEIGHT); ++i)
        {
             read(port, &read_byte, 1);
-            image[i] = (uint16_t) read_byte;
-            read(port, &read_byte, 1);
-            image[i] |= (((uint16_t) read_byte) << 8);
+            image[i] = read_byte;
        }
+
+        FILE* output = fopen("image.bin", "w");
+
+        if(output == NULL)
+        {
+            perror("Could not open output file to write image to!");
+            return errno;
+        }
+
+        fwrite(image, 1, (IMAGE_WIDTH * IMAGE_HEIGHT), output);
+        
+        status = fclose(output);
+
+        if(status < 0)
+        {
+            perror("Could not close output file!");
+            return status;
+        }
     }
+    else
+    {
+        printf("Got bad response! Actual value: %d\n", read_byte);
+    }
+
+    // Close the port
+    status = close(port);
+
+    if(status < 0)
+    {
+        char str_buf[256];
+        sprintf(str_buf, "ERROR: Failed to close port %s", PORT_NAME);
+        perror(str_buf);
+        return status;
+    }
+
+    printf("Finished getting picture!!\n");
 
     return 0;
 }
