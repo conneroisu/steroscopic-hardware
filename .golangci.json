@@ -2,11 +2,7 @@
   "formatters": {
     "exclusions": {
       "generated": "lax",
-      "paths": [
-        "third_party$",
-        "builtin$",
-        "examples$"
-      ]
+      "paths": ["third_party$", "builtin$", "examples$"]
     }
   },
   "linters": {
@@ -29,12 +25,7 @@
     ],
     "exclusions": {
       "generated": "lax",
-      "paths": [
-        "(^|/)vendor($|/)",
-        "third_party$",
-        "builtin$",
-        "examples$"
-      ],
+      "paths": ["(^|/)vendor($|/)", "third_party$", "builtin$", "examples$"],
       "presets": [
         "comments",
         "common-false-positives",
@@ -47,18 +38,13 @@
         "enable-all-rules": false,
         "rules": [
           {
-            "exclude": [
-              "vendor/"
-            ],
+            "exclude": ["vendor/"],
             "name": "blank-imports"
           }
         ]
       },
       "staticcheck": {
-        "checks": [
-          "-SA1019",
-          "all"
-        ]
+        "checks": ["-SA1019", "all"]
       }
     }
   },
@@ -66,11 +52,7 @@
     "default": "error",
     "rules": [
       {
-        "linters": [
-          "goimports",
-          "intrange",
-          "usestdlibvars"
-        ],
+        "linters": ["goimports", "intrange", "usestdlibvars"],
         "severity": "info"
       }
     ]

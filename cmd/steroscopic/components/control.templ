@@ -27,6 +27,11 @@ templ Control(
 						step="2"
 						value={ strconv.Itoa(blockSize) }
 						class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer mx-4"
+						hx-post="/update-params"
+						hx-trigger="input changed delay:300ms"
+						hx-vals="js:{blockSize: document.getElementById('block-size-slider').value, maxDisparity: document.getElementById('max-disparity-slider').value}"
+						hx-swap="none"
+						oninput="document.getElementById('block-size-input').value = this.value"
 					/>
 					<input
 						type="number"
@@ -36,6 +41,11 @@ templ Control(
 						step="2"
 						value={ strconv.Itoa(blockSize) }
 						class="w-16 bg-gray-700 text-white rounded p-1 text-center"
+						hx-post="/update-params"
+						hx-trigger="input changed delay:300ms"
+						hx-vals="js:{blockSize: document.getElementById('block-size-input').value, maxDisparity: document.getElementById('max-disparity-slider').value}"
+						hx-swap="none"
+						oninput="document.getElementById('block-size-slider').value = this.value"
 					/>
 					<div class="relative ml-2 group">
 						<div
@@ -63,6 +73,11 @@ templ Control(
 						step="16"
 						value={ strconv.Itoa(maxDisparity) }
 						class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer mx-4"
+						hx-post="/update-params"
+						hx-trigger="input changed delay:300ms"
+						hx-vals="js:{blockSize: document.getElementById('block-size-slider').value, maxDisparity: document.getElementById('max-disparity-slider').value}"
+						hx-swap="none"
+						oninput="document.getElementById('max-disparity-input').value = this.value"
 					/>
 					<input
 						type="number"
@@ -72,6 +87,11 @@ templ Control(
 						step="16"
 						value={ strconv.Itoa(maxDisparity) }
 						class="w-16 bg-gray-700 text-white rounded p-1 text-center"
+						hx-post="/update-params"
+						hx-trigger="input changed delay:300ms"
+						hx-vals="js:{blockSize: document.getElementById('block-size-input').value, maxDisparity: document.getElementById('max-disparity-input').value}"
+						hx-swap="none"
+						oninput="document.getElementById('max-disparity-slider').value = this.value"
 					/>
 					<div class="relative ml-2 group">
 						<div

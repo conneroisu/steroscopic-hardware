@@ -17,13 +17,10 @@ templ App(title string, comp templ.Component) {
 	<html>
 		<head>
 			<title>{ title }</title>
-			<script src="https://cdn.tailwindcss.com"></script>
-			<script src="https://unpkg.com/htmx.org@2.0.4" integrity="sha384-HGfztofotfshcF7+8n44JQL2oJmowVChPTg48S+jvZoztPfvwD79OC/LTtG6dMp+" crossorigin="anonymous"></script>
+			<script defer src="/static/index.js"></script>
+			<script defer src="/static/ds.js"></script>
+			<script defer src="/static/tailwind.js"></script>
 			<script> tailwind.config = { darkMode: "class", theme: { extend: { colors: { primary: { DEFAULT: "#3b82f6", dark: "#2563eb" } }, }, }, }; </script>
-			<script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/cdn.min.js"></script>
-			<script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/persist@3.x.x/dist/cdn.min.js"></script>
-			<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-			<script type="module" src="https://cdn.jsdelivr.net/gh/starfederation/datastar@v1.0.0-beta.11/bundles/datastar.js"></script>
 		</head>
 		<style>[x-cloak] { display: none !important; }</style>
 		<body class="bg-gray-900 text-gray-200 min-h-screen">
@@ -73,7 +70,7 @@ templ header() {
 						hx-push-url="true"
 						class="px-4 py-2 rounded-lg transition"
 						@click="index = true"
-						:class="{ 
+						:class="{
 							'bg-blue-700 hover:bg-gray-600': index,
 							'bg-gray-800 hover:bg-blue-300': !index
 						}"

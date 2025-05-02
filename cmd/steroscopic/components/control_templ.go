@@ -47,46 +47,46 @@ func Control(
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\" class=\"w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer mx-4\"> <input type=\"number\" id=\"block-size-input\" min=\"3\" max=\"31\" step=\"2\" value=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\" class=\"w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer mx-4\" hx-post=\"/update-params\" hx-trigger=\"input changed delay:300ms\" hx-vals=\"js:{blockSize: document.getElementById(&#39;block-size-slider&#39;).value, maxDisparity: document.getElementById(&#39;max-disparity-slider&#39;).value}\" hx-swap=\"none\" oninput=\"document.getElementById(&#39;block-size-input&#39;).value = this.value\"> <input type=\"number\" id=\"block-size-input\" min=\"3\" max=\"31\" step=\"2\" value=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var3 string
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(blockSize))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/steroscopic/components/control.templ`, Line: 37, Col: 37}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/steroscopic/components/control.templ`, Line: 42, Col: 37}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "\" class=\"w-16 bg-gray-700 text-white rounded p-1 text-center\"><div class=\"relative ml-2 group\"><div class=\"w-5 h-5 bg-gray-600 rounded-full flex items-center justify-center text-xs text-white cursor-help\">?</div><div class=\"absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-48 bg-gray-700 text-white text-xs p-2 rounded opacity-0 group-hover:opacity-100 transition pointer-events-none\">Size of matching block used in SAD algorithm. Must be an odd number (3-31).</div></div></div></div><div class=\"space-y-2\"><div class=\"flex items-center\"><label for=\"max-disparity-slider\" class=\"w-32 font-medium\">Max Disparity:</label> <input type=\"range\" id=\"max-disparity-slider\" min=\"16\" max=\"256\" step=\"16\" value=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "\" class=\"w-16 bg-gray-700 text-white rounded p-1 text-center\" hx-post=\"/update-params\" hx-trigger=\"input changed delay:300ms\" hx-vals=\"js:{blockSize: document.getElementById(&#39;block-size-input&#39;).value, maxDisparity: document.getElementById(&#39;max-disparity-slider&#39;).value}\" hx-swap=\"none\" oninput=\"document.getElementById(&#39;block-size-slider&#39;).value = this.value\"><div class=\"relative ml-2 group\"><div class=\"w-5 h-5 bg-gray-600 rounded-full flex items-center justify-center text-xs text-white cursor-help\">?</div><div class=\"absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-48 bg-gray-700 text-white text-xs p-2 rounded opacity-0 group-hover:opacity-100 transition pointer-events-none\">Size of matching block used in SAD algorithm. Must be an odd number (3-31).</div></div></div></div><div class=\"space-y-2\"><div class=\"flex items-center\"><label for=\"max-disparity-slider\" class=\"w-32 font-medium\">Max Disparity:</label> <input type=\"range\" id=\"max-disparity-slider\" min=\"16\" max=\"256\" step=\"16\" value=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(maxDisparity))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/steroscopic/components/control.templ`, Line: 64, Col: 40}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/steroscopic/components/control.templ`, Line: 74, Col: 40}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "\" class=\"w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer mx-4\"> <input type=\"number\" id=\"max-disparity-input\" min=\"16\" max=\"256\" step=\"16\" value=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "\" class=\"w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer mx-4\" hx-post=\"/update-params\" hx-trigger=\"input changed delay:300ms\" hx-vals=\"js:{blockSize: document.getElementById(&#39;block-size-slider&#39;).value, maxDisparity: document.getElementById(&#39;max-disparity-slider&#39;).value}\" hx-swap=\"none\" oninput=\"document.getElementById(&#39;max-disparity-input&#39;).value = this.value\"> <input type=\"number\" id=\"max-disparity-input\" min=\"16\" max=\"256\" step=\"16\" value=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var5 string
 		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(maxDisparity))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/steroscopic/components/control.templ`, Line: 73, Col: 40}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/steroscopic/components/control.templ`, Line: 88, Col: 40}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "\" class=\"w-16 bg-gray-700 text-white rounded p-1 text-center\"><div class=\"relative ml-2 group\"><div class=\"w-5 h-5 bg-gray-600 rounded-full flex items-center justify-center text-xs text-white cursor-help\">?</div><div class=\"absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-48 bg-gray-700 text-white text-xs p-2 rounded opacity-0 group-hover:opacity-100 transition pointer-events-none\">Maximum pixel displacement between left and right images (16-256).</div></div></div></div></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "\" class=\"w-16 bg-gray-700 text-white rounded p-1 text-center\" hx-post=\"/update-params\" hx-trigger=\"input changed delay:300ms\" hx-vals=\"js:{blockSize: document.getElementById(&#39;block-size-input&#39;).value, maxDisparity: document.getElementById(&#39;max-disparity-input&#39;).value}\" hx-swap=\"none\" oninput=\"document.getElementById(&#39;max-disparity-slider&#39;).value = this.value\"><div class=\"relative ml-2 group\"><div class=\"w-5 h-5 bg-gray-600 rounded-full flex items-center justify-center text-xs text-white cursor-help\">?</div><div class=\"absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-48 bg-gray-700 text-white text-xs p-2 rounded opacity-0 group-hover:opacity-100 transition pointer-events-none\">Maximum pixel displacement between left and right images (16-256).</div></div></div></div></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

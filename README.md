@@ -54,7 +54,6 @@ This will allow direnv to automatically load the environment variables and devel
 
 #### Deterministic Simulation Testing
 
-
 ### Hardware Development
 
 - [ ] Generic params for chuck size.

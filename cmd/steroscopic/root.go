@@ -37,33 +37,24 @@ var (
 
 // NewServer creates a new web-ui server
 func NewServer(
-	ctx context.Context,
+	leftStream, rightStream, outputStream *camera.StreamManager,
+	params *despair.Parameters,
 ) (http.Handler, error) {
-	var params = defaultParams
 	mux := http.NewServeMux()
-	leftCamera := camera.NewStaticCamera("./testdata/L_00001.png")
-	rightCamera := camera.NewStaticCamera("./testdata/R_00001.png")
-	leftStreamManager := camera.NewStreamManager(leftCamera)
-	rightStreamManager := camera.NewStreamManager(rightCamera)
-	outputCamera := camera.NewOutputCamera(&params, leftStreamManager, rightStreamManager)
-	outputStreamManager := camera.NewStreamManager(outputCamera)
-	err := AddRoutes(ctx, mux, &params, leftStreamManager, rightStreamManager, outputStreamManager)
+	err := AddRoutes(mux, params, leftStream, rightStream, outputStream)
 	if err != nil {
 		return nil, err
 	}
-	slogLogHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		slog.Info(
-			"reqwuest",
-			slog.String("method", r.Method),
-			slog.String("url", r.URL.String()),
-		)
+	slogLogHandler := http.HandlerFunc(
+		func(w http.ResponseWriter, r *http.Request) {
+			slog.Info(
+				"reqwuest",
+				slog.String("method", r.Method),
+				slog.String("url", r.URL.String()),
+			)
 
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
-
-		mux.ServeHTTP(w, r)
-	})
+			mux.ServeHTTP(w, r)
+		})
 	var handler http.Handler = slogLogHandler
 	return handler, nil
 }
@@ -88,7 +79,24 @@ func Run(
 	)
 	defer cancel()
 
-	handler, err := NewServer(ctx)
+	var params = defaultParams
+
+	leftCamera := camera.NewStaticCamera("./testdata/L_00001.png")
+	rightCamera := camera.NewStaticCamera("./testdata/R_00001.png")
+	leftStreamManager := camera.NewStreamManager(leftCamera)
+	rightStreamManager := camera.NewStreamManager(rightCamera)
+	outputCamera := camera.NewOutputCamera(
+		&params,
+		leftStreamManager,
+		rightStreamManager,
+	)
+	outputStreamManager := camera.NewStreamManager(outputCamera)
+	handler, err := NewServer(
+		leftStreamManager,
+		rightStreamManager,
+		outputStreamManager,
+		&params,
+	)
 	if err != nil {
 		return err
 	}

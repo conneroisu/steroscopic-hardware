@@ -31,6 +31,18 @@
           exec = "$EDITOR $REPO_ROOT/go.mod";
           description = "Edit go.mod";
         };
+        generate-js = {
+          exec = ''
+            ${pkgs.bun}/bin/bun build \
+                $REPO_ROOT/index.js \
+                --minify \
+                --minify-syntax \
+                --minify-whitespace  \
+                --minify-identifiers \
+                --outdir $REPO_ROOT/cmd/steroscopic/static/
+          '';
+          description = "Generate JS files";
+        };
         clean = {
           exec = ''${pkgs.git}/bin/git clean -fdx'';
           description = "Clean Project";

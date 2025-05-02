@@ -2,7 +2,6 @@ package logger
 
 import (
 	"context"
-	"fmt"
 	"log/slog"
 	"os"
 	"sync"
@@ -139,20 +138,4 @@ func (h *ChannelHandler) SetLevel(level slog.Level) {
 	h.mu.Lock()
 	defer h.mu.Unlock()
 	h.level = level
-}
-
-// ProcessLogs is a function that processes log entries from the channel
-func ProcessLogs(ctx context.Context, logChan chan LogEntry) {
-	for {
-		select {
-		case <-ctx.Done():
-			return
-		case entry := <-logChan:
-			// Process the log entry (example: print it with additional formatting)
-			fmt.Printf("PROCESSED: [%s] %s - %s\n", entry.Level, entry.Time.Format(time.RFC3339), entry.Message)
-			for _, attr := range entry.Attrs {
-				fmt.Printf("  %s: %v\n", attr.Key, attr.Value)
-			}
-		}
-	}
 }

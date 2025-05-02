@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"fmt"
+	"log/slog"
 	"net/http"
 )
 
@@ -13,6 +14,7 @@ func Make(fn APIFn) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		err := fn(w, r)
 		if err != nil {
+			slog.Error(fmt.Sprintf("API error: %s", err.Error()))
 			http.Error(
 				w,
 				fmt.Sprintf(
