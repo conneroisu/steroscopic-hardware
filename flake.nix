@@ -159,6 +159,7 @@
             svgcleaner
             sqlite-web
             harper
+            htmx-lsp
             openssl.dev
           ]
           ++ (with pkgs;

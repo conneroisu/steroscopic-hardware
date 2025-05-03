@@ -51,9 +51,3 @@ direnv allow
 ```
 
 This will allow direnv to automatically load the environment variables and development dependencies.
-
-#### Deterministic Simulation Testing
-
-### Hardware Development
-
-- [ ] Generic params for chuck size.
