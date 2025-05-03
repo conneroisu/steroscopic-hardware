@@ -1,4 +1,7 @@
 // Package main contains an example of how to use the lzma package.
+//
+// It is a command line tool that can be used to compress and decompress
+// files.
 package main
 
 import (
