@@ -3,6 +3,7 @@
 # Script to generate test files for LZMA testing
 # This creates a variety of file sizes and contents and compresses them with the
 # reference LZMA implementation (xz-utils)
+# Runs on Linux and macOS
 
 set -e
 
