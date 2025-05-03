@@ -18,9 +18,9 @@ const (
 // len(probPrices) = 512
 var probPrices = make([]uint32, kBitModelTotal>>kNumMoveReducingBits)
 
-// Reader is the actual read interface needed by [lzma.NewDecoder].
+// Reader is the actual read interface needed by [NewDecoder].
 //
-// If the passed in io.Reader does not also have ReadByte, the [lzma.NewDecoder]
+// If the passed in io.Reader does not also have ReadByte, the [NewDecoder]
 // will introduce its own buffering.
 type Reader interface {
 	io.Reader
@@ -127,10 +127,10 @@ func initBitModels(length uint32) (probs []uint16) {
 	return
 }
 
-// Writer is the actual write interface needed by [lzma.NewEncoder].
+// Writer is the actual write interface needed by [NewEncoder].
 //
 // If the passed in [io.Writer] does not also have WriteByte and Flush, the
-// [lzma.NewEncoder] function will wrap it into a bufio.Writer.
+// [NewEncoder] function will wrap it into a bufio.Writer.
 type Writer interface {
 	io.Writer
 	Flush() error
