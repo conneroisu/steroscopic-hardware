@@ -6,3 +6,5 @@
 // Allowing for the logging of console messages both to the console
 // and to the browser.
 package logger
+
+//go:generate gomarkdoc -o README.md -e .
