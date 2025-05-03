@@ -201,7 +201,10 @@ func main() {
 			if stdin {
 				inFile = os.Stdin
 				defer inFile.Close()
-				z = lzma.NewWriterLevel(pw, *level)
+				z, err = lzma.NewWriterLevel(pw, *level)
+				if err != nil {
+					fmt.Fprintf(os.Stderr, "error: %s\n", err.Error())
+				}
 				defer z.Close()
 			} else {
 				var f os.FileInfo
@@ -214,7 +217,10 @@ func main() {
 				if err != nil {
 					log.Fatal(err.Error())
 				}
-				z = lzma.NewWriterSizeLevel(pw, f.Size(), *level)
+				z, err = lzma.NewWriterSizeLevel(pw, f.Size(), *level)
+				if err != nil {
+					fmt.Fprintf(os.Stderr, "error: %s\n", err.Error())
+				}
 				defer z.Close()
 			}
 

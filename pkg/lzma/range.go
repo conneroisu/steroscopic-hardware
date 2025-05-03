@@ -15,11 +15,13 @@ const (
 	kNumBitPriceShiftBits = 6
 )
 
-var probPrices = make([]uint32, kBitModelTotal>>kNumMoveReducingBits) // len(probPrices) = 512
-// Reader is the actual read interface needed by NewDecoder.
+// len(probPrices) = 512
+var probPrices = make([]uint32, kBitModelTotal>>kNumMoveReducingBits)
+
+// Reader is the actual read interface needed by [lzma.NewDecoder].
 //
-// If the passed in io.Reader does not also have ReadByte, the NewDecoder will
-// introduce its own buffering.
+// If the passed in io.Reader does not also have ReadByte, the [lzma.NewDecoder]
+// will introduce its own buffering.
 type Reader interface {
 	io.Reader
 	ReadByte() (c byte, err error)
@@ -38,7 +40,7 @@ func makeReader(r io.Reader) Reader {
 	return bufio.NewReader(r)
 }
 
-func newRangeDecoder(r io.Reader) *rangeDecoder {
+func newRangeDecoder(r io.Reader) (*rangeDecoder, error) {
 	rd := &rangeDecoder{
 		r:      makeReader(r),
 		rrange: 0xFFFFFFFF,
@@ -47,42 +49,52 @@ func newRangeDecoder(r io.Reader) *rangeDecoder {
 	buf := make([]byte, 5)
 	_, err := io.ReadFull(rd.r, buf)
 	if err != nil {
-		throw(err)
+		return nil, err
 	}
 	for i := range buf {
 		rd.code = rd.code<<8 | uint32(buf[i])
 	}
-	return rd
+	return rd, nil
 }
 
-func (rd *rangeDecoder) decodeDirectBits(numTotalBits uint32) (res uint32) {
+func (rd *rangeDecoder) decodeDirectBits(numTotalBits uint32) (uint32, error) {
+	var (
+		c   byte
+		res uint32
+		err error
+	)
+
 	for i := numTotalBits; i != 0; i-- {
 		rd.rrange >>= 1
 		t := (rd.code - rd.rrange) >> 31
 		rd.code -= rd.rrange & (t - 1)
 		res = res<<1 | (1 - t)
 		if rd.rrange < kTopValue {
-			c, err := rd.r.ReadByte()
+			c, err = rd.r.ReadByte()
 			if err != nil {
-				throw(err)
+				return 0, err
 			}
 			rd.code = rd.code<<8 | uint32(c)
 			rd.rrange <<= 8
 		}
 	}
-	return
+	return res, nil
 }
 
-func (rd *rangeDecoder) decodeBit(probs []uint16, index uint32) (res uint32) {
+func (rd *rangeDecoder) decodeBit(
+	probs []uint16,
+	index uint32,
+) (res uint32, err error) {
+	var b byte
 	prob := probs[index]
 	newBound := (rd.rrange >> kNumBitModelTotalBits) * uint32(prob)
 	if rd.code < newBound {
 		rd.rrange = newBound
 		probs[index] = prob + (kBitModelTotal-prob)>>kNumMoveBits
 		if rd.rrange < kTopValue {
-			b, err := rd.r.ReadByte()
+			b, err = rd.r.ReadByte()
 			if err != nil {
-				throw(err)
+				return
 			}
 			rd.code = rd.code<<8 | uint32(b)
 			rd.rrange <<= 8
@@ -93,9 +105,9 @@ func (rd *rangeDecoder) decodeBit(probs []uint16, index uint32) (res uint32) {
 		rd.code -= newBound
 		probs[index] = prob - prob>>kNumMoveBits
 		if rd.rrange < kTopValue {
-			b, err := rd.r.ReadByte()
+			b, err = rd.r.ReadByte()
 			if err != nil {
-				throw(err)
+				return
 			}
 			rd.code = rd.code<<8 | uint32(b)
 			rd.rrange <<= 8
@@ -115,10 +127,10 @@ func initBitModels(length uint32) (probs []uint16) {
 	return
 }
 
-// Writer is the actual write interface needed by NewEncoder.
+// Writer is the actual write interface needed by [lzma.NewEncoder].
 //
-// If the passed in io.Writer does not also have WriteByte and Flush, the
-// NewEncoder fn will wrap it into an bufio.Writer.
+// If the passed in [io.Writer] does not also have WriteByte and Flush, the
+// [lzma.NewEncoder] function will wrap it into a bufio.Writer.
 type Writer interface {
 	io.Writer
 	Flush() error
@@ -152,26 +164,32 @@ func newRangeEncoder(w io.Writer) *rangeEncoder {
 	}
 }
 
-func (re *rangeEncoder) flush() {
+func (re *rangeEncoder) flush() error {
+	var err error
 	for range 5 {
-		re.shiftLow()
+		err = re.shiftLow()
+		if err != nil {
+			return err
+		}
 	}
-	err := re.w.Flush()
+	err = re.w.Flush()
 	if err != nil {
-		throw(err)
+		return err
 	}
+	return nil
 }
 
-func (re *rangeEncoder) shiftLow() {
+func (re *rangeEncoder) shiftLow() error {
 	lowHi := uint32(re.low >> 32)
 	if lowHi != 0 || re.low < uint64(0x00000000FF000000) {
 		re.pos += uint64(re.cacheSize)
 		temp := re.cache
-		dwtemp := uint32(1) // execute the loop at least once (do-while)
+		dwtemp := uint32(1)
+		// Execute the loop at least once
 		for ; dwtemp != 0; dwtemp = re.cacheSize {
 			err := re.w.WriteByte(byte(temp + lowHi))
 			if err != nil {
-				throw(err)
+				return err
 			}
 			temp = 0x000000FF
 			re.cacheSize--
@@ -180,6 +198,7 @@ func (re *rangeEncoder) shiftLow() {
 	}
 	re.cacheSize++
 	re.low = uint64(uint32(re.low) << 8)
+	return nil
 }
 
 func (re *rangeEncoder) encodeDirectBits(v, numTotalBits uint32) {
@@ -190,7 +209,10 @@ func (re *rangeEncoder) encodeDirectBits(v, numTotalBits uint32) {
 		}
 		if re.rrange < kTopValue {
 			re.rrange <<= 8
-			re.shiftLow()
+			err := re.shiftLow()
+			if err != nil {
+				return
+			}
 		}
 	}
 }
@@ -208,11 +230,15 @@ func (re *rangeEncoder) encode(probs []uint16, index, symbol uint32) {
 	}
 	if re.rrange < kTopValue {
 		re.rrange <<= 8
-		re.shiftLow()
+		err := re.shiftLow()
+		if err != nil {
+			return
+		}
 	}
 }
 
-// should be called in the encoder's contructor.
+// initProbPrices initializes the probPrices array and should be called in the
+// encoder's constructor.
 func initProbPrices() {
 	kNumBits := uint32(kNumBitModelTotalBits - kNumMoveReducingBits)
 	for i := kNumBits - 1; int32(i) >= 0; i-- {

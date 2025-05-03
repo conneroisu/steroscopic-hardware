@@ -10,35 +10,44 @@ func newLitSubCoder() *litSubCoder {
 	}
 }
 
-func (lsc *litSubCoder) decodeNormal(rd *rangeDecoder) byte {
+func (lsc *litSubCoder) decodeNormal(rd *rangeDecoder) (byte, error) {
 	symbol := uint32(1)
 	for symbol < 0x100 {
-		i := rd.decodeBit(lsc.coders, symbol)
+		i, err := rd.decodeBit(lsc.coders, symbol)
+		if err != nil {
+			return 0, err
+		}
 		symbol = symbol<<1 | i
 	}
-	return byte(symbol)
+	return byte(symbol), nil
 }
 
 func (lsc *litSubCoder) decodeWithMatchByte(
 	rd *rangeDecoder,
 	matchByte byte,
-) byte {
+) (byte, error) {
 	uMatchByte := uint32(matchByte)
 	symbol := uint32(1)
 	for symbol < 0x100 {
 		matchBit := (uMatchByte >> 7) & 1
 		uMatchByte <<= 1
-		bit := rd.decodeBit(lsc.coders, ((1+matchBit)<<8)+symbol)
+		bit, err := rd.decodeBit(lsc.coders, ((1+matchBit)<<8)+symbol)
+		if err != nil {
+			return 0, err
+		}
 		symbol = (symbol << 1) | bit
 		if matchBit != bit {
 			for symbol < 0x100 {
-				i := rd.decodeBit(lsc.coders, symbol)
+				i, err := rd.decodeBit(lsc.coders, symbol)
+				if err != nil {
+					return 0, err
+				}
 				symbol = (symbol << 1) | i
 			}
 			break
 		}
 	}
-	return byte(symbol)
+	return byte(symbol), nil
 }
 
 func (lsc *litSubCoder) encode(re *rangeEncoder, symbol byte) {
@@ -76,9 +85,9 @@ func (lsc *litSubCoder) encodeMatched(
 }
 
 func (lsc *litSubCoder) getPrice(matchMode bool, matchByte, symbol byte) uint32 {
+	var price uint32
 	uMatchByte := uint32(matchByte)
 	uSymbol := uint32(symbol)
-	price := uint32(0)
 	context := uint32(1)
 	i := uint32(7)
 	if matchMode {

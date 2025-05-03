@@ -24,22 +24,38 @@ func newLenCoder(
 	return lc
 }
 
-func (lc *lenCoder) decode(rd *rangeDecoder, posState uint32) (res uint32) {
-	i := rd.decodeBit(lc.choice, 0)
+func (lc *lenCoder) decode(rd *rangeDecoder, posState uint32) (uint32, error) {
+	var res uint32
+	i, err := rd.decodeBit(lc.choice, 0)
+	if err != nil {
+		return 0, err
+	}
 	if i == 0 {
-		res = lc.lowCoder[posState].decode(rd)
-		return
+		res, err = lc.lowCoder[posState].decode(rd)
+		if err != nil {
+			return 0, err
+		}
+		return res, nil
 	}
 	res = kNumLowLenSymbols
-	j := rd.decodeBit(lc.choice, 1)
-	if j == 0 {
-		k := lc.midCoder[posState].decode(rd)
-		res += k
-		return
+	j, err := rd.decodeBit(lc.choice, 1)
+	if err != nil {
+		return 0, err
 	}
-	l := lc.highCoder.decode(rd)
+	if j == 0 {
+		k, err := lc.midCoder[posState].decode(rd)
+		if err != nil {
+			return 0, err
+		}
+		res += k
+		return res, nil
+	}
+	l, err := lc.highCoder.decode(rd)
+	if err != nil {
+		return 0, err
+	}
 	res = res + kNumMidLenSymbols + l
-	return
+	return res, nil
 }
 
 func (lc *lenCoder) encode(re *rangeEncoder, symbol, posState uint32) {

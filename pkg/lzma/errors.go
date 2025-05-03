@@ -7,8 +7,9 @@ type HeaderError struct {
 	msg string
 }
 
-// Error returns the error message.
-func (e *HeaderError) Error() string {
+// Error returns the error message and implements the error interface
+// on the HeaderError type.
+func (e HeaderError) Error() string {
 	return fmt.Sprintf("header error: %s", e.msg)
 }
 
@@ -17,7 +18,8 @@ type StreamError struct {
 	msg string
 }
 
-// Error returns the error message and implements the error interface.
+// Error returns the error message and implements the error interface
+// on the StreamError type.
 func (e *StreamError) Error() string {
 	return fmt.Sprintf("stream error: %s", e.msg)
 }
@@ -27,7 +29,20 @@ type NWriteError struct {
 	msg string
 }
 
-// Error returns the error message and implements the error interface.
+// Error returns the error message and implements the error interface
+// on the NWriteError type.
 func (e *NWriteError) Error() string {
 	return fmt.Sprintf("number of bytes returned by Writer.Write() didn't meet expectances: %s", e.msg)
+}
+
+// An ArgumentValueError reports an error encountered while parsing user provided arguments.
+type ArgumentValueError struct {
+	msg string
+	val any
+}
+
+// Error returns the error message and implements the error interface
+// on the ArgumentValueError type.
+func (e *ArgumentValueError) Error() string {
+	return fmt.Sprintf("illegal argument value error: %s with value %v", e.msg, e.val)
 }

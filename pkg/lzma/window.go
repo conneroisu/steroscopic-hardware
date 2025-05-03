@@ -5,7 +5,7 @@ import (
 	"io"
 )
 
-type lzOutWindow struct {
+type outWindow struct {
 	w         io.Writer
 	buf       []byte
 	winSize   uint32
@@ -13,8 +13,8 @@ type lzOutWindow struct {
 	streamPos uint32
 }
 
-func newLzOutWindow(w io.Writer, windowSize uint32) *lzOutWindow {
-	return &lzOutWindow{
+func newOutWindow(w io.Writer, windowSize uint32) *outWindow {
+	return &outWindow{
 		w:         w,
 		buf:       make([]byte, windowSize),
 		winSize:   windowSize,
@@ -23,28 +23,28 @@ func newLzOutWindow(w io.Writer, windowSize uint32) *lzOutWindow {
 	}
 }
 
-func (ow *lzOutWindow) flush() {
+func (ow *outWindow) flush() error {
 	size := ow.pos - ow.streamPos
 	if size == 0 {
-		return
+		return nil
 	}
 	n, err := ow.w.Write(ow.buf[ow.streamPos : ow.streamPos+size])
 	if err != nil {
-		throw(err)
+		return err
 	}
 	if uint32(n) != size {
-		throw(&NWriteError{
+		return &NWriteError{
 			msg: fmt.Sprintf("Write %d bytes, expected %d", n, size),
-		})
+		}
 	}
-	//unpacked += size
 	if ow.pos >= ow.winSize {
 		ow.pos = 0
 	}
 	ow.streamPos = ow.pos
+	return nil
 }
 
-func (ow *lzOutWindow) copyBlock(distance, length uint32) {
+func (ow *outWindow) copyBlock(distance, length uint32) {
 	pos := ow.pos - distance - 1
 	if pos >= ow.winSize {
 		pos += ow.winSize
@@ -62,7 +62,7 @@ func (ow *lzOutWindow) copyBlock(distance, length uint32) {
 	}
 }
 
-func (ow *lzOutWindow) putByte(b byte) {
+func (ow *outWindow) putByte(b byte) {
 	ow.buf[ow.pos] = b
 	ow.pos++
 	if ow.pos >= ow.winSize {
@@ -70,7 +70,7 @@ func (ow *lzOutWindow) putByte(b byte) {
 	}
 }
 
-func (ow *lzOutWindow) getByte(distance uint32) byte {
+func (ow *outWindow) getByte(distance uint32) byte {
 	pos := ow.pos - distance - 1
 	if pos >= ow.winSize {
 		pos += ow.winSize
@@ -78,7 +78,7 @@ func (ow *lzOutWindow) getByte(distance uint32) byte {
 	return ow.buf[pos]
 }
 
-type lzInWindow struct {
+type inWindow struct {
 	r              io.Reader
 	buf            []byte
 	posLimit       uint32
@@ -92,9 +92,12 @@ type lzInWindow struct {
 	streamEnd      bool
 }
 
-func newLzInWindow(r io.Reader, keepSizeBefore, keepSizeAfter, keepSizeReserv uint32) *lzInWindow {
+func newInWindow(
+	r io.Reader,
+	keepSizeBefore, keepSizeAfter, keepSizeReserv uint32,
+) (*inWindow, error) {
 	blockSize := keepSizeBefore + keepSizeAfter + keepSizeReserv
-	iw := &lzInWindow{
+	iw := &inWindow{
 		r:              r,
 		buf:            make([]byte, blockSize),
 		lastSafePos:    blockSize - keepSizeAfter,
@@ -106,11 +109,12 @@ func newLzInWindow(r io.Reader, keepSizeBefore, keepSizeAfter, keepSizeReserv ui
 		streamPos:      0,
 		streamEnd:      false,
 	}
-	iw.readBlock()
-	return iw
+	err := iw.readBlock()
+
+	return iw, err
 }
 
-func (iw *lzInWindow) moveBlock() {
+func (iw *inWindow) moveBlock() {
 	offset := iw.bufOffset + iw.pos - iw.keepSizeBefore
 	if offset > 0 {
 		offset--
@@ -123,17 +127,17 @@ func (iw *lzInWindow) moveBlock() {
 	iw.bufOffset -= offset
 }
 
-func (iw *lzInWindow) readBlock() {
+func (iw *inWindow) readBlock() error {
 	if iw.streamEnd {
-		return
+		return nil
 	}
 	for {
 		if iw.blockSize-iw.bufOffset-iw.streamPos == 0 {
-			return
+			return nil
 		}
 		n, err := iw.r.Read(iw.buf[iw.bufOffset+iw.streamPos : iw.blockSize])
 		if err != nil && err != io.EOF {
-			throw(err)
+			return err
 		}
 		if n == 0 && err == io.EOF {
 			iw.posLimit = iw.streamPos
@@ -142,7 +146,7 @@ func (iw *lzInWindow) readBlock() {
 				iw.posLimit = iw.lastSafePos - iw.bufOffset
 			}
 			iw.streamEnd = true
-			return
+			return nil
 		}
 		iw.streamPos += uint32(n)
 		if iw.streamPos >= iw.pos+iw.keepSizeAfter {
@@ -151,22 +155,29 @@ func (iw *lzInWindow) readBlock() {
 	}
 }
 
-func (iw *lzInWindow) movePos() {
+func (iw *inWindow) movePos() error {
 	iw.pos++
 	if iw.pos > iw.posLimit {
 		ptr := iw.bufOffset + iw.pos
 		if ptr > iw.lastSafePos {
 			iw.moveBlock()
 		}
-		iw.readBlock()
+		err := iw.readBlock()
+		if err != nil {
+			return err
+		}
 	}
+	return nil
 }
 
-func (iw *lzInWindow) getIndexByte(index int32) byte {
+func (iw *inWindow) getIndexByte(index int32) byte {
 	return iw.buf[int32(iw.bufOffset+iw.pos)+index]
 }
 
-func (iw *lzInWindow) getMatchLen(index int32, distance, limit uint32) uint32 {
+func (iw *inWindow) getMatchLen(
+	index int32,
+	distance, limit uint32,
+) uint32 {
 	var res uint32
 	uIndex := uint32(index)
 	if iw.streamEnd {
@@ -183,11 +194,11 @@ func (iw *lzInWindow) getMatchLen(index int32, distance, limit uint32) uint32 {
 	return res
 }
 
-func (iw *lzInWindow) getNumAvailableBytes() uint32 {
+func (iw *inWindow) getNumAvailableBytes() uint32 {
 	return iw.streamPos - iw.pos
 }
 
-func (iw *lzInWindow) reduceOffsets(subValue uint32) {
+func (iw *inWindow) reduceOffsets(subValue uint32) {
 	iw.bufOffset += subValue
 	iw.posLimit -= subValue
 	iw.pos -= subValue

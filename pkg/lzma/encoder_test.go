@@ -2,6 +2,7 @@ package lzma_test
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"log"
 	"testing"
@@ -33,85 +34,79 @@ var bench = lzmaBenchmark{
 
 func pipe(
 	_ *testing.T,
-	efunc func(io.WriteCloser),
-	dfunc func(io.ReadCloser),
+	wfunc func(io.WriteCloser),
+	rfunc func(io.ReadCloser),
 	size int64,
 ) {
 	level := 3
 	pr, pw := io.Pipe()
 	go func() {
 		defer pw.Close()
-		ze := lzma.NewWriterSizeLevel(pw, size, level)
+		ze, _ := lzma.NewWriterSizeLevel(pw, size, level)
 		defer ze.Close()
-		efunc(ze)
+		wfunc(ze)
 	}()
 	defer pr.Close()
 	zd := lzma.NewReader(pr)
 	defer zd.Close()
-	dfunc(zd)
+	rfunc(zd)
 }
 
-func testEmpty(t *testing.T, sizeIsKnown bool) {
-	size := int64(-1)
-	if sizeIsKnown == true {
-		size = 0
+func TestWriterSizeLevelEmpty(t *testing.T) {
+	cases := []bool{true, false}
+	for _, sizeIsKnown := range cases {
+		t.Run("TestWriterSizeLevelEmpty - "+fmt.Sprintf("%t", sizeIsKnown), func(t *testing.T) {
+			size := int64(-1)
+			if sizeIsKnown == true {
+				size = 0
+			}
+			pipe(t,
+				func(_ io.WriteCloser) {},
+				func(r io.ReadCloser) {
+					b, err := io.ReadAll(r)
+					if err != nil {
+						t.Fatalf("%v", err)
+					}
+					if len(b) != 0 {
+						t.Fatalf("did not read an empty slice")
+					}
+				},
+				size)
+		})
 	}
-	pipe(t,
-		func(_ io.WriteCloser) {},
-		func(r io.ReadCloser) {
-			b, err := io.ReadAll(r)
-			if err != nil {
-				t.Fatalf("%v", err)
+}
+
+func TestWriterSizeLevel(t *testing.T) {
+	cases := []bool{true, false}
+	for _, sizeIsKnown := range cases {
+		t.Run("TestWriterSizeLevel - "+fmt.Sprintf("%t", sizeIsKnown), func(t *testing.T) {
+			size := int64(-1)
+			payload := []byte("connerohnesorge")
+			if sizeIsKnown == true {
+				size = int64(len(payload))
 			}
-			if len(b) != 0 {
-				t.Fatalf("did not read an empty slice")
-			}
-		},
-		size)
-}
-
-func TestEmpty1(t *testing.T) {
-	testEmpty(t, true)
-}
-
-func TestEmpty2(t *testing.T) {
-	testEmpty(t, false)
-}
-
-func testBoth(t *testing.T, sizeIsKnown bool) {
-	size := int64(-1)
-	payload := []byte("lzmalzmalzma")
-	if sizeIsKnown == true {
-		size = int64(len(payload))
+			pipe(t,
+				func(w io.WriteCloser) {
+					n, err := w.Write(payload)
+					if err != nil {
+						t.Fatalf("%v", err)
+					}
+					if n != len(payload) {
+						t.Fatalf("wrote %d bytes, want %d bytes", n, len(payload))
+					}
+				},
+				func(r io.ReadCloser) {
+					b, err := io.ReadAll(r)
+					if err != nil {
+						t.Fatalf("%v", err)
+					}
+					if string(b) != string(payload) {
+						t.Fatalf("payload is %s, want %s", string(b), string(payload))
+					}
+				},
+				size)
+		})
 	}
-	pipe(t,
-		func(w io.WriteCloser) {
-			n, err := w.Write(payload)
-			if err != nil {
-				t.Fatalf("%v", err)
-			}
-			if n != len(payload) {
-				t.Fatalf("wrote %d bytes, want %d bytes", n, len(payload))
-			}
-		},
-		func(r io.ReadCloser) {
-			b, err := io.ReadAll(r)
-			if err != nil {
-				t.Fatalf("%v", err)
-			}
-			if string(b) != string(payload) {
-				t.Fatalf("payload is %s, want %s", string(b), string(payload))
-			}
-		},
-		size)
-}
-
-func TestBoth1(t *testing.T) {
-	testBoth(t, true)
-}
-
-func TestBoth2(t *testing.T) {
-	testBoth(t, false)
 }
 
 type lzmaTest struct {
@@ -410,7 +405,7 @@ func TestEncoder(t *testing.T) {
 			}
 			go func() {
 				defer pw.Close()
-				w := lzma.NewWriterSizeLevel(pw, size, tt.level)
+				w, _ := lzma.NewWriterSizeLevel(pw, size, tt.level)
 				defer w.Close()
 				_, err := io.Copy(w, in)
 				if err != nil {
@@ -425,7 +420,13 @@ func TestEncoder(t *testing.T) {
 			res := b.Bytes()
 			if bytes.Equal(res, tt.lzma) == false {
 				t.Errorf(
-					"%s: got %d-byte %q, want %d-byte %q", tt.desc, len(res), string(res), len(tt.lzma), string(tt.lzma))
+					"%s: got %d-byte %q, want %d-byte %q",
+					tt.desc,
+					len(res),
+					string(res),
+					len(tt.lzma),
+					string(tt.lzma),
+				)
 			}
 		}
 	}
@@ -440,7 +441,7 @@ func BenchmarkEncoder(b *testing.B) {
 		defer pr.Close()
 		go func() {
 			defer pw.Close()
-			w := lzma.NewWriterLevel(pw, bench.level)
+			w, _ := lzma.NewWriterLevel(pw, bench.level)
 			defer w.Close()
 			start <- true
 			n, err := io.Copy(w, in)
@@ -459,6 +460,13 @@ func BenchmarkEncoder(b *testing.B) {
 		}
 	}
 	if bytes.Equal(buf.Bytes(), bench.lzma) == false { // check only once, not at every iteration
-		log.Fatalf("%s: got %d-byte %q, want %d-byte %q", bench.descr, len(buf.Bytes()), buf.String(), len(bench.lzma), string(bench.lzma))
+		log.Fatalf(
+			"%s: got %d-byte %q, want %d-byte %q",
+			bench.descr,
+			len(buf.Bytes()),
+			buf.String(),
+			len(bench.lzma),
+			string(bench.lzma),
+		)
 	}
 }

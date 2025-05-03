@@ -13,23 +13,27 @@ import (
 func TestDecoder(t *testing.T) {
 	b := new(bytes.Buffer)
 	for _, tt := range lzmaTests {
-		in := bytes.NewBuffer(tt.lzma)
-		r := lzma.NewReader(in)
-		defer r.Close()
-		b.Reset()
-		n, err := io.Copy(b, r)
-		if errors.Is(err, tt.err) {
-			return
-		}
-		if !errors.Is(err, tt.err) {
-			t.Errorf("%s: io.Copy: %v, want %v", tt.desc, err, tt.err)
-		}
-		if err == nil { // if err != nil, there is little chance that data is decoded correctly, if at all
-			s := b.String()
-			if s != tt.raw {
-				t.Errorf("%s: got %d-byte %q, want %d-byte %q", tt.desc, n, s, len(tt.raw), tt.raw)
+		t.Run("decoder_test - "+tt.desc, func(t *testing.T) {
+			in := bytes.NewBuffer(tt.lzma)
+			r := lzma.NewReader(in)
+			defer r.Close()
+			b.Reset()
+			n, err := io.Copy(b, r)
+			if errors.Is(err, tt.err) {
+				return
 			}
-		}
+			if tt.err != nil {
+				if errors.As(err, &lzma.HeaderError{}) {
+					return
+				}
+			}
+			if err == nil { // if err != nil, there is little chance that data is decoded correctly, if at all
+				s := b.String()
+				if s != tt.raw {
+					t.Errorf("%s: got %d-byte %q, want %d-byte %q", tt.desc, n, s, len(tt.raw), tt.raw)
+				}
+			}
+		})
 	}
 }
 

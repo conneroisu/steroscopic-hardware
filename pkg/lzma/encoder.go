@@ -16,6 +16,79 @@ const (
 	DefaultCompression = 5
 )
 
+// NewWriterSizeLevel writes to the given Writer the compressed version of
+// data written to the returned [io.WriteCloser]. It is the caller's responsibility
+// to call Close on the [io.WriteCloser] when done.
+//
+// Parameter size is the actual size of
+// uncompressed data that's going to be written to [io.WriteCloser]. If size is
+// unknown, use -1 instead.
+//
+// Parameter level is any integer value between [lzma.BestSpeed] and
+// [lzma.BestCompression].
+//
+// Arguments size and level (the lzma header) are written to the writer before
+// any compressed data.
+//
+// If size is -1, last bytes are encoded in a different way to mark the end of
+// the stream. The size of the compressed data will increase by 5 or 6 bytes.
+//
+// The reason for which size is an argument is that, unlike gzip which appends
+// the size and the checksum at the end of the stream, lzma stores the size
+// before any compressed data. Thus, lzma can compute the size while reading
+// data from pipe.
+func NewWriterSizeLevel(w io.Writer, size int64, level int) (io.WriteCloser, error) {
+	var z encoder
+	pr, pw := newSyncPipe()
+	go func() {
+		err := z.encoder(pr, w, size, level)
+		err = pr.CloseWithError(err)
+		if err != nil {
+			throw(fmt.Errorf("lzma.NewWriterSizeLevel failed to close: %w", err))
+		}
+	}()
+	return pw, nil
+}
+
+// NewWriterLevel creates a new Writer that compresses data to the given Writer
+// using the given level.
+//
+// Level is any integer value between [lzma.BestSpeed] and
+// [lzma.BestCompression].
+//
+// Same as lzma.NewWriterSizeLevel(w, -1, level).
+func NewWriterLevel(w io.Writer, level int) (io.WriteCloser, error) {
+	return NewWriterSizeLevel(w, -1, level)
+}
+
+// NewWriterSize creates a new Writer that compresses data to the given Writer
+// using the given size as the uncompressed data size.
+//
+// If size is unknown, use
+// -1 instead.
+//
+// Level is any integer value between [lzma.BestSpeed] and
+// [lzma.BestCompression].
+//
+// Parameter size and the size, [lzma.DefaultCompression], (the lzma header) are written to the passed in writer before
+// any compressed data.
+//
+// If size is -1, last bytes are encoded in a different way to mark the end of
+// the stream. The size of the compressed data will increase by 5 or 6 bytes.
+//
+// Same as NewWriterSizeLevel(w, size, lzma.DefaultCompression).
+func NewWriterSize(w io.Writer, size int64) (io.WriteCloser, error) {
+	return NewWriterSizeLevel(w, size, DefaultCompression)
+}
+
+// NewWriter creates a new Writer that compresses data to the given Writer
+// using the default compression level.
+//
+// Same as NewWriterSizeLevel(w, -1, DefaultCompression).
+func NewWriter(w io.Writer) (io.WriteCloser, error) {
+	return NewWriterSizeLevel(w, -1, DefaultCompression)
+}
+
 // levels is intended to be constant, but there is no way to enforce this constraint
 var levels = []compressionLevel{
 	{},                        // 0
@@ -42,71 +115,6 @@ const (
 	kNumOpts             = 1 << 12
 )
 
-// local error wrapper so we can distinguish between error we want
-// to return as errors from genuine panics
-type osError struct {
-	error
-}
-
-// An argumentValueError reports an error encountered while parsing user provided arguments.
-type argumentValueError struct {
-	msg string
-	val any
-}
-
-func (e *argumentValueError) Error() string {
-	return fmt.Sprintf("illegal argument value error: %s with value %v", e.msg, e.val)
-}
-
-// Report error and stop executing. Wraps error an osError for handlePanics() to
-// distinguish them from genuine panics.
-func throw(err error) {
-	panic(&osError{err})
-}
-
-// handlePanics is a deferred function to turn a panic with type *osError into a plain error
-// return. Other panics are unexpected and so are re-enabled.
-func handlePanics(err *error) {
-	if v := recover(); v != nil {
-		switch e := v.(type) {
-		case *osError:
-			*err = e.error
-		default:
-			// runtime errors should crash
-			panic(v)
-		}
-	}
-}
-
-type syncPipeReader struct {
-	*io.PipeReader
-	closeChan chan bool
-}
-
-func (sr *syncPipeReader) CloseWithError(err error) error {
-	retErr := sr.PipeReader.CloseWithError(err)
-	sr.closeChan <- true // finish writer close
-	return retErr
-}
-
-type syncPipeWriter struct {
-	*io.PipeWriter
-	closeChan chan bool
-}
-
-func (sw *syncPipeWriter) Close() error {
-	err := sw.PipeWriter.Close()
-	<-sw.closeChan // wait for reader close
-	return err
-}
-
-func syncPipe() (*syncPipeReader, *syncPipeWriter) {
-	r, w := io.Pipe()
-	sr := &syncPipeReader{r, make(chan bool, 1)}
-	sw := &syncPipeWriter{w, sr.closeChan}
-	return sr, sw
-}
-
 type compressionLevel struct {
 	dictSize        uint32 // d, 1 << dictSize
 	fastBytes       uint32 // fb
@@ -116,27 +124,6 @@ type compressionLevel struct {
 	matchFinder     string // mf
 	//compressionMode uint32 // a
 	//matchCycles     uint32 // mc
-}
-
-func (cl *compressionLevel) checkValues() {
-	if cl.dictSize < 12 || cl.dictSize > 29 {
-		throw(&argumentValueError{"dictionary size out of range", cl.dictSize})
-	}
-	if cl.fastBytes < 5 || cl.fastBytes > 273 {
-		throw(&argumentValueError{"number of fast bytes out of range", cl.fastBytes})
-	}
-	if cl.litContextBits > 8 {
-		throw(&argumentValueError{"number of literal context bits out of range", cl.litContextBits})
-	}
-	if cl.litPosStateBits > 4 {
-		throw(&argumentValueError{"number of literal position bits out of range", cl.litPosStateBits})
-	}
-	if cl.posStateBits > 4 {
-		throw(&argumentValueError{"number of position bits out of range", cl.posStateBits})
-	}
-	if cl.matchFinder != "bt2" && cl.matchFinder != "bt4" {
-		throw(&argumentValueError{"unsuported match finder", cl.matchFinder})
-	}
 }
 
 // should be called in the encoder's contructor
@@ -206,7 +193,7 @@ func (o *optimal) isShortRep() bool {
 type encoder struct {
 	// i/o, range encoder and match finder
 	re *rangeEncoder // w
-	mf *lzBinTree    // r
+	mf *binTree      // r
 
 	cl           *compressionLevel
 	size         int64
@@ -267,9 +254,13 @@ type encoder struct {
 	backRes uint32
 }
 
-func (z *encoder) readMatchDistances() (lenRes uint32) {
-	lenRes = 0
-	z.distancePairs = z.mf.getMatches(z.matchDistances)
+func (z *encoder) readMatchDistances() (uint32, error) {
+	var lenRes uint32
+	var err error
+	z.distancePairs, err = z.mf.getMatches(z.matchDistances)
+	if err != nil {
+		return 0, err
+	}
 	if z.distancePairs > 0 {
 		lenRes = z.matchDistances[z.distancePairs-2]
 		if lenRes == z.cl.fastBytes {
@@ -277,14 +268,15 @@ func (z *encoder) readMatchDistances() (lenRes uint32) {
 		}
 	}
 	z.additionalOffset++
-	return
+	return lenRes, nil
 }
 
-func (z *encoder) movePos(num uint32) {
+func (z *encoder) movePos(num uint32) error {
 	if num > 0 {
 		z.additionalOffset += num
-		z.mf.skip(num)
+		return z.mf.skip(num)
 	}
+	return nil
 }
 
 func (z *encoder) getPureRepPrice(repIndex, state, posState uint32) (price uint32) {
@@ -352,21 +344,25 @@ func (z *encoder) backward(cur uint32) uint32 {
 	return z.optimumCurrentIndex
 }
 
-func (z *encoder) getOptimum(position uint32) (res uint32) {
+func (z *encoder) getOptimum(position uint32) (uint32, error) {
 	if z.optimumEndIndex != z.optimumCurrentIndex {
 		lenRes := z.optimum[z.optimumCurrentIndex].posPrev - z.optimumCurrentIndex
 		z.backRes = z.optimum[z.optimumCurrentIndex].backPrev
 		z.optimumCurrentIndex = z.optimum[z.optimumCurrentIndex].posPrev
-		res = lenRes
-		return
+		return lenRes, nil
 	}
 
 	z.optimumEndIndex = 0
 	z.optimumCurrentIndex = 0
+	var res uint32
 	var lenMain uint32
 	var distancePairs uint32
+	var err error
 	if !z.longestMatchFound {
-		lenMain = z.readMatchDistances()
+		lenMain, err = z.readMatchDistances()
+		if err != nil {
+			return 0, err
+		}
 	} else {
 		lenMain = z.longestMatchLen
 		z.longestMatchFound = false
@@ -375,12 +371,10 @@ func (z *encoder) getOptimum(position uint32) (res uint32) {
 	availableBytes := z.mf.iw.getNumAvailableBytes() + 1
 	if availableBytes < 2 {
 		z.backRes = 0xFFFFFFFF
-		res = 1
-		return
+		return 1, nil
 	}
 
-	repMaxIndex := uint32(0)
-	var i uint32
+	var i, repMaxIndex uint32
 	for ; i < kNumRepDistances; i++ {
 		z.reps[i] = z.repDistances[i]
 		z.repLens[i] = z.mf.iw.getMatchLen(0-1, z.reps[i], kMatchMaxLen)
@@ -391,24 +385,21 @@ func (z *encoder) getOptimum(position uint32) (res uint32) {
 	if z.repLens[repMaxIndex] >= z.cl.fastBytes {
 		z.backRes = repMaxIndex
 		lenRes := z.repLens[repMaxIndex]
-		res = lenRes
-		z.movePos(lenRes - 1)
-		return
+		err = z.movePos(lenRes - 1)
+		return lenRes, err
 	}
 
 	if lenMain >= z.cl.fastBytes {
 		z.backRes = z.matchDistances[distancePairs-1] + kNumRepDistances
-		res = lenMain
-		z.movePos(lenMain - 1)
-		return
+		err = z.movePos(lenMain - 1)
+		return lenMain, err
 	}
 
 	curByte := z.mf.iw.getIndexByte(0 - 1)
 	matchByte := z.mf.iw.getIndexByte(0 - int32(z.repDistances[0]) - 1 - 1)
 	if lenMain < 2 && curByte != matchByte && z.repLens[repMaxIndex] < 2 {
 		z.backRes = 0xFFFFFFFF
-		res = 1
-		return
+		return 1, nil
 	}
 
 	z.optimum[0].state = z.state
@@ -430,8 +421,7 @@ func (z *encoder) getOptimum(position uint32) (res uint32) {
 	lenEnd := max(lenMain, z.repLens[repMaxIndex])
 	if lenEnd < 2 {
 		z.backRes = z.optimum[1].backPrev
-		res = 1
-		return
+		return 1, nil
 	}
 
 	z.optimum[1].posPrev = 0
@@ -473,7 +463,7 @@ DoWhile1:
 		length = z.repLens[0] + 1
 	}
 	if length <= lenMain {
-		offs := uint32(0)
+		var offs uint32
 		for length > z.matchDistances[offs] {
 			offs += 2
 		}
@@ -496,21 +486,24 @@ DoWhile1:
 		}
 	}
 
-	cur := uint32(0)
+	var cur uint32
 	for {
 		cur++
 		if cur == lenEnd {
 			res = z.backward(cur)
-			return
+			return res, nil
 		}
 
-		newLen := z.readMatchDistances()
+		newLen, err := z.readMatchDistances()
+		if err != nil {
+			return 0, err
+		}
 		distancePairs = z.distancePairs
 		if newLen >= z.cl.fastBytes {
 			z.longestMatchLen = newLen
 			z.longestMatchFound = true
 			res = z.backward(cur)
-			return
+			return res, nil
 		}
 
 		position++
@@ -617,7 +610,7 @@ DoWhile1:
 		}
 
 		availableBytesFull := z.mf.iw.getNumAvailableBytes() + 1
-		availableBytesFull = minUInt32(kNumOpts-1-cur, availableBytesFull)
+		availableBytesFull = min(kNumOpts-1-cur, availableBytesFull)
 		availableBytes = availableBytesFull
 		if availableBytes < 2 {
 			continue
@@ -626,7 +619,7 @@ DoWhile1:
 			availableBytes = z.cl.fastBytes
 		}
 		if !nextIsChar && matchByte != curByte {
-			t := minUInt32(availableBytesFull-1, z.cl.fastBytes)
+			t := min(availableBytesFull-1, z.cl.fastBytes)
 			lenTest2 := z.mf.iw.getMatchLen(0, z.reps[0], t)
 			if lenTest2 >= 2 {
 				state2 := stateUpdateChar(state)
@@ -681,15 +674,21 @@ DoWhile1:
 			}
 
 			if lenTest < availableBytesFull {
-				t := minUInt32(availableBytesFull-1-lenTest, z.cl.fastBytes)
+				t := min(availableBytesFull-1-lenTest, z.cl.fastBytes)
 				lenTest2 := z.mf.iw.getMatchLen(int32(lenTest), z.reps[repIndex], t)
 				if lenTest2 >= 2 {
 					state2 := stateUpdateRep(state)
 					posStateNext := (position + lenTest) & z.posStateMask
 					curAndLenCharPrice := repMatchPrice + z.getRepPrice(repIndex, lenTest, state, posState) +
 						getPrice0(z.isMatch[state2<<kNumPosStatesBitsMax+posStateNext]) +
-						z.litCoder.getSubCoder(position+lenTest, z.mf.iw.getIndexByte(int32(lenTest)-1-1)).getPrice(
-							true, z.mf.iw.getIndexByte(int32(lenTest)-1-(int32(z.reps[repIndex]+1))), z.mf.iw.getIndexByte(int32(lenTest)-1))
+						z.litCoder.getSubCoder(
+							position+lenTest,
+							z.mf.iw.getIndexByte(int32(lenTest)-1-1),
+						).getPrice(
+							true,
+							z.mf.iw.getIndexByte(int32(lenTest)-1-(int32(z.reps[repIndex]+1))),
+							z.mf.iw.getIndexByte(int32(lenTest)-1),
+						)
 					state2 = stateUpdateChar(state2)
 					posStateNext = (position + lenTest + 1) & z.posStateMask
 					nextMatchPrice := curAndLenCharPrice + getPrice1(z.isMatch[state2<<kNumPosStatesBitsMax+posStateNext])
@@ -723,72 +722,81 @@ DoWhile1:
 					distancePairs += 2
 				}
 				break
-				// empty loop
 			}
 			z.matchDistances[distancePairs] = newLen
 			distancePairs += 2
 		}
-		if newLen >= startLen {
-			normalMatchPrice = matchPrice + getPrice0(z.isRep[state])
-			for lenEnd < cur+newLen {
-				lenEnd++
-				z.optimum[lenEnd].price = kInfinityPrice
-			}
-			offs := uint32(0)
-			for startLen > z.matchDistances[offs] {
-				offs += 2
-			}
+		if newLen < startLen {
+			continue
+		}
+		var offs uint32
+		normalMatchPrice = matchPrice + getPrice0(z.isRep[state])
+		for lenEnd < cur+newLen {
+			lenEnd++
+			z.optimum[lenEnd].price = kInfinityPrice
+		}
+		for startLen > z.matchDistances[offs] {
+			offs += 2
+		}
 
-			for lenTest := startLen; ; lenTest++ {
-				curBack := z.matchDistances[offs+1]
-				curAndLenPrice := normalMatchPrice + z.getPosLenPrice(curBack, lenTest, posState)
-				optimum := z.optimum[cur+lenTest]
-				if curAndLenPrice < optimum.price {
-					optimum.price = curAndLenPrice
-					optimum.posPrev = cur
-					optimum.backPrev = curBack + kNumRepDistances
-					optimum.prev1IsChar = false
-				}
-				if lenTest == z.matchDistances[offs] {
-					if lenTest < availableBytesFull {
-						t := minUInt32(availableBytesFull-1-lenTest, z.cl.fastBytes)
-						lenTest2 := z.mf.iw.getMatchLen(int32(lenTest), curBack, t)
-						if lenTest2 >= 2 {
-							state2 := stateUpdateMatch(state)
-							posStateNext := (position + lenTest) & z.posStateMask
-							curAndLenCharPrice := curAndLenPrice +
-								getPrice0(z.isMatch[state2<<kNumPosStatesBitsMax+posStateNext]) +
-								z.litCoder.getSubCoder(position+lenTest, z.mf.iw.getIndexByte(int32(lenTest)-1-1)).getPrice(
-									true, z.mf.iw.getIndexByte(int32(lenTest)-(int32(curBack)+1)-1),
-									z.mf.iw.getIndexByte(int32(lenTest)-1))
+		for lenTest := startLen; ; lenTest++ {
+			curBack := z.matchDistances[offs+1]
+			curAndLenPrice := normalMatchPrice + z.getPosLenPrice(curBack, lenTest, posState)
+			optimum := z.optimum[cur+lenTest]
+			if curAndLenPrice < optimum.price {
+				optimum.price = curAndLenPrice
+				optimum.posPrev = cur
+				optimum.backPrev = curBack + kNumRepDistances
+				optimum.prev1IsChar = false
+			}
+			if lenTest != z.matchDistances[offs] {
+				continue
+			}
+			if lenTest < availableBytesFull {
+				t := min(availableBytesFull-1-lenTest, z.cl.fastBytes)
+				lenTest2 := z.mf.iw.getMatchLen(int32(lenTest), curBack, t)
+				if lenTest2 >= 2 {
+					state2 := stateUpdateMatch(state)
+					posStateNext := (position + lenTest) & z.posStateMask
+					curAndLenCharPrice := curAndLenPrice +
+						getPrice0(z.isMatch[state2<<kNumPosStatesBitsMax+posStateNext]) +
+						z.litCoder.getSubCoder(
+							position+lenTest,
+							z.mf.iw.getIndexByte(int32(lenTest)-1-1),
+						).getPrice(
+							true, z.mf.iw.getIndexByte(int32(lenTest)-(int32(curBack)+1)-1),
+							z.mf.iw.getIndexByte(int32(lenTest)-1))
 
-							state2 = stateUpdateChar(state2)
-							posStateNext = (position + lenTest + 1) & z.posStateMask
-							nextMatchPrice := curAndLenCharPrice + getPrice1(z.isMatch[state2<<kNumPosStatesBitsMax+posStateNext])
-							nextRepMatchPrice := nextMatchPrice + getPrice1(z.isRep[state2])
-							offset := lenTest + 1 + lenTest2
-							for lenEnd < cur+offset {
-								lenEnd++
-								z.optimum[lenEnd].price = kInfinityPrice
-							}
-							curAndLenPrice = nextRepMatchPrice + z.getRepPrice(0, lenTest2, state2, posStateNext)
-							optimum = z.optimum[cur+offset]
-							if curAndLenPrice < optimum.price {
-								optimum.price = curAndLenPrice
-								optimum.posPrev = cur + lenTest + 1
-								optimum.backPrev = 0
-								optimum.prev1IsChar = true
-								optimum.prev2 = true
-								optimum.posPrev2 = cur
-								optimum.backPrev2 = curBack + kNumRepDistances
-							}
-						}
+					state2 = stateUpdateChar(state2)
+					posStateNext = (position + lenTest + 1) & z.posStateMask
+					nextMatchPrice := curAndLenCharPrice + getPrice1(z.isMatch[state2<<kNumPosStatesBitsMax+posStateNext])
+					nextRepMatchPrice := nextMatchPrice + getPrice1(z.isRep[state2])
+					offset := lenTest + 1 + lenTest2
+					for lenEnd < cur+offset {
+						lenEnd++
+						z.optimum[lenEnd].price = kInfinityPrice
 					}
-					offs += 2
-					if offs == distancePairs {
-						break
+					curAndLenPrice = nextRepMatchPrice + z.getRepPrice(
+						0,
+						lenTest2,
+						state2,
+						posStateNext,
+					)
+					optimum = z.optimum[cur+offset]
+					if curAndLenPrice < optimum.price {
+						optimum.price = curAndLenPrice
+						optimum.posPrev = cur + lenTest + 1
+						optimum.backPrev = 0
+						optimum.prev1IsChar = true
+						optimum.prev2 = true
+						optimum.posPrev2 = cur
+						optimum.backPrev2 = curBack + kNumRepDistances
 					}
 				}
+			}
+			offs += 2
+			if offs == distancePairs {
+				break
 			}
 		}
 	}
@@ -805,7 +813,7 @@ func (z *encoder) fillDistancesPrices() {
 	}
 	var lenToPosState uint32
 	for ; lenToPosState < kNumLenToPosStates; lenToPosState++ {
-		var posSlot uint32
+		var posSlot, i uint32
 		st := lenToPosState << kNumPosSlotBits
 		for posSlot = range z.distTableSize {
 			z.posSlotPrices[st+posSlot] = z.posSlotCoders[lenToPosState].getPrice(posSlot)
@@ -813,7 +821,6 @@ func (z *encoder) fillDistancesPrices() {
 		for posSlot = kEndPosModelIndex; posSlot < z.distTableSize; posSlot++ {
 			z.posSlotPrices[st+posSlot] += (posSlot>>1 - 1 - kNumAlignBits) << kNumBitPriceShiftBits
 		}
-		var i uint32
 		st2 := lenToPosState * kNumFullDistances
 		for i = range kStartPosModelIndex {
 			z.distancesPrices[st2+i] = z.posSlotPrices[st+i]
@@ -864,7 +871,10 @@ func (z *encoder) codeOneBlock() {
 			z.flush(uint32(z.nowPos))
 			return
 		}
-		_ = z.readMatchDistances()
+		_, err := z.readMatchDistances()
+		if err != nil {
+			return
+		}
 		z.re.encode(z.isMatch, z.state<<kNumPosStatesBitsMax+uint32(z.nowPos)&z.posStateMask, 0)
 		z.state = stateUpdateChar(z.state)
 		curByte := z.mf.iw.getIndexByte(0 - int32(z.additionalOffset))
@@ -878,7 +888,10 @@ func (z *encoder) codeOneBlock() {
 		return
 	}
 	for {
-		length := z.getOptimum(uint32(z.nowPos))
+		length, err := z.getOptimum(uint32(z.nowPos))
+		if err != nil {
+			return
+		}
 		pos := z.backRes
 		posState := uint32(z.nowPos) & z.posStateMask
 		complexState := z.state<<kNumPosStatesBitsMax + posState
@@ -918,7 +931,11 @@ func (z *encoder) codeOneBlock() {
 				if length == 1 {
 					z.state = stateUpdateShortRep(z.state)
 				} else {
-					z.repMatchLenCoder.encode(z.re, length-kMatchMinLen, posState)
+					z.repMatchLenCoder.encode(
+						z.re,
+						length-kMatchMinLen,
+						posState,
+					)
 					z.state = stateUpdateRep(z.state)
 				}
 				distance := z.repDistances[pos]
@@ -941,9 +958,18 @@ func (z *encoder) codeOneBlock() {
 					baseVal := (2 | posSlot&1) << footerBits
 					posReduced := pos - baseVal
 					if posSlot < kEndPosModelIndex {
-						reverseEncodeIndex(z.re, z.posCoders, baseVal-posSlot-1, footerBits, posReduced)
+						reverseEncodeIndex(
+							z.re,
+							z.posCoders,
+							baseVal-posSlot-1,
+							footerBits,
+							posReduced,
+						)
 					} else {
-						z.re.encodeDirectBits(posReduced>>kNumAlignBits, footerBits-kNumAlignBits)
+						z.re.encodeDirectBits(
+							posReduced>>kNumAlignBits,
+							footerBits-kNumAlignBits,
+						)
 						z.posAlignCoder.reverseEncode(z.re, posReduced&kAlignMask)
 						z.alignPriceCount++
 					}
@@ -999,18 +1025,35 @@ func (z *encoder) encoder(
 	initGFastPos()
 
 	if level < 1 || level > 9 {
-		return &argumentValueError{"level out of range", level}
+		return &ArgumentValueError{"level out of range", level}
 	}
 	// do not assign &levels[level] directly to z.cl because dictSize is modified later
 	// and the next run of this funcion with the same compression level will fail;
 	// levels is intended to be const, but there is no way enforce this constraint.
 	cl := levels[level]
 	z.cl = &cl
-	z.cl.checkValues()
+	if z.cl.dictSize < 12 || cl.dictSize > 29 {
+		return &ArgumentValueError{"dictionary size out of range", z.cl.dictSize}
+	}
+	if z.cl.fastBytes < 5 || cl.fastBytes > 273 {
+		return &ArgumentValueError{"number of fast bytes out of range", z.cl.fastBytes}
+	}
+	if z.cl.litContextBits > 8 {
+		return &ArgumentValueError{"number of literal context bits out of range", z.cl.litContextBits}
+	}
+	if z.cl.litPosStateBits > 4 {
+		return &ArgumentValueError{"number of literal position bits out of range", z.cl.litPosStateBits}
+	}
+	if z.cl.posStateBits > 4 {
+		return &ArgumentValueError{"number of position bits out of range", z.cl.posStateBits}
+	}
+	if z.cl.matchFinder != "bt2" && cl.matchFinder != "bt4" {
+		return &ArgumentValueError{"unsuported match finder", z.cl.matchFinder}
+	}
 	z.distTableSize = z.cl.dictSize * 2
 	z.cl.dictSize = 1 << z.cl.dictSize
 	if size < -1 { // size can be equal to zero
-		return &argumentValueError{"illegal size", size}
+		return &ArgumentValueError{"illegal size", size}
 	}
 	z.size = size
 	z.writeEndMark = false
@@ -1018,7 +1061,7 @@ func (z *encoder) encoder(
 		z.writeEndMark = true
 	}
 
-	header := make([]byte, lzmaHeaderSize)
+	header := make([]byte, headerSize)
 	header[0] = byte((z.cl.posStateBits*5+z.cl.litPosStateBits)*9 + z.cl.litContextBits)
 	var i uint32
 	for ; i < 4; i++ {
@@ -1026,7 +1069,7 @@ func (z *encoder) encoder(
 	}
 	i = 0
 	for ; i < 8; i++ {
-		header[i+lzmaPropSize] = byte(z.size >> (8 * i))
+		header[i+propSize] = byte(z.size >> (8 * i))
 	}
 	n, err := w.Write(header)
 	if err != nil {
@@ -1049,7 +1092,10 @@ func (z *encoder) encoder(
 	if z.matchFinderType == eMatchFinderTypeBT2 {
 		numHashBytes = 2
 	}
-	z.mf = newLzBinTree(r, z.cl.dictSize, kNumOpts, z.cl.fastBytes, kMatchMaxLen+1, numHashBytes)
+	z.mf, err = newBinTree(r, z.cl.dictSize, kNumOpts, z.cl.fastBytes, kMatchMaxLen+1, numHashBytes)
+	if err != nil {
+		return fmt.Errorf("lzma.NewWriterSizeLevel failed to create bin tree: %w", err)
+	}
 
 	z.optimum = make([]*optimal, kNumOpts)
 	for i := range kNumOpts {
@@ -1114,59 +1160,26 @@ func (z *encoder) encoder(
 	return
 }
 
-// NewWriterSizeLevel writes to the given Writer the compressed version of
-// data written to the returned WriteCloser. It is the caller's responsibility
-// to call Close on the WriteCloser when done. size is the actual size of
-// uncompressed data that's going to be written to WriteCloser. If size is
-// unknown, use -1 instead. level is any integer value between BestSpeed and
-// BestCompression.
-//
-// size and level (the lzma header) are written to w before any compressed data.
-// If size is -1, last bytes are encoded in a different way to mark the end of
-// the stream. The size of the compressed data will increase by 5 or 6 bytes.
-func NewWriterSizeLevel(w io.Writer, size int64, level int) io.WriteCloser {
-	// the reason for which size is an argument is that lzma, unlike gzip,
-	// stores the size before any compressed data. gzip appends the size and
-	// the checksum at the end of the stream, thus it can compute the size
-	// while reading data from pipe.
-	var z encoder
-	pr, pw := syncPipe()
-	go func() {
-		err := z.encoder(pr, w, size, level)
-		err = pr.CloseWithError(err)
-		if err != nil {
-			throw(fmt.Errorf("lzma.NewWriterSizeLevel failed to close: %w", err))
+// local error wrapper so we can distinguish between error we want
+// to return as errors from genuine panics
+type osError struct{ error }
+
+// Report error and stop executing. Wraps error an osError for handlePanics() to
+// distinguish them from genuine panics.
+func throw(err error) {
+	panic(&osError{err})
+}
+
+// handlePanics is a deferred function to turn a panic with type *osError into a plain error
+// return. Other panics are unexpected and so are re-enabled.
+func handlePanics(err *error) {
+	if v := recover(); v != nil {
+		switch e := v.(type) {
+		case *osError:
+			*err = e.error
+		default:
+			// runtime errors should crash
+			panic(v)
 		}
-	}()
-	return pw
-}
-
-// NewWriterLevel creates a new Writer that compresses data to the given Writer
-// using the given level. level is any integer value between BestSpeed and
-// BestCompression.
-//
-// Same as NewWriterSizeLevel(w, -1, level).
-func NewWriterLevel(w io.Writer, level int) io.WriteCloser {
-	return NewWriterSizeLevel(w, -1, level)
-}
-
-// NewWriterSize creates a new Writer that compresses data to the given Writer
-// using the given size as the uncompressed data size. If size is unknown, use
-// -1 instead. level is any integer value between BestSpeed and BestCompression.
-//
-// size and level (the lzma header) are written to w before any compressed data.
-// If size is -1, last bytes are encoded in a different way to mark the end of
-// the stream. The size of the compressed data will increase by 5 or 6 bytes.
-//
-// Same as NewWriterSizeLevel(w, size, lzma.DefaultCompression).
-func NewWriterSize(w io.Writer, size int64) io.WriteCloser {
-	return NewWriterSizeLevel(w, size, DefaultCompression)
-}
-
-// NewWriter creates a new Writer that compresses data to the given Writer
-// using the default compression level.
-//
-// Same as NewWriterSizeLevel(w, -1, DefaultCompression).
-func NewWriter(w io.Writer) io.WriteCloser {
-	return NewWriterSizeLevel(w, -1, DefaultCompression)
+	}
 }

@@ -118,7 +118,7 @@ function we(t) {
   if (t.id) return t.id;
   let e = new ue(),
     n = t;
-  for (; n;) {
+  for (; n; ) {
     if ((e.with(n.tagName || ""), n.id)) {
       e.with(n.id);
       break;
@@ -137,7 +137,7 @@ function be(t, e) {
   if ("starIgnore" in n) return null;
   "starIgnore__self" in n || e(t);
   let r = t.firstElementChild;
-  for (; r;) be(r, e), (r = r.nextElementSibling);
+  for (; r; ) be(r, e), (r = r.nextElementSibling);
 }
 var An = "https://data-star.dev/errors";
 function $e(t, e, n = {}) {
@@ -192,14 +192,14 @@ function Ge() {
   }
   let t,
     e = !1;
-  for (; Se !== void 0;) {
+  for (; Se !== void 0; ) {
     let n = Se;
-    for (Se = void 0, We++; n !== void 0;) {
+    for (Se = void 0, We++; n !== void 0; ) {
       let r = n._nextBatchedEffect;
       if (
         ((n._nextBatchedEffect = void 0),
-          (n._flags &= ~fe),
-          !(n._flags & pe) && ft(n))
+        (n._flags &= ~fe),
+        !(n._flags & pe) && ft(n))
       )
         try {
           n._callback();
@@ -241,7 +241,7 @@ function ct(t) {
     return (
       (e._version = 0),
       e._nextSource !== void 0 &&
-      ((e._nextSource._prevSource = e._prevSource),
+        ((e._nextSource._prevSource = e._prevSource),
         e._prevSource !== void 0 && (e._prevSource._nextSource = e._nextSource),
         (e._prevSource = C._sources),
         (e._nextSource = void 0),
@@ -258,14 +258,14 @@ function I(t) {
 }
 I.prototype.brand = _n;
 I.prototype._refresh = () => !0;
-I.prototype._subscribe = function(t) {
+I.prototype._subscribe = function (t) {
   this._targets !== t &&
     t._prevTarget === void 0 &&
     ((t._nextTarget = this._targets),
-      this._targets !== void 0 && (this._targets._prevTarget = t),
-      (this._targets = t));
+    this._targets !== void 0 && (this._targets._prevTarget = t),
+    (this._targets = t));
 };
-I.prototype._unsubscribe = function(t) {
+I.prototype._unsubscribe = function (t) {
   if (this._targets !== void 0) {
     let e = t._prevTarget,
       n = t._nextTarget;
@@ -274,7 +274,7 @@ I.prototype._unsubscribe = function(t) {
       t === this._targets && (this._targets = n);
   }
 };
-I.prototype.subscribe = function(t) {
+I.prototype.subscribe = function (t) {
   return me(() => {
     let e = this.value,
       n = C;
@@ -286,16 +286,16 @@ I.prototype.subscribe = function(t) {
     }
   });
 };
-I.prototype.valueOf = function() {
+I.prototype.valueOf = function () {
   return this.value;
 };
-I.prototype.toString = function() {
+I.prototype.toString = function () {
   return `${this.value}`;
 };
-I.prototype.toJSON = function() {
+I.prototype.toJSON = function () {
   return this.value;
 };
-I.prototype.peek = function() {
+I.prototype.peek = function () {
   let t = C;
   C = void 0;
   try {
@@ -340,9 +340,9 @@ function dt(t) {
     let n = e._source._node;
     if (
       (n !== void 0 && (e._rollbackNode = n),
-        (e._source._node = e),
-        (e._version = -1),
-        e._nextSource === void 0)
+      (e._source._node = e),
+      (e._version = -1),
+      e._nextSource === void 0)
     ) {
       t._sources = e;
       break;
@@ -352,7 +352,7 @@ function dt(t) {
 function pt(t) {
   let e = t._sources,
     n;
-  for (; e !== void 0;) {
+  for (; e !== void 0; ) {
     let r = e._prevSource;
     e._version === -1
       ? (e._source._unsubscribe(e),
@@ -373,7 +373,7 @@ function ne(t) {
     (this._flags = Ee);
 }
 ne.prototype = new I();
-ne.prototype._refresh = function() {
+ne.prototype._refresh = function () {
   if (((this._flags &= ~fe), this._flags & K)) return !1;
   if (
     (this._flags & (Ee | de)) === de ||
@@ -382,8 +382,8 @@ ne.prototype._refresh = function() {
     return !0;
   if (
     ((this._globalVersion = Ne),
-      (this._flags |= K),
-      this._version > 0 && !ft(this))
+    (this._flags |= K),
+    this._version > 0 && !ft(this))
   )
     return (this._flags &= ~K), !0;
   let t = C;
@@ -397,7 +397,7 @@ ne.prototype._refresh = function() {
   }
   return (C = t), pt(this), (this._flags &= ~K), !0;
 };
-ne.prototype._subscribe = function(t) {
+ne.prototype._subscribe = function (t) {
   if (this._targets === void 0) {
     this._flags |= Ee | de;
     for (let e = this._sources; e !== void 0; e = e._nextSource)
@@ -405,7 +405,7 @@ ne.prototype._subscribe = function(t) {
   }
   I.prototype._subscribe.call(this, t);
 };
-ne.prototype._unsubscribe = function(t) {
+ne.prototype._unsubscribe = function (t) {
   if (
     this._targets !== void 0 &&
     (I.prototype._unsubscribe.call(this, t), this._targets === void 0)
@@ -415,7 +415,7 @@ ne.prototype._unsubscribe = function(t) {
       e._source._unsubscribe(e);
   }
 };
-ne.prototype._notify = function() {
+ne.prototype._notify = function () {
   if (!(this._flags & fe)) {
     this._flags |= Ee | fe;
     for (let t = this._targets; t !== void 0; t = t._nextTarget)
@@ -428,8 +428,8 @@ Object.defineProperty(ne.prototype, "value", {
     let t = ct(this);
     if (
       (this._refresh(),
-        t !== void 0 && (t._version = this._version),
-        this._flags & Pe)
+      t !== void 0 && (t._version = this._version),
+      this._flags & Pe)
     )
       throw j(ce, "GetComputedError", { value: this._value });
     return this._value;
@@ -449,9 +449,9 @@ function gt(t) {
     } catch (r) {
       throw (
         ((t._flags &= ~K),
-          (t._flags |= pe),
-          Ue(t),
-          j(ce, "CleanupEffectError", { error: r }))
+        (t._flags |= pe),
+        Ue(t),
+        j(ce, "CleanupEffectError", { error: r }))
       );
     } finally {
       (C = n), Ge();
@@ -474,7 +474,7 @@ function Te(t) {
     (this._nextBatchedEffect = void 0),
     (this._flags = de);
 }
-Te.prototype._callback = function() {
+Te.prototype._callback = function () {
   let t = this._start();
   try {
     if (this._flags & pe || this._fn === void 0) return;
@@ -484,17 +484,17 @@ Te.prototype._callback = function() {
     t();
   }
 };
-Te.prototype._start = function() {
+Te.prototype._start = function () {
   if (this._flags & K) throw j(ce, "SignalCycleDetected");
   (this._flags |= K), (this._flags &= ~pe), gt(this), dt(this), Be();
   let t = C;
   return (C = this), Rn.bind(this, t);
 };
-Te.prototype._notify = function() {
+Te.prototype._notify = function () {
   this._flags & fe ||
     ((this._flags |= fe), (this._nextBatchedEffect = Se), (Se = this));
 };
-Te.prototype._dispose = function() {
+Te.prototype._dispose = function () {
   (this._flags |= pe), this._flags & K || Ue(this);
 };
 function me(t) {
@@ -563,8 +563,8 @@ function bt(t, e) {
       r instanceof I
         ? e(n, r)
         : bt(r, (i, o) => {
-          e(`${n}.${i}`, o);
-        });
+            e(`${n}.${i}`, o);
+          });
     }
 }
 function xn(t, ...e) {
@@ -699,13 +699,13 @@ function Et(t) {
 function Ve(...t) {
   for (let e of t) {
     let n = {
-      plugin: e,
-      signals: St,
-      effect: (i) => me(i),
-      actions: Ie,
-      removals: re,
-      applyToElement: Le,
-    },
+        plugin: e,
+        signals: St,
+        effect: (i) => me(i),
+        actions: Ie,
+        removals: re,
+        applyToElement: Le,
+      },
       r;
     switch (e.type) {
       case 3: {
@@ -782,12 +782,12 @@ function wn() {
       }
       for (let r of n) Le(r);
     })),
-      je.observe(document.body, {
-        attributes: !0,
-        attributeOldValue: !0,
-        childList: !0,
-        subtree: !0,
-      }));
+    je.observe(document.body, {
+      attributes: !0,
+      attributeOldValue: !0,
+      childList: !0,
+      subtree: !0,
+    }));
 }
 function Mn(t, e, n) {
   let r = ve(e.slice(Je.length)),
@@ -829,7 +829,7 @@ function Mn(t, e, n) {
     let [_, ...E] = T.split(".");
     v.mods.set(ve(_), new Set(E.map((c) => c.toLowerCase())));
   }
-  let A = i.onLoad(v) ?? (() => { }),
+  let A = i.onLoad(v) ?? (() => {}),
     h = re.get(t.id);
   h || ((h = new Map()), re.set(t.id, h)), h.set(n, A);
 }
@@ -903,18 +903,18 @@ function Q(t, e, n) {
 async function Cn(t, e) {
   let n = t.getReader(),
     r;
-  for (; !(r = await n.read()).done;) e(r.value);
+  for (; !(r = await n.read()).done; ) e(r.value);
 }
 function Nn(t) {
   let e,
     n,
     r,
     i = !1;
-  return function(s) {
+  return function (s) {
     e === void 0 ? ((e = s), (n = 0), (r = -1)) : (e = In(e, s));
     let a = e.length,
       p = 0;
-    for (; n < a;) {
+    for (; n < a; ) {
       i && (e[n] === 10 && (p = ++n), (i = !1));
       let y = -1;
       for (; n < a && y === -1; ++n)
@@ -937,7 +937,7 @@ function Nn(t) {
 function kn(t, e, n) {
   let r = Rt(),
     i = new TextDecoder();
-  return function(s, a) {
+  return function (s, a) {
     if (s.length === 0) n?.(r), (r = Rt());
     else if (a > 0) {
       let p = i.decode(s.subarray(0, a)),
@@ -1012,7 +1012,7 @@ function wt(
       g(), T();
     });
     let m = y ?? window.fetch,
-      f = i ?? function() { };
+      f = i ?? function () {};
     async function S() {
       d = new AbortController();
       try {
@@ -1047,8 +1047,8 @@ function wt(
               E > A
                 ? (Q(_t, e, {}), g(), _("Max retries reached."))
                 : console.error(
-                  `Datastar failed to reach ${t.toString()} retrying in ${R}ms.`,
-                );
+                    `Datastar failed to reach ${t.toString()} retrying in ${R}ms.`,
+                  );
           } catch (R) {
             g(), _(R);
           }
@@ -1088,7 +1088,7 @@ var Mt = (t) => `${t}`.includes("text/event-stream"),
         r,
       ),
       E = e.toLowerCase(),
-      c = () => { };
+      c = () => {};
     try {
       if ((Q(De, s, {}), !n?.length))
         throw P("SseNoUrlProvided", t, { action: E });
@@ -1251,9 +1251,9 @@ function W(t, e) {
   }
   return t;
 }
-var Dt = (function() {
+var Dt = (function () {
   "use strict";
-  let t = () => { },
+  let t = () => {},
     e = {
       morphStyle: "outerHTML",
       callbacks: {
@@ -1300,141 +1300,141 @@ var Dt = (function() {
       c = A();
     return (
       T &&
-      T !== document.activeElement?.id &&
-      ((h = b.target.querySelector(`[id="${T}"]`)), h?.focus()),
+        T !== document.activeElement?.id &&
+        ((h = b.target.querySelector(`[id="${T}"]`)), h?.focus()),
       h && !h.selectionEnd && E && h.setSelectionRange(_, E),
       c
     );
   }
-  let o = (function() {
-    function b(u, l, g, m = null, f = null) {
-      l instanceof HTMLTemplateElement &&
-        g instanceof HTMLTemplateElement &&
-        ((l = l.content), (g = g.content)),
-        (m ||= l.firstChild);
-      for (let S of g.childNodes) {
-        if (m && m != f) {
-          let R = h(u, S, m, f);
-          if (R) {
-            R !== m && _(u, m, R), s(R, S, u), (m = R.nextSibling);
+  let o = (function () {
+      function b(u, l, g, m = null, f = null) {
+        l instanceof HTMLTemplateElement &&
+          g instanceof HTMLTemplateElement &&
+          ((l = l.content), (g = g.content)),
+          (m ||= l.firstChild);
+        for (let S of g.childNodes) {
+          if (m && m != f) {
+            let R = h(u, S, m, f);
+            if (R) {
+              R !== m && _(u, m, R), s(R, S, u), (m = R.nextSibling);
+              continue;
+            }
+          }
+          if (S instanceof Element && u.persistentIds.has(S.id)) {
+            let R = E(l, S.id, m, u);
+            s(R, S, u), (m = R.nextSibling);
             continue;
           }
+          let w = A(l, S, m, u);
+          w && (m = w.nextSibling);
         }
-        if (S instanceof Element && u.persistentIds.has(S.id)) {
-          let R = E(l, S.id, m, u);
-          s(R, S, u), (m = R.nextSibling);
-          continue;
+        for (; m && m != f; ) {
+          let S = m;
+          (m = m.nextSibling), T(u, S);
         }
-        let w = A(l, S, m, u);
-        w && (m = w.nextSibling);
       }
-      for (; m && m != f;) {
-        let S = m;
-        (m = m.nextSibling), T(u, S);
+      function A(u, l, g, m) {
+        if (m.callbacks.beforeNodeAdded(l) === !1) return null;
+        if (m.idMap.has(l)) {
+          let f = document.createElement(l.tagName);
+          return (
+            u.insertBefore(f, g), s(f, l, m), m.callbacks.afterNodeAdded(f), f
+          );
+        } else {
+          let f = document.importNode(l, !0);
+          return u.insertBefore(f, g), m.callbacks.afterNodeAdded(f), f;
+        }
       }
-    }
-    function A(u, l, g, m) {
-      if (m.callbacks.beforeNodeAdded(l) === !1) return null;
-      if (m.idMap.has(l)) {
-        let f = document.createElement(l.tagName);
-        return (
-          u.insertBefore(f, g), s(f, l, m), m.callbacks.afterNodeAdded(f), f
-        );
-      } else {
-        let f = document.importNode(l, !0);
-        return u.insertBefore(f, g), m.callbacks.afterNodeAdded(f), f;
-      }
-    }
-    let h = (function() {
-      function u(m, f, S, w) {
-        let R = null,
-          M = f.nextSibling,
-          L = 0,
-          N = S;
-        for (; N && N != w;) {
-          if (g(N, f)) {
-            if (l(m, N, f)) return N;
-            R === null && (m.idMap.has(N) || (R = N));
-          }
-          if (
-            (R === null &&
-              M &&
-              g(N, M) &&
-              (L++, (M = M.nextSibling), L >= 2 && (R = void 0)),
+      let h = (function () {
+        function u(m, f, S, w) {
+          let R = null,
+            M = f.nextSibling,
+            L = 0,
+            N = S;
+          for (; N && N != w; ) {
+            if (g(N, f)) {
+              if (l(m, N, f)) return N;
+              R === null && (m.idMap.has(N) || (R = N));
+            }
+            if (
+              (R === null &&
+                M &&
+                g(N, M) &&
+                (L++, (M = M.nextSibling), L >= 2 && (R = void 0)),
               N.contains(document.activeElement))
-          )
-            break;
-          N = N.nextSibling;
+            )
+              break;
+            N = N.nextSibling;
+          }
+          return R || null;
         }
-        return R || null;
-      }
-      function l(m, f, S) {
-        let w = m.idMap.get(f),
-          R = m.idMap.get(S);
-        if (!R || !w) return !1;
-        for (let M of w) if (R.has(M)) return !0;
-        return !1;
-      }
-      function g(m, f) {
-        let S = m,
-          w = f;
-        return (
-          S.nodeType === w.nodeType &&
-          S.tagName === w.tagName &&
-          (!S.id || S.id === w.id)
-        );
-      }
-      return u;
-    })();
-    function T(u, l) {
-      if (u.idMap.has(l)) d(u.pantry, l, null);
-      else {
-        if (u.callbacks.beforeNodeRemoved(l) === !1) return;
-        l.parentNode?.removeChild(l), u.callbacks.afterNodeRemoved(l);
-      }
-    }
-    function _(u, l, g) {
-      let m = l;
-      for (; m && m !== g;) {
-        let f = m;
-        (m = m.nextSibling), T(u, f);
-      }
-      return m;
-    }
-    function E(u, l, g, m) {
-      let f =
-        (m.target.id === l && m.target) ||
-        m.target.querySelector(`[id="${l}"]`) ||
-        m.pantry.querySelector(`[id="${l}"]`);
-      return c(f, m), d(u, f, g), f;
-    }
-    function c(u, l) {
-      let g = u.id;
-      for (; (u = u.parentNode);) {
-        let m = l.idMap.get(u);
-        m && (m.delete(g), m.size || l.idMap.delete(u));
-      }
-    }
-    function d(u, l, g) {
-      if (u.moveBefore)
-        try {
-          u.moveBefore(l, g);
-        } catch {
-          u.insertBefore(l, g);
+        function l(m, f, S) {
+          let w = m.idMap.get(f),
+            R = m.idMap.get(S);
+          if (!R || !w) return !1;
+          for (let M of w) if (R.has(M)) return !0;
+          return !1;
         }
-      else u.insertBefore(l, g);
-    }
-    return b;
-  })(),
-    s = (function() {
+        function g(m, f) {
+          let S = m,
+            w = f;
+          return (
+            S.nodeType === w.nodeType &&
+            S.tagName === w.tagName &&
+            (!S.id || S.id === w.id)
+          );
+        }
+        return u;
+      })();
+      function T(u, l) {
+        if (u.idMap.has(l)) d(u.pantry, l, null);
+        else {
+          if (u.callbacks.beforeNodeRemoved(l) === !1) return;
+          l.parentNode?.removeChild(l), u.callbacks.afterNodeRemoved(l);
+        }
+      }
+      function _(u, l, g) {
+        let m = l;
+        for (; m && m !== g; ) {
+          let f = m;
+          (m = m.nextSibling), T(u, f);
+        }
+        return m;
+      }
+      function E(u, l, g, m) {
+        let f =
+          (m.target.id === l && m.target) ||
+          m.target.querySelector(`[id="${l}"]`) ||
+          m.pantry.querySelector(`[id="${l}"]`);
+        return c(f, m), d(u, f, g), f;
+      }
+      function c(u, l) {
+        let g = u.id;
+        for (; (u = u.parentNode); ) {
+          let m = l.idMap.get(u);
+          m && (m.delete(g), m.size || l.idMap.delete(u));
+        }
+      }
+      function d(u, l, g) {
+        if (u.moveBefore)
+          try {
+            u.moveBefore(l, g);
+          } catch {
+            u.insertBefore(l, g);
+          }
+        else u.insertBefore(l, g);
+      }
+      return b;
+    })(),
+    s = (function () {
       function b(c, d, u) {
         return u.ignoreActive && c === document.activeElement
           ? null
           : (u.callbacks.beforeNodeMorphed(c, d) === !1 ||
-            ((c instanceof HTMLHeadElement && u.head.ignore) ||
-              (c instanceof HTMLHeadElement && u.head.style !== "morph"
-                ? p(c, d, u)
-                : (A(c, d, u), E(c, u) || o(u, c, d))),
+              ((c instanceof HTMLHeadElement && u.head.ignore) ||
+                (c instanceof HTMLHeadElement && u.head.style !== "morph"
+                  ? p(c, d, u)
+                  : (A(c, d, u), E(c, u) || o(u, c, d))),
               u.callbacks.afterNodeMorphed(c, d)),
             c);
       }
@@ -1474,10 +1474,10 @@ var Dt = (function() {
             T(c, d, "disabled", u),
             d.hasAttribute("value")
               ? g !== l &&
-              (_("value", c, "update", u) ||
-                (c.setAttribute("value", l), (c.value = l)))
+                (_("value", c, "update", u) ||
+                  (c.setAttribute("value", l), (c.value = l)))
               : _("value", c, "remove", u) ||
-              ((c.value = ""), c.removeAttribute("value"));
+                ((c.value = ""), c.removeAttribute("value"));
         } else if (
           c instanceof HTMLOptionElement &&
           d instanceof HTMLOptionElement
@@ -1492,8 +1492,8 @@ var Dt = (function() {
           if (_("value", c, "update", u)) return;
           l !== g && (c.value = l),
             c.firstChild &&
-            c.firstChild.nodeValue !== l &&
-            (c.firstChild.nodeValue = l);
+              c.firstChild.nodeValue !== l &&
+              (c.firstChild.nodeValue = l);
         }
       }
       function T(c, d, u, l) {
@@ -1565,10 +1565,10 @@ var Dt = (function() {
       if (h.callbacks.beforeNodeAdded(g) !== !1) {
         if (("href" in g && g.href) || ("src" in g && g.src)) {
           let m,
-            f = new Promise(function(S) {
+            f = new Promise(function (S) {
               m = S;
             });
-          g.addEventListener("load", function() {
+          g.addEventListener("load", function () {
             m();
           }),
             u.push(f);
@@ -1581,85 +1581,85 @@ var Dt = (function() {
         (b.removeChild(l), h.callbacks.afterNodeRemoved(l));
     return h.head.afterHeadMorphed(b, { added: T, kept: E, removed: _ }), u;
   }
-  let y = (function() {
-    function b(d, u, l) {
-      let { persistentIds: g, idMap: m } = E(d, u),
-        f = A(l),
-        S = f.morphStyle || "outerHTML";
-      if (!["innerHTML", "outerHTML"].includes(S))
-        throw `Do not understand how to morph style ${S}`;
-      return {
-        target: d,
-        newContent: u,
-        config: f,
-        morphStyle: S,
-        ignoreActive: f.ignoreActive,
-        ignoreActiveValue: f.ignoreActiveValue,
-        restoreFocus: f.restoreFocus,
-        idMap: m,
-        persistentIds: g,
-        pantry: h(),
-        callbacks: f.callbacks,
-        head: f.head,
-      };
-    }
-    function A(d) {
-      let u = Object.assign({}, e);
-      return (
-        Object.assign(u, d),
-        (u.callbacks = Object.assign({}, e.callbacks, d.callbacks)),
-        (u.head = Object.assign({}, e.head, d.head)),
-        u
-      );
-    }
-    function h() {
-      let d = document.createElement("div");
-      return (
-        (d.hidden = !0), document.body.insertAdjacentElement("afterend", d), d
-      );
-    }
-    function T(d) {
-      let u = Array.from(d.querySelectorAll("[id]"));
-      return d.id && u.push(d), u;
-    }
-    function _(d, u, l, g) {
-      for (let m of g)
-        if (u.has(m.id)) {
-          let f = m;
-          for (; f;) {
-            let S = d.get(f);
-            if (
-              (S == null && ((S = new Set()), d.set(f, S)),
+  let y = (function () {
+      function b(d, u, l) {
+        let { persistentIds: g, idMap: m } = E(d, u),
+          f = A(l),
+          S = f.morphStyle || "outerHTML";
+        if (!["innerHTML", "outerHTML"].includes(S))
+          throw `Do not understand how to morph style ${S}`;
+        return {
+          target: d,
+          newContent: u,
+          config: f,
+          morphStyle: S,
+          ignoreActive: f.ignoreActive,
+          ignoreActiveValue: f.ignoreActiveValue,
+          restoreFocus: f.restoreFocus,
+          idMap: m,
+          persistentIds: g,
+          pantry: h(),
+          callbacks: f.callbacks,
+          head: f.head,
+        };
+      }
+      function A(d) {
+        let u = Object.assign({}, e);
+        return (
+          Object.assign(u, d),
+          (u.callbacks = Object.assign({}, e.callbacks, d.callbacks)),
+          (u.head = Object.assign({}, e.head, d.head)),
+          u
+        );
+      }
+      function h() {
+        let d = document.createElement("div");
+        return (
+          (d.hidden = !0), document.body.insertAdjacentElement("afterend", d), d
+        );
+      }
+      function T(d) {
+        let u = Array.from(d.querySelectorAll("[id]"));
+        return d.id && u.push(d), u;
+      }
+      function _(d, u, l, g) {
+        for (let m of g)
+          if (u.has(m.id)) {
+            let f = m;
+            for (; f; ) {
+              let S = d.get(f);
+              if (
+                (S == null && ((S = new Set()), d.set(f, S)),
                 S.add(m.id),
                 f === l)
-            )
-              break;
-            f = f.parentElement;
+              )
+                break;
+              f = f.parentElement;
+            }
           }
-        }
-    }
-    function E(d, u) {
-      let l = T(d),
-        g = T(u),
-        m = c(l, g),
-        f = new Map();
-      _(f, m, d, l);
-      let S = u.__idiomorphRoot || u;
-      return _(f, m, S, g), { persistentIds: m, idMap: f };
-    }
-    function c(d, u) {
-      let l = new Set(),
-        g = new Map();
-      for (let { id: f, tagName: S } of d) g.has(f) ? l.add(f) : g.set(f, S);
-      let m = new Set();
-      for (let { id: f, tagName: S } of u)
-        m.has(f) ? l.add(f) : g.get(f) === S && m.add(f);
-      for (let f of l) m.delete(f);
-      return m;
-    }
-    return b;
-  })(),
-    { normalizeElement: v, normalizeParent: k } = (function() {
+      }
+      function E(d, u) {
+        let l = T(d),
+          g = T(u),
+          m = c(l, g),
+          f = new Map();
+        _(f, m, d, l);
+        let S = u.__idiomorphRoot || u;
+        return _(f, m, S, g), { persistentIds: m, idMap: f };
+      }
+      function c(d, u) {
+        let l = new Set(),
+          g = new Map();
+        for (let { id: f, tagName: S } of d) g.has(f) ? l.add(f) : g.set(f, S);
+        let m = new Set();
+        for (let { id: f, tagName: S } of u)
+          m.has(f) ? l.add(f) : g.get(f) === S && m.add(f);
+        for (let f of l) m.delete(f);
+        return m;
+      }
+      return b;
+    })(),
+    { normalizeElement: v, normalizeParent: k } = (function () {
       let b = new WeakSet();
       function A(E) {
         return E instanceof Document ? E.documentElement : E;
@@ -1692,7 +1692,7 @@ var Dt = (function() {
             d = this.previousSibling
               ? this.previousSibling.nextSibling
               : this.realParentNode.firstChild;
-          for (; d && d != this.nextSibling;) c.push(d), (d = d.nextSibling);
+          for (; d && d != this.nextSibling; ) c.push(d), (d = d.nextSibling);
           return c;
         }
         querySelectorAll(c) {
@@ -1899,7 +1899,7 @@ function se(t) {
     if (e.endsWith("s")) return Number(e.replace("s", "")) * 1e3;
     try {
       return Number.parseFloat(e);
-    } catch { }
+    } catch {}
   }
   return 0;
 }
@@ -1922,10 +1922,10 @@ function Dn(t, e, n = !0, r = !1) {
   return (...o) => {
     i ||
       (n && t(...o),
-        (i = !0),
-        setTimeout(() => {
-          (i = !1), r && t(...o);
-        }, e));
+      (i = !0),
+      setTimeout(() => {
+        (i = !1), r && t(...o);
+      }, e));
   };
 }
 function ee(t, e) {
@@ -1987,7 +1987,7 @@ var jt = {
     let n = W(e(), t),
       r = 0,
       i = t.get("delay");
-    return i && (r = se(i)), setTimeout(n, r), () => { };
+    return i && (r = se(i)), setTimeout(n, r), () => {};
   },
 };
 var Kt = {
@@ -2125,17 +2125,17 @@ var Xe = "smooth",
       let i = { behavior: Xe, block: He, inline: He };
       if (
         (n.has(Xe) && (i.behavior = Xe),
-          n.has(Xt) && (i.behavior = Xt),
-          n.has(Zt) && (i.behavior = Zt),
-          n.has(On) && (i.inline = Qt),
-          n.has(Hn) && (i.inline = He),
-          n.has(Fn) && (i.inline = en),
-          n.has(qn) && (i.inline = tn),
-          n.has($n) && (i.block = Qt),
-          n.has(Wn) && (i.block = He),
-          n.has(Bn) && (i.block = en),
-          n.has(Gn) && (i.block = tn),
-          !(e instanceof HTMLElement || e instanceof SVGElement))
+        n.has(Xt) && (i.behavior = Xt),
+        n.has(Zt) && (i.behavior = Zt),
+        n.has(On) && (i.inline = Qt),
+        n.has(Hn) && (i.inline = He),
+        n.has(Fn) && (i.inline = en),
+        n.has(qn) && (i.inline = tn),
+        n.has($n) && (i.block = Qt),
+        n.has(Wn) && (i.block = He),
+        n.has(Bn) && (i.block = en),
+        n.has(Gn) && (i.block = tn),
+        !(e instanceof HTMLElement || e instanceof SVGElement))
       )
         throw P("ScrollIntoViewInvalidElement", t);
       e.tabIndex || e.setAttribute("tabindex", "0"),
@@ -2183,16 +2183,16 @@ var sn = {
     let i = r();
     return e === ""
       ? n(async () => {
-        let o = i();
-        for (let [s, a] of Object.entries(o))
-          a === !1 ? t.removeAttribute(s) : t.setAttribute(s, a);
-      })
+          let o = i();
+          for (let [s, a] of Object.entries(o))
+            a === !1 ? t.removeAttribute(s) : t.setAttribute(s, a);
+        })
       : ((e = Y(e)),
         n(async () => {
           let o = !1;
           try {
             o = i();
-          } catch { }
+          } catch {}
           let s;
           typeof o == "string" ? (s = o) : (s = JSON.stringify(o)),
             !s || s === "false" || s === "null" || s === "undefined"
@@ -2229,9 +2229,9 @@ var jn = /^data:(?<mime>[^;]+);base64,(?<contents>.*)$/,
         l = -1;
       Array.isArray(d.value) &&
         (e.getAttribute("name") === null && e.setAttribute("name", p),
-          (l = [...document.querySelectorAll(`[name="${p}"]`)].findIndex(
-            (M) => M === t.el,
-          )));
+        (l = [...document.querySelectorAll(`[name="${p}"]`)].findIndex(
+          (M) => M === t.el,
+        )));
       let g = l >= 0,
         m = () => [...i.value(p)],
         f = () => {
@@ -2259,7 +2259,7 @@ var jn = /^data:(?<mime>[^;]+);base64,(?<contents>.*)$/,
           let M = i.value(p);
           if (g) {
             let D = M;
-            for (; l >= D.length;) D.push(h);
+            for (; l >= D.length; ) D.push(h);
             M = D[l] || h;
           }
           let L = (D, B) => {
@@ -2364,16 +2364,16 @@ var cn = {
     let s = (v) => {
       v &&
         ((n.has("prevent") || e === "submit") && v.preventDefault(),
-          n.has("stop") && v.stopPropagation()),
+        n.has("stop") && v.stopPropagation()),
         i(v);
     };
     (s = ee(s, n)), (s = W(s, n));
     let a = { capture: !1, passive: !1, once: !1 };
     if (
       (n.has("capture") && (a.capture = !0),
-        n.has("passive") && (a.passive = !0),
-        n.has("once") && (a.once = !0),
-        n.has("outside"))
+      n.has("passive") && (a.passive = !0),
+      n.has("once") && (a.once = !0),
+      n.has("outside"))
     ) {
       o = document;
       let v = s;

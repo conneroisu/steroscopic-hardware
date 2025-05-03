@@ -168,7 +168,7 @@
       a = "",
       i = r.charCodeAt(0);
     if (1 === n && 45 === i) return "\\" + r;
-    for (; ++o < n;)
+    for (; ++o < n; )
       (t = r.charCodeAt(o)),
         (a +=
           0 !== t
@@ -178,11 +178,11 @@
               (1 === o && t >= 48 && t <= 57 && 45 === i)
               ? "\\" + t.toString(16) + " "
               : t >= 128 ||
-                45 === t ||
-                95 === t ||
-                (t >= 48 && t <= 57) ||
-                (t >= 65 && t <= 90) ||
-                (t >= 97 && t <= 122)
+                  45 === t ||
+                  95 === t ||
+                  (t >= 48 && t <= 57) ||
+                  (t >= 65 && t <= 90) ||
+                  (t >= 97 && t <= 122)
                 ? r.charAt(o)
                 : "\\" + r.charAt(o)
             : "�");
@@ -214,140 +214,140 @@
     return (i.get(t) ?? []).some((t) => e === t || e.startsWith(`${t}-`));
   }
   var s = class {
-    constructor(e = new Map(), t = new Set([])) {
-      (this.values = e), (this.keyframes = t);
-    }
-    prefix = null;
-    add(e, t, r = 0) {
-      if (e.endsWith("-*")) {
-        if ("initial" !== t)
-          throw new Error(
-            `Invalid theme value \`${t}\` for namespace \`${e}\``,
-          );
-        "--*" === e
-          ? this.values.clear()
-          : this.clearNamespace(e.slice(0, -2), 0);
+      constructor(e = new Map(), t = new Set([])) {
+        (this.values = e), (this.keyframes = t);
       }
-      if (4 & r) {
+      prefix = null;
+      add(e, t, r = 0) {
+        if (e.endsWith("-*")) {
+          if ("initial" !== t)
+            throw new Error(
+              `Invalid theme value \`${t}\` for namespace \`${e}\``,
+            );
+          "--*" === e
+            ? this.values.clear()
+            : this.clearNamespace(e.slice(0, -2), 0);
+        }
+        if (4 & r) {
+          let t = this.values.get(e);
+          if (t && !(4 & t.options)) return;
+        }
+        "initial" === t
+          ? this.values.delete(e)
+          : this.values.set(e, { value: t, options: r });
+      }
+      keysInNamespaces(e) {
+        let t = [];
+        for (let r of e) {
+          let e = `${r}-`;
+          for (let n of this.values.keys())
+            n.startsWith(e) &&
+              -1 === n.indexOf("--", 2) &&
+              (l(n, r) || t.push(n.slice(e.length)));
+        }
+        return t;
+      }
+      get(e) {
+        for (let t of e) {
+          let e = this.values.get(t);
+          if (e) return e.value;
+        }
+        return null;
+      }
+      hasDefault(e) {
+        return !(4 & ~this.getOptions(e));
+      }
+      getOptions(e) {
+        return (e = a(this.#e(e))), this.values.get(e)?.options ?? 0;
+      }
+      entries() {
+        return this.prefix
+          ? Array.from(this.values, (e) => ((e[0] = this.prefixKey(e[0])), e))
+          : this.values.entries();
+      }
+      prefixKey(e) {
+        return this.prefix ? `--${this.prefix}-${e.slice(2)}` : e;
+      }
+      #e(e) {
+        return this.prefix ? `--${e.slice(3 + this.prefix.length)}` : e;
+      }
+      clearNamespace(e, t) {
+        let r = i.get(e) ?? [];
+        e: for (let n of this.values.keys())
+          if (n.startsWith(e)) {
+            if (0 !== t && (this.getOptions(n) & t) !== t) continue;
+            for (let e of r) if (n.startsWith(e)) continue e;
+            this.values.delete(n);
+          }
+      }
+      #t(e, t) {
+        for (let r of t) {
+          let t = null !== e ? `${r}-${e}` : r;
+          if (!this.values.has(t)) {
+            if (null === e || !e.includes(".")) continue;
+            if (((t = `${r}-${e.replaceAll(".", "_")}`), !this.values.has(t)))
+              continue;
+          }
+          if (!l(t, r)) return t;
+        }
+        return null;
+      }
+      #r(e) {
         let t = this.values.get(e);
-        if (t && !(4 & t.options)) return;
+        if (!t) return null;
+        let r = null;
+        return (
+          2 & t.options && (r = t.value),
+          `var(${o(this.prefixKey(e))}${r ? `, ${r}` : ""})`
+        );
       }
-      "initial" === t
-        ? this.values.delete(e)
-        : this.values.set(e, { value: t, options: r });
-    }
-    keysInNamespaces(e) {
-      let t = [];
-      for (let r of e) {
-        let e = `${r}-`;
-        for (let n of this.values.keys())
-          n.startsWith(e) &&
-            -1 === n.indexOf("--", 2) &&
-            (l(n, r) || t.push(n.slice(e.length)));
-      }
-      return t;
-    }
-    get(e) {
-      for (let t of e) {
-        let e = this.values.get(t);
-        if (e) return e.value;
-      }
-      return null;
-    }
-    hasDefault(e) {
-      return !(4 & ~this.getOptions(e));
-    }
-    getOptions(e) {
-      return (e = a(this.#e(e))), this.values.get(e)?.options ?? 0;
-    }
-    entries() {
-      return this.prefix
-        ? Array.from(this.values, (e) => ((e[0] = this.prefixKey(e[0])), e))
-        : this.values.entries();
-    }
-    prefixKey(e) {
-      return this.prefix ? `--${this.prefix}-${e.slice(2)}` : e;
-    }
-    #e(e) {
-      return this.prefix ? `--${e.slice(3 + this.prefix.length)}` : e;
-    }
-    clearNamespace(e, t) {
-      let r = i.get(e) ?? [];
-      e: for (let n of this.values.keys())
-        if (n.startsWith(e)) {
-          if (0 !== t && (this.getOptions(n) & t) !== t) continue;
-          for (let e of r) if (n.startsWith(e)) continue e;
-          this.values.delete(n);
-        }
-    }
-    #t(e, t) {
-      for (let r of t) {
-        let t = null !== e ? `${r}-${e}` : r;
-        if (!this.values.has(t)) {
-          if (null === e || !e.includes(".")) continue;
-          if (((t = `${r}-${e.replaceAll(".", "_")}`), !this.values.has(t)))
-            continue;
-        }
-        if (!l(t, r)) return t;
-      }
-      return null;
-    }
-    #r(e) {
-      let t = this.values.get(e);
-      if (!t) return null;
-      let r = null;
-      return (
-        2 & t.options && (r = t.value),
-        `var(${o(this.prefixKey(e))}${r ? `, ${r}` : ""})`
-      );
-    }
-    markUsedVariable(e) {
-      let t = a(this.#e(e)),
-        r = this.values.get(t);
-      if (!r) return !1;
-      let n = 16 & r.options;
-      return (r.options |= 16), !n;
-    }
-    resolve(e, t, r = 0) {
-      let n = this.#t(e, t);
-      if (!n) return null;
-      let o = this.values.get(n);
-      return 1 & (r | o.options) ? o.value : this.#r(n);
-    }
-    resolveValue(e, t) {
-      let r = this.#t(e, t);
-      return r ? this.values.get(r).value : null;
-    }
-    resolveWith(e, t, r = []) {
-      let n = this.#t(e, t);
-      if (!n) return null;
-      let o = {};
-      for (let e of r) {
-        let t = `${n}${e}`,
+      markUsedVariable(e) {
+        let t = a(this.#e(e)),
           r = this.values.get(t);
-        r && (1 & r.options ? (o[e] = r.value) : (o[e] = this.#r(t)));
+        if (!r) return !1;
+        let n = 16 & r.options;
+        return (r.options |= 16), !n;
       }
-      let a = this.values.get(n);
-      return 1 & a.options ? [a.value, o] : [this.#r(n), o];
-    }
-    namespace(e) {
-      let t = new Map(),
-        r = `${e}-`;
-      for (let [n, o] of this.values)
-        n === e
-          ? t.set(null, o.value)
-          : n.startsWith(`${r}-`)
-            ? t.set(n.slice(e.length), o.value)
-            : n.startsWith(r) && t.set(n.slice(r.length), o.value);
-      return t;
-    }
-    addKeyframes(e) {
-      this.keyframes.add(e);
-    }
-    getKeyframes() {
-      return Array.from(this.keyframes);
-    }
-  },
+      resolve(e, t, r = 0) {
+        let n = this.#t(e, t);
+        if (!n) return null;
+        let o = this.values.get(n);
+        return 1 & (r | o.options) ? o.value : this.#r(n);
+      }
+      resolveValue(e, t) {
+        let r = this.#t(e, t);
+        return r ? this.values.get(r).value : null;
+      }
+      resolveWith(e, t, r = []) {
+        let n = this.#t(e, t);
+        if (!n) return null;
+        let o = {};
+        for (let e of r) {
+          let t = `${n}${e}`,
+            r = this.values.get(t);
+          r && (1 & r.options ? (o[e] = r.value) : (o[e] = this.#r(t)));
+        }
+        let a = this.values.get(n);
+        return 1 & a.options ? [a.value, o] : [this.#r(n), o];
+      }
+      namespace(e) {
+        let t = new Map(),
+          r = `${e}-`;
+        for (let [n, o] of this.values)
+          n === e
+            ? t.set(null, o.value)
+            : n.startsWith(`${r}-`)
+              ? t.set(n.slice(e.length), o.value)
+              : n.startsWith(r) && t.set(n.slice(r.length), o.value);
+        return t;
+      }
+      addKeyframes(e) {
+        this.keyframes.add(e);
+      }
+      getKeyframes() {
+        return Array.from(this.keyframes);
+      }
+    },
     c = class extends Map {
       constructor(e) {
         super(), (this.factory = e);
@@ -377,13 +377,13 @@
             replaceWith(t) {
               a ||
                 ((a = !0),
-                  Array.isArray(t)
-                    ? 0 === t.length
-                      ? (e.splice(n, 1), (i = 0))
-                      : 1 === t.length
-                        ? ((e[n] = t[0]), (i = 1))
-                        : (e.splice(n, 1, ...t), (i = t.length))
-                    : (e[n] = t));
+                Array.isArray(t)
+                  ? 0 === t.length
+                    ? (e.splice(n, 1), (i = 0))
+                    : 1 === t.length
+                      ? ((e[n] = t[0]), (i = 1))
+                      : (e.splice(n, 1, ...t), (i = t.length))
+                  : (e[n] = t));
             },
           }) ?? 0;
       if (a) 0 === l ? n-- : (n += i - 1);
@@ -439,7 +439,7 @@
             ;
             l < e.length &&
             ((t = e.charCodeAt(l)),
-              58 === t ||
+            58 === t ||
               44 === t ||
               61 === t ||
               62 === t ||
@@ -546,13 +546,13 @@
             replaceWith(t) {
               l ||
                 ((l = !0),
-                  Array.isArray(t)
-                    ? 0 === t.length
-                      ? (e.splice(o, 1), (s = 0))
-                      : 1 === t.length
-                        ? ((e[o] = t[0]), (s = 1))
-                        : (e.splice(o, 1, ...t), (s = t.length))
-                    : ((e[o] = t), (s = 1)));
+                Array.isArray(t)
+                  ? 0 === t.length
+                    ? (e.splice(o, 1), (s = 0))
+                    : 1 === t.length
+                      ? ((e[o] = t[0]), (s = 1))
+                      : (e.splice(o, 1, ...t), (s = t.length))
+                  : ((e[o] = t), (s = 1)));
             },
           }) ?? 0;
       if ((r.pop(), l)) 0 === c ? o-- : (o += s - 1);
@@ -662,7 +662,7 @@
             "@custom-media" === t.name ||
             "@namespace" === t.name ||
             "@import" === t.name) &&
-          c.push(t);
+            c.push(t);
       } else if ("at-root" === e.kind)
         for (let t of e.nodes) {
           let e = [];
@@ -687,7 +687,7 @@
         if ((e.splice(r, 1), 0 === e.length)) {
           let t = S(w, (t) => "rule" === t.kind && t.nodes === e);
           if (!t || 0 === t.length) continue e;
-          for (t.unshift({ kind: "at-root", nodes: w }); ;) {
+          for (t.unshift({ kind: "at-root", nodes: w }); ; ) {
             let e = t.pop();
             if (!e) break;
             let r = t[t.length - 1];
@@ -734,9 +734,9 @@
                     if (s.has(r)) return void (n = !0);
                     if (
                       (s.add(r),
-                        (a = !0),
-                        (l = t.theme.resolveValue(null, [e.value])),
-                        !l)
+                      (a = !0),
+                      (l = t.theme.resolveValue(null, [e.value])),
+                      !l)
                     )
                       return void (n = !0);
                     if ("currentcolor" === l.toLowerCase())
@@ -745,7 +745,7 @@
                   } while (i);
                   r({ kind: "word", value: l });
                 }),
-                  n || o)
+                n || o)
               ) {
                 let t = e.nodes.findIndex(
                   (e) => "separator" === e.kind && e.value.trim().includes(","),
@@ -764,7 +764,7 @@
                   (t.value = "srgb");
               }
             }),
-              !a)
+            !a)
           )
             continue;
           let i = { ...n, value: h(o) },
@@ -775,8 +775,8 @@
       let e = [];
       if (
         (u.length > 0 && e.push(b(":root, :host", u)),
-          d.length > 0 && e.push(b("*, ::before, ::after, ::backdrop", d)),
-          e.length > 0)
+        d.length > 0 && e.push(b("*, ::before, ::after, ::backdrop", d)),
+        e.length > 0)
       ) {
         let t = w.findIndex(
           (e) =>
@@ -847,26 +847,26 @@
     return e.split(/[\s,]+/);
   }
   var V = [
-    "calc",
-    "min",
-    "max",
-    "clamp",
-    "mod",
-    "rem",
-    "sin",
-    "cos",
-    "tan",
-    "asin",
-    "acos",
-    "atan",
-    "atan2",
-    "pow",
-    "sqrt",
-    "hypot",
-    "log",
-    "exp",
-    "round",
-  ],
+      "calc",
+      "min",
+      "max",
+      "clamp",
+      "mod",
+      "rem",
+      "sin",
+      "cos",
+      "tan",
+      "asin",
+      "acos",
+      "atan",
+      "atan2",
+      "pow",
+      "sqrt",
+      "hypot",
+      "log",
+      "exp",
+      "round",
+    ],
     N = ["anchor-size"],
     O = new RegExp(`(${N.join("|")})\\(`, "g");
   function F(e) {
@@ -877,12 +877,12 @@
     let t = m(e);
     return (
       D(t),
-      (e = (function(e) {
+      (e = (function (e) {
         if (!V.some((t) => e.includes(t))) return e;
         let t = !1;
         N.some((t) => e.includes(t)) &&
           ((O.lastIndex = 0),
-            (e = e.replace(O, (e, r) => ((t = !0), `$${N.indexOf(r)}$(`))));
+          (e = e.replace(O, (e, r) => ((t = !0), `$${N.indexOf(r)}$(`))));
         let r = "",
           n = [];
         for (let t = 0; t < e.length; t++) {
@@ -998,7 +998,7 @@
           break;
         case 39:
         case 34:
-          for (; ++n < r;) {
+          for (; ++n < r; ) {
             let t = e.charCodeAt(n);
             if (92 !== t) {
               if (t === o) break;
@@ -1041,7 +1041,7 @@
             break;
           case 39:
           case 34:
-            for (; ++t < a;) {
+            for (; ++t < a; ) {
               let r = e.charCodeAt(t);
               if (92 !== r) {
                 if (r === l) break;
@@ -1087,7 +1087,7 @@
   function* q(e, t) {
     t(e) && (yield [e, null]);
     let r = e.lastIndexOf("-");
-    for (; r > 0;) {
+    for (; r > 0; ) {
       let n = e.slice(0, r);
       if (t(n)) {
         let t = [n, e.slice(r + 1)];
@@ -1110,206 +1110,206 @@
     return Number.isNaN(l) ? (e < t ? -1 : 1) : l;
   }
   var H = new Set([
-    "black",
-    "silver",
-    "gray",
-    "white",
-    "maroon",
-    "red",
-    "purple",
-    "fuchsia",
-    "green",
-    "lime",
-    "olive",
-    "yellow",
-    "navy",
-    "blue",
-    "teal",
-    "aqua",
-    "aliceblue",
-    "antiquewhite",
-    "aqua",
-    "aquamarine",
-    "azure",
-    "beige",
-    "bisque",
-    "black",
-    "blanchedalmond",
-    "blue",
-    "blueviolet",
-    "brown",
-    "burlywood",
-    "cadetblue",
-    "chartreuse",
-    "chocolate",
-    "coral",
-    "cornflowerblue",
-    "cornsilk",
-    "crimson",
-    "cyan",
-    "darkblue",
-    "darkcyan",
-    "darkgoldenrod",
-    "darkgray",
-    "darkgreen",
-    "darkgrey",
-    "darkkhaki",
-    "darkmagenta",
-    "darkolivegreen",
-    "darkorange",
-    "darkorchid",
-    "darkred",
-    "darksalmon",
-    "darkseagreen",
-    "darkslateblue",
-    "darkslategray",
-    "darkslategrey",
-    "darkturquoise",
-    "darkviolet",
-    "deeppink",
-    "deepskyblue",
-    "dimgray",
-    "dimgrey",
-    "dodgerblue",
-    "firebrick",
-    "floralwhite",
-    "forestgreen",
-    "fuchsia",
-    "gainsboro",
-    "ghostwhite",
-    "gold",
-    "goldenrod",
-    "gray",
-    "green",
-    "greenyellow",
-    "grey",
-    "honeydew",
-    "hotpink",
-    "indianred",
-    "indigo",
-    "ivory",
-    "khaki",
-    "lavender",
-    "lavenderblush",
-    "lawngreen",
-    "lemonchiffon",
-    "lightblue",
-    "lightcoral",
-    "lightcyan",
-    "lightgoldenrodyellow",
-    "lightgray",
-    "lightgreen",
-    "lightgrey",
-    "lightpink",
-    "lightsalmon",
-    "lightseagreen",
-    "lightskyblue",
-    "lightslategray",
-    "lightslategrey",
-    "lightsteelblue",
-    "lightyellow",
-    "lime",
-    "limegreen",
-    "linen",
-    "magenta",
-    "maroon",
-    "mediumaquamarine",
-    "mediumblue",
-    "mediumorchid",
-    "mediumpurple",
-    "mediumseagreen",
-    "mediumslateblue",
-    "mediumspringgreen",
-    "mediumturquoise",
-    "mediumvioletred",
-    "midnightblue",
-    "mintcream",
-    "mistyrose",
-    "moccasin",
-    "navajowhite",
-    "navy",
-    "oldlace",
-    "olive",
-    "olivedrab",
-    "orange",
-    "orangered",
-    "orchid",
-    "palegoldenrod",
-    "palegreen",
-    "paleturquoise",
-    "palevioletred",
-    "papayawhip",
-    "peachpuff",
-    "peru",
-    "pink",
-    "plum",
-    "powderblue",
-    "purple",
-    "rebeccapurple",
-    "red",
-    "rosybrown",
-    "royalblue",
-    "saddlebrown",
-    "salmon",
-    "sandybrown",
-    "seagreen",
-    "seashell",
-    "sienna",
-    "silver",
-    "skyblue",
-    "slateblue",
-    "slategray",
-    "slategrey",
-    "snow",
-    "springgreen",
-    "steelblue",
-    "tan",
-    "teal",
-    "thistle",
-    "tomato",
-    "turquoise",
-    "violet",
-    "wheat",
-    "white",
-    "whitesmoke",
-    "yellow",
-    "yellowgreen",
-    "transparent",
-    "currentcolor",
-    "canvas",
-    "canvastext",
-    "linktext",
-    "visitedtext",
-    "activetext",
-    "buttonface",
-    "buttontext",
-    "buttonborder",
-    "field",
-    "fieldtext",
-    "highlight",
-    "highlighttext",
-    "selecteditem",
-    "selecteditemtext",
-    "mark",
-    "marktext",
-    "graytext",
-    "accentcolor",
-    "accentcolortext",
-  ]),
+      "black",
+      "silver",
+      "gray",
+      "white",
+      "maroon",
+      "red",
+      "purple",
+      "fuchsia",
+      "green",
+      "lime",
+      "olive",
+      "yellow",
+      "navy",
+      "blue",
+      "teal",
+      "aqua",
+      "aliceblue",
+      "antiquewhite",
+      "aqua",
+      "aquamarine",
+      "azure",
+      "beige",
+      "bisque",
+      "black",
+      "blanchedalmond",
+      "blue",
+      "blueviolet",
+      "brown",
+      "burlywood",
+      "cadetblue",
+      "chartreuse",
+      "chocolate",
+      "coral",
+      "cornflowerblue",
+      "cornsilk",
+      "crimson",
+      "cyan",
+      "darkblue",
+      "darkcyan",
+      "darkgoldenrod",
+      "darkgray",
+      "darkgreen",
+      "darkgrey",
+      "darkkhaki",
+      "darkmagenta",
+      "darkolivegreen",
+      "darkorange",
+      "darkorchid",
+      "darkred",
+      "darksalmon",
+      "darkseagreen",
+      "darkslateblue",
+      "darkslategray",
+      "darkslategrey",
+      "darkturquoise",
+      "darkviolet",
+      "deeppink",
+      "deepskyblue",
+      "dimgray",
+      "dimgrey",
+      "dodgerblue",
+      "firebrick",
+      "floralwhite",
+      "forestgreen",
+      "fuchsia",
+      "gainsboro",
+      "ghostwhite",
+      "gold",
+      "goldenrod",
+      "gray",
+      "green",
+      "greenyellow",
+      "grey",
+      "honeydew",
+      "hotpink",
+      "indianred",
+      "indigo",
+      "ivory",
+      "khaki",
+      "lavender",
+      "lavenderblush",
+      "lawngreen",
+      "lemonchiffon",
+      "lightblue",
+      "lightcoral",
+      "lightcyan",
+      "lightgoldenrodyellow",
+      "lightgray",
+      "lightgreen",
+      "lightgrey",
+      "lightpink",
+      "lightsalmon",
+      "lightseagreen",
+      "lightskyblue",
+      "lightslategray",
+      "lightslategrey",
+      "lightsteelblue",
+      "lightyellow",
+      "lime",
+      "limegreen",
+      "linen",
+      "magenta",
+      "maroon",
+      "mediumaquamarine",
+      "mediumblue",
+      "mediumorchid",
+      "mediumpurple",
+      "mediumseagreen",
+      "mediumslateblue",
+      "mediumspringgreen",
+      "mediumturquoise",
+      "mediumvioletred",
+      "midnightblue",
+      "mintcream",
+      "mistyrose",
+      "moccasin",
+      "navajowhite",
+      "navy",
+      "oldlace",
+      "olive",
+      "olivedrab",
+      "orange",
+      "orangered",
+      "orchid",
+      "palegoldenrod",
+      "palegreen",
+      "paleturquoise",
+      "palevioletred",
+      "papayawhip",
+      "peachpuff",
+      "peru",
+      "pink",
+      "plum",
+      "powderblue",
+      "purple",
+      "rebeccapurple",
+      "red",
+      "rosybrown",
+      "royalblue",
+      "saddlebrown",
+      "salmon",
+      "sandybrown",
+      "seagreen",
+      "seashell",
+      "sienna",
+      "silver",
+      "skyblue",
+      "slateblue",
+      "slategray",
+      "slategrey",
+      "snow",
+      "springgreen",
+      "steelblue",
+      "tan",
+      "teal",
+      "thistle",
+      "tomato",
+      "turquoise",
+      "violet",
+      "wheat",
+      "white",
+      "whitesmoke",
+      "yellow",
+      "yellowgreen",
+      "transparent",
+      "currentcolor",
+      "canvas",
+      "canvastext",
+      "linktext",
+      "visitedtext",
+      "activetext",
+      "buttonface",
+      "buttontext",
+      "buttonborder",
+      "field",
+      "fieldtext",
+      "highlight",
+      "highlighttext",
+      "selecteditem",
+      "selecteditemtext",
+      "mark",
+      "marktext",
+      "graytext",
+      "accentcolor",
+      "accentcolortext",
+    ]),
     Z = /^(rgba?|hsla?|hwb|color|(ok)?(lab|lch)|light-dark|color-mix)\(/i;
   var Y = {
-    color: function(e) {
+    color: function (e) {
       return 35 === e.charCodeAt(0) || Z.test(e) || H.has(e.toLowerCase());
     },
     length: se,
     percentage: ae,
-    ratio: function(e) {
+    ratio: function (e) {
       return ie.test(e) || F(e);
     },
     number: ne,
     integer: de,
     url: X,
-    position: function(e) {
+    position: function (e) {
       let t = 0;
       for (let r of R(e, " "))
         if (
@@ -1329,7 +1329,7 @@
         } else t += 1;
       return t > 0;
     },
-    "bg-size": function(e) {
+    "bg-size": function (e) {
       let t = 0;
       for (let r of R(e, ",")) {
         if ("cover" === r || "contain" === r) {
@@ -1342,13 +1342,13 @@
       }
       return t > 0;
     },
-    "line-width": function(e) {
+    "line-width": function (e) {
       return R(e, " ").every(
         (e) =>
           se(e) || ne(e) || "thin" === e || "medium" === e || "thick" === e,
       );
     },
-    image: function(e) {
+    image: function (e) {
       let t = 0;
       for (let r of R(e, ","))
         if (!r.startsWith("var(")) {
@@ -1368,7 +1368,7 @@
         }
       return t > 0;
     },
-    "family-name": function(e) {
+    "family-name": function (e) {
       let t = 0;
       for (let r of R(e, ",")) {
         let e = r.charCodeAt(0);
@@ -1377,7 +1377,7 @@
       }
       return t > 0;
     },
-    "generic-name": function(e) {
+    "generic-name": function (e) {
       return (
         "serif" === e ||
         "sans-serif" === e ||
@@ -1394,7 +1394,7 @@
         "fangsong" === e
       );
     },
-    "absolute-size": function(e) {
+    "absolute-size": function (e) {
       return (
         "xx-small" === e ||
         "x-small" === e ||
@@ -1406,13 +1406,13 @@
         "xxx-large" === e
       );
     },
-    "relative-size": function(e) {
+    "relative-size": function (e) {
       return "larger" === e || "smaller" === e;
     },
-    angle: function(e) {
+    angle: function (e) {
       return ce.test(e);
     },
-    vector: function(e) {
+    vector: function (e) {
       return ue.test(e);
     },
   };
@@ -1685,15 +1685,15 @@
     function l(e) {
       return o
         ? R(e, ",")
-          .map((e) => o + e)
-          .join(",")
+            .map((e) => o + e)
+            .join(",")
         : e;
     }
     return a
       ? [
-        y(e, l(we(t, n))),
-        b("@supports (color: lab(from red l a b))", [y(e, l(i))]),
-      ]
+          y(e, l(we(t, n))),
+          b("@supports (color: lab(from red l a b))", [y(e, l(i))]),
+        ]
       : [y(e, l(i))];
   }
   function Ve(e, t, r, n, o = "") {
@@ -1713,19 +1713,19 @@
         .join(" ");
     return a
       ? [
-        y(
-          e,
-          o +
-          R(t, ",")
-            .map((e) => `drop-shadow(${we(e, n)})`)
-            .join(" "),
-        ),
-        b("@supports (color: lab(from red l a b))", [y(e, o + i)]),
-      ]
+          y(
+            e,
+            o +
+              R(t, ",")
+                .map((e) => `drop-shadow(${we(e, n)})`)
+                .join(" "),
+          ),
+          b("@supports (color: lab(from red l a b))", [y(e, o + i)]),
+        ]
       : [y(e, o + i)];
   }
   var Ne = {
-    "--alpha": function(e, t, r, ...n) {
+    "--alpha": function (e, t, r, ...n) {
       let [o, a] = R(r, "/").map((e) => e.trim());
       if (!o || !a)
         throw new Error(
@@ -1737,7 +1737,7 @@
         );
       return ze(o, a);
     },
-    "--spacing": function(e, t, r, ...n) {
+    "--spacing": function (e, t, r, ...n) {
       if (!r)
         throw new Error(
           "The --spacing(…) function requires an argument, but received none.",
@@ -1753,7 +1753,7 @@
         );
       return `calc(${o} * ${r})`;
     },
-    "--theme": function(e, t, r, ...n) {
+    "--theme": function (e, t, r, ...n) {
       if (!r.startsWith("--"))
         throw new Error(
           "The --theme(…) function can only be used with CSS variables from your theme.",
@@ -1779,7 +1779,7 @@
       ) {
         let e = m(a);
         return (
-          (function(e, t) {
+          (function (e, t) {
             p(e, (e) => {
               if (
                 "function" === e.kind &&
@@ -1800,8 +1800,8 @@
       }
       return a;
     },
-    theme: function(e, t, r, ...n) {
-      r = (function(e) {
+    theme: function (e, t, r, ...n) {
+      r = (function (e) {
         if ("'" !== e[0] && '"' !== e[0]) return e;
         let t = "",
           r = e[0];
@@ -1867,8 +1867,8 @@
           i = r + 1,
           l = r,
           s = r + 1;
-        for (n = e.charCodeAt(i); n >= 48 && n <= 57;) n = e.charCodeAt(++i);
-        for (o = t.charCodeAt(s); o >= 48 && o <= 57;) o = t.charCodeAt(++s);
+        for (n = e.charCodeAt(i); n >= 48 && n <= 57; ) n = e.charCodeAt(++i);
+        for (o = t.charCodeAt(s); o >= 48 && o <= 57; ) o = t.charCodeAt(++s);
         let c = e.slice(a, i),
           u = t.slice(l, s),
           d = Number(c) - Number(u);
@@ -1892,18 +1892,18 @@
             a = null === n ? r : `${r}-${n}`;
           t.push({ name: a, utility: r, fraction: o, modifiers: e.modifiers }),
             e.supportsNegative &&
-            t.push({
-              name: `-${a}`,
-              utility: `-${r}`,
-              fraction: o,
-              modifiers: e.modifiers,
-            });
+              t.push({
+                name: `-${a}`,
+                utility: `-${r}`,
+                fraction: o,
+                modifiers: e.modifiers,
+              });
         }
     }
     return 0 === t.length
       ? []
       : (t.sort((e, t) => Ue(e.name, t.name)),
-        (function(e) {
+        (function (e) {
           let t = [],
             r = null,
             n = new Map(),
@@ -1912,7 +1912,7 @@
             let { utility: e, fraction: i } = a;
             r || ((r = { utility: e, items: [] }), n.set(e, r)),
               e !== r.utility &&
-              (t.push(r), (r = { utility: e, items: [] }), n.set(e, r)),
+                (t.push(r), (r = { utility: e, items: [] }), n.set(e, r)),
               i ? o.get(e).push(a) : r.items.push(a);
           }
           r && t[t.length - 1] !== r && t.push(r);
@@ -1948,8 +1948,8 @@
           "rule" === e.kind
             ? r.push(e.selector)
             : "at-rule" === e.kind &&
-            "@slot" !== e.name &&
-            r.push(`${e.name} ${e.params}`);
+              "@slot" !== e.name &&
+              r.push(`${e.name} ${e.params}`);
         }),
           this.static(
             e,
@@ -2051,7 +2051,7 @@
           : null === i || ("arbitrary" === a.kind && "arbitrary" !== i.kind)
             ? 1
             : ("arbitrary" !== a.kind && "arbitrary" === i.kind) ||
-              a.value < i.value
+                a.value < i.value
               ? -1
               : 1;
       }
@@ -2069,7 +2069,7 @@
         i
           ? Object.assign(i, { kind: t, applyFn: r, compounds: n })
           : (void 0 === a &&
-            ((this.lastOrder = this.nextOrder()), (a = this.lastOrder)),
+              ((this.lastOrder = this.nextOrder()), (a = this.lastOrder)),
             this.variants.set(e, {
               kind: t,
               applyFn: r,
@@ -2127,755 +2127,721 @@
     });
   }
   function qe(e) {
-    let t = (function(e) {
-      let t = new xe();
-      function r(r, n) {
-        function* o(t) {
-          for (let r of e.keysInNamespaces(t))
-            yield r.replace(Ce, (e, t, r) => `${t}.${r}`);
-        }
-        let a = [
-          "1/2",
-          "1/3",
-          "2/3",
-          "1/4",
-          "2/4",
-          "3/4",
-          "1/5",
-          "2/5",
-          "3/5",
-          "4/5",
-          "1/6",
-          "2/6",
-          "3/6",
-          "4/6",
-          "5/6",
-          "1/12",
-          "2/12",
-          "3/12",
-          "4/12",
-          "5/12",
-          "6/12",
-          "7/12",
-          "8/12",
-          "9/12",
-          "10/12",
-          "11/12",
-        ];
-        t.suggest(r, () => {
-          let e = [];
-          for (let t of n()) {
-            if ("string" == typeof t) {
-              e.push({ values: [t], modifiers: [] });
-              continue;
-            }
-            let r = [...(t.values ?? []), ...o(t.valueThemeKeys ?? [])],
-              n = [...(t.modifiers ?? []), ...o(t.modifierThemeKeys ?? [])];
-            t.supportsFractions && r.push(...a),
-              t.hasDefaultValue && r.unshift(null),
-              e.push({
-                supportsNegative: t.supportsNegative,
-                values: r,
-                modifiers: n,
-              });
+    let t = (function (e) {
+        let t = new xe();
+        function r(r, n) {
+          function* o(t) {
+            for (let r of e.keysInNamespaces(t))
+              yield r.replace(Ce, (e, t, r) => `${t}.${r}`);
           }
-          return e;
-        });
-      }
-      function n(e, r) {
-        t.static(e, () =>
-          r.map((e) => ("function" == typeof e ? e() : y(e[0], e[1]))),
-        );
-      }
-      function o(n, o) {
-        function a({ negative: t }) {
-          return (r) => {
-            let n = null,
-              a = null;
-            if (r.value)
-              if ("arbitrary" === r.value.kind) {
-                if (r.modifier) return;
-                (n = r.value.value), (a = r.value.dataType);
-              } else {
-                if (
-                  ((n = e.resolve(
-                    r.value.fraction ?? r.value.value,
-                    o.themeKeys ?? [],
-                  )),
-                    null === n && o.supportsFractions && r.value.fraction)
-                ) {
-                  let [e, t] = R(r.value.fraction, "/");
-                  if (!de(e) || !de(t)) return;
-                  n = `calc(${r.value.fraction} * 100%)`;
-                }
-                if (null === n && t && o.handleNegativeBareValue) {
+          let a = [
+            "1/2",
+            "1/3",
+            "2/3",
+            "1/4",
+            "2/4",
+            "3/4",
+            "1/5",
+            "2/5",
+            "3/5",
+            "4/5",
+            "1/6",
+            "2/6",
+            "3/6",
+            "4/6",
+            "5/6",
+            "1/12",
+            "2/12",
+            "3/12",
+            "4/12",
+            "5/12",
+            "6/12",
+            "7/12",
+            "8/12",
+            "9/12",
+            "10/12",
+            "11/12",
+          ];
+          t.suggest(r, () => {
+            let e = [];
+            for (let t of n()) {
+              if ("string" == typeof t) {
+                e.push({ values: [t], modifiers: [] });
+                continue;
+              }
+              let r = [...(t.values ?? []), ...o(t.valueThemeKeys ?? [])],
+                n = [...(t.modifiers ?? []), ...o(t.modifierThemeKeys ?? [])];
+              t.supportsFractions && r.push(...a),
+                t.hasDefaultValue && r.unshift(null),
+                e.push({
+                  supportsNegative: t.supportsNegative,
+                  values: r,
+                  modifiers: n,
+                });
+            }
+            return e;
+          });
+        }
+        function n(e, r) {
+          t.static(e, () =>
+            r.map((e) => ("function" == typeof e ? e() : y(e[0], e[1]))),
+          );
+        }
+        function o(n, o) {
+          function a({ negative: t }) {
+            return (r) => {
+              let n = null,
+                a = null;
+              if (r.value)
+                if ("arbitrary" === r.value.kind) {
+                  if (r.modifier) return;
+                  (n = r.value.value), (a = r.value.dataType);
+                } else {
                   if (
-                    ((n = o.handleNegativeBareValue(r.value)),
+                    ((n = e.resolve(
+                      r.value.fraction ?? r.value.value,
+                      o.themeKeys ?? [],
+                    )),
+                    null === n && o.supportsFractions && r.value.fraction)
+                  ) {
+                    let [e, t] = R(r.value.fraction, "/");
+                    if (!de(e) || !de(t)) return;
+                    n = `calc(${r.value.fraction} * 100%)`;
+                  }
+                  if (null === n && t && o.handleNegativeBareValue) {
+                    if (
+                      ((n = o.handleNegativeBareValue(r.value)),
                       !n?.includes("/") && r.modifier)
+                    )
+                      return;
+                    if (null !== n) return o.handle(n, null);
+                  }
+                  if (
+                    null === n &&
+                    o.handleBareValue &&
+                    ((n = o.handleBareValue(r.value)),
+                    !n?.includes("/") && r.modifier)
                   )
                     return;
-                  if (null !== n) return o.handle(n, null);
                 }
-                if (
-                  null === n &&
-                  o.handleBareValue &&
-                  ((n = o.handleBareValue(r.value)),
-                    !n?.includes("/") && r.modifier)
-                )
-                  return;
+              else {
+                if (r.modifier) return;
+                n =
+                  void 0 !== o.defaultValue
+                    ? o.defaultValue
+                    : e.resolve(null, o.themeKeys ?? []);
               }
-            else {
-              if (r.modifier) return;
-              n =
-                void 0 !== o.defaultValue
-                  ? o.defaultValue
-                  : e.resolve(null, o.themeKeys ?? []);
-            }
-            if (null !== n) return o.handle(t ? `calc(${n} * -1)` : n, a);
-          };
+              if (null !== n) return o.handle(t ? `calc(${n} * -1)` : n, a);
+            };
+          }
+          o.supportsNegative && t.functional(`-${n}`, a({ negative: !0 })),
+            t.functional(n, a({ negative: !1 })),
+            r(n, () => [
+              {
+                supportsNegative: o.supportsNegative,
+                valueThemeKeys: o.themeKeys ?? [],
+                hasDefaultValue:
+                  void 0 !== o.defaultValue && null !== o.defaultValue,
+                supportsFractions: o.supportsFractions,
+              },
+            ]);
         }
-        o.supportsNegative && t.functional(`-${n}`, a({ negative: !0 })),
-          t.functional(n, a({ negative: !1 })),
-          r(n, () => [
-            {
-              supportsNegative: o.supportsNegative,
-              valueThemeKeys: o.themeKeys ?? [],
-              hasDefaultValue:
-                void 0 !== o.defaultValue && null !== o.defaultValue,
-              supportsFractions: o.supportsFractions,
-            },
-          ]);
-      }
-      function a(n, o) {
-        t.functional(n, (t) => {
-          if (!t.value) return;
-          let r = null;
-          return (
-            "arbitrary" === t.value.kind
-              ? ((r = t.value.value), (r = je(r, t.modifier, e)))
-              : (r = Te(t, e, o.themeKeys)),
-            null !== r ? o.handle(r) : void 0
-          );
-        }),
-          r(n, () => [
-            {
-              values: ["current", "inherit", "transparent"],
-              valueThemeKeys: o.themeKeys,
-              modifiers: Array.from({ length: 21 }, (e, t) => "" + 5 * t),
-            },
-          ]);
-      }
-      function i(
-        n,
-        a,
-        i,
-        { supportsNegative: l = !1, supportsFractions: s = !1 } = {},
-      ) {
-        l && t.static(`-${n}-px`, () => i("-1px")),
-          t.static(`${n}-px`, () => i("1px")),
-          o(n, {
-            themeKeys: a,
-            supportsFractions: s,
-            supportsNegative: l,
-            defaultValue: null,
-            handleBareValue: ({ value: t }) => {
-              let r = e.resolve(null, ["--spacing"]);
-              return r && pe(t) ? `calc(${r} * ${t})` : null;
-            },
-            handleNegativeBareValue: ({ value: t }) => {
-              let r = e.resolve(null, ["--spacing"]);
-              return r && pe(t) ? `calc(${r} * -${t})` : null;
-            },
-            handle: i,
+        function a(n, o) {
+          t.functional(n, (t) => {
+            if (!t.value) return;
+            let r = null;
+            return (
+              "arbitrary" === t.value.kind
+                ? ((r = t.value.value), (r = je(r, t.modifier, e)))
+                : (r = Te(t, e, o.themeKeys)),
+              null !== r ? o.handle(r) : void 0
+            );
           }),
-          r(n, () => [
-            {
-              values: e.get(["--spacing"]) ? ye : [],
-              supportsNegative: l,
+            r(n, () => [
+              {
+                values: ["current", "inherit", "transparent"],
+                valueThemeKeys: o.themeKeys,
+                modifiers: Array.from({ length: 21 }, (e, t) => "" + 5 * t),
+              },
+            ]);
+        }
+        function i(
+          n,
+          a,
+          i,
+          { supportsNegative: l = !1, supportsFractions: s = !1 } = {},
+        ) {
+          l && t.static(`-${n}-px`, () => i("-1px")),
+            t.static(`${n}-px`, () => i("1px")),
+            o(n, {
+              themeKeys: a,
               supportsFractions: s,
-              valueThemeKeys: a,
+              supportsNegative: l,
+              defaultValue: null,
+              handleBareValue: ({ value: t }) => {
+                let r = e.resolve(null, ["--spacing"]);
+                return r && pe(t) ? `calc(${r} * ${t})` : null;
+              },
+              handleNegativeBareValue: ({ value: t }) => {
+                let r = e.resolve(null, ["--spacing"]);
+                return r && pe(t) ? `calc(${r} * -${t})` : null;
+              },
+              handle: i,
+            }),
+            r(n, () => [
+              {
+                values: e.get(["--spacing"]) ? ye : [],
+                supportsNegative: l,
+                supportsFractions: s,
+                valueThemeKeys: a,
+              },
+            ]);
+        }
+        n("sr-only", [
+          ["position", "absolute"],
+          ["width", "1px"],
+          ["height", "1px"],
+          ["padding", "0"],
+          ["margin", "-1px"],
+          ["overflow", "hidden"],
+          ["clip", "rect(0, 0, 0, 0)"],
+          ["white-space", "nowrap"],
+          ["border-width", "0"],
+        ]),
+          n("not-sr-only", [
+            ["position", "static"],
+            ["width", "auto"],
+            ["height", "auto"],
+            ["padding", "0"],
+            ["margin", "0"],
+            ["overflow", "visible"],
+            ["clip", "auto"],
+            ["white-space", "normal"],
+          ]),
+          n("pointer-events-none", [["pointer-events", "none"]]),
+          n("pointer-events-auto", [["pointer-events", "auto"]]),
+          n("visible", [["visibility", "visible"]]),
+          n("invisible", [["visibility", "hidden"]]),
+          n("collapse", [["visibility", "collapse"]]),
+          n("static", [["position", "static"]]),
+          n("fixed", [["position", "fixed"]]),
+          n("absolute", [["position", "absolute"]]),
+          n("relative", [["position", "relative"]]),
+          n("sticky", [["position", "sticky"]]);
+        for (let [e, t] of [
+          ["inset", "inset"],
+          ["inset-x", "inset-inline"],
+          ["inset-y", "inset-block"],
+          ["start", "inset-inline-start"],
+          ["end", "inset-inline-end"],
+          ["top", "top"],
+          ["right", "right"],
+          ["bottom", "bottom"],
+          ["left", "left"],
+        ])
+          n(`${e}-auto`, [[t, "auto"]]),
+            n(`${e}-full`, [[t, "100%"]]),
+            n(`-${e}-full`, [[t, "-100%"]]),
+            i(e, ["--inset", "--spacing"], (e) => [y(t, e)], {
+              supportsNegative: !0,
+              supportsFractions: !0,
+            });
+        n("isolate", [["isolation", "isolate"]]),
+          n("isolation-auto", [["isolation", "auto"]]),
+          n("z-auto", [["z-index", "auto"]]),
+          o("z", {
+            supportsNegative: !0,
+            handleBareValue: ({ value: e }) => (de(e) ? e : null),
+            themeKeys: ["--z-index"],
+            handle: (e) => [y("z-index", e)],
+          }),
+          r("z", () => [
+            {
+              supportsNegative: !0,
+              values: ["0", "10", "20", "30", "40", "50"],
+              valueThemeKeys: ["--z-index"],
             },
-          ]);
-      }
-      n("sr-only", [
-        ["position", "absolute"],
-        ["width", "1px"],
-        ["height", "1px"],
-        ["padding", "0"],
-        ["margin", "-1px"],
-        ["overflow", "hidden"],
-        ["clip", "rect(0, 0, 0, 0)"],
-        ["white-space", "nowrap"],
-        ["border-width", "0"],
-      ]),
-        n("not-sr-only", [
-          ["position", "static"],
+          ]),
+          n("order-first", [["order", "-9999"]]),
+          n("order-last", [["order", "9999"]]),
+          n("order-none", [["order", "0"]]),
+          o("order", {
+            supportsNegative: !0,
+            handleBareValue: ({ value: e }) => (de(e) ? e : null),
+            themeKeys: ["--order"],
+            handle: (e) => [y("order", e)],
+          }),
+          r("order", () => [
+            {
+              supportsNegative: !0,
+              values: Array.from({ length: 12 }, (e, t) => `${t + 1}`),
+              valueThemeKeys: ["--order"],
+            },
+          ]),
+          n("col-auto", [["grid-column", "auto"]]),
+          o("col", {
+            supportsNegative: !0,
+            handleBareValue: ({ value: e }) => (de(e) ? e : null),
+            themeKeys: ["--grid-column"],
+            handle: (e) => [y("grid-column", e)],
+          }),
+          n("col-span-full", [["grid-column", "1 / -1"]]),
+          o("col-span", {
+            handleBareValue: ({ value: e }) => (de(e) ? e : null),
+            handle: (e) => [y("grid-column", `span ${e} / span ${e}`)],
+          }),
+          n("col-start-auto", [["grid-column-start", "auto"]]),
+          o("col-start", {
+            supportsNegative: !0,
+            handleBareValue: ({ value: e }) => (de(e) ? e : null),
+            themeKeys: ["--grid-column-start"],
+            handle: (e) => [y("grid-column-start", e)],
+          }),
+          n("col-end-auto", [["grid-column-end", "auto"]]),
+          o("col-end", {
+            supportsNegative: !0,
+            handleBareValue: ({ value: e }) => (de(e) ? e : null),
+            themeKeys: ["--grid-column-end"],
+            handle: (e) => [y("grid-column-end", e)],
+          }),
+          r("col-span", () => [
+            {
+              values: Array.from({ length: 12 }, (e, t) => `${t + 1}`),
+              valueThemeKeys: [],
+            },
+          ]),
+          r("col-start", () => [
+            {
+              supportsNegative: !0,
+              values: Array.from({ length: 13 }, (e, t) => `${t + 1}`),
+              valueThemeKeys: ["--grid-column-start"],
+            },
+          ]),
+          r("col-end", () => [
+            {
+              supportsNegative: !0,
+              values: Array.from({ length: 13 }, (e, t) => `${t + 1}`),
+              valueThemeKeys: ["--grid-column-end"],
+            },
+          ]),
+          n("row-auto", [["grid-row", "auto"]]),
+          o("row", {
+            supportsNegative: !0,
+            handleBareValue: ({ value: e }) => (de(e) ? e : null),
+            themeKeys: ["--grid-row"],
+            handle: (e) => [y("grid-row", e)],
+          }),
+          n("row-span-full", [["grid-row", "1 / -1"]]),
+          o("row-span", {
+            themeKeys: [],
+            handleBareValue: ({ value: e }) => (de(e) ? e : null),
+            handle: (e) => [y("grid-row", `span ${e} / span ${e}`)],
+          }),
+          n("row-start-auto", [["grid-row-start", "auto"]]),
+          o("row-start", {
+            supportsNegative: !0,
+            handleBareValue: ({ value: e }) => (de(e) ? e : null),
+            themeKeys: ["--grid-row-start"],
+            handle: (e) => [y("grid-row-start", e)],
+          }),
+          n("row-end-auto", [["grid-row-end", "auto"]]),
+          o("row-end", {
+            supportsNegative: !0,
+            handleBareValue: ({ value: e }) => (de(e) ? e : null),
+            themeKeys: ["--grid-row-end"],
+            handle: (e) => [y("grid-row-end", e)],
+          }),
+          r("row-span", () => [
+            {
+              values: Array.from({ length: 12 }, (e, t) => `${t + 1}`),
+              valueThemeKeys: [],
+            },
+          ]),
+          r("row-start", () => [
+            {
+              supportsNegative: !0,
+              values: Array.from({ length: 13 }, (e, t) => `${t + 1}`),
+              valueThemeKeys: ["--grid-row-start"],
+            },
+          ]),
+          r("row-end", () => [
+            {
+              supportsNegative: !0,
+              values: Array.from({ length: 13 }, (e, t) => `${t + 1}`),
+              valueThemeKeys: ["--grid-row-end"],
+            },
+          ]),
+          n("float-start", [["float", "inline-start"]]),
+          n("float-end", [["float", "inline-end"]]),
+          n("float-right", [["float", "right"]]),
+          n("float-left", [["float", "left"]]),
+          n("float-none", [["float", "none"]]),
+          n("clear-start", [["clear", "inline-start"]]),
+          n("clear-end", [["clear", "inline-end"]]),
+          n("clear-right", [["clear", "right"]]),
+          n("clear-left", [["clear", "left"]]),
+          n("clear-both", [["clear", "both"]]),
+          n("clear-none", [["clear", "none"]]);
+        for (let [e, t] of [
+          ["m", "margin"],
+          ["mx", "margin-inline"],
+          ["my", "margin-block"],
+          ["ms", "margin-inline-start"],
+          ["me", "margin-inline-end"],
+          ["mt", "margin-top"],
+          ["mr", "margin-right"],
+          ["mb", "margin-bottom"],
+          ["ml", "margin-left"],
+        ])
+          n(`${e}-auto`, [[t, "auto"]]),
+            i(e, ["--margin", "--spacing"], (e) => [y(t, e)], {
+              supportsNegative: !0,
+            });
+        n("box-border", [["box-sizing", "border-box"]]),
+          n("box-content", [["box-sizing", "content-box"]]),
+          n("line-clamp-none", [
+            ["overflow", "visible"],
+            ["display", "block"],
+            ["-webkit-box-orient", "horizontal"],
+            ["-webkit-line-clamp", "unset"],
+          ]),
+          o("line-clamp", {
+            themeKeys: ["--line-clamp"],
+            handleBareValue: ({ value: e }) => (de(e) ? e : null),
+            handle: (e) => [
+              y("overflow", "hidden"),
+              y("display", "-webkit-box"),
+              y("-webkit-box-orient", "vertical"),
+              y("-webkit-line-clamp", e),
+            ],
+          }),
+          r("line-clamp", () => [
+            {
+              values: ["1", "2", "3", "4", "5", "6"],
+              valueThemeKeys: ["--line-clamp"],
+            },
+          ]),
+          n("block", [["display", "block"]]),
+          n("inline-block", [["display", "inline-block"]]),
+          n("inline", [["display", "inline"]]),
+          n("hidden", [["display", "none"]]),
+          n("inline-flex", [["display", "inline-flex"]]),
+          n("table", [["display", "table"]]),
+          n("inline-table", [["display", "inline-table"]]),
+          n("table-caption", [["display", "table-caption"]]),
+          n("table-cell", [["display", "table-cell"]]),
+          n("table-column", [["display", "table-column"]]),
+          n("table-column-group", [["display", "table-column-group"]]),
+          n("table-footer-group", [["display", "table-footer-group"]]),
+          n("table-header-group", [["display", "table-header-group"]]),
+          n("table-row-group", [["display", "table-row-group"]]),
+          n("table-row", [["display", "table-row"]]),
+          n("flow-root", [["display", "flow-root"]]),
+          n("flex", [["display", "flex"]]),
+          n("grid", [["display", "grid"]]),
+          n("inline-grid", [["display", "inline-grid"]]),
+          n("contents", [["display", "contents"]]),
+          n("list-item", [["display", "list-item"]]),
+          n("field-sizing-content", [["field-sizing", "content"]]),
+          n("field-sizing-fixed", [["field-sizing", "fixed"]]),
+          n("aspect-auto", [["aspect-ratio", "auto"]]),
+          n("aspect-square", [["aspect-ratio", "1 / 1"]]),
+          o("aspect", {
+            themeKeys: ["--aspect"],
+            handleBareValue: ({ fraction: e }) => {
+              if (null === e) return null;
+              let [t, r] = R(e, "/");
+              return de(t) && de(r) ? e : null;
+            },
+            handle: (e) => [y("aspect-ratio", e)],
+          });
+        for (let [e, t] of [
+          ["full", "100%"],
+          ["svw", "100svw"],
+          ["lvw", "100lvw"],
+          ["dvw", "100dvw"],
+          ["svh", "100svh"],
+          ["lvh", "100lvh"],
+          ["dvh", "100dvh"],
+          ["min", "min-content"],
+          ["max", "max-content"],
+          ["fit", "fit-content"],
+        ])
+          n(`size-${e}`, [
+            ["--tw-sort", "size"],
+            ["width", t],
+            ["height", t],
+          ]),
+            n(`w-${e}`, [["width", t]]),
+            n(`h-${e}`, [["height", t]]),
+            n(`min-w-${e}`, [["min-width", t]]),
+            n(`min-h-${e}`, [["min-height", t]]),
+            n(`max-w-${e}`, [["max-width", t]]),
+            n(`max-h-${e}`, [["max-height", t]]);
+        n("size-auto", [
+          ["--tw-sort", "size"],
           ["width", "auto"],
           ["height", "auto"],
-          ["padding", "0"],
-          ["margin", "0"],
-          ["overflow", "visible"],
-          ["clip", "auto"],
-          ["white-space", "normal"],
         ]),
-        n("pointer-events-none", [["pointer-events", "none"]]),
-        n("pointer-events-auto", [["pointer-events", "auto"]]),
-        n("visible", [["visibility", "visible"]]),
-        n("invisible", [["visibility", "hidden"]]),
-        n("collapse", [["visibility", "collapse"]]),
-        n("static", [["position", "static"]]),
-        n("fixed", [["position", "fixed"]]),
-        n("absolute", [["position", "absolute"]]),
-        n("relative", [["position", "relative"]]),
-        n("sticky", [["position", "sticky"]]);
-      for (let [e, t] of [
-        ["inset", "inset"],
-        ["inset-x", "inset-inline"],
-        ["inset-y", "inset-block"],
-        ["start", "inset-inline-start"],
-        ["end", "inset-inline-end"],
-        ["top", "top"],
-        ["right", "right"],
-        ["bottom", "bottom"],
-        ["left", "left"],
-      ])
-        n(`${e}-auto`, [[t, "auto"]]),
-          n(`${e}-full`, [[t, "100%"]]),
-          n(`-${e}-full`, [[t, "-100%"]]),
-          i(e, ["--inset", "--spacing"], (e) => [y(t, e)], {
-            supportsNegative: !0,
-            supportsFractions: !0,
-          });
-      n("isolate", [["isolation", "isolate"]]),
-        n("isolation-auto", [["isolation", "auto"]]),
-        n("z-auto", [["z-index", "auto"]]),
-        o("z", {
-          supportsNegative: !0,
-          handleBareValue: ({ value: e }) => (de(e) ? e : null),
-          themeKeys: ["--z-index"],
-          handle: (e) => [y("z-index", e)],
+          n("w-auto", [["width", "auto"]]),
+          n("h-auto", [["height", "auto"]]),
+          n("min-w-auto", [["min-width", "auto"]]),
+          n("min-h-auto", [["min-height", "auto"]]),
+          n("h-lh", [["height", "1lh"]]),
+          n("min-h-lh", [["min-height", "1lh"]]),
+          n("max-h-lh", [["max-height", "1lh"]]),
+          n("w-screen", [["width", "100vw"]]),
+          n("min-w-screen", [["min-width", "100vw"]]),
+          n("max-w-screen", [["max-width", "100vw"]]),
+          n("h-screen", [["height", "100vh"]]),
+          n("min-h-screen", [["min-height", "100vh"]]),
+          n("max-h-screen", [["max-height", "100vh"]]),
+          n("max-w-none", [["max-width", "none"]]),
+          n("max-h-none", [["max-height", "none"]]),
+          i(
+            "size",
+            ["--size", "--spacing"],
+            (e) => [y("--tw-sort", "size"), y("width", e), y("height", e)],
+            { supportsFractions: !0 },
+          );
+        for (let [e, t, r] of [
+          ["w", ["--width", "--spacing", "--container"], "width"],
+          ["min-w", ["--min-width", "--spacing", "--container"], "min-width"],
+          ["max-w", ["--max-width", "--spacing", "--container"], "max-width"],
+          ["h", ["--height", "--spacing"], "height"],
+          ["min-h", ["--min-height", "--height", "--spacing"], "min-height"],
+          ["max-h", ["--max-height", "--height", "--spacing"], "max-height"],
+        ])
+          i(e, t, (e) => [y(r, e)], { supportsFractions: !0 });
+        t.static("container", () => {
+          let t = [...e.namespace("--breakpoint").values()];
+          t.sort((e, t) => P(e, t, "asc"));
+          let r = [
+            y("--tw-sort", "--tw-container-component"),
+            y("width", "100%"),
+          ];
+          for (let e of t)
+            r.push(k("@media", `(width >= ${e})`, [y("max-width", e)]));
+          return r;
         }),
-        r("z", () => [
-          {
-            supportsNegative: !0,
-            values: ["0", "10", "20", "30", "40", "50"],
-            valueThemeKeys: ["--z-index"],
-          },
-        ]),
-        n("order-first", [["order", "-9999"]]),
-        n("order-last", [["order", "9999"]]),
-        n("order-none", [["order", "0"]]),
-        o("order", {
-          supportsNegative: !0,
-          handleBareValue: ({ value: e }) => (de(e) ? e : null),
-          themeKeys: ["--order"],
-          handle: (e) => [y("order", e)],
-        }),
-        r("order", () => [
-          {
-            supportsNegative: !0,
-            values: Array.from({ length: 12 }, (e, t) => `${t + 1}`),
-            valueThemeKeys: ["--order"],
-          },
-        ]),
-        n("col-auto", [["grid-column", "auto"]]),
-        o("col", {
-          supportsNegative: !0,
-          handleBareValue: ({ value: e }) => (de(e) ? e : null),
-          themeKeys: ["--grid-column"],
-          handle: (e) => [y("grid-column", e)],
-        }),
-        n("col-span-full", [["grid-column", "1 / -1"]]),
-        o("col-span", {
-          handleBareValue: ({ value: e }) => (de(e) ? e : null),
-          handle: (e) => [y("grid-column", `span ${e} / span ${e}`)],
-        }),
-        n("col-start-auto", [["grid-column-start", "auto"]]),
-        o("col-start", {
-          supportsNegative: !0,
-          handleBareValue: ({ value: e }) => (de(e) ? e : null),
-          themeKeys: ["--grid-column-start"],
-          handle: (e) => [y("grid-column-start", e)],
-        }),
-        n("col-end-auto", [["grid-column-end", "auto"]]),
-        o("col-end", {
-          supportsNegative: !0,
-          handleBareValue: ({ value: e }) => (de(e) ? e : null),
-          themeKeys: ["--grid-column-end"],
-          handle: (e) => [y("grid-column-end", e)],
-        }),
-        r("col-span", () => [
-          {
-            values: Array.from({ length: 12 }, (e, t) => `${t + 1}`),
-            valueThemeKeys: [],
-          },
-        ]),
-        r("col-start", () => [
-          {
-            supportsNegative: !0,
-            values: Array.from({ length: 13 }, (e, t) => `${t + 1}`),
-            valueThemeKeys: ["--grid-column-start"],
-          },
-        ]),
-        r("col-end", () => [
-          {
-            supportsNegative: !0,
-            values: Array.from({ length: 13 }, (e, t) => `${t + 1}`),
-            valueThemeKeys: ["--grid-column-end"],
-          },
-        ]),
-        n("row-auto", [["grid-row", "auto"]]),
-        o("row", {
-          supportsNegative: !0,
-          handleBareValue: ({ value: e }) => (de(e) ? e : null),
-          themeKeys: ["--grid-row"],
-          handle: (e) => [y("grid-row", e)],
-        }),
-        n("row-span-full", [["grid-row", "1 / -1"]]),
-        o("row-span", {
-          themeKeys: [],
-          handleBareValue: ({ value: e }) => (de(e) ? e : null),
-          handle: (e) => [y("grid-row", `span ${e} / span ${e}`)],
-        }),
-        n("row-start-auto", [["grid-row-start", "auto"]]),
-        o("row-start", {
-          supportsNegative: !0,
-          handleBareValue: ({ value: e }) => (de(e) ? e : null),
-          themeKeys: ["--grid-row-start"],
-          handle: (e) => [y("grid-row-start", e)],
-        }),
-        n("row-end-auto", [["grid-row-end", "auto"]]),
-        o("row-end", {
-          supportsNegative: !0,
-          handleBareValue: ({ value: e }) => (de(e) ? e : null),
-          themeKeys: ["--grid-row-end"],
-          handle: (e) => [y("grid-row-end", e)],
-        }),
-        r("row-span", () => [
-          {
-            values: Array.from({ length: 12 }, (e, t) => `${t + 1}`),
-            valueThemeKeys: [],
-          },
-        ]),
-        r("row-start", () => [
-          {
-            supportsNegative: !0,
-            values: Array.from({ length: 13 }, (e, t) => `${t + 1}`),
-            valueThemeKeys: ["--grid-row-start"],
-          },
-        ]),
-        r("row-end", () => [
-          {
-            supportsNegative: !0,
-            values: Array.from({ length: 13 }, (e, t) => `${t + 1}`),
-            valueThemeKeys: ["--grid-row-end"],
-          },
-        ]),
-        n("float-start", [["float", "inline-start"]]),
-        n("float-end", [["float", "inline-end"]]),
-        n("float-right", [["float", "right"]]),
-        n("float-left", [["float", "left"]]),
-        n("float-none", [["float", "none"]]),
-        n("clear-start", [["clear", "inline-start"]]),
-        n("clear-end", [["clear", "inline-end"]]),
-        n("clear-right", [["clear", "right"]]),
-        n("clear-left", [["clear", "left"]]),
-        n("clear-both", [["clear", "both"]]),
-        n("clear-none", [["clear", "none"]]);
-      for (let [e, t] of [
-        ["m", "margin"],
-        ["mx", "margin-inline"],
-        ["my", "margin-block"],
-        ["ms", "margin-inline-start"],
-        ["me", "margin-inline-end"],
-        ["mt", "margin-top"],
-        ["mr", "margin-right"],
-        ["mb", "margin-bottom"],
-        ["ml", "margin-left"],
-      ])
-        n(`${e}-auto`, [[t, "auto"]]),
-          i(e, ["--margin", "--spacing"], (e) => [y(t, e)], {
-            supportsNegative: !0,
-          });
-      n("box-border", [["box-sizing", "border-box"]]),
-        n("box-content", [["box-sizing", "content-box"]]),
-        n("line-clamp-none", [
-          ["overflow", "visible"],
-          ["display", "block"],
-          ["-webkit-box-orient", "horizontal"],
-          ["-webkit-line-clamp", "unset"],
-        ]),
-        o("line-clamp", {
-          themeKeys: ["--line-clamp"],
-          handleBareValue: ({ value: e }) => (de(e) ? e : null),
-          handle: (e) => [
-            y("overflow", "hidden"),
-            y("display", "-webkit-box"),
-            y("-webkit-box-orient", "vertical"),
-            y("-webkit-line-clamp", e),
-          ],
-        }),
-        r("line-clamp", () => [
-          {
-            values: ["1", "2", "3", "4", "5", "6"],
-            valueThemeKeys: ["--line-clamp"],
-          },
-        ]),
-        n("block", [["display", "block"]]),
-        n("inline-block", [["display", "inline-block"]]),
-        n("inline", [["display", "inline"]]),
-        n("hidden", [["display", "none"]]),
-        n("inline-flex", [["display", "inline-flex"]]),
-        n("table", [["display", "table"]]),
-        n("inline-table", [["display", "inline-table"]]),
-        n("table-caption", [["display", "table-caption"]]),
-        n("table-cell", [["display", "table-cell"]]),
-        n("table-column", [["display", "table-column"]]),
-        n("table-column-group", [["display", "table-column-group"]]),
-        n("table-footer-group", [["display", "table-footer-group"]]),
-        n("table-header-group", [["display", "table-header-group"]]),
-        n("table-row-group", [["display", "table-row-group"]]),
-        n("table-row", [["display", "table-row"]]),
-        n("flow-root", [["display", "flow-root"]]),
-        n("flex", [["display", "flex"]]),
-        n("grid", [["display", "grid"]]),
-        n("inline-grid", [["display", "inline-grid"]]),
-        n("contents", [["display", "contents"]]),
-        n("list-item", [["display", "list-item"]]),
-        n("field-sizing-content", [["field-sizing", "content"]]),
-        n("field-sizing-fixed", [["field-sizing", "fixed"]]),
-        n("aspect-auto", [["aspect-ratio", "auto"]]),
-        n("aspect-square", [["aspect-ratio", "1 / 1"]]),
-        o("aspect", {
-          themeKeys: ["--aspect"],
-          handleBareValue: ({ fraction: e }) => {
-            if (null === e) return null;
-            let [t, r] = R(e, "/");
-            return de(t) && de(r) ? e : null;
-          },
-          handle: (e) => [y("aspect-ratio", e)],
-        });
-      for (let [e, t] of [
-        ["full", "100%"],
-        ["svw", "100svw"],
-        ["lvw", "100lvw"],
-        ["dvw", "100dvw"],
-        ["svh", "100svh"],
-        ["lvh", "100lvh"],
-        ["dvh", "100dvh"],
-        ["min", "min-content"],
-        ["max", "max-content"],
-        ["fit", "fit-content"],
-      ])
-        n(`size-${e}`, [
-          ["--tw-sort", "size"],
-          ["width", t],
-          ["height", t],
-        ]),
-          n(`w-${e}`, [["width", t]]),
-          n(`h-${e}`, [["height", t]]),
-          n(`min-w-${e}`, [["min-width", t]]),
-          n(`min-h-${e}`, [["min-height", t]]),
-          n(`max-w-${e}`, [["max-width", t]]),
-          n(`max-h-${e}`, [["max-height", t]]);
-      n("size-auto", [
-        ["--tw-sort", "size"],
-        ["width", "auto"],
-        ["height", "auto"],
-      ]),
-        n("w-auto", [["width", "auto"]]),
-        n("h-auto", [["height", "auto"]]),
-        n("min-w-auto", [["min-width", "auto"]]),
-        n("min-h-auto", [["min-height", "auto"]]),
-        n("h-lh", [["height", "1lh"]]),
-        n("min-h-lh", [["min-height", "1lh"]]),
-        n("max-h-lh", [["max-height", "1lh"]]),
-        n("w-screen", [["width", "100vw"]]),
-        n("min-w-screen", [["min-width", "100vw"]]),
-        n("max-w-screen", [["max-width", "100vw"]]),
-        n("h-screen", [["height", "100vh"]]),
-        n("min-h-screen", [["min-height", "100vh"]]),
-        n("max-h-screen", [["max-height", "100vh"]]),
-        n("max-w-none", [["max-width", "none"]]),
-        n("max-h-none", [["max-height", "none"]]),
-        i(
-          "size",
-          ["--size", "--spacing"],
-          (e) => [y("--tw-sort", "size"), y("width", e), y("height", e)],
-          { supportsFractions: !0 },
-        );
-      for (let [e, t, r] of [
-        ["w", ["--width", "--spacing", "--container"], "width"],
-        ["min-w", ["--min-width", "--spacing", "--container"], "min-width"],
-        ["max-w", ["--max-width", "--spacing", "--container"], "max-width"],
-        ["h", ["--height", "--spacing"], "height"],
-        ["min-h", ["--min-height", "--height", "--spacing"], "min-height"],
-        ["max-h", ["--max-height", "--height", "--spacing"], "max-height"],
-      ])
-        i(e, t, (e) => [y(r, e)], { supportsFractions: !0 });
-      t.static("container", () => {
-        let t = [...e.namespace("--breakpoint").values()];
-        t.sort((e, t) => P(e, t, "asc"));
-        let r = [
-          y("--tw-sort", "--tw-container-component"),
-          y("width", "100%"),
-        ];
-        for (let e of t)
-          r.push(k("@media", `(width >= ${e})`, [y("max-width", e)]));
-        return r;
-      }),
-        n("flex-auto", [["flex", "auto"]]),
-        n("flex-initial", [["flex", "0 auto"]]),
-        n("flex-none", [["flex", "none"]]),
-        t.functional("flex", (e) => {
-          if (e.value) {
-            if ("arbitrary" === e.value.kind)
-              return e.modifier ? void 0 : [y("flex", e.value.value)];
-            if (e.value.fraction) {
-              let [t, r] = R(e.value.fraction, "/");
-              return de(t) && de(r)
-                ? [y("flex", `calc(${e.value.fraction} * 100%)`)]
-                : void 0;
+          n("flex-auto", [["flex", "auto"]]),
+          n("flex-initial", [["flex", "0 auto"]]),
+          n("flex-none", [["flex", "none"]]),
+          t.functional("flex", (e) => {
+            if (e.value) {
+              if ("arbitrary" === e.value.kind)
+                return e.modifier ? void 0 : [y("flex", e.value.value)];
+              if (e.value.fraction) {
+                let [t, r] = R(e.value.fraction, "/");
+                return de(t) && de(r)
+                  ? [y("flex", `calc(${e.value.fraction} * 100%)`)]
+                  : void 0;
+              }
+              if (de(e.value.value))
+                return e.modifier ? void 0 : [y("flex", e.value.value)];
             }
-            if (de(e.value.value))
-              return e.modifier ? void 0 : [y("flex", e.value.value)];
-          }
-        }),
-        r("flex", () => [{ supportsFractions: !0 }]),
-        o("shrink", {
-          defaultValue: "1",
-          handleBareValue: ({ value: e }) => (de(e) ? e : null),
-          handle: (e) => [y("flex-shrink", e)],
-        }),
-        o("grow", {
-          defaultValue: "1",
-          handleBareValue: ({ value: e }) => (de(e) ? e : null),
-          handle: (e) => [y("flex-grow", e)],
-        }),
-        r("shrink", () => [
-          { values: ["0"], valueThemeKeys: [], hasDefaultValue: !0 },
-        ]),
-        r("grow", () => [
-          { values: ["0"], valueThemeKeys: [], hasDefaultValue: !0 },
-        ]),
-        n("basis-auto", [["flex-basis", "auto"]]),
-        n("basis-full", [["flex-basis", "100%"]]),
-        i(
-          "basis",
-          ["--flex-basis", "--spacing", "--container"],
-          (e) => [y("flex-basis", e)],
-          { supportsFractions: !0 },
-        ),
-        n("table-auto", [["table-layout", "auto"]]),
-        n("table-fixed", [["table-layout", "fixed"]]),
-        n("caption-top", [["caption-side", "top"]]),
-        n("caption-bottom", [["caption-side", "bottom"]]),
-        n("border-collapse", [["border-collapse", "collapse"]]),
-        n("border-separate", [["border-collapse", "separate"]]);
-      let l = () =>
-        z([
-          $e("--tw-border-spacing-x", "0", "<length>"),
-          $e("--tw-border-spacing-y", "0", "<length>"),
-        ]);
-      i("border-spacing", ["--border-spacing", "--spacing"], (e) => [
-        l(),
-        y("--tw-border-spacing-x", e),
-        y("--tw-border-spacing-y", e),
-        y(
-          "border-spacing",
-          "var(--tw-border-spacing-x) var(--tw-border-spacing-y)",
-        ),
-      ]),
-        i("border-spacing-x", ["--border-spacing", "--spacing"], (e) => [
+          }),
+          r("flex", () => [{ supportsFractions: !0 }]),
+          o("shrink", {
+            defaultValue: "1",
+            handleBareValue: ({ value: e }) => (de(e) ? e : null),
+            handle: (e) => [y("flex-shrink", e)],
+          }),
+          o("grow", {
+            defaultValue: "1",
+            handleBareValue: ({ value: e }) => (de(e) ? e : null),
+            handle: (e) => [y("flex-grow", e)],
+          }),
+          r("shrink", () => [
+            { values: ["0"], valueThemeKeys: [], hasDefaultValue: !0 },
+          ]),
+          r("grow", () => [
+            { values: ["0"], valueThemeKeys: [], hasDefaultValue: !0 },
+          ]),
+          n("basis-auto", [["flex-basis", "auto"]]),
+          n("basis-full", [["flex-basis", "100%"]]),
+          i(
+            "basis",
+            ["--flex-basis", "--spacing", "--container"],
+            (e) => [y("flex-basis", e)],
+            { supportsFractions: !0 },
+          ),
+          n("table-auto", [["table-layout", "auto"]]),
+          n("table-fixed", [["table-layout", "fixed"]]),
+          n("caption-top", [["caption-side", "top"]]),
+          n("caption-bottom", [["caption-side", "bottom"]]),
+          n("border-collapse", [["border-collapse", "collapse"]]),
+          n("border-separate", [["border-collapse", "separate"]]);
+        let l = () =>
+          z([
+            $e("--tw-border-spacing-x", "0", "<length>"),
+            $e("--tw-border-spacing-y", "0", "<length>"),
+          ]);
+        i("border-spacing", ["--border-spacing", "--spacing"], (e) => [
           l(),
           y("--tw-border-spacing-x", e),
-          y(
-            "border-spacing",
-            "var(--tw-border-spacing-x) var(--tw-border-spacing-y)",
-          ),
-        ]),
-        i("border-spacing-y", ["--border-spacing", "--spacing"], (e) => [
-          l(),
           y("--tw-border-spacing-y", e),
           y(
             "border-spacing",
             "var(--tw-border-spacing-x) var(--tw-border-spacing-y)",
           ),
         ]),
-        n("origin-center", [["transform-origin", "center"]]),
-        n("origin-top", [["transform-origin", "top"]]),
-        n("origin-top-right", [["transform-origin", "top right"]]),
-        n("origin-right", [["transform-origin", "right"]]),
-        n("origin-bottom-right", [["transform-origin", "bottom right"]]),
-        n("origin-bottom", [["transform-origin", "bottom"]]),
-        n("origin-bottom-left", [["transform-origin", "bottom left"]]),
-        n("origin-left", [["transform-origin", "left"]]),
-        n("origin-top-left", [["transform-origin", "top left"]]),
-        o("origin", {
-          themeKeys: ["--transform-origin"],
-          handle: (e) => [y("transform-origin", e)],
-        }),
-        n("perspective-origin-center", [["perspective-origin", "center"]]),
-        n("perspective-origin-top", [["perspective-origin", "top"]]),
-        n("perspective-origin-top-right", [
-          ["perspective-origin", "top right"],
-        ]),
-        n("perspective-origin-right", [["perspective-origin", "right"]]),
-        n("perspective-origin-bottom-right", [
-          ["perspective-origin", "bottom right"],
-        ]),
-        n("perspective-origin-bottom", [["perspective-origin", "bottom"]]),
-        n("perspective-origin-bottom-left", [
-          ["perspective-origin", "bottom left"],
-        ]),
-        n("perspective-origin-left", [["perspective-origin", "left"]]),
-        n("perspective-origin-top-left", [
-          ["perspective-origin", "top left"],
-        ]),
-        o("perspective-origin", {
-          themeKeys: ["--perspective-origin"],
-          handle: (e) => [y("perspective-origin", e)],
-        }),
-        n("perspective-none", [["perspective", "none"]]),
-        o("perspective", {
-          themeKeys: ["--perspective"],
-          handle: (e) => [y("perspective", e)],
-        });
-      let s = () =>
-        z([
-          $e("--tw-translate-x", "0"),
-          $e("--tw-translate-y", "0"),
-          $e("--tw-translate-z", "0"),
-        ]);
-      n("translate-none", [["translate", "none"]]),
-        n("-translate-full", [
-          s,
-          ["--tw-translate-x", "-100%"],
-          ["--tw-translate-y", "-100%"],
-          ["translate", "var(--tw-translate-x) var(--tw-translate-y)"],
-        ]),
-        n("translate-full", [
-          s,
-          ["--tw-translate-x", "100%"],
-          ["--tw-translate-y", "100%"],
-          ["translate", "var(--tw-translate-x) var(--tw-translate-y)"],
-        ]),
-        i(
-          "translate",
-          ["--translate", "--spacing"],
-          (e) => [
-            s(),
-            y("--tw-translate-x", e),
-            y("--tw-translate-y", e),
-            y("translate", "var(--tw-translate-x) var(--tw-translate-y)"),
-          ],
-          { supportsNegative: !0, supportsFractions: !0 },
-        );
-      for (let e of ["x", "y"])
-        n(`-translate-${e}-full`, [
-          s,
-          [`--tw-translate-${e}`, "-100%"],
-          ["translate", "var(--tw-translate-x) var(--tw-translate-y)"],
-        ]),
-          n(`translate-${e}-full`, [
+          i("border-spacing-x", ["--border-spacing", "--spacing"], (e) => [
+            l(),
+            y("--tw-border-spacing-x", e),
+            y(
+              "border-spacing",
+              "var(--tw-border-spacing-x) var(--tw-border-spacing-y)",
+            ),
+          ]),
+          i("border-spacing-y", ["--border-spacing", "--spacing"], (e) => [
+            l(),
+            y("--tw-border-spacing-y", e),
+            y(
+              "border-spacing",
+              "var(--tw-border-spacing-x) var(--tw-border-spacing-y)",
+            ),
+          ]),
+          n("origin-center", [["transform-origin", "center"]]),
+          n("origin-top", [["transform-origin", "top"]]),
+          n("origin-top-right", [["transform-origin", "top right"]]),
+          n("origin-right", [["transform-origin", "right"]]),
+          n("origin-bottom-right", [["transform-origin", "bottom right"]]),
+          n("origin-bottom", [["transform-origin", "bottom"]]),
+          n("origin-bottom-left", [["transform-origin", "bottom left"]]),
+          n("origin-left", [["transform-origin", "left"]]),
+          n("origin-top-left", [["transform-origin", "top left"]]),
+          o("origin", {
+            themeKeys: ["--transform-origin"],
+            handle: (e) => [y("transform-origin", e)],
+          }),
+          n("perspective-origin-center", [["perspective-origin", "center"]]),
+          n("perspective-origin-top", [["perspective-origin", "top"]]),
+          n("perspective-origin-top-right", [
+            ["perspective-origin", "top right"],
+          ]),
+          n("perspective-origin-right", [["perspective-origin", "right"]]),
+          n("perspective-origin-bottom-right", [
+            ["perspective-origin", "bottom right"],
+          ]),
+          n("perspective-origin-bottom", [["perspective-origin", "bottom"]]),
+          n("perspective-origin-bottom-left", [
+            ["perspective-origin", "bottom left"],
+          ]),
+          n("perspective-origin-left", [["perspective-origin", "left"]]),
+          n("perspective-origin-top-left", [
+            ["perspective-origin", "top left"],
+          ]),
+          o("perspective-origin", {
+            themeKeys: ["--perspective-origin"],
+            handle: (e) => [y("perspective-origin", e)],
+          }),
+          n("perspective-none", [["perspective", "none"]]),
+          o("perspective", {
+            themeKeys: ["--perspective"],
+            handle: (e) => [y("perspective", e)],
+          });
+        let s = () =>
+          z([
+            $e("--tw-translate-x", "0"),
+            $e("--tw-translate-y", "0"),
+            $e("--tw-translate-z", "0"),
+          ]);
+        n("translate-none", [["translate", "none"]]),
+          n("-translate-full", [
             s,
-            [`--tw-translate-${e}`, "100%"],
+            ["--tw-translate-x", "-100%"],
+            ["--tw-translate-y", "-100%"],
+            ["translate", "var(--tw-translate-x) var(--tw-translate-y)"],
+          ]),
+          n("translate-full", [
+            s,
+            ["--tw-translate-x", "100%"],
+            ["--tw-translate-y", "100%"],
             ["translate", "var(--tw-translate-x) var(--tw-translate-y)"],
           ]),
           i(
-            `translate-${e}`,
+            "translate",
             ["--translate", "--spacing"],
-            (t) => [
+            (e) => [
               s(),
-              y(`--tw-translate-${e}`, t),
+              y("--tw-translate-x", e),
+              y("--tw-translate-y", e),
               y("translate", "var(--tw-translate-x) var(--tw-translate-y)"),
             ],
             { supportsNegative: !0, supportsFractions: !0 },
           );
-      i(
-        "translate-z",
-        ["--translate", "--spacing"],
-        (e) => [
-          s(),
-          y("--tw-translate-z", e),
-          y(
-            "translate",
-            "var(--tw-translate-x) var(--tw-translate-y) var(--tw-translate-z)",
-          ),
-        ],
-        { supportsNegative: !0 },
-      ),
-        n("translate-3d", [
-          s,
-          [
-            "translate",
-            "var(--tw-translate-x) var(--tw-translate-y) var(--tw-translate-z)",
-          ],
-        ]);
-      let c = () =>
-        z([
-          $e("--tw-scale-x", "1"),
-          $e("--tw-scale-y", "1"),
-          $e("--tw-scale-z", "1"),
-        ]);
-      function u({ negative: t }) {
-        return (r) => {
-          if (!r.value || r.modifier) return;
-          let n;
-          return "arbitrary" === r.value.kind
-            ? ((n = r.value.value), [y("scale", n)])
-            : ((n = e.resolve(r.value.value, ["--scale"])),
-              !n && de(r.value.value) && (n = `${r.value.value}%`),
-              n
-                ? ((n = t ? `calc(${n} * -1)` : n),
-                  [
-                    c(),
-                    y("--tw-scale-x", n),
-                    y("--tw-scale-y", n),
-                    y("--tw-scale-z", n),
-                    y("scale", "var(--tw-scale-x) var(--tw-scale-y)"),
-                  ])
-                : void 0);
-        };
-      }
-      n("scale-none", [["scale", "none"]]),
-        t.functional("-scale", u({ negative: !0 })),
-        t.functional("scale", u({ negative: !1 })),
-        r("scale", () => [
-          {
-            supportsNegative: !0,
-            values: [
-              "0",
-              "50",
-              "75",
-              "90",
-              "95",
-              "100",
-              "105",
-              "110",
-              "125",
-              "150",
-              "200",
-            ],
-            valueThemeKeys: ["--scale"],
-          },
-        ]);
-      for (let e of ["x", "y", "z"])
-        o(`scale-${e}`, {
-          supportsNegative: !0,
-          themeKeys: ["--scale"],
-          handleBareValue: ({ value: e }) => (de(e) ? `${e}%` : null),
-          handle: (t) => [
-            c(),
-            y(`--tw-scale-${e}`, t),
+        for (let e of ["x", "y"])
+          n(`-translate-${e}-full`, [
+            s,
+            [`--tw-translate-${e}`, "-100%"],
+            ["translate", "var(--tw-translate-x) var(--tw-translate-y)"],
+          ]),
+            n(`translate-${e}-full`, [
+              s,
+              [`--tw-translate-${e}`, "100%"],
+              ["translate", "var(--tw-translate-x) var(--tw-translate-y)"],
+            ]),
+            i(
+              `translate-${e}`,
+              ["--translate", "--spacing"],
+              (t) => [
+                s(),
+                y(`--tw-translate-${e}`, t),
+                y("translate", "var(--tw-translate-x) var(--tw-translate-y)"),
+              ],
+              { supportsNegative: !0, supportsFractions: !0 },
+            );
+        i(
+          "translate-z",
+          ["--translate", "--spacing"],
+          (e) => [
+            s(),
+            y("--tw-translate-z", e),
             y(
-              "scale",
-              "var(--tw-scale-x) var(--tw-scale-y)" +
-              ("z" === e ? " var(--tw-scale-z)" : ""),
+              "translate",
+              "var(--tw-translate-x) var(--tw-translate-y) var(--tw-translate-z)",
             ),
           ],
-        }),
-          r(`scale-${e}`, () => [
+          { supportsNegative: !0 },
+        ),
+          n("translate-3d", [
+            s,
+            [
+              "translate",
+              "var(--tw-translate-x) var(--tw-translate-y) var(--tw-translate-z)",
+            ],
+          ]);
+        let c = () =>
+          z([
+            $e("--tw-scale-x", "1"),
+            $e("--tw-scale-y", "1"),
+            $e("--tw-scale-z", "1"),
+          ]);
+        function u({ negative: t }) {
+          return (r) => {
+            if (!r.value || r.modifier) return;
+            let n;
+            return "arbitrary" === r.value.kind
+              ? ((n = r.value.value), [y("scale", n)])
+              : ((n = e.resolve(r.value.value, ["--scale"])),
+                !n && de(r.value.value) && (n = `${r.value.value}%`),
+                n
+                  ? ((n = t ? `calc(${n} * -1)` : n),
+                    [
+                      c(),
+                      y("--tw-scale-x", n),
+                      y("--tw-scale-y", n),
+                      y("--tw-scale-z", n),
+                      y("scale", "var(--tw-scale-x) var(--tw-scale-y)"),
+                    ])
+                  : void 0);
+          };
+        }
+        n("scale-none", [["scale", "none"]]),
+          t.functional("-scale", u({ negative: !0 })),
+          t.functional("scale", u({ negative: !1 })),
+          r("scale", () => [
             {
               supportsNegative: !0,
               values: [
@@ -2894,1411 +2860,1445 @@
               valueThemeKeys: ["--scale"],
             },
           ]);
-      function d({ negative: t }) {
-        return (r) => {
-          if (!r.value || r.modifier) return;
-          let n;
-          if ("arbitrary" === r.value.kind) {
-            n = r.value.value;
-            let e = r.value.dataType ?? G(n, ["angle", "vector"]);
-            if ("vector" === e) return [y("rotate", `${n} var(--tw-rotate)`)];
-            if ("angle" !== e) return [y("rotate", n)];
-          } else if (
-            ((n = e.resolve(r.value.value, ["--rotate"])),
-              !n && de(r.value.value) && (n = `${r.value.value}deg`),
-              !n)
-          )
-            return;
-          return [y("rotate", t ? `calc(${n} * -1)` : n)];
-        };
-      }
-      n("scale-3d", [
-        c,
-        ["scale", "var(--tw-scale-x) var(--tw-scale-y) var(--tw-scale-z)"],
-      ]),
-        n("rotate-none", [["rotate", "none"]]),
-        t.functional("-rotate", d({ negative: !0 })),
-        t.functional("rotate", d({ negative: !1 })),
-        r("rotate", () => [
-          {
+        for (let e of ["x", "y", "z"])
+          o(`scale-${e}`, {
             supportsNegative: !0,
-            values: ["0", "1", "2", "3", "6", "12", "45", "90", "180"],
-            valueThemeKeys: ["--rotate"],
-          },
-        ]);
-      {
-        let e = [
-          "var(--tw-rotate-x,)",
-          "var(--tw-rotate-y,)",
-          "var(--tw-rotate-z,)",
-          "var(--tw-skew-x,)",
-          "var(--tw-skew-y,)",
-        ].join(" "),
-          a = () =>
-            z([
-              $e("--tw-rotate-x"),
-              $e("--tw-rotate-y"),
-              $e("--tw-rotate-z"),
-              $e("--tw-skew-x"),
-              $e("--tw-skew-y"),
-            ]);
-        for (let t of ["x", "y", "z"])
-          o(`rotate-${t}`, {
-            supportsNegative: !0,
-            themeKeys: ["--rotate"],
-            handleBareValue: ({ value: e }) => (de(e) ? `${e}deg` : null),
-            handle: (r) => [
-              a(),
-              y(`--tw-rotate-${t}`, `rotate${t.toUpperCase()}(${r})`),
-              y("transform", e),
+            themeKeys: ["--scale"],
+            handleBareValue: ({ value: e }) => (de(e) ? `${e}%` : null),
+            handle: (t) => [
+              c(),
+              y(`--tw-scale-${e}`, t),
+              y(
+                "scale",
+                "var(--tw-scale-x) var(--tw-scale-y)" +
+                  ("z" === e ? " var(--tw-scale-z)" : ""),
+              ),
             ],
           }),
-            r(`rotate-${t}`, () => [
+            r(`scale-${e}`, () => [
               {
                 supportsNegative: !0,
-                values: ["0", "1", "2", "3", "6", "12", "45", "90", "180"],
-                valueThemeKeys: ["--rotate"],
+                values: [
+                  "0",
+                  "50",
+                  "75",
+                  "90",
+                  "95",
+                  "100",
+                  "105",
+                  "110",
+                  "125",
+                  "150",
+                  "200",
+                ],
+                valueThemeKeys: ["--scale"],
               },
             ]);
-        o("skew", {
-          supportsNegative: !0,
-          themeKeys: ["--skew"],
-          handleBareValue: ({ value: e }) => (de(e) ? `${e}deg` : null),
-          handle: (t) => [
-            a(),
-            y("--tw-skew-x", `skewX(${t})`),
-            y("--tw-skew-y", `skewY(${t})`),
-            y("transform", e),
-          ],
-        }),
-          o("skew-x", {
+        function d({ negative: t }) {
+          return (r) => {
+            if (!r.value || r.modifier) return;
+            let n;
+            if ("arbitrary" === r.value.kind) {
+              n = r.value.value;
+              let e = r.value.dataType ?? G(n, ["angle", "vector"]);
+              if ("vector" === e) return [y("rotate", `${n} var(--tw-rotate)`)];
+              if ("angle" !== e) return [y("rotate", n)];
+            } else if (
+              ((n = e.resolve(r.value.value, ["--rotate"])),
+              !n && de(r.value.value) && (n = `${r.value.value}deg`),
+              !n)
+            )
+              return;
+            return [y("rotate", t ? `calc(${n} * -1)` : n)];
+          };
+        }
+        n("scale-3d", [
+          c,
+          ["scale", "var(--tw-scale-x) var(--tw-scale-y) var(--tw-scale-z)"],
+        ]),
+          n("rotate-none", [["rotate", "none"]]),
+          t.functional("-rotate", d({ negative: !0 })),
+          t.functional("rotate", d({ negative: !1 })),
+          r("rotate", () => [
+            {
+              supportsNegative: !0,
+              values: ["0", "1", "2", "3", "6", "12", "45", "90", "180"],
+              valueThemeKeys: ["--rotate"],
+            },
+          ]);
+        {
+          let e = [
+              "var(--tw-rotate-x,)",
+              "var(--tw-rotate-y,)",
+              "var(--tw-rotate-z,)",
+              "var(--tw-skew-x,)",
+              "var(--tw-skew-y,)",
+            ].join(" "),
+            a = () =>
+              z([
+                $e("--tw-rotate-x"),
+                $e("--tw-rotate-y"),
+                $e("--tw-rotate-z"),
+                $e("--tw-skew-x"),
+                $e("--tw-skew-y"),
+              ]);
+          for (let t of ["x", "y", "z"])
+            o(`rotate-${t}`, {
+              supportsNegative: !0,
+              themeKeys: ["--rotate"],
+              handleBareValue: ({ value: e }) => (de(e) ? `${e}deg` : null),
+              handle: (r) => [
+                a(),
+                y(`--tw-rotate-${t}`, `rotate${t.toUpperCase()}(${r})`),
+                y("transform", e),
+              ],
+            }),
+              r(`rotate-${t}`, () => [
+                {
+                  supportsNegative: !0,
+                  values: ["0", "1", "2", "3", "6", "12", "45", "90", "180"],
+                  valueThemeKeys: ["--rotate"],
+                },
+              ]);
+          o("skew", {
             supportsNegative: !0,
             themeKeys: ["--skew"],
             handleBareValue: ({ value: e }) => (de(e) ? `${e}deg` : null),
             handle: (t) => [
               a(),
               y("--tw-skew-x", `skewX(${t})`),
-              y("transform", e),
-            ],
-          }),
-          o("skew-y", {
-            supportsNegative: !0,
-            themeKeys: ["--skew"],
-            handleBareValue: ({ value: e }) => (de(e) ? `${e}deg` : null),
-            handle: (t) => [
-              a(),
               y("--tw-skew-y", `skewY(${t})`),
               y("transform", e),
             ],
           }),
-          r("skew", () => [
-            {
+            o("skew-x", {
               supportsNegative: !0,
-              values: ["0", "1", "2", "3", "6", "12"],
-              valueThemeKeys: ["--skew"],
-            },
-          ]),
-          r("skew-x", () => [
-            {
+              themeKeys: ["--skew"],
+              handleBareValue: ({ value: e }) => (de(e) ? `${e}deg` : null),
+              handle: (t) => [
+                a(),
+                y("--tw-skew-x", `skewX(${t})`),
+                y("transform", e),
+              ],
+            }),
+            o("skew-y", {
               supportsNegative: !0,
-              values: ["0", "1", "2", "3", "6", "12"],
-              valueThemeKeys: ["--skew"],
-            },
-          ]),
-          r("skew-y", () => [
-            {
-              supportsNegative: !0,
-              values: ["0", "1", "2", "3", "6", "12"],
-              valueThemeKeys: ["--skew"],
-            },
-          ]),
-          t.functional("transform", (t) => {
-            if (t.modifier) return;
-            let r = null;
-            return (
-              t.value
-                ? "arbitrary" === t.value.kind && (r = t.value.value)
-                : (r = e),
-              null !== r ? [a(), y("transform", r)] : void 0
-            );
-          }),
-          r("transform", () => [{ hasDefaultValue: !0 }]),
-          n("transform-cpu", [["transform", e]]),
-          n("transform-gpu", [["transform", `translateZ(0) ${e}`]]),
-          n("transform-none", [["transform", "none"]]);
-      }
-      n("transform-flat", [["transform-style", "flat"]]),
-        n("transform-3d", [["transform-style", "preserve-3d"]]),
-        n("transform-content", [["transform-box", "content-box"]]),
-        n("transform-border", [["transform-box", "border-box"]]),
-        n("transform-fill", [["transform-box", "fill-box"]]),
-        n("transform-stroke", [["transform-box", "stroke-box"]]),
-        n("transform-view", [["transform-box", "view-box"]]),
-        n("backface-visible", [["backface-visibility", "visible"]]),
-        n("backface-hidden", [["backface-visibility", "hidden"]]);
-      for (let e of [
-        "auto",
-        "default",
-        "pointer",
-        "wait",
-        "text",
-        "move",
-        "help",
-        "not-allowed",
-        "none",
-        "context-menu",
-        "progress",
-        "cell",
-        "crosshair",
-        "vertical-text",
-        "alias",
-        "copy",
-        "no-drop",
-        "grab",
-        "grabbing",
-        "all-scroll",
-        "col-resize",
-        "row-resize",
-        "n-resize",
-        "e-resize",
-        "s-resize",
-        "w-resize",
-        "ne-resize",
-        "nw-resize",
-        "se-resize",
-        "sw-resize",
-        "ew-resize",
-        "ns-resize",
-        "nesw-resize",
-        "nwse-resize",
-        "zoom-in",
-        "zoom-out",
-      ])
-        n(`cursor-${e}`, [["cursor", e]]);
-      o("cursor", {
-        themeKeys: ["--cursor"],
-        handle: (e) => [y("cursor", e)],
-      });
-      for (let e of ["auto", "none", "manipulation"])
-        n(`touch-${e}`, [["touch-action", e]]);
-      let f = () =>
-        z([$e("--tw-pan-x"), $e("--tw-pan-y"), $e("--tw-pinch-zoom")]);
-      for (let e of ["x", "left", "right"])
-        n(`touch-pan-${e}`, [
-          f,
-          ["--tw-pan-x", `pan-${e}`],
-          [
-            "touch-action",
-            "var(--tw-pan-x,) var(--tw-pan-y,) var(--tw-pinch-zoom,)",
-          ],
-        ]);
-      for (let e of ["y", "up", "down"])
-        n(`touch-pan-${e}`, [
-          f,
-          ["--tw-pan-y", `pan-${e}`],
-          [
-            "touch-action",
-            "var(--tw-pan-x,) var(--tw-pan-y,) var(--tw-pinch-zoom,)",
-          ],
-        ]);
-      n("touch-pinch-zoom", [
-        f,
-        ["--tw-pinch-zoom", "pinch-zoom"],
-        [
-          "touch-action",
-          "var(--tw-pan-x,) var(--tw-pan-y,) var(--tw-pinch-zoom,)",
-        ],
-      ]);
-      for (let e of ["none", "text", "all", "auto"])
-        n(`select-${e}`, [
-          ["-webkit-user-select", e],
-          ["user-select", e],
-        ]);
-      n("resize-none", [["resize", "none"]]),
-        n("resize-x", [["resize", "horizontal"]]),
-        n("resize-y", [["resize", "vertical"]]),
-        n("resize", [["resize", "both"]]),
-        n("snap-none", [["scroll-snap-type", "none"]]);
-      let p = () => z([$e("--tw-scroll-snap-strictness", "proximity", "*")]);
-      for (let e of ["x", "y", "both"])
-        n(`snap-${e}`, [
-          p,
-          ["scroll-snap-type", `${e} var(--tw-scroll-snap-strictness)`],
-        ]);
-      n("snap-mandatory", [p, ["--tw-scroll-snap-strictness", "mandatory"]]),
-        n("snap-proximity", [
-          p,
-          ["--tw-scroll-snap-strictness", "proximity"],
-        ]),
-        n("snap-align-none", [["scroll-snap-align", "none"]]),
-        n("snap-start", [["scroll-snap-align", "start"]]),
-        n("snap-end", [["scroll-snap-align", "end"]]),
-        n("snap-center", [["scroll-snap-align", "center"]]),
-        n("snap-normal", [["scroll-snap-stop", "normal"]]),
-        n("snap-always", [["scroll-snap-stop", "always"]]);
-      for (let [e, t] of [
-        ["scroll-m", "scroll-margin"],
-        ["scroll-mx", "scroll-margin-inline"],
-        ["scroll-my", "scroll-margin-block"],
-        ["scroll-ms", "scroll-margin-inline-start"],
-        ["scroll-me", "scroll-margin-inline-end"],
-        ["scroll-mt", "scroll-margin-top"],
-        ["scroll-mr", "scroll-margin-right"],
-        ["scroll-mb", "scroll-margin-bottom"],
-        ["scroll-ml", "scroll-margin-left"],
-      ])
-        i(e, ["--scroll-margin", "--spacing"], (e) => [y(t, e)], {
-          supportsNegative: !0,
-        });
-      for (let [e, t] of [
-        ["scroll-p", "scroll-padding"],
-        ["scroll-px", "scroll-padding-inline"],
-        ["scroll-py", "scroll-padding-block"],
-        ["scroll-ps", "scroll-padding-inline-start"],
-        ["scroll-pe", "scroll-padding-inline-end"],
-        ["scroll-pt", "scroll-padding-top"],
-        ["scroll-pr", "scroll-padding-right"],
-        ["scroll-pb", "scroll-padding-bottom"],
-        ["scroll-pl", "scroll-padding-left"],
-      ])
-        i(e, ["--scroll-padding", "--spacing"], (e) => [y(t, e)]);
-      n("list-inside", [["list-style-position", "inside"]]),
-        n("list-outside", [["list-style-position", "outside"]]),
-        n("list-none", [["list-style-type", "none"]]),
-        n("list-disc", [["list-style-type", "disc"]]),
-        n("list-decimal", [["list-style-type", "decimal"]]),
-        o("list", {
-          themeKeys: ["--list-style-type"],
-          handle: (e) => [y("list-style-type", e)],
-        }),
-        n("list-image-none", [["list-style-image", "none"]]),
-        o("list-image", {
-          themeKeys: ["--list-style-image"],
-          handle: (e) => [y("list-style-image", e)],
-        }),
-        n("appearance-none", [["appearance", "none"]]),
-        n("appearance-auto", [["appearance", "auto"]]),
-        n("scheme-normal", [["color-scheme", "normal"]]),
-        n("scheme-dark", [["color-scheme", "dark"]]),
-        n("scheme-light", [["color-scheme", "light"]]),
-        n("scheme-light-dark", [["color-scheme", "light dark"]]),
-        n("scheme-only-dark", [["color-scheme", "only dark"]]),
-        n("scheme-only-light", [["color-scheme", "only light"]]),
-        n("columns-auto", [["columns", "auto"]]),
-        o("columns", {
-          themeKeys: ["--columns", "--container"],
-          handleBareValue: ({ value: e }) => (de(e) ? e : null),
-          handle: (e) => [y("columns", e)],
-        }),
-        r("columns", () => [
-          {
-            values: Array.from({ length: 12 }, (e, t) => `${t + 1}`),
-            valueThemeKeys: ["--columns", "--container"],
-          },
-        ]);
-      for (let e of [
-        "auto",
-        "avoid",
-        "all",
-        "avoid-page",
-        "page",
-        "left",
-        "right",
-        "column",
-      ])
-        n(`break-before-${e}`, [["break-before", e]]);
-      for (let e of ["auto", "avoid", "avoid-page", "avoid-column"])
-        n(`break-inside-${e}`, [["break-inside", e]]);
-      for (let e of [
-        "auto",
-        "avoid",
-        "all",
-        "avoid-page",
-        "page",
-        "left",
-        "right",
-        "column",
-      ])
-        n(`break-after-${e}`, [["break-after", e]]);
-      n("grid-flow-row", [["grid-auto-flow", "row"]]),
-        n("grid-flow-col", [["grid-auto-flow", "column"]]),
-        n("grid-flow-dense", [["grid-auto-flow", "dense"]]),
-        n("grid-flow-row-dense", [["grid-auto-flow", "row dense"]]),
-        n("grid-flow-col-dense", [["grid-auto-flow", "column dense"]]),
-        n("auto-cols-auto", [["grid-auto-columns", "auto"]]),
-        n("auto-cols-min", [["grid-auto-columns", "min-content"]]),
-        n("auto-cols-max", [["grid-auto-columns", "max-content"]]),
-        n("auto-cols-fr", [["grid-auto-columns", "minmax(0, 1fr)"]]),
-        o("auto-cols", {
-          themeKeys: ["--grid-auto-columns"],
-          handle: (e) => [y("grid-auto-columns", e)],
-        }),
-        n("auto-rows-auto", [["grid-auto-rows", "auto"]]),
-        n("auto-rows-min", [["grid-auto-rows", "min-content"]]),
-        n("auto-rows-max", [["grid-auto-rows", "max-content"]]),
-        n("auto-rows-fr", [["grid-auto-rows", "minmax(0, 1fr)"]]),
-        o("auto-rows", {
-          themeKeys: ["--grid-auto-rows"],
-          handle: (e) => [y("grid-auto-rows", e)],
-        }),
-        n("grid-cols-none", [["grid-template-columns", "none"]]),
-        n("grid-cols-subgrid", [["grid-template-columns", "subgrid"]]),
-        o("grid-cols", {
-          themeKeys: ["--grid-template-columns"],
-          handleBareValue: ({ value: e }) =>
-            fe(e) ? `repeat(${e}, minmax(0, 1fr))` : null,
-          handle: (e) => [y("grid-template-columns", e)],
-        }),
-        n("grid-rows-none", [["grid-template-rows", "none"]]),
-        n("grid-rows-subgrid", [["grid-template-rows", "subgrid"]]),
-        o("grid-rows", {
-          themeKeys: ["--grid-template-rows"],
-          handleBareValue: ({ value: e }) =>
-            fe(e) ? `repeat(${e}, minmax(0, 1fr))` : null,
-          handle: (e) => [y("grid-template-rows", e)],
-        }),
-        r("grid-cols", () => [
-          {
-            values: Array.from({ length: 12 }, (e, t) => `${t + 1}`),
-            valueThemeKeys: ["--grid-template-columns"],
-          },
-        ]),
-        r("grid-rows", () => [
-          {
-            values: Array.from({ length: 12 }, (e, t) => `${t + 1}`),
-            valueThemeKeys: ["--grid-template-rows"],
-          },
-        ]),
-        n("flex-row", [["flex-direction", "row"]]),
-        n("flex-row-reverse", [["flex-direction", "row-reverse"]]),
-        n("flex-col", [["flex-direction", "column"]]),
-        n("flex-col-reverse", [["flex-direction", "column-reverse"]]),
-        n("flex-wrap", [["flex-wrap", "wrap"]]),
-        n("flex-nowrap", [["flex-wrap", "nowrap"]]),
-        n("flex-wrap-reverse", [["flex-wrap", "wrap-reverse"]]),
-        n("place-content-center", [["place-content", "center"]]),
-        n("place-content-start", [["place-content", "start"]]),
-        n("place-content-end", [["place-content", "end"]]),
-        n("place-content-center-safe", [["place-content", "safe center"]]),
-        n("place-content-end-safe", [["place-content", "safe end"]]),
-        n("place-content-between", [["place-content", "space-between"]]),
-        n("place-content-around", [["place-content", "space-around"]]),
-        n("place-content-evenly", [["place-content", "space-evenly"]]),
-        n("place-content-baseline", [["place-content", "baseline"]]),
-        n("place-content-stretch", [["place-content", "stretch"]]),
-        n("place-items-center", [["place-items", "center"]]),
-        n("place-items-start", [["place-items", "start"]]),
-        n("place-items-end", [["place-items", "end"]]),
-        n("place-items-center-safe", [["place-items", "safe center"]]),
-        n("place-items-end-safe", [["place-items", "safe end"]]),
-        n("place-items-baseline", [["place-items", "baseline"]]),
-        n("place-items-stretch", [["place-items", "stretch"]]),
-        n("content-normal", [["align-content", "normal"]]),
-        n("content-center", [["align-content", "center"]]),
-        n("content-start", [["align-content", "flex-start"]]),
-        n("content-end", [["align-content", "flex-end"]]),
-        n("content-center-safe", [["align-content", "safe center"]]),
-        n("content-end-safe", [["align-content", "safe flex-end"]]),
-        n("content-between", [["align-content", "space-between"]]),
-        n("content-around", [["align-content", "space-around"]]),
-        n("content-evenly", [["align-content", "space-evenly"]]),
-        n("content-baseline", [["align-content", "baseline"]]),
-        n("content-stretch", [["align-content", "stretch"]]),
-        n("items-center", [["align-items", "center"]]),
-        n("items-start", [["align-items", "flex-start"]]),
-        n("items-end", [["align-items", "flex-end"]]),
-        n("items-center-safe", [["align-items", "safe center"]]),
-        n("items-end-safe", [["align-items", "safe flex-end"]]),
-        n("items-baseline", [["align-items", "baseline"]]),
-        n("items-baseline-last", [["align-items", "last baseline"]]),
-        n("items-stretch", [["align-items", "stretch"]]),
-        n("justify-normal", [["justify-content", "normal"]]),
-        n("justify-center", [["justify-content", "center"]]),
-        n("justify-start", [["justify-content", "flex-start"]]),
-        n("justify-end", [["justify-content", "flex-end"]]),
-        n("justify-center-safe", [["justify-content", "safe center"]]),
-        n("justify-end-safe", [["justify-content", "safe flex-end"]]),
-        n("justify-between", [["justify-content", "space-between"]]),
-        n("justify-around", [["justify-content", "space-around"]]),
-        n("justify-evenly", [["justify-content", "space-evenly"]]),
-        n("justify-baseline", [["justify-content", "baseline"]]),
-        n("justify-stretch", [["justify-content", "stretch"]]),
-        n("justify-items-normal", [["justify-items", "normal"]]),
-        n("justify-items-center", [["justify-items", "center"]]),
-        n("justify-items-start", [["justify-items", "start"]]),
-        n("justify-items-end", [["justify-items", "end"]]),
-        n("justify-items-center-safe", [["justify-items", "safe center"]]),
-        n("justify-items-end-safe", [["justify-items", "safe end"]]),
-        n("justify-items-stretch", [["justify-items", "stretch"]]),
-        i("gap", ["--gap", "--spacing"], (e) => [y("gap", e)]),
-        i("gap-x", ["--gap", "--spacing"], (e) => [y("column-gap", e)]),
-        i("gap-y", ["--gap", "--spacing"], (e) => [y("row-gap", e)]),
-        i(
-          "space-x",
-          ["--space", "--spacing"],
-          (e) => [
-            z([$e("--tw-space-x-reverse", "0")]),
-            w(":where(& > :not(:last-child))", [
-              y("--tw-sort", "row-gap"),
-              y("--tw-space-x-reverse", "0"),
-              y(
-                "margin-inline-start",
-                `calc(${e} * var(--tw-space-x-reverse))`,
-              ),
-              y(
-                "margin-inline-end",
-                `calc(${e} * calc(1 - var(--tw-space-x-reverse)))`,
-              ),
+              themeKeys: ["--skew"],
+              handleBareValue: ({ value: e }) => (de(e) ? `${e}deg` : null),
+              handle: (t) => [
+                a(),
+                y("--tw-skew-y", `skewY(${t})`),
+                y("transform", e),
+              ],
+            }),
+            r("skew", () => [
+              {
+                supportsNegative: !0,
+                values: ["0", "1", "2", "3", "6", "12"],
+                valueThemeKeys: ["--skew"],
+              },
             ]),
-          ],
-          { supportsNegative: !0 },
-        ),
-        i(
-          "space-y",
-          ["--space", "--spacing"],
-          (e) => [
-            z([$e("--tw-space-y-reverse", "0")]),
-            w(":where(& > :not(:last-child))", [
-              y("--tw-sort", "column-gap"),
-              y("--tw-space-y-reverse", "0"),
-              y(
-                "margin-block-start",
-                `calc(${e} * var(--tw-space-y-reverse))`,
-              ),
-              y(
-                "margin-block-end",
-                `calc(${e} * calc(1 - var(--tw-space-y-reverse)))`,
-              ),
+            r("skew-x", () => [
+              {
+                supportsNegative: !0,
+                values: ["0", "1", "2", "3", "6", "12"],
+                valueThemeKeys: ["--skew"],
+              },
             ]),
-          ],
-          { supportsNegative: !0 },
-        ),
-        n("space-x-reverse", [
-          () => z([$e("--tw-space-x-reverse", "0")]),
-          () =>
-            w(":where(& > :not(:last-child))", [
-              y("--tw-sort", "row-gap"),
-              y("--tw-space-x-reverse", "1"),
+            r("skew-y", () => [
+              {
+                supportsNegative: !0,
+                values: ["0", "1", "2", "3", "6", "12"],
+                valueThemeKeys: ["--skew"],
+              },
             ]),
-        ]),
-        n("space-y-reverse", [
-          () => z([$e("--tw-space-y-reverse", "0")]),
-          () =>
-            w(":where(& > :not(:last-child))", [
-              y("--tw-sort", "column-gap"),
-              y("--tw-space-y-reverse", "1"),
-            ]),
-        ]),
-        n("accent-auto", [["accent-color", "auto"]]),
-        a("accent", {
-          themeKeys: ["--accent-color", "--color"],
-          handle: (e) => [y("accent-color", e)],
-        }),
-        a("caret", {
-          themeKeys: ["--caret-color", "--color"],
-          handle: (e) => [y("caret-color", e)],
-        }),
-        a("divide", {
-          themeKeys: ["--divide-color", "--color"],
-          handle: (e) => [
-            w(":where(& > :not(:last-child))", [
-              y("--tw-sort", "divide-color"),
-              y("border-color", e),
-            ]),
-          ],
-        }),
-        n("place-self-auto", [["place-self", "auto"]]),
-        n("place-self-start", [["place-self", "start"]]),
-        n("place-self-end", [["place-self", "end"]]),
-        n("place-self-center", [["place-self", "center"]]),
-        n("place-self-end-safe", [["place-self", "safe end"]]),
-        n("place-self-center-safe", [["place-self", "safe center"]]),
-        n("place-self-stretch", [["place-self", "stretch"]]),
-        n("self-auto", [["align-self", "auto"]]),
-        n("self-start", [["align-self", "flex-start"]]),
-        n("self-end", [["align-self", "flex-end"]]),
-        n("self-center", [["align-self", "center"]]),
-        n("self-end-safe", [["align-self", "safe flex-end"]]),
-        n("self-center-safe", [["align-self", "safe center"]]),
-        n("self-stretch", [["align-self", "stretch"]]),
-        n("self-baseline", [["align-self", "baseline"]]),
-        n("self-baseline-last", [["align-self", "last baseline"]]),
-        n("justify-self-auto", [["justify-self", "auto"]]),
-        n("justify-self-start", [["justify-self", "flex-start"]]),
-        n("justify-self-end", [["justify-self", "flex-end"]]),
-        n("justify-self-center", [["justify-self", "center"]]),
-        n("justify-self-end-safe", [["justify-self", "safe flex-end"]]),
-        n("justify-self-center-safe", [["justify-self", "safe center"]]),
-        n("justify-self-stretch", [["justify-self", "stretch"]]);
-      for (let e of ["auto", "hidden", "clip", "visible", "scroll"])
-        n(`overflow-${e}`, [["overflow", e]]),
-          n(`overflow-x-${e}`, [["overflow-x", e]]),
-          n(`overflow-y-${e}`, [["overflow-y", e]]);
-      for (let e of ["auto", "contain", "none"])
-        n(`overscroll-${e}`, [["overscroll-behavior", e]]),
-          n(`overscroll-x-${e}`, [["overscroll-behavior-x", e]]),
-          n(`overscroll-y-${e}`, [["overscroll-behavior-y", e]]);
-      n("scroll-auto", [["scroll-behavior", "auto"]]),
-        n("scroll-smooth", [["scroll-behavior", "smooth"]]),
-        n("truncate", [
-          ["overflow", "hidden"],
-          ["text-overflow", "ellipsis"],
-          ["white-space", "nowrap"],
-        ]),
-        n("text-ellipsis", [["text-overflow", "ellipsis"]]),
-        n("text-clip", [["text-overflow", "clip"]]),
-        n("hyphens-none", [
-          ["-webkit-hyphens", "none"],
-          ["hyphens", "none"],
-        ]),
-        n("hyphens-manual", [
-          ["-webkit-hyphens", "manual"],
-          ["hyphens", "manual"],
-        ]),
-        n("hyphens-auto", [
-          ["-webkit-hyphens", "auto"],
-          ["hyphens", "auto"],
-        ]),
-        n("whitespace-normal", [["white-space", "normal"]]),
-        n("whitespace-nowrap", [["white-space", "nowrap"]]),
-        n("whitespace-pre", [["white-space", "pre"]]),
-        n("whitespace-pre-line", [["white-space", "pre-line"]]),
-        n("whitespace-pre-wrap", [["white-space", "pre-wrap"]]),
-        n("whitespace-break-spaces", [["white-space", "break-spaces"]]),
-        n("text-wrap", [["text-wrap", "wrap"]]),
-        n("text-nowrap", [["text-wrap", "nowrap"]]),
-        n("text-balance", [["text-wrap", "balance"]]),
-        n("text-pretty", [["text-wrap", "pretty"]]),
-        n("break-normal", [
-          ["overflow-wrap", "normal"],
-          ["word-break", "normal"],
-        ]),
-        n("break-words", [["overflow-wrap", "break-word"]]),
-        n("break-all", [["word-break", "break-all"]]),
-        n("break-keep", [["word-break", "keep-all"]]),
-        n("wrap-anywhere", [["overflow-wrap", "anywhere"]]),
-        n("wrap-break-word", [["overflow-wrap", "break-word"]]),
-        n("wrap-normal", [["overflow-wrap", "normal"]]);
-      for (let [e, t] of [
-        ["rounded", ["border-radius"]],
-        [
-          "rounded-s",
-          ["border-start-start-radius", "border-end-start-radius"],
-        ],
-        ["rounded-e", ["border-start-end-radius", "border-end-end-radius"]],
-        ["rounded-t", ["border-top-left-radius", "border-top-right-radius"]],
-        [
-          "rounded-r",
-          ["border-top-right-radius", "border-bottom-right-radius"],
-        ],
-        [
-          "rounded-b",
-          ["border-bottom-right-radius", "border-bottom-left-radius"],
-        ],
-        [
-          "rounded-l",
-          ["border-top-left-radius", "border-bottom-left-radius"],
-        ],
-        ["rounded-ss", ["border-start-start-radius"]],
-        ["rounded-se", ["border-start-end-radius"]],
-        ["rounded-ee", ["border-end-end-radius"]],
-        ["rounded-es", ["border-end-start-radius"]],
-        ["rounded-tl", ["border-top-left-radius"]],
-        ["rounded-tr", ["border-top-right-radius"]],
-        ["rounded-br", ["border-bottom-right-radius"]],
-        ["rounded-bl", ["border-bottom-left-radius"]],
-      ])
-        n(
-          `${e}-none`,
-          t.map((e) => [e, "0"]),
-        ),
-          n(
-            `${e}-full`,
-            t.map((e) => [e, "calc(infinity * 1px)"]),
-          ),
-          o(e, {
-            themeKeys: ["--radius"],
-            handle: (e) => t.map((t) => y(t, e)),
-          });
-      n("border-solid", [
-        ["--tw-border-style", "solid"],
-        ["border-style", "solid"],
-      ]),
-        n("border-dashed", [
-          ["--tw-border-style", "dashed"],
-          ["border-style", "dashed"],
-        ]),
-        n("border-dotted", [
-          ["--tw-border-style", "dotted"],
-          ["border-style", "dotted"],
-        ]),
-        n("border-double", [
-          ["--tw-border-style", "double"],
-          ["border-style", "double"],
-        ]),
-        n("border-hidden", [
-          ["--tw-border-style", "hidden"],
-          ["border-style", "hidden"],
-        ]),
-        n("border-none", [
-          ["--tw-border-style", "none"],
-          ["border-style", "none"],
-        ]);
-      {
-        let a = function(n, o) {
-          t.functional(n, (t) => {
-            if (!t.value) {
+            t.functional("transform", (t) => {
               if (t.modifier) return;
-              let r = e.get(["--default-border-width"]) ?? "1px",
-                n = o.width(r);
-              return n ? [i(), ...n] : void 0;
-            }
+              let r = null;
+              return (
+                t.value
+                  ? "arbitrary" === t.value.kind && (r = t.value.value)
+                  : (r = e),
+                null !== r ? [a(), y("transform", r)] : void 0
+              );
+            }),
+            r("transform", () => [{ hasDefaultValue: !0 }]),
+            n("transform-cpu", [["transform", e]]),
+            n("transform-gpu", [["transform", `translateZ(0) ${e}`]]),
+            n("transform-none", [["transform", "none"]]);
+        }
+        n("transform-flat", [["transform-style", "flat"]]),
+          n("transform-3d", [["transform-style", "preserve-3d"]]),
+          n("transform-content", [["transform-box", "content-box"]]),
+          n("transform-border", [["transform-box", "border-box"]]),
+          n("transform-fill", [["transform-box", "fill-box"]]),
+          n("transform-stroke", [["transform-box", "stroke-box"]]),
+          n("transform-view", [["transform-box", "view-box"]]),
+          n("backface-visible", [["backface-visibility", "visible"]]),
+          n("backface-hidden", [["backface-visibility", "hidden"]]);
+        for (let e of [
+          "auto",
+          "default",
+          "pointer",
+          "wait",
+          "text",
+          "move",
+          "help",
+          "not-allowed",
+          "none",
+          "context-menu",
+          "progress",
+          "cell",
+          "crosshair",
+          "vertical-text",
+          "alias",
+          "copy",
+          "no-drop",
+          "grab",
+          "grabbing",
+          "all-scroll",
+          "col-resize",
+          "row-resize",
+          "n-resize",
+          "e-resize",
+          "s-resize",
+          "w-resize",
+          "ne-resize",
+          "nw-resize",
+          "se-resize",
+          "sw-resize",
+          "ew-resize",
+          "ns-resize",
+          "nesw-resize",
+          "nwse-resize",
+          "zoom-in",
+          "zoom-out",
+        ])
+          n(`cursor-${e}`, [["cursor", e]]);
+        o("cursor", {
+          themeKeys: ["--cursor"],
+          handle: (e) => [y("cursor", e)],
+        });
+        for (let e of ["auto", "none", "manipulation"])
+          n(`touch-${e}`, [["touch-action", e]]);
+        let f = () =>
+          z([$e("--tw-pan-x"), $e("--tw-pan-y"), $e("--tw-pinch-zoom")]);
+        for (let e of ["x", "left", "right"])
+          n(`touch-pan-${e}`, [
+            f,
+            ["--tw-pan-x", `pan-${e}`],
+            [
+              "touch-action",
+              "var(--tw-pan-x,) var(--tw-pan-y,) var(--tw-pinch-zoom,)",
+            ],
+          ]);
+        for (let e of ["y", "up", "down"])
+          n(`touch-pan-${e}`, [
+            f,
+            ["--tw-pan-y", `pan-${e}`],
+            [
+              "touch-action",
+              "var(--tw-pan-x,) var(--tw-pan-y,) var(--tw-pinch-zoom,)",
+            ],
+          ]);
+        n("touch-pinch-zoom", [
+          f,
+          ["--tw-pinch-zoom", "pinch-zoom"],
+          [
+            "touch-action",
+            "var(--tw-pan-x,) var(--tw-pan-y,) var(--tw-pinch-zoom,)",
+          ],
+        ]);
+        for (let e of ["none", "text", "all", "auto"])
+          n(`select-${e}`, [
+            ["-webkit-user-select", e],
+            ["user-select", e],
+          ]);
+        n("resize-none", [["resize", "none"]]),
+          n("resize-x", [["resize", "horizontal"]]),
+          n("resize-y", [["resize", "vertical"]]),
+          n("resize", [["resize", "both"]]),
+          n("snap-none", [["scroll-snap-type", "none"]]);
+        let p = () => z([$e("--tw-scroll-snap-strictness", "proximity", "*")]);
+        for (let e of ["x", "y", "both"])
+          n(`snap-${e}`, [
+            p,
+            ["scroll-snap-type", `${e} var(--tw-scroll-snap-strictness)`],
+          ]);
+        n("snap-mandatory", [p, ["--tw-scroll-snap-strictness", "mandatory"]]),
+          n("snap-proximity", [
+            p,
+            ["--tw-scroll-snap-strictness", "proximity"],
+          ]),
+          n("snap-align-none", [["scroll-snap-align", "none"]]),
+          n("snap-start", [["scroll-snap-align", "start"]]),
+          n("snap-end", [["scroll-snap-align", "end"]]),
+          n("snap-center", [["scroll-snap-align", "center"]]),
+          n("snap-normal", [["scroll-snap-stop", "normal"]]),
+          n("snap-always", [["scroll-snap-stop", "always"]]);
+        for (let [e, t] of [
+          ["scroll-m", "scroll-margin"],
+          ["scroll-mx", "scroll-margin-inline"],
+          ["scroll-my", "scroll-margin-block"],
+          ["scroll-ms", "scroll-margin-inline-start"],
+          ["scroll-me", "scroll-margin-inline-end"],
+          ["scroll-mt", "scroll-margin-top"],
+          ["scroll-mr", "scroll-margin-right"],
+          ["scroll-mb", "scroll-margin-bottom"],
+          ["scroll-ml", "scroll-margin-left"],
+        ])
+          i(e, ["--scroll-margin", "--spacing"], (e) => [y(t, e)], {
+            supportsNegative: !0,
+          });
+        for (let [e, t] of [
+          ["scroll-p", "scroll-padding"],
+          ["scroll-px", "scroll-padding-inline"],
+          ["scroll-py", "scroll-padding-block"],
+          ["scroll-ps", "scroll-padding-inline-start"],
+          ["scroll-pe", "scroll-padding-inline-end"],
+          ["scroll-pt", "scroll-padding-top"],
+          ["scroll-pr", "scroll-padding-right"],
+          ["scroll-pb", "scroll-padding-bottom"],
+          ["scroll-pl", "scroll-padding-left"],
+        ])
+          i(e, ["--scroll-padding", "--spacing"], (e) => [y(t, e)]);
+        n("list-inside", [["list-style-position", "inside"]]),
+          n("list-outside", [["list-style-position", "outside"]]),
+          n("list-none", [["list-style-type", "none"]]),
+          n("list-disc", [["list-style-type", "disc"]]),
+          n("list-decimal", [["list-style-type", "decimal"]]),
+          o("list", {
+            themeKeys: ["--list-style-type"],
+            handle: (e) => [y("list-style-type", e)],
+          }),
+          n("list-image-none", [["list-style-image", "none"]]),
+          o("list-image", {
+            themeKeys: ["--list-style-image"],
+            handle: (e) => [y("list-style-image", e)],
+          }),
+          n("appearance-none", [["appearance", "none"]]),
+          n("appearance-auto", [["appearance", "auto"]]),
+          n("scheme-normal", [["color-scheme", "normal"]]),
+          n("scheme-dark", [["color-scheme", "dark"]]),
+          n("scheme-light", [["color-scheme", "light"]]),
+          n("scheme-light-dark", [["color-scheme", "light dark"]]),
+          n("scheme-only-dark", [["color-scheme", "only dark"]]),
+          n("scheme-only-light", [["color-scheme", "only light"]]),
+          n("columns-auto", [["columns", "auto"]]),
+          o("columns", {
+            themeKeys: ["--columns", "--container"],
+            handleBareValue: ({ value: e }) => (de(e) ? e : null),
+            handle: (e) => [y("columns", e)],
+          }),
+          r("columns", () => [
+            {
+              values: Array.from({ length: 12 }, (e, t) => `${t + 1}`),
+              valueThemeKeys: ["--columns", "--container"],
+            },
+          ]);
+        for (let e of [
+          "auto",
+          "avoid",
+          "all",
+          "avoid-page",
+          "page",
+          "left",
+          "right",
+          "column",
+        ])
+          n(`break-before-${e}`, [["break-before", e]]);
+        for (let e of ["auto", "avoid", "avoid-page", "avoid-column"])
+          n(`break-inside-${e}`, [["break-inside", e]]);
+        for (let e of [
+          "auto",
+          "avoid",
+          "all",
+          "avoid-page",
+          "page",
+          "left",
+          "right",
+          "column",
+        ])
+          n(`break-after-${e}`, [["break-after", e]]);
+        n("grid-flow-row", [["grid-auto-flow", "row"]]),
+          n("grid-flow-col", [["grid-auto-flow", "column"]]),
+          n("grid-flow-dense", [["grid-auto-flow", "dense"]]),
+          n("grid-flow-row-dense", [["grid-auto-flow", "row dense"]]),
+          n("grid-flow-col-dense", [["grid-auto-flow", "column dense"]]),
+          n("auto-cols-auto", [["grid-auto-columns", "auto"]]),
+          n("auto-cols-min", [["grid-auto-columns", "min-content"]]),
+          n("auto-cols-max", [["grid-auto-columns", "max-content"]]),
+          n("auto-cols-fr", [["grid-auto-columns", "minmax(0, 1fr)"]]),
+          o("auto-cols", {
+            themeKeys: ["--grid-auto-columns"],
+            handle: (e) => [y("grid-auto-columns", e)],
+          }),
+          n("auto-rows-auto", [["grid-auto-rows", "auto"]]),
+          n("auto-rows-min", [["grid-auto-rows", "min-content"]]),
+          n("auto-rows-max", [["grid-auto-rows", "max-content"]]),
+          n("auto-rows-fr", [["grid-auto-rows", "minmax(0, 1fr)"]]),
+          o("auto-rows", {
+            themeKeys: ["--grid-auto-rows"],
+            handle: (e) => [y("grid-auto-rows", e)],
+          }),
+          n("grid-cols-none", [["grid-template-columns", "none"]]),
+          n("grid-cols-subgrid", [["grid-template-columns", "subgrid"]]),
+          o("grid-cols", {
+            themeKeys: ["--grid-template-columns"],
+            handleBareValue: ({ value: e }) =>
+              fe(e) ? `repeat(${e}, minmax(0, 1fr))` : null,
+            handle: (e) => [y("grid-template-columns", e)],
+          }),
+          n("grid-rows-none", [["grid-template-rows", "none"]]),
+          n("grid-rows-subgrid", [["grid-template-rows", "subgrid"]]),
+          o("grid-rows", {
+            themeKeys: ["--grid-template-rows"],
+            handleBareValue: ({ value: e }) =>
+              fe(e) ? `repeat(${e}, minmax(0, 1fr))` : null,
+            handle: (e) => [y("grid-template-rows", e)],
+          }),
+          r("grid-cols", () => [
+            {
+              values: Array.from({ length: 12 }, (e, t) => `${t + 1}`),
+              valueThemeKeys: ["--grid-template-columns"],
+            },
+          ]),
+          r("grid-rows", () => [
+            {
+              values: Array.from({ length: 12 }, (e, t) => `${t + 1}`),
+              valueThemeKeys: ["--grid-template-rows"],
+            },
+          ]),
+          n("flex-row", [["flex-direction", "row"]]),
+          n("flex-row-reverse", [["flex-direction", "row-reverse"]]),
+          n("flex-col", [["flex-direction", "column"]]),
+          n("flex-col-reverse", [["flex-direction", "column-reverse"]]),
+          n("flex-wrap", [["flex-wrap", "wrap"]]),
+          n("flex-nowrap", [["flex-wrap", "nowrap"]]),
+          n("flex-wrap-reverse", [["flex-wrap", "wrap-reverse"]]),
+          n("place-content-center", [["place-content", "center"]]),
+          n("place-content-start", [["place-content", "start"]]),
+          n("place-content-end", [["place-content", "end"]]),
+          n("place-content-center-safe", [["place-content", "safe center"]]),
+          n("place-content-end-safe", [["place-content", "safe end"]]),
+          n("place-content-between", [["place-content", "space-between"]]),
+          n("place-content-around", [["place-content", "space-around"]]),
+          n("place-content-evenly", [["place-content", "space-evenly"]]),
+          n("place-content-baseline", [["place-content", "baseline"]]),
+          n("place-content-stretch", [["place-content", "stretch"]]),
+          n("place-items-center", [["place-items", "center"]]),
+          n("place-items-start", [["place-items", "start"]]),
+          n("place-items-end", [["place-items", "end"]]),
+          n("place-items-center-safe", [["place-items", "safe center"]]),
+          n("place-items-end-safe", [["place-items", "safe end"]]),
+          n("place-items-baseline", [["place-items", "baseline"]]),
+          n("place-items-stretch", [["place-items", "stretch"]]),
+          n("content-normal", [["align-content", "normal"]]),
+          n("content-center", [["align-content", "center"]]),
+          n("content-start", [["align-content", "flex-start"]]),
+          n("content-end", [["align-content", "flex-end"]]),
+          n("content-center-safe", [["align-content", "safe center"]]),
+          n("content-end-safe", [["align-content", "safe flex-end"]]),
+          n("content-between", [["align-content", "space-between"]]),
+          n("content-around", [["align-content", "space-around"]]),
+          n("content-evenly", [["align-content", "space-evenly"]]),
+          n("content-baseline", [["align-content", "baseline"]]),
+          n("content-stretch", [["align-content", "stretch"]]),
+          n("items-center", [["align-items", "center"]]),
+          n("items-start", [["align-items", "flex-start"]]),
+          n("items-end", [["align-items", "flex-end"]]),
+          n("items-center-safe", [["align-items", "safe center"]]),
+          n("items-end-safe", [["align-items", "safe flex-end"]]),
+          n("items-baseline", [["align-items", "baseline"]]),
+          n("items-baseline-last", [["align-items", "last baseline"]]),
+          n("items-stretch", [["align-items", "stretch"]]),
+          n("justify-normal", [["justify-content", "normal"]]),
+          n("justify-center", [["justify-content", "center"]]),
+          n("justify-start", [["justify-content", "flex-start"]]),
+          n("justify-end", [["justify-content", "flex-end"]]),
+          n("justify-center-safe", [["justify-content", "safe center"]]),
+          n("justify-end-safe", [["justify-content", "safe flex-end"]]),
+          n("justify-between", [["justify-content", "space-between"]]),
+          n("justify-around", [["justify-content", "space-around"]]),
+          n("justify-evenly", [["justify-content", "space-evenly"]]),
+          n("justify-baseline", [["justify-content", "baseline"]]),
+          n("justify-stretch", [["justify-content", "stretch"]]),
+          n("justify-items-normal", [["justify-items", "normal"]]),
+          n("justify-items-center", [["justify-items", "center"]]),
+          n("justify-items-start", [["justify-items", "start"]]),
+          n("justify-items-end", [["justify-items", "end"]]),
+          n("justify-items-center-safe", [["justify-items", "safe center"]]),
+          n("justify-items-end-safe", [["justify-items", "safe end"]]),
+          n("justify-items-stretch", [["justify-items", "stretch"]]),
+          i("gap", ["--gap", "--spacing"], (e) => [y("gap", e)]),
+          i("gap-x", ["--gap", "--spacing"], (e) => [y("column-gap", e)]),
+          i("gap-y", ["--gap", "--spacing"], (e) => [y("row-gap", e)]),
+          i(
+            "space-x",
+            ["--space", "--spacing"],
+            (e) => [
+              z([$e("--tw-space-x-reverse", "0")]),
+              w(":where(& > :not(:last-child))", [
+                y("--tw-sort", "row-gap"),
+                y("--tw-space-x-reverse", "0"),
+                y(
+                  "margin-inline-start",
+                  `calc(${e} * var(--tw-space-x-reverse))`,
+                ),
+                y(
+                  "margin-inline-end",
+                  `calc(${e} * calc(1 - var(--tw-space-x-reverse)))`,
+                ),
+              ]),
+            ],
+            { supportsNegative: !0 },
+          ),
+          i(
+            "space-y",
+            ["--space", "--spacing"],
+            (e) => [
+              z([$e("--tw-space-y-reverse", "0")]),
+              w(":where(& > :not(:last-child))", [
+                y("--tw-sort", "column-gap"),
+                y("--tw-space-y-reverse", "0"),
+                y(
+                  "margin-block-start",
+                  `calc(${e} * var(--tw-space-y-reverse))`,
+                ),
+                y(
+                  "margin-block-end",
+                  `calc(${e} * calc(1 - var(--tw-space-y-reverse)))`,
+                ),
+              ]),
+            ],
+            { supportsNegative: !0 },
+          ),
+          n("space-x-reverse", [
+            () => z([$e("--tw-space-x-reverse", "0")]),
+            () =>
+              w(":where(& > :not(:last-child))", [
+                y("--tw-sort", "row-gap"),
+                y("--tw-space-x-reverse", "1"),
+              ]),
+          ]),
+          n("space-y-reverse", [
+            () => z([$e("--tw-space-y-reverse", "0")]),
+            () =>
+              w(":where(& > :not(:last-child))", [
+                y("--tw-sort", "column-gap"),
+                y("--tw-space-y-reverse", "1"),
+              ]),
+          ]),
+          n("accent-auto", [["accent-color", "auto"]]),
+          a("accent", {
+            themeKeys: ["--accent-color", "--color"],
+            handle: (e) => [y("accent-color", e)],
+          }),
+          a("caret", {
+            themeKeys: ["--caret-color", "--color"],
+            handle: (e) => [y("caret-color", e)],
+          }),
+          a("divide", {
+            themeKeys: ["--divide-color", "--color"],
+            handle: (e) => [
+              w(":where(& > :not(:last-child))", [
+                y("--tw-sort", "divide-color"),
+                y("border-color", e),
+              ]),
+            ],
+          }),
+          n("place-self-auto", [["place-self", "auto"]]),
+          n("place-self-start", [["place-self", "start"]]),
+          n("place-self-end", [["place-self", "end"]]),
+          n("place-self-center", [["place-self", "center"]]),
+          n("place-self-end-safe", [["place-self", "safe end"]]),
+          n("place-self-center-safe", [["place-self", "safe center"]]),
+          n("place-self-stretch", [["place-self", "stretch"]]),
+          n("self-auto", [["align-self", "auto"]]),
+          n("self-start", [["align-self", "flex-start"]]),
+          n("self-end", [["align-self", "flex-end"]]),
+          n("self-center", [["align-self", "center"]]),
+          n("self-end-safe", [["align-self", "safe flex-end"]]),
+          n("self-center-safe", [["align-self", "safe center"]]),
+          n("self-stretch", [["align-self", "stretch"]]),
+          n("self-baseline", [["align-self", "baseline"]]),
+          n("self-baseline-last", [["align-self", "last baseline"]]),
+          n("justify-self-auto", [["justify-self", "auto"]]),
+          n("justify-self-start", [["justify-self", "flex-start"]]),
+          n("justify-self-end", [["justify-self", "flex-end"]]),
+          n("justify-self-center", [["justify-self", "center"]]),
+          n("justify-self-end-safe", [["justify-self", "safe flex-end"]]),
+          n("justify-self-center-safe", [["justify-self", "safe center"]]),
+          n("justify-self-stretch", [["justify-self", "stretch"]]);
+        for (let e of ["auto", "hidden", "clip", "visible", "scroll"])
+          n(`overflow-${e}`, [["overflow", e]]),
+            n(`overflow-x-${e}`, [["overflow-x", e]]),
+            n(`overflow-y-${e}`, [["overflow-y", e]]);
+        for (let e of ["auto", "contain", "none"])
+          n(`overscroll-${e}`, [["overscroll-behavior", e]]),
+            n(`overscroll-x-${e}`, [["overscroll-behavior-x", e]]),
+            n(`overscroll-y-${e}`, [["overscroll-behavior-y", e]]);
+        n("scroll-auto", [["scroll-behavior", "auto"]]),
+          n("scroll-smooth", [["scroll-behavior", "smooth"]]),
+          n("truncate", [
+            ["overflow", "hidden"],
+            ["text-overflow", "ellipsis"],
+            ["white-space", "nowrap"],
+          ]),
+          n("text-ellipsis", [["text-overflow", "ellipsis"]]),
+          n("text-clip", [["text-overflow", "clip"]]),
+          n("hyphens-none", [
+            ["-webkit-hyphens", "none"],
+            ["hyphens", "none"],
+          ]),
+          n("hyphens-manual", [
+            ["-webkit-hyphens", "manual"],
+            ["hyphens", "manual"],
+          ]),
+          n("hyphens-auto", [
+            ["-webkit-hyphens", "auto"],
+            ["hyphens", "auto"],
+          ]),
+          n("whitespace-normal", [["white-space", "normal"]]),
+          n("whitespace-nowrap", [["white-space", "nowrap"]]),
+          n("whitespace-pre", [["white-space", "pre"]]),
+          n("whitespace-pre-line", [["white-space", "pre-line"]]),
+          n("whitespace-pre-wrap", [["white-space", "pre-wrap"]]),
+          n("whitespace-break-spaces", [["white-space", "break-spaces"]]),
+          n("text-wrap", [["text-wrap", "wrap"]]),
+          n("text-nowrap", [["text-wrap", "nowrap"]]),
+          n("text-balance", [["text-wrap", "balance"]]),
+          n("text-pretty", [["text-wrap", "pretty"]]),
+          n("break-normal", [
+            ["overflow-wrap", "normal"],
+            ["word-break", "normal"],
+          ]),
+          n("break-words", [["overflow-wrap", "break-word"]]),
+          n("break-all", [["word-break", "break-all"]]),
+          n("break-keep", [["word-break", "keep-all"]]),
+          n("wrap-anywhere", [["overflow-wrap", "anywhere"]]),
+          n("wrap-break-word", [["overflow-wrap", "break-word"]]),
+          n("wrap-normal", [["overflow-wrap", "normal"]]);
+        for (let [e, t] of [
+          ["rounded", ["border-radius"]],
+          [
+            "rounded-s",
+            ["border-start-start-radius", "border-end-start-radius"],
+          ],
+          ["rounded-e", ["border-start-end-radius", "border-end-end-radius"]],
+          ["rounded-t", ["border-top-left-radius", "border-top-right-radius"]],
+          [
+            "rounded-r",
+            ["border-top-right-radius", "border-bottom-right-radius"],
+          ],
+          [
+            "rounded-b",
+            ["border-bottom-right-radius", "border-bottom-left-radius"],
+          ],
+          [
+            "rounded-l",
+            ["border-top-left-radius", "border-bottom-left-radius"],
+          ],
+          ["rounded-ss", ["border-start-start-radius"]],
+          ["rounded-se", ["border-start-end-radius"]],
+          ["rounded-ee", ["border-end-end-radius"]],
+          ["rounded-es", ["border-end-start-radius"]],
+          ["rounded-tl", ["border-top-left-radius"]],
+          ["rounded-tr", ["border-top-right-radius"]],
+          ["rounded-br", ["border-bottom-right-radius"]],
+          ["rounded-bl", ["border-bottom-left-radius"]],
+        ])
+          n(
+            `${e}-none`,
+            t.map((e) => [e, "0"]),
+          ),
+            n(
+              `${e}-full`,
+              t.map((e) => [e, "calc(infinity * 1px)"]),
+            ),
+            o(e, {
+              themeKeys: ["--radius"],
+              handle: (e) => t.map((t) => y(t, e)),
+            });
+        n("border-solid", [
+          ["--tw-border-style", "solid"],
+          ["border-style", "solid"],
+        ]),
+          n("border-dashed", [
+            ["--tw-border-style", "dashed"],
+            ["border-style", "dashed"],
+          ]),
+          n("border-dotted", [
+            ["--tw-border-style", "dotted"],
+            ["border-style", "dotted"],
+          ]),
+          n("border-double", [
+            ["--tw-border-style", "double"],
+            ["border-style", "double"],
+          ]),
+          n("border-hidden", [
+            ["--tw-border-style", "hidden"],
+            ["border-style", "hidden"],
+          ]),
+          n("border-none", [
+            ["--tw-border-style", "none"],
+            ["border-style", "none"],
+          ]);
+        {
+          let a = function (n, o) {
+              t.functional(n, (t) => {
+                if (!t.value) {
+                  if (t.modifier) return;
+                  let r = e.get(["--default-border-width"]) ?? "1px",
+                    n = o.width(r);
+                  return n ? [i(), ...n] : void 0;
+                }
+                if ("arbitrary" === t.value.kind) {
+                  let r = t.value.value;
+                  switch (
+                    t.value.dataType ??
+                    G(r, ["color", "line-width", "length"])
+                  ) {
+                    case "line-width":
+                    case "length": {
+                      if (t.modifier) return;
+                      let e = o.width(r);
+                      return e ? [i(), ...e] : void 0;
+                    }
+                    default:
+                      return (
+                        (r = je(r, t.modifier, e)),
+                        null === r ? void 0 : o.color(r)
+                      );
+                  }
+                }
+                {
+                  let r = Te(t, e, ["--border-color", "--color"]);
+                  if (r) return o.color(r);
+                }
+                {
+                  if (t.modifier) return;
+                  let r = e.resolve(t.value.value, ["--border-width"]);
+                  if (r) {
+                    let e = o.width(r);
+                    return e ? [i(), ...e] : void 0;
+                  }
+                  if (de(t.value.value)) {
+                    let e = o.width(`${t.value.value}px`);
+                    return e ? [i(), ...e] : void 0;
+                  }
+                }
+              }),
+                r(n, () => [
+                  {
+                    values: ["current", "inherit", "transparent"],
+                    valueThemeKeys: ["--border-color", "--color"],
+                    modifiers: Array.from({ length: 21 }, (e, t) => "" + 5 * t),
+                    hasDefaultValue: !0,
+                  },
+                  {
+                    values: ["0", "2", "4", "8"],
+                    valueThemeKeys: ["--border-width"],
+                  },
+                ]);
+            },
+            i = () => z([$e("--tw-border-style", "solid")]);
+          a("border", {
+            width: (e) => [
+              y("border-style", "var(--tw-border-style)"),
+              y("border-width", e),
+            ],
+            color: (e) => [y("border-color", e)],
+          }),
+            a("border-x", {
+              width: (e) => [
+                y("border-inline-style", "var(--tw-border-style)"),
+                y("border-inline-width", e),
+              ],
+              color: (e) => [y("border-inline-color", e)],
+            }),
+            a("border-y", {
+              width: (e) => [
+                y("border-block-style", "var(--tw-border-style)"),
+                y("border-block-width", e),
+              ],
+              color: (e) => [y("border-block-color", e)],
+            }),
+            a("border-s", {
+              width: (e) => [
+                y("border-inline-start-style", "var(--tw-border-style)"),
+                y("border-inline-start-width", e),
+              ],
+              color: (e) => [y("border-inline-start-color", e)],
+            }),
+            a("border-e", {
+              width: (e) => [
+                y("border-inline-end-style", "var(--tw-border-style)"),
+                y("border-inline-end-width", e),
+              ],
+              color: (e) => [y("border-inline-end-color", e)],
+            }),
+            a("border-t", {
+              width: (e) => [
+                y("border-top-style", "var(--tw-border-style)"),
+                y("border-top-width", e),
+              ],
+              color: (e) => [y("border-top-color", e)],
+            }),
+            a("border-r", {
+              width: (e) => [
+                y("border-right-style", "var(--tw-border-style)"),
+                y("border-right-width", e),
+              ],
+              color: (e) => [y("border-right-color", e)],
+            }),
+            a("border-b", {
+              width: (e) => [
+                y("border-bottom-style", "var(--tw-border-style)"),
+                y("border-bottom-width", e),
+              ],
+              color: (e) => [y("border-bottom-color", e)],
+            }),
+            a("border-l", {
+              width: (e) => [
+                y("border-left-style", "var(--tw-border-style)"),
+                y("border-left-width", e),
+              ],
+              color: (e) => [y("border-left-color", e)],
+            }),
+            o("divide-x", {
+              defaultValue: e.get(["--default-border-width"]) ?? "1px",
+              themeKeys: ["--divide-width", "--border-width"],
+              handleBareValue: ({ value: e }) => (de(e) ? `${e}px` : null),
+              handle: (e) => [
+                z([$e("--tw-divide-x-reverse", "0")]),
+                w(":where(& > :not(:last-child))", [
+                  y("--tw-sort", "divide-x-width"),
+                  i(),
+                  y("--tw-divide-x-reverse", "0"),
+                  y("border-inline-style", "var(--tw-border-style)"),
+                  y(
+                    "border-inline-start-width",
+                    `calc(${e} * var(--tw-divide-x-reverse))`,
+                  ),
+                  y(
+                    "border-inline-end-width",
+                    `calc(${e} * calc(1 - var(--tw-divide-x-reverse)))`,
+                  ),
+                ]),
+              ],
+            }),
+            o("divide-y", {
+              defaultValue: e.get(["--default-border-width"]) ?? "1px",
+              themeKeys: ["--divide-width", "--border-width"],
+              handleBareValue: ({ value: e }) => (de(e) ? `${e}px` : null),
+              handle: (e) => [
+                z([$e("--tw-divide-y-reverse", "0")]),
+                w(":where(& > :not(:last-child))", [
+                  y("--tw-sort", "divide-y-width"),
+                  i(),
+                  y("--tw-divide-y-reverse", "0"),
+                  y("border-bottom-style", "var(--tw-border-style)"),
+                  y("border-top-style", "var(--tw-border-style)"),
+                  y(
+                    "border-top-width",
+                    `calc(${e} * var(--tw-divide-y-reverse))`,
+                  ),
+                  y(
+                    "border-bottom-width",
+                    `calc(${e} * calc(1 - var(--tw-divide-y-reverse)))`,
+                  ),
+                ]),
+              ],
+            }),
+            r("divide-x", () => [
+              {
+                values: ["0", "2", "4", "8"],
+                valueThemeKeys: ["--divide-width", "--border-width"],
+                hasDefaultValue: !0,
+              },
+            ]),
+            r("divide-y", () => [
+              {
+                values: ["0", "2", "4", "8"],
+                valueThemeKeys: ["--divide-width", "--border-width"],
+                hasDefaultValue: !0,
+              },
+            ]),
+            n("divide-x-reverse", [
+              () => z([$e("--tw-divide-x-reverse", "0")]),
+              () =>
+                w(":where(& > :not(:last-child))", [
+                  y("--tw-divide-x-reverse", "1"),
+                ]),
+            ]),
+            n("divide-y-reverse", [
+              () => z([$e("--tw-divide-y-reverse", "0")]),
+              () =>
+                w(":where(& > :not(:last-child))", [
+                  y("--tw-divide-y-reverse", "1"),
+                ]),
+            ]);
+          for (let e of ["solid", "dashed", "dotted", "double", "none"])
+            n(`divide-${e}`, [
+              () =>
+                w(":where(& > :not(:last-child))", [
+                  y("--tw-sort", "divide-style"),
+                  y("--tw-border-style", e),
+                  y("border-style", e),
+                ]),
+            ]);
+        }
+        n("bg-auto", [["background-size", "auto"]]),
+          n("bg-cover", [["background-size", "cover"]]),
+          n("bg-contain", [["background-size", "contain"]]),
+          o("bg-size", {
+            handle(e) {
+              if (e) return [y("background-size", e)];
+            },
+          }),
+          n("bg-fixed", [["background-attachment", "fixed"]]),
+          n("bg-local", [["background-attachment", "local"]]),
+          n("bg-scroll", [["background-attachment", "scroll"]]),
+          n("bg-top", [["background-position", "top"]]),
+          n("bg-top-left", [["background-position", "left top"]]),
+          n("bg-top-right", [["background-position", "right top"]]),
+          n("bg-bottom", [["background-position", "bottom"]]),
+          n("bg-bottom-left", [["background-position", "left bottom"]]),
+          n("bg-bottom-right", [["background-position", "right bottom"]]),
+          n("bg-left", [["background-position", "left"]]),
+          n("bg-right", [["background-position", "right"]]),
+          n("bg-center", [["background-position", "center"]]),
+          o("bg-position", {
+            handle(e) {
+              if (e) return [y("background-position", e)];
+            },
+          }),
+          n("bg-repeat", [["background-repeat", "repeat"]]),
+          n("bg-no-repeat", [["background-repeat", "no-repeat"]]),
+          n("bg-repeat-x", [["background-repeat", "repeat-x"]]),
+          n("bg-repeat-y", [["background-repeat", "repeat-y"]]),
+          n("bg-repeat-round", [["background-repeat", "round"]]),
+          n("bg-repeat-space", [["background-repeat", "space"]]),
+          n("bg-none", [["background-image", "none"]]);
+        {
+          let e = function (e) {
+              let t = "in oklab";
+              if ("named" === e?.kind)
+                switch (e.value) {
+                  case "longer":
+                  case "shorter":
+                  case "increasing":
+                  case "decreasing":
+                    t = `in oklch ${e.value} hue`;
+                    break;
+                  default:
+                    t = `in ${e.value}`;
+                }
+              else "arbitrary" === e?.kind && (t = e.value);
+              return t;
+            },
+            n = function ({ negative: t }) {
+              return (r) => {
+                if (!r.value) return;
+                if ("arbitrary" === r.value.kind) {
+                  if (r.modifier) return;
+                  let e = r.value.value;
+                  return "angle" === (r.value.dataType ?? G(e, ["angle"]))
+                    ? ((e = t ? `calc(${e} * -1)` : `${e}`),
+                      [
+                        y("--tw-gradient-position", e),
+                        y(
+                          "background-image",
+                          `linear-gradient(var(--tw-gradient-stops,${e}))`,
+                        ),
+                      ])
+                    : t
+                      ? void 0
+                      : [
+                          y("--tw-gradient-position", e),
+                          y(
+                            "background-image",
+                            `linear-gradient(var(--tw-gradient-stops,${e}))`,
+                          ),
+                        ];
+                }
+                let n = r.value.value;
+                if (!t && i.has(n)) n = i.get(n);
+                else {
+                  if (!de(n)) return;
+                  n = t ? `calc(${n}deg * -1)` : `${n}deg`;
+                }
+                let o = e(r.modifier);
+                return [
+                  y("--tw-gradient-position", `${n}`),
+                  b(
+                    "@supports (background-image: linear-gradient(in lab, red, red))",
+                    [y("--tw-gradient-position", `${n} ${o}`)],
+                  ),
+                  y(
+                    "background-image",
+                    "linear-gradient(var(--tw-gradient-stops))",
+                  ),
+                ];
+              };
+            },
+            o = function ({ negative: t }) {
+              return (r) => {
+                if ("arbitrary" === r.value?.kind) {
+                  if (r.modifier) return;
+                  let e = r.value.value;
+                  return [
+                    y("--tw-gradient-position", e),
+                    y(
+                      "background-image",
+                      `conic-gradient(var(--tw-gradient-stops,${e}))`,
+                    ),
+                  ];
+                }
+                let n = e(r.modifier);
+                if (!r.value)
+                  return [
+                    y("--tw-gradient-position", n),
+                    y(
+                      "background-image",
+                      "conic-gradient(var(--tw-gradient-stops))",
+                    ),
+                  ];
+                let o = r.value.value;
+                return de(o)
+                  ? ((o = t ? `calc(${o}deg * -1)` : `${o}deg`),
+                    [
+                      y("--tw-gradient-position", `from ${o} ${n}`),
+                      y(
+                        "background-image",
+                        "conic-gradient(var(--tw-gradient-stops))",
+                      ),
+                    ])
+                  : void 0;
+              };
+            },
+            a = [
+              "oklab",
+              "oklch",
+              "srgb",
+              "hsl",
+              "longer",
+              "shorter",
+              "increasing",
+              "decreasing",
+            ],
+            i = new Map([
+              ["to-t", "to top"],
+              ["to-tr", "to top right"],
+              ["to-r", "to right"],
+              ["to-br", "to bottom right"],
+              ["to-b", "to bottom"],
+              ["to-bl", "to bottom left"],
+              ["to-l", "to left"],
+              ["to-tl", "to top left"],
+            ]);
+          t.functional("-bg-linear", n({ negative: !0 })),
+            t.functional("bg-linear", n({ negative: !1 })),
+            r("bg-linear", () => [
+              { values: [...i.keys()], modifiers: a },
+              {
+                values: [
+                  "0",
+                  "30",
+                  "60",
+                  "90",
+                  "120",
+                  "150",
+                  "180",
+                  "210",
+                  "240",
+                  "270",
+                  "300",
+                  "330",
+                ],
+                supportsNegative: !0,
+                modifiers: a,
+              },
+            ]),
+            t.functional("-bg-conic", o({ negative: !0 })),
+            t.functional("bg-conic", o({ negative: !1 })),
+            r("bg-conic", () => [
+              { hasDefaultValue: !0, modifiers: a },
+              {
+                values: [
+                  "0",
+                  "30",
+                  "60",
+                  "90",
+                  "120",
+                  "150",
+                  "180",
+                  "210",
+                  "240",
+                  "270",
+                  "300",
+                  "330",
+                ],
+                supportsNegative: !0,
+                modifiers: a,
+              },
+            ]),
+            t.functional("bg-radial", (t) => {
+              if (!t.value)
+                return [
+                  y("--tw-gradient-position", e(t.modifier)),
+                  y(
+                    "background-image",
+                    "radial-gradient(var(--tw-gradient-stops))",
+                  ),
+                ];
+              if ("arbitrary" === t.value.kind) {
+                if (t.modifier) return;
+                let e = t.value.value;
+                return [
+                  y("--tw-gradient-position", e),
+                  y(
+                    "background-image",
+                    `radial-gradient(var(--tw-gradient-stops,${e}))`,
+                  ),
+                ];
+              }
+            }),
+            r("bg-radial", () => [{ hasDefaultValue: !0, modifiers: a }]);
+        }
+        t.functional("bg", (t) => {
+          if (t.value) {
             if ("arbitrary" === t.value.kind) {
               let r = t.value.value;
               switch (
-              t.value.dataType ??
-              G(r, ["color", "line-width", "length"])
+                t.value.dataType ??
+                G(r, [
+                  "image",
+                  "color",
+                  "percentage",
+                  "position",
+                  "bg-size",
+                  "length",
+                  "url",
+                ])
               ) {
-                case "line-width":
-                case "length": {
-                  if (t.modifier) return;
-                  let e = o.width(r);
-                  return e ? [i(), ...e] : void 0;
-                }
+                case "percentage":
+                case "position":
+                  return t.modifier ? void 0 : [y("background-position", r)];
+                case "bg-size":
+                case "length":
+                case "size":
+                  return t.modifier ? void 0 : [y("background-size", r)];
+                case "image":
+                case "url":
+                  return t.modifier ? void 0 : [y("background-image", r)];
                 default:
                   return (
                     (r = je(r, t.modifier, e)),
-                    null === r ? void 0 : o.color(r)
+                    null === r ? void 0 : [y("background-color", r)]
                   );
               }
             }
             {
-              let r = Te(t, e, ["--border-color", "--color"]);
-              if (r) return o.color(r);
+              let r = Te(t, e, ["--background-color", "--color"]);
+              if (r) return [y("background-color", r)];
             }
             {
               if (t.modifier) return;
-              let r = e.resolve(t.value.value, ["--border-width"]);
-              if (r) {
-                let e = o.width(r);
-                return e ? [i(), ...e] : void 0;
+              let r = e.resolve(t.value.value, ["--background-image"]);
+              if (r) return [y("background-image", r)];
+            }
+          }
+        }),
+          r("bg", () => [
+            {
+              values: ["current", "inherit", "transparent"],
+              valueThemeKeys: ["--background-color", "--color"],
+              modifiers: Array.from({ length: 21 }, (e, t) => "" + 5 * t),
+            },
+            { values: [], valueThemeKeys: ["--background-image"] },
+          ]);
+        let h = () =>
+          z([
+            $e("--tw-gradient-position"),
+            $e("--tw-gradient-from", "#0000", "<color>"),
+            $e("--tw-gradient-via", "#0000", "<color>"),
+            $e("--tw-gradient-to", "#0000", "<color>"),
+            $e("--tw-gradient-stops"),
+            $e("--tw-gradient-via-stops"),
+            $e("--tw-gradient-from-position", "0%", "<length-percentage>"),
+            $e("--tw-gradient-via-position", "50%", "<length-percentage>"),
+            $e("--tw-gradient-to-position", "100%", "<length-percentage>"),
+          ]);
+        function m(n, o) {
+          t.functional(n, (t) => {
+            if (t.value) {
+              if ("arbitrary" === t.value.kind) {
+                let r = t.value.value;
+                switch (
+                  t.value.dataType ??
+                  G(r, ["color", "length", "percentage"])
+                ) {
+                  case "length":
+                  case "percentage":
+                    return t.modifier ? void 0 : o.position(r);
+                  default:
+                    return (
+                      (r = je(r, t.modifier, e)),
+                      null === r ? void 0 : o.color(r)
+                    );
+                }
               }
-              if (de(t.value.value)) {
-                let e = o.width(`${t.value.value}px`);
-                return e ? [i(), ...e] : void 0;
+              {
+                let r = Te(t, e, ["--background-color", "--color"]);
+                if (r) return o.color(r);
+              }
+              {
+                if (t.modifier) return;
+                let r = e.resolve(t.value.value, [
+                  "--gradient-color-stop-positions",
+                ]);
+                if (r) return o.position(r);
+                if (
+                  "%" === t.value.value[t.value.value.length - 1] &&
+                  de(t.value.value.slice(0, -1))
+                )
+                  return o.position(t.value.value);
               }
             }
           }),
             r(n, () => [
               {
                 values: ["current", "inherit", "transparent"],
-                valueThemeKeys: ["--border-color", "--color"],
+                valueThemeKeys: ["--background-color", "--color"],
                 modifiers: Array.from({ length: 21 }, (e, t) => "" + 5 * t),
-                hasDefaultValue: !0,
               },
               {
-                values: ["0", "2", "4", "8"],
-                valueThemeKeys: ["--border-width"],
+                values: Array.from({ length: 21 }, (e, t) => 5 * t + "%"),
+                valueThemeKeys: ["--gradient-color-stop-positions"],
               },
             ]);
-        },
-          i = () => z([$e("--tw-border-style", "solid")]);
-        a("border", {
-          width: (e) => [
-            y("border-style", "var(--tw-border-style)"),
-            y("border-width", e),
-          ],
-          color: (e) => [y("border-color", e)],
-        }),
-          a("border-x", {
-            width: (e) => [
-              y("border-inline-style", "var(--tw-border-style)"),
-              y("border-inline-width", e),
-            ],
-            color: (e) => [y("border-inline-color", e)],
-          }),
-          a("border-y", {
-            width: (e) => [
-              y("border-block-style", "var(--tw-border-style)"),
-              y("border-block-width", e),
-            ],
-            color: (e) => [y("border-block-color", e)],
-          }),
-          a("border-s", {
-            width: (e) => [
-              y("border-inline-start-style", "var(--tw-border-style)"),
-              y("border-inline-start-width", e),
-            ],
-            color: (e) => [y("border-inline-start-color", e)],
-          }),
-          a("border-e", {
-            width: (e) => [
-              y("border-inline-end-style", "var(--tw-border-style)"),
-              y("border-inline-end-width", e),
-            ],
-            color: (e) => [y("border-inline-end-color", e)],
-          }),
-          a("border-t", {
-            width: (e) => [
-              y("border-top-style", "var(--tw-border-style)"),
-              y("border-top-width", e),
-            ],
-            color: (e) => [y("border-top-color", e)],
-          }),
-          a("border-r", {
-            width: (e) => [
-              y("border-right-style", "var(--tw-border-style)"),
-              y("border-right-width", e),
-            ],
-            color: (e) => [y("border-right-color", e)],
-          }),
-          a("border-b", {
-            width: (e) => [
-              y("border-bottom-style", "var(--tw-border-style)"),
-              y("border-bottom-width", e),
-            ],
-            color: (e) => [y("border-bottom-color", e)],
-          }),
-          a("border-l", {
-            width: (e) => [
-              y("border-left-style", "var(--tw-border-style)"),
-              y("border-left-width", e),
-            ],
-            color: (e) => [y("border-left-color", e)],
-          }),
-          o("divide-x", {
-            defaultValue: e.get(["--default-border-width"]) ?? "1px",
-            themeKeys: ["--divide-width", "--border-width"],
-            handleBareValue: ({ value: e }) => (de(e) ? `${e}px` : null),
-            handle: (e) => [
-              z([$e("--tw-divide-x-reverse", "0")]),
-              w(":where(& > :not(:last-child))", [
-                y("--tw-sort", "divide-x-width"),
-                i(),
-                y("--tw-divide-x-reverse", "0"),
-                y("border-inline-style", "var(--tw-border-style)"),
-                y(
-                  "border-inline-start-width",
-                  `calc(${e} * var(--tw-divide-x-reverse))`,
-                ),
-                y(
-                  "border-inline-end-width",
-                  `calc(${e} * calc(1 - var(--tw-divide-x-reverse)))`,
-                ),
-              ]),
-            ],
-          }),
-          o("divide-y", {
-            defaultValue: e.get(["--default-border-width"]) ?? "1px",
-            themeKeys: ["--divide-width", "--border-width"],
-            handleBareValue: ({ value: e }) => (de(e) ? `${e}px` : null),
-            handle: (e) => [
-              z([$e("--tw-divide-y-reverse", "0")]),
-              w(":where(& > :not(:last-child))", [
-                y("--tw-sort", "divide-y-width"),
-                i(),
-                y("--tw-divide-y-reverse", "0"),
-                y("border-bottom-style", "var(--tw-border-style)"),
-                y("border-top-style", "var(--tw-border-style)"),
-                y(
-                  "border-top-width",
-                  `calc(${e} * var(--tw-divide-y-reverse))`,
-                ),
-                y(
-                  "border-bottom-width",
-                  `calc(${e} * calc(1 - var(--tw-divide-y-reverse)))`,
-                ),
-              ]),
-            ],
-          }),
-          r("divide-x", () => [
-            {
-              values: ["0", "2", "4", "8"],
-              valueThemeKeys: ["--divide-width", "--border-width"],
-              hasDefaultValue: !0,
-            },
-          ]),
-          r("divide-y", () => [
-            {
-              values: ["0", "2", "4", "8"],
-              valueThemeKeys: ["--divide-width", "--border-width"],
-              hasDefaultValue: !0,
-            },
-          ]),
-          n("divide-x-reverse", [
-            () => z([$e("--tw-divide-x-reverse", "0")]),
-            () =>
-              w(":where(& > :not(:last-child))", [
-                y("--tw-divide-x-reverse", "1"),
-              ]),
-          ]),
-          n("divide-y-reverse", [
-            () => z([$e("--tw-divide-y-reverse", "0")]),
-            () =>
-              w(":where(& > :not(:last-child))", [
-                y("--tw-divide-y-reverse", "1"),
-              ]),
-          ]);
-        for (let e of ["solid", "dashed", "dotted", "double", "none"])
-          n(`divide-${e}`, [
-            () =>
-              w(":where(& > :not(:last-child))", [
-                y("--tw-sort", "divide-style"),
-                y("--tw-border-style", e),
-                y("border-style", e),
-              ]),
-          ]);
-      }
-      n("bg-auto", [["background-size", "auto"]]),
-        n("bg-cover", [["background-size", "cover"]]),
-        n("bg-contain", [["background-size", "contain"]]),
-        o("bg-size", {
-          handle(e) {
-            if (e) return [y("background-size", e)];
-          },
-        }),
-        n("bg-fixed", [["background-attachment", "fixed"]]),
-        n("bg-local", [["background-attachment", "local"]]),
-        n("bg-scroll", [["background-attachment", "scroll"]]),
-        n("bg-top", [["background-position", "top"]]),
-        n("bg-top-left", [["background-position", "left top"]]),
-        n("bg-top-right", [["background-position", "right top"]]),
-        n("bg-bottom", [["background-position", "bottom"]]),
-        n("bg-bottom-left", [["background-position", "left bottom"]]),
-        n("bg-bottom-right", [["background-position", "right bottom"]]),
-        n("bg-left", [["background-position", "left"]]),
-        n("bg-right", [["background-position", "right"]]),
-        n("bg-center", [["background-position", "center"]]),
-        o("bg-position", {
-          handle(e) {
-            if (e) return [y("background-position", e)];
-          },
-        }),
-        n("bg-repeat", [["background-repeat", "repeat"]]),
-        n("bg-no-repeat", [["background-repeat", "no-repeat"]]),
-        n("bg-repeat-x", [["background-repeat", "repeat-x"]]),
-        n("bg-repeat-y", [["background-repeat", "repeat-y"]]),
-        n("bg-repeat-round", [["background-repeat", "round"]]),
-        n("bg-repeat-space", [["background-repeat", "space"]]),
-        n("bg-none", [["background-image", "none"]]);
-      {
-        let e = function(e) {
-          let t = "in oklab";
-          if ("named" === e?.kind)
-            switch (e.value) {
-              case "longer":
-              case "shorter":
-              case "increasing":
-              case "decreasing":
-                t = `in oklch ${e.value} hue`;
-                break;
-              default:
-                t = `in ${e.value}`;
-            }
-          else "arbitrary" === e?.kind && (t = e.value);
-          return t;
-        },
-          n = function({ negative: t }) {
-            return (r) => {
-              if (!r.value) return;
-              if ("arbitrary" === r.value.kind) {
-                if (r.modifier) return;
-                let e = r.value.value;
-                return "angle" === (r.value.dataType ?? G(e, ["angle"]))
-                  ? ((e = t ? `calc(${e} * -1)` : `${e}`),
-                    [
-                      y("--tw-gradient-position", e),
-                      y(
-                        "background-image",
-                        `linear-gradient(var(--tw-gradient-stops,${e}))`,
-                      ),
-                    ])
-                  : t
-                    ? void 0
-                    : [
-                      y("--tw-gradient-position", e),
-                      y(
-                        "background-image",
-                        `linear-gradient(var(--tw-gradient-stops,${e}))`,
-                      ),
-                    ];
-              }
-              let n = r.value.value;
-              if (!t && i.has(n)) n = i.get(n);
-              else {
-                if (!de(n)) return;
-                n = t ? `calc(${n}deg * -1)` : `${n}deg`;
-              }
-              let o = e(r.modifier);
-              return [
-                y("--tw-gradient-position", `${n}`),
-                b(
-                  "@supports (background-image: linear-gradient(in lab, red, red))",
-                  [y("--tw-gradient-position", `${n} ${o}`)],
-                ),
-                y(
-                  "background-image",
-                  "linear-gradient(var(--tw-gradient-stops))",
-                ),
-              ];
-            };
-          },
-          o = function({ negative: t }) {
-            return (r) => {
-              if ("arbitrary" === r.value?.kind) {
-                if (r.modifier) return;
-                let e = r.value.value;
-                return [
-                  y("--tw-gradient-position", e),
-                  y(
-                    "background-image",
-                    `conic-gradient(var(--tw-gradient-stops,${e}))`,
-                  ),
-                ];
-              }
-              let n = e(r.modifier);
-              if (!r.value)
-                return [
-                  y("--tw-gradient-position", n),
-                  y(
-                    "background-image",
-                    "conic-gradient(var(--tw-gradient-stops))",
-                  ),
-                ];
-              let o = r.value.value;
-              return de(o)
-                ? ((o = t ? `calc(${o}deg * -1)` : `${o}deg`),
-                  [
-                    y("--tw-gradient-position", `from ${o} ${n}`),
-                    y(
-                      "background-image",
-                      "conic-gradient(var(--tw-gradient-stops))",
-                    ),
-                  ])
-                : void 0;
-            };
-          },
-          a = [
-            "oklab",
-            "oklch",
-            "srgb",
-            "hsl",
-            "longer",
-            "shorter",
-            "increasing",
-            "decreasing",
-          ],
-          i = new Map([
-            ["to-t", "to top"],
-            ["to-tr", "to top right"],
-            ["to-r", "to right"],
-            ["to-br", "to bottom right"],
-            ["to-b", "to bottom"],
-            ["to-bl", "to bottom left"],
-            ["to-l", "to left"],
-            ["to-tl", "to top left"],
-          ]);
-        t.functional("-bg-linear", n({ negative: !0 })),
-          t.functional("bg-linear", n({ negative: !1 })),
-          r("bg-linear", () => [
-            { values: [...i.keys()], modifiers: a },
-            {
-              values: [
-                "0",
-                "30",
-                "60",
-                "90",
-                "120",
-                "150",
-                "180",
-                "210",
-                "240",
-                "270",
-                "300",
-                "330",
-              ],
-              supportsNegative: !0,
-              modifiers: a,
-            },
-          ]),
-          t.functional("-bg-conic", o({ negative: !0 })),
-          t.functional("bg-conic", o({ negative: !1 })),
-          r("bg-conic", () => [
-            { hasDefaultValue: !0, modifiers: a },
-            {
-              values: [
-                "0",
-                "30",
-                "60",
-                "90",
-                "120",
-                "150",
-                "180",
-                "210",
-                "240",
-                "270",
-                "300",
-                "330",
-              ],
-              supportsNegative: !0,
-              modifiers: a,
-            },
-          ]),
-          t.functional("bg-radial", (t) => {
-            if (!t.value)
-              return [
-                y("--tw-gradient-position", e(t.modifier)),
-                y(
-                  "background-image",
-                  "radial-gradient(var(--tw-gradient-stops))",
-                ),
-              ];
-            if ("arbitrary" === t.value.kind) {
-              if (t.modifier) return;
-              let e = t.value.value;
-              return [
-                y("--tw-gradient-position", e),
-                y(
-                  "background-image",
-                  `radial-gradient(var(--tw-gradient-stops,${e}))`,
-                ),
-              ];
-            }
-          }),
-          r("bg-radial", () => [{ hasDefaultValue: !0, modifiers: a }]);
-      }
-      t.functional("bg", (t) => {
-        if (t.value) {
-          if ("arbitrary" === t.value.kind) {
-            let r = t.value.value;
-            switch (
-            t.value.dataType ??
-            G(r, [
-              "image",
-              "color",
-              "percentage",
-              "position",
-              "bg-size",
-              "length",
-              "url",
-            ])
-            ) {
-              case "percentage":
-              case "position":
-                return t.modifier ? void 0 : [y("background-position", r)];
-              case "bg-size":
-              case "length":
-              case "size":
-                return t.modifier ? void 0 : [y("background-size", r)];
-              case "image":
-              case "url":
-                return t.modifier ? void 0 : [y("background-image", r)];
-              default:
-                return (
-                  (r = je(r, t.modifier, e)),
-                  null === r ? void 0 : [y("background-color", r)]
-                );
-            }
-          }
-          {
-            let r = Te(t, e, ["--background-color", "--color"]);
-            if (r) return [y("background-color", r)];
-          }
-          {
-            if (t.modifier) return;
-            let r = e.resolve(t.value.value, ["--background-image"]);
-            if (r) return [y("background-image", r)];
-          }
         }
-      }),
-        r("bg", () => [
-          {
-            values: ["current", "inherit", "transparent"],
-            valueThemeKeys: ["--background-color", "--color"],
-            modifiers: Array.from({ length: 21 }, (e, t) => "" + 5 * t),
-          },
-          { values: [], valueThemeKeys: ["--background-image"] },
-        ]);
-      let h = () =>
-        z([
-          $e("--tw-gradient-position"),
-          $e("--tw-gradient-from", "#0000", "<color>"),
-          $e("--tw-gradient-via", "#0000", "<color>"),
-          $e("--tw-gradient-to", "#0000", "<color>"),
-          $e("--tw-gradient-stops"),
-          $e("--tw-gradient-via-stops"),
-          $e("--tw-gradient-from-position", "0%", "<length-percentage>"),
-          $e("--tw-gradient-via-position", "50%", "<length-percentage>"),
-          $e("--tw-gradient-to-position", "100%", "<length-percentage>"),
-        ]);
-      function m(n, o) {
-        t.functional(n, (t) => {
-          if (t.value) {
-            if ("arbitrary" === t.value.kind) {
-              let r = t.value.value;
-              switch (
-              t.value.dataType ??
-              G(r, ["color", "length", "percentage"])
-              ) {
-                case "length":
-                case "percentage":
-                  return t.modifier ? void 0 : o.position(r);
-                default:
-                  return (
-                    (r = je(r, t.modifier, e)),
-                    null === r ? void 0 : o.color(r)
-                  );
-              }
-            }
-            {
-              let r = Te(t, e, ["--background-color", "--color"]);
-              if (r) return o.color(r);
-            }
-            {
-              if (t.modifier) return;
-              let r = e.resolve(t.value.value, [
-                "--gradient-color-stop-positions",
-              ]);
-              if (r) return o.position(r);
-              if (
-                "%" === t.value.value[t.value.value.length - 1] &&
-                de(t.value.value.slice(0, -1))
-              )
-                return o.position(t.value.value);
-            }
-          }
-        }),
-          r(n, () => [
-            {
-              values: ["current", "inherit", "transparent"],
-              valueThemeKeys: ["--background-color", "--color"],
-              modifiers: Array.from({ length: 21 }, (e, t) => "" + 5 * t),
-            },
-            {
-              values: Array.from({ length: 21 }, (e, t) => 5 * t + "%"),
-              valueThemeKeys: ["--gradient-color-stop-positions"],
-            },
-          ]);
-      }
-      m("from", {
-        color: (e) => [
-          h(),
-          y("--tw-sort", "--tw-gradient-from"),
-          y("--tw-gradient-from", e),
-          y(
-            "--tw-gradient-stops",
-            "var(--tw-gradient-via-stops, var(--tw-gradient-position), var(--tw-gradient-from) var(--tw-gradient-from-position), var(--tw-gradient-to) var(--tw-gradient-to-position))",
-          ),
-        ],
-        position: (e) => [h(), y("--tw-gradient-from-position", e)],
-      }),
-        n("via-none", [["--tw-gradient-via-stops", "initial"]]),
-        m("via", {
+        m("from", {
           color: (e) => [
             h(),
-            y("--tw-sort", "--tw-gradient-via"),
-            y("--tw-gradient-via", e),
-            y(
-              "--tw-gradient-via-stops",
-              "var(--tw-gradient-position), var(--tw-gradient-from) var(--tw-gradient-from-position), var(--tw-gradient-via) var(--tw-gradient-via-position), var(--tw-gradient-to) var(--tw-gradient-to-position)",
-            ),
-            y("--tw-gradient-stops", "var(--tw-gradient-via-stops)"),
-          ],
-          position: (e) => [h(), y("--tw-gradient-via-position", e)],
-        }),
-        m("to", {
-          color: (e) => [
-            h(),
-            y("--tw-sort", "--tw-gradient-to"),
-            y("--tw-gradient-to", e),
+            y("--tw-sort", "--tw-gradient-from"),
+            y("--tw-gradient-from", e),
             y(
               "--tw-gradient-stops",
               "var(--tw-gradient-via-stops, var(--tw-gradient-position), var(--tw-gradient-from) var(--tw-gradient-from-position), var(--tw-gradient-to) var(--tw-gradient-to-position))",
             ),
           ],
-          position: (e) => [h(), y("--tw-gradient-to-position", e)],
+          position: (e) => [h(), y("--tw-gradient-from-position", e)],
         }),
-        n("mask-none", [["mask-image", "none"]]),
-        t.functional("mask", (e) => {
-          if (!e.value || e.modifier || "arbitrary" !== e.value.kind) return;
-          let t = e.value.value;
-          switch (
-          e.value.dataType ??
-          G(t, [
-            "image",
-            "percentage",
-            "position",
-            "bg-size",
-            "length",
-            "url",
-          ])
-          ) {
-            case "percentage":
-            case "position":
-              return e.modifier ? void 0 : [y("mask-position", t)];
-            case "bg-size":
-            case "length":
-            case "size":
-              return [y("mask-size", t)];
-            default:
-              return [y("mask-image", t)];
-          }
-        }),
-        n("mask-add", [["mask-composite", "add"]]),
-        n("mask-subtract", [["mask-composite", "subtract"]]),
-        n("mask-intersect", [["mask-composite", "intersect"]]),
-        n("mask-exclude", [["mask-composite", "exclude"]]),
-        n("mask-alpha", [["mask-mode", "alpha"]]),
-        n("mask-luminance", [["mask-mode", "luminance"]]),
-        n("mask-match", [["mask-mode", "match-source"]]),
-        n("mask-type-alpha", [["mask-type", "alpha"]]),
-        n("mask-type-luminance", [["mask-type", "luminance"]]),
-        n("mask-auto", [["mask-size", "auto"]]),
-        n("mask-cover", [["mask-size", "cover"]]),
-        n("mask-contain", [["mask-size", "contain"]]),
-        o("mask-size", {
-          handle(e) {
-            if (e) return [y("mask-size", e)];
-          },
-        }),
-        n("mask-top", [["mask-position", "top"]]),
-        n("mask-top-left", [["mask-position", "left top"]]),
-        n("mask-top-right", [["mask-position", "right top"]]),
-        n("mask-bottom", [["mask-position", "bottom"]]),
-        n("mask-bottom-left", [["mask-position", "left bottom"]]),
-        n("mask-bottom-right", [["mask-position", "right bottom"]]),
-        n("mask-left", [["mask-position", "left"]]),
-        n("mask-right", [["mask-position", "right"]]),
-        n("mask-center", [["mask-position", "center"]]),
-        o("mask-position", {
-          handle(e) {
-            if (e) return [y("mask-position", e)];
-          },
-        }),
-        n("mask-repeat", [["mask-repeat", "repeat"]]),
-        n("mask-no-repeat", [["mask-repeat", "no-repeat"]]),
-        n("mask-repeat-x", [["mask-repeat", "repeat-x"]]),
-        n("mask-repeat-y", [["mask-repeat", "repeat-y"]]),
-        n("mask-repeat-round", [["mask-repeat", "round"]]),
-        n("mask-repeat-space", [["mask-repeat", "space"]]),
-        n("mask-clip-border", [["mask-clip", "border-box"]]),
-        n("mask-clip-padding", [["mask-clip", "padding-box"]]),
-        n("mask-clip-content", [["mask-clip", "content-box"]]),
-        n("mask-clip-fill", [["mask-clip", "fill-box"]]),
-        n("mask-clip-stroke", [["mask-clip", "stroke-box"]]),
-        n("mask-clip-view", [["mask-clip", "view-box"]]),
-        n("mask-no-clip", [["mask-clip", "no-clip"]]),
-        n("mask-origin-border", [["mask-origin", "border-box"]]),
-        n("mask-origin-padding", [["mask-origin", "padding-box"]]),
-        n("mask-origin-content", [["mask-origin", "content-box"]]),
-        n("mask-origin-fill", [["mask-origin", "fill-box"]]),
-        n("mask-origin-stroke", [["mask-origin", "stroke-box"]]),
-        n("mask-origin-view", [["mask-origin", "view-box"]]);
-      let g = () =>
-        z([
-          $e("--tw-mask-linear", "linear-gradient(#fff, #fff)"),
-          $e("--tw-mask-radial", "linear-gradient(#fff, #fff)"),
-          $e("--tw-mask-conic", "linear-gradient(#fff, #fff)"),
-        ]);
-      function v(n, o) {
-        t.functional(n, (t) => {
-          if (t.value) {
-            if ("arbitrary" === t.value.kind) {
-              let r = t.value.value;
-              switch (
-              t.value.dataType ??
-              G(r, ["length", "percentage", "color"])
-              ) {
-                case "color":
-                  return (
-                    (r = je(r, t.modifier, e)),
-                    null === r ? void 0 : o.color(r)
-                  );
-                case "percentage":
-                  return t.modifier || !de(r.slice(0, -1))
-                    ? void 0
-                    : o.position(r);
-                default:
-                  return t.modifier ? void 0 : o.position(r);
-              }
+          n("via-none", [["--tw-gradient-via-stops", "initial"]]),
+          m("via", {
+            color: (e) => [
+              h(),
+              y("--tw-sort", "--tw-gradient-via"),
+              y("--tw-gradient-via", e),
+              y(
+                "--tw-gradient-via-stops",
+                "var(--tw-gradient-position), var(--tw-gradient-from) var(--tw-gradient-from-position), var(--tw-gradient-via) var(--tw-gradient-via-position), var(--tw-gradient-to) var(--tw-gradient-to-position)",
+              ),
+              y("--tw-gradient-stops", "var(--tw-gradient-via-stops)"),
+            ],
+            position: (e) => [h(), y("--tw-gradient-via-position", e)],
+          }),
+          m("to", {
+            color: (e) => [
+              h(),
+              y("--tw-sort", "--tw-gradient-to"),
+              y("--tw-gradient-to", e),
+              y(
+                "--tw-gradient-stops",
+                "var(--tw-gradient-via-stops, var(--tw-gradient-position), var(--tw-gradient-from) var(--tw-gradient-from-position), var(--tw-gradient-to) var(--tw-gradient-to-position))",
+              ),
+            ],
+            position: (e) => [h(), y("--tw-gradient-to-position", e)],
+          }),
+          n("mask-none", [["mask-image", "none"]]),
+          t.functional("mask", (e) => {
+            if (!e.value || e.modifier || "arbitrary" !== e.value.kind) return;
+            let t = e.value.value;
+            switch (
+              e.value.dataType ??
+              G(t, [
+                "image",
+                "percentage",
+                "position",
+                "bg-size",
+                "length",
+                "url",
+              ])
+            ) {
+              case "percentage":
+              case "position":
+                return e.modifier ? void 0 : [y("mask-position", t)];
+              case "bg-size":
+              case "length":
+              case "size":
+                return [y("mask-size", t)];
+              default:
+                return [y("mask-image", t)];
             }
-            {
-              let r = Te(t, e, ["--background-color", "--color"]);
-              if (r) return o.color(r);
-            }
-            {
-              if (t.modifier) return;
-              let r = G(t.value.value, ["number", "percentage"]);
-              if (!r) return;
-              switch (r) {
-                case "number": {
-                  let r = e.resolve(null, ["--spacing"]);
-                  return r && pe(t.value.value)
-                    ? o.position(`calc(${r} * ${t.value.value})`)
-                    : void 0;
-                }
-                case "percentage":
-                  return de(t.value.value.slice(0, -1))
-                    ? o.position(t.value.value)
-                    : void 0;
-                default:
-                  return;
-              }
-            }
-          }
-        }),
-          r(n, () => [
-            {
-              values: ["current", "inherit", "transparent"],
-              valueThemeKeys: ["--background-color", "--color"],
-              modifiers: Array.from({ length: 21 }, (e, t) => "" + 5 * t),
+          }),
+          n("mask-add", [["mask-composite", "add"]]),
+          n("mask-subtract", [["mask-composite", "subtract"]]),
+          n("mask-intersect", [["mask-composite", "intersect"]]),
+          n("mask-exclude", [["mask-composite", "exclude"]]),
+          n("mask-alpha", [["mask-mode", "alpha"]]),
+          n("mask-luminance", [["mask-mode", "luminance"]]),
+          n("mask-match", [["mask-mode", "match-source"]]),
+          n("mask-type-alpha", [["mask-type", "alpha"]]),
+          n("mask-type-luminance", [["mask-type", "luminance"]]),
+          n("mask-auto", [["mask-size", "auto"]]),
+          n("mask-cover", [["mask-size", "cover"]]),
+          n("mask-contain", [["mask-size", "contain"]]),
+          o("mask-size", {
+            handle(e) {
+              if (e) return [y("mask-size", e)];
             },
-            {
-              values: Array.from({ length: 21 }, (e, t) => 5 * t + "%"),
-              valueThemeKeys: ["--gradient-color-stop-positions"],
+          }),
+          n("mask-top", [["mask-position", "top"]]),
+          n("mask-top-left", [["mask-position", "left top"]]),
+          n("mask-top-right", [["mask-position", "right top"]]),
+          n("mask-bottom", [["mask-position", "bottom"]]),
+          n("mask-bottom-left", [["mask-position", "left bottom"]]),
+          n("mask-bottom-right", [["mask-position", "right bottom"]]),
+          n("mask-left", [["mask-position", "left"]]),
+          n("mask-right", [["mask-position", "right"]]),
+          n("mask-center", [["mask-position", "center"]]),
+          o("mask-position", {
+            handle(e) {
+              if (e) return [y("mask-position", e)];
             },
-          ]),
-          r(n, () => [
-            { values: Array.from({ length: 21 }, (e, t) => 5 * t + "%") },
-            { values: e.get(["--spacing"]) ? ye : [] },
-            {
-              values: ["current", "inherit", "transparent"],
-              valueThemeKeys: ["--background-color", "--color"],
-              modifiers: Array.from({ length: 21 }, (e, t) => "" + 5 * t),
-            },
+          }),
+          n("mask-repeat", [["mask-repeat", "repeat"]]),
+          n("mask-no-repeat", [["mask-repeat", "no-repeat"]]),
+          n("mask-repeat-x", [["mask-repeat", "repeat-x"]]),
+          n("mask-repeat-y", [["mask-repeat", "repeat-y"]]),
+          n("mask-repeat-round", [["mask-repeat", "round"]]),
+          n("mask-repeat-space", [["mask-repeat", "space"]]),
+          n("mask-clip-border", [["mask-clip", "border-box"]]),
+          n("mask-clip-padding", [["mask-clip", "padding-box"]]),
+          n("mask-clip-content", [["mask-clip", "content-box"]]),
+          n("mask-clip-fill", [["mask-clip", "fill-box"]]),
+          n("mask-clip-stroke", [["mask-clip", "stroke-box"]]),
+          n("mask-clip-view", [["mask-clip", "view-box"]]),
+          n("mask-no-clip", [["mask-clip", "no-clip"]]),
+          n("mask-origin-border", [["mask-origin", "border-box"]]),
+          n("mask-origin-padding", [["mask-origin", "padding-box"]]),
+          n("mask-origin-content", [["mask-origin", "content-box"]]),
+          n("mask-origin-fill", [["mask-origin", "fill-box"]]),
+          n("mask-origin-stroke", [["mask-origin", "stroke-box"]]),
+          n("mask-origin-view", [["mask-origin", "view-box"]]);
+        let g = () =>
+          z([
+            $e("--tw-mask-linear", "linear-gradient(#fff, #fff)"),
+            $e("--tw-mask-radial", "linear-gradient(#fff, #fff)"),
+            $e("--tw-mask-conic", "linear-gradient(#fff, #fff)"),
           ]);
-      }
-      let x = () =>
-        z([
-          $e("--tw-mask-left", "linear-gradient(#fff, #fff)"),
-          $e("--tw-mask-right", "linear-gradient(#fff, #fff)"),
-          $e("--tw-mask-bottom", "linear-gradient(#fff, #fff)"),
-          $e("--tw-mask-top", "linear-gradient(#fff, #fff)"),
-        ]);
-      function $(e, t, r) {
-        v(e, {
-          color(e) {
-            let n = [
-              g(),
-              x(),
-              y(
-                "mask-image",
-                "var(--tw-mask-linear), var(--tw-mask-radial), var(--tw-mask-conic)",
-              ),
-              y("mask-composite", "intersect"),
-              y(
-                "--tw-mask-linear",
-                "var(--tw-mask-left), var(--tw-mask-right), var(--tw-mask-bottom), var(--tw-mask-top)",
-              ),
-            ];
-            for (let o of ["top", "right", "bottom", "left"])
-              r[o] &&
-                (n.push(
-                  y(
-                    `--tw-mask-${o}`,
-                    `linear-gradient(to ${o}, var(--tw-mask-${o}-from-color) var(--tw-mask-${o}-from-position), var(--tw-mask-${o}-to-color) var(--tw-mask-${o}-to-position))`,
-                  ),
+        function v(n, o) {
+          t.functional(n, (t) => {
+            if (t.value) {
+              if ("arbitrary" === t.value.kind) {
+                let r = t.value.value;
+                switch (
+                  t.value.dataType ??
+                  G(r, ["length", "percentage", "color"])
+                ) {
+                  case "color":
+                    return (
+                      (r = je(r, t.modifier, e)),
+                      null === r ? void 0 : o.color(r)
+                    );
+                  case "percentage":
+                    return t.modifier || !de(r.slice(0, -1))
+                      ? void 0
+                      : o.position(r);
+                  default:
+                    return t.modifier ? void 0 : o.position(r);
+                }
+              }
+              {
+                let r = Te(t, e, ["--background-color", "--color"]);
+                if (r) return o.color(r);
+              }
+              {
+                if (t.modifier) return;
+                let r = G(t.value.value, ["number", "percentage"]);
+                if (!r) return;
+                switch (r) {
+                  case "number": {
+                    let r = e.resolve(null, ["--spacing"]);
+                    return r && pe(t.value.value)
+                      ? o.position(`calc(${r} * ${t.value.value})`)
+                      : void 0;
+                  }
+                  case "percentage":
+                    return de(t.value.value.slice(0, -1))
+                      ? o.position(t.value.value)
+                      : void 0;
+                  default:
+                    return;
+                }
+              }
+            }
+          }),
+            r(n, () => [
+              {
+                values: ["current", "inherit", "transparent"],
+                valueThemeKeys: ["--background-color", "--color"],
+                modifiers: Array.from({ length: 21 }, (e, t) => "" + 5 * t),
+              },
+              {
+                values: Array.from({ length: 21 }, (e, t) => 5 * t + "%"),
+                valueThemeKeys: ["--gradient-color-stop-positions"],
+              },
+            ]),
+            r(n, () => [
+              { values: Array.from({ length: 21 }, (e, t) => 5 * t + "%") },
+              { values: e.get(["--spacing"]) ? ye : [] },
+              {
+                values: ["current", "inherit", "transparent"],
+                valueThemeKeys: ["--background-color", "--color"],
+                modifiers: Array.from({ length: 21 }, (e, t) => "" + 5 * t),
+              },
+            ]);
+        }
+        let x = () =>
+          z([
+            $e("--tw-mask-left", "linear-gradient(#fff, #fff)"),
+            $e("--tw-mask-right", "linear-gradient(#fff, #fff)"),
+            $e("--tw-mask-bottom", "linear-gradient(#fff, #fff)"),
+            $e("--tw-mask-top", "linear-gradient(#fff, #fff)"),
+          ]);
+        function $(e, t, r) {
+          v(e, {
+            color(e) {
+              let n = [
+                g(),
+                x(),
+                y(
+                  "mask-image",
+                  "var(--tw-mask-linear), var(--tw-mask-radial), var(--tw-mask-conic)",
                 ),
+                y("mask-composite", "intersect"),
+                y(
+                  "--tw-mask-linear",
+                  "var(--tw-mask-left), var(--tw-mask-right), var(--tw-mask-bottom), var(--tw-mask-top)",
+                ),
+              ];
+              for (let o of ["top", "right", "bottom", "left"])
+                r[o] &&
+                  (n.push(
+                    y(
+                      `--tw-mask-${o}`,
+                      `linear-gradient(to ${o}, var(--tw-mask-${o}-from-color) var(--tw-mask-${o}-from-position), var(--tw-mask-${o}-to-color) var(--tw-mask-${o}-to-position))`,
+                    ),
+                  ),
                   n.push(
                     z([
                       $e(`--tw-mask-${o}-from-position`, "0%"),
@@ -4308,30 +4308,30 @@
                     ]),
                   ),
                   n.push(y(`--tw-mask-${o}-${t}-color`, e)));
-            return n;
-          },
-          position(e) {
-            let n = [
-              g(),
-              x(),
-              y(
-                "mask-image",
-                "var(--tw-mask-linear), var(--tw-mask-radial), var(--tw-mask-conic)",
-              ),
-              y("mask-composite", "intersect"),
-              y(
-                "--tw-mask-linear",
-                "var(--tw-mask-left), var(--tw-mask-right), var(--tw-mask-bottom), var(--tw-mask-top)",
-              ),
-            ];
-            for (let o of ["top", "right", "bottom", "left"])
-              r[o] &&
-                (n.push(
-                  y(
-                    `--tw-mask-${o}`,
-                    `linear-gradient(to ${o}, var(--tw-mask-${o}-from-color) var(--tw-mask-${o}-from-position), var(--tw-mask-${o}-to-color) var(--tw-mask-${o}-to-position))`,
-                  ),
+              return n;
+            },
+            position(e) {
+              let n = [
+                g(),
+                x(),
+                y(
+                  "mask-image",
+                  "var(--tw-mask-linear), var(--tw-mask-radial), var(--tw-mask-conic)",
                 ),
+                y("mask-composite", "intersect"),
+                y(
+                  "--tw-mask-linear",
+                  "var(--tw-mask-left), var(--tw-mask-right), var(--tw-mask-bottom), var(--tw-mask-top)",
+                ),
+              ];
+              for (let o of ["top", "right", "bottom", "left"])
+                r[o] &&
+                  (n.push(
+                    y(
+                      `--tw-mask-${o}`,
+                      `linear-gradient(to ${o}, var(--tw-mask-${o}-from-color) var(--tw-mask-${o}-from-position), var(--tw-mask-${o}-to-color) var(--tw-mask-${o}-to-position))`,
+                    ),
+                  ),
                   n.push(
                     z([
                       $e(`--tw-mask-${o}-from-position`, "0%"),
@@ -4341,341 +4341,319 @@
                     ]),
                   ),
                   n.push(y(`--tw-mask-${o}-${t}-position`, e)));
-            return n;
-          },
-        });
-      }
-      $("mask-x-from", "from", { top: !1, right: !0, bottom: !1, left: !0 }),
-        $("mask-x-to", "to", { top: !1, right: !0, bottom: !1, left: !0 }),
-        $("mask-y-from", "from", {
-          top: !0,
-          right: !1,
-          bottom: !0,
-          left: !1,
-        }),
-        $("mask-y-to", "to", { top: !0, right: !1, bottom: !0, left: !1 }),
-        $("mask-t-from", "from", {
-          top: !0,
-          right: !1,
-          bottom: !1,
-          left: !1,
-        }),
-        $("mask-t-to", "to", { top: !0, right: !1, bottom: !1, left: !1 }),
-        $("mask-r-from", "from", {
-          top: !1,
-          right: !0,
-          bottom: !1,
-          left: !1,
-        }),
-        $("mask-r-to", "to", { top: !1, right: !0, bottom: !1, left: !1 }),
-        $("mask-b-from", "from", {
-          top: !1,
-          right: !1,
-          bottom: !0,
-          left: !1,
-        }),
-        $("mask-b-to", "to", { top: !1, right: !1, bottom: !0, left: !1 }),
-        $("mask-l-from", "from", {
-          top: !1,
-          right: !1,
-          bottom: !1,
-          left: !0,
-        }),
-        $("mask-l-to", "to", { top: !1, right: !1, bottom: !1, left: !0 });
-      let A = () =>
-        z([
-          $e("--tw-mask-linear-position", "0deg"),
-          $e("--tw-mask-linear-from-position", "0%"),
-          $e("--tw-mask-linear-to-position", "100%"),
-          $e("--tw-mask-linear-from-color", "black"),
-          $e("--tw-mask-linear-to-color", "transparent"),
-        ]);
-      o("mask-linear", {
-        defaultValue: null,
-        supportsNegative: !0,
-        supportsFractions: !1,
-        handleBareValue: (e) =>
-          de(e.value) ? `calc(1deg * ${e.value})` : null,
-        handleNegativeBareValue: (e) =>
-          de(e.value) ? `calc(1deg * -${e.value})` : null,
-        handle: (e) => [
-          g(),
-          A(),
-          y(
-            "mask-image",
-            "var(--tw-mask-linear), var(--tw-mask-radial), var(--tw-mask-conic)",
-          ),
-          y("mask-composite", "intersect"),
-          y(
-            "--tw-mask-linear",
-            "linear-gradient(var(--tw-mask-linear-stops, var(--tw-mask-linear-position)))",
-          ),
-          y("--tw-mask-linear-position", e),
-        ],
-      }),
-        r("mask-linear", () => [
-          {
-            supportsNegative: !0,
-            values: ["0", "1", "2", "3", "6", "12", "45", "90", "180"],
-          },
-        ]),
-        v("mask-linear-from", {
-          color: (e) => [
-            g(),
-            A(),
-            y(
-              "mask-image",
-              "var(--tw-mask-linear), var(--tw-mask-radial), var(--tw-mask-conic)",
-            ),
-            y("mask-composite", "intersect"),
-            y(
-              "--tw-mask-linear-stops",
-              "var(--tw-mask-linear-position), var(--tw-mask-linear-from-color) var(--tw-mask-linear-from-position), var(--tw-mask-linear-to-color) var(--tw-mask-linear-to-position)",
-            ),
-            y(
-              "--tw-mask-linear",
-              "linear-gradient(var(--tw-mask-linear-stops))",
-            ),
-            y("--tw-mask-linear-from-color", e),
-          ],
-          position: (e) => [
-            g(),
-            A(),
-            y(
-              "mask-image",
-              "var(--tw-mask-linear), var(--tw-mask-radial), var(--tw-mask-conic)",
-            ),
-            y("mask-composite", "intersect"),
-            y(
-              "--tw-mask-linear-stops",
-              "var(--tw-mask-linear-position), var(--tw-mask-linear-from-color) var(--tw-mask-linear-from-position), var(--tw-mask-linear-to-color) var(--tw-mask-linear-to-position)",
-            ),
-            y(
-              "--tw-mask-linear",
-              "linear-gradient(var(--tw-mask-linear-stops))",
-            ),
-            y("--tw-mask-linear-from-position", e),
-          ],
-        }),
-        v("mask-linear-to", {
-          color: (e) => [
-            g(),
-            A(),
-            y(
-              "mask-image",
-              "var(--tw-mask-linear), var(--tw-mask-radial), var(--tw-mask-conic)",
-            ),
-            y("mask-composite", "intersect"),
-            y(
-              "--tw-mask-linear-stops",
-              "var(--tw-mask-linear-position), var(--tw-mask-linear-from-color) var(--tw-mask-linear-from-position), var(--tw-mask-linear-to-color) var(--tw-mask-linear-to-position)",
-            ),
-            y(
-              "--tw-mask-linear",
-              "linear-gradient(var(--tw-mask-linear-stops))",
-            ),
-            y("--tw-mask-linear-to-color", e),
-          ],
-          position: (e) => [
-            g(),
-            A(),
-            y(
-              "mask-image",
-              "var(--tw-mask-linear), var(--tw-mask-radial), var(--tw-mask-conic)",
-            ),
-            y("mask-composite", "intersect"),
-            y(
-              "--tw-mask-linear-stops",
-              "var(--tw-mask-linear-position), var(--tw-mask-linear-from-color) var(--tw-mask-linear-from-position), var(--tw-mask-linear-to-color) var(--tw-mask-linear-to-position)",
-            ),
-            y(
-              "--tw-mask-linear",
-              "linear-gradient(var(--tw-mask-linear-stops))",
-            ),
-            y("--tw-mask-linear-to-position", e),
-          ],
-        });
-      let j = () =>
-        z([
-          $e("--tw-mask-radial-from-position", "0%"),
-          $e("--tw-mask-radial-to-position", "100%"),
-          $e("--tw-mask-radial-from-color", "black"),
-          $e("--tw-mask-radial-to-color", "transparent"),
-          $e("--tw-mask-radial-shape", "ellipse"),
-          $e("--tw-mask-radial-size", "farthest-corner"),
-          $e("--tw-mask-radial-position", "center"),
-        ]);
-      n("mask-circle", [["--tw-mask-radial-shape", "circle"]]),
-        n("mask-ellipse", [["--tw-mask-radial-shape", "ellipse"]]),
-        n("mask-radial-closest-side", [
-          ["--tw-mask-radial-size", "closest-side"],
-        ]),
-        n("mask-radial-farthest-side", [
-          ["--tw-mask-radial-size", "farthest-side"],
-        ]),
-        n("mask-radial-closest-corner", [
-          ["--tw-mask-radial-size", "closest-corner"],
-        ]),
-        n("mask-radial-farthest-corner", [
-          ["--tw-mask-radial-size", "farthest-corner"],
-        ]),
-        n("mask-radial-at-top", [["--tw-mask-radial-position", "top"]]),
-        n("mask-radial-at-top-left", [
-          ["--tw-mask-radial-position", "top left"],
-        ]),
-        n("mask-radial-at-top-right", [
-          ["--tw-mask-radial-position", "top right"],
-        ]),
-        n("mask-radial-at-bottom", [["--tw-mask-radial-position", "bottom"]]),
-        n("mask-radial-at-bottom-left", [
-          ["--tw-mask-radial-position", "bottom left"],
-        ]),
-        n("mask-radial-at-bottom-right", [
-          ["--tw-mask-radial-position", "bottom right"],
-        ]),
-        n("mask-radial-at-left", [["--tw-mask-radial-position", "left"]]),
-        n("mask-radial-at-right", [["--tw-mask-radial-position", "right"]]),
-        n("mask-radial-at-center", [["--tw-mask-radial-position", "center"]]),
-        o("mask-radial-at", {
+              return n;
+            },
+          });
+        }
+        $("mask-x-from", "from", { top: !1, right: !0, bottom: !1, left: !0 }),
+          $("mask-x-to", "to", { top: !1, right: !0, bottom: !1, left: !0 }),
+          $("mask-y-from", "from", {
+            top: !0,
+            right: !1,
+            bottom: !0,
+            left: !1,
+          }),
+          $("mask-y-to", "to", { top: !0, right: !1, bottom: !0, left: !1 }),
+          $("mask-t-from", "from", {
+            top: !0,
+            right: !1,
+            bottom: !1,
+            left: !1,
+          }),
+          $("mask-t-to", "to", { top: !0, right: !1, bottom: !1, left: !1 }),
+          $("mask-r-from", "from", {
+            top: !1,
+            right: !0,
+            bottom: !1,
+            left: !1,
+          }),
+          $("mask-r-to", "to", { top: !1, right: !0, bottom: !1, left: !1 }),
+          $("mask-b-from", "from", {
+            top: !1,
+            right: !1,
+            bottom: !0,
+            left: !1,
+          }),
+          $("mask-b-to", "to", { top: !1, right: !1, bottom: !0, left: !1 }),
+          $("mask-l-from", "from", {
+            top: !1,
+            right: !1,
+            bottom: !1,
+            left: !0,
+          }),
+          $("mask-l-to", "to", { top: !1, right: !1, bottom: !1, left: !0 });
+        let A = () =>
+          z([
+            $e("--tw-mask-linear-position", "0deg"),
+            $e("--tw-mask-linear-from-position", "0%"),
+            $e("--tw-mask-linear-to-position", "100%"),
+            $e("--tw-mask-linear-from-color", "black"),
+            $e("--tw-mask-linear-to-color", "transparent"),
+          ]);
+        o("mask-linear", {
           defaultValue: null,
-          supportsNegative: !1,
+          supportsNegative: !0,
           supportsFractions: !1,
-          handle: (e) => [y("--tw-mask-radial-position", e)],
-        }),
-        o("mask-radial", {
-          defaultValue: null,
-          supportsNegative: !1,
-          supportsFractions: !1,
+          handleBareValue: (e) =>
+            de(e.value) ? `calc(1deg * ${e.value})` : null,
+          handleNegativeBareValue: (e) =>
+            de(e.value) ? `calc(1deg * -${e.value})` : null,
           handle: (e) => [
             g(),
-            j(),
+            A(),
             y(
               "mask-image",
               "var(--tw-mask-linear), var(--tw-mask-radial), var(--tw-mask-conic)",
             ),
             y("mask-composite", "intersect"),
             y(
-              "--tw-mask-radial",
-              "radial-gradient(var(--tw-mask-radial-stops, var(--tw-mask-radial-size)))",
+              "--tw-mask-linear",
+              "linear-gradient(var(--tw-mask-linear-stops, var(--tw-mask-linear-position)))",
             ),
-            y("--tw-mask-radial-size", e),
+            y("--tw-mask-linear-position", e),
           ],
         }),
-        v("mask-radial-from", {
-          color: (e) => [
-            g(),
-            j(),
-            y(
-              "mask-image",
-              "var(--tw-mask-linear), var(--tw-mask-radial), var(--tw-mask-conic)",
-            ),
-            y("mask-composite", "intersect"),
-            y(
-              "--tw-mask-radial-stops",
-              "var(--tw-mask-radial-shape) var(--tw-mask-radial-size) at var(--tw-mask-radial-position), var(--tw-mask-radial-from-color) var(--tw-mask-radial-from-position), var(--tw-mask-radial-to-color) var(--tw-mask-radial-to-position)",
-            ),
-            y(
-              "--tw-mask-radial",
-              "radial-gradient(var(--tw-mask-radial-stops))",
-            ),
-            y("--tw-mask-radial-from-color", e),
-          ],
-          position: (e) => [
-            g(),
-            j(),
-            y(
-              "mask-image",
-              "var(--tw-mask-linear), var(--tw-mask-radial), var(--tw-mask-conic)",
-            ),
-            y("mask-composite", "intersect"),
-            y(
-              "--tw-mask-radial-stops",
-              "var(--tw-mask-radial-shape) var(--tw-mask-radial-size) at var(--tw-mask-radial-position), var(--tw-mask-radial-from-color) var(--tw-mask-radial-from-position), var(--tw-mask-radial-to-color) var(--tw-mask-radial-to-position)",
-            ),
-            y(
-              "--tw-mask-radial",
-              "radial-gradient(var(--tw-mask-radial-stops))",
-            ),
-            y("--tw-mask-radial-from-position", e),
-          ],
-        }),
-        v("mask-radial-to", {
-          color: (e) => [
-            g(),
-            j(),
-            y(
-              "mask-image",
-              "var(--tw-mask-linear), var(--tw-mask-radial), var(--tw-mask-conic)",
-            ),
-            y("mask-composite", "intersect"),
-            y(
-              "--tw-mask-radial-stops",
-              "var(--tw-mask-radial-shape) var(--tw-mask-radial-size) at var(--tw-mask-radial-position), var(--tw-mask-radial-from-color) var(--tw-mask-radial-from-position), var(--tw-mask-radial-to-color) var(--tw-mask-radial-to-position)",
-            ),
-            y(
-              "--tw-mask-radial",
-              "radial-gradient(var(--tw-mask-radial-stops))",
-            ),
-            y("--tw-mask-radial-to-color", e),
-          ],
-          position: (e) => [
-            g(),
-            j(),
-            y(
-              "mask-image",
-              "var(--tw-mask-linear), var(--tw-mask-radial), var(--tw-mask-conic)",
-            ),
-            y("mask-composite", "intersect"),
-            y(
-              "--tw-mask-radial-stops",
-              "var(--tw-mask-radial-shape) var(--tw-mask-radial-size) at var(--tw-mask-radial-position), var(--tw-mask-radial-from-color) var(--tw-mask-radial-from-position), var(--tw-mask-radial-to-color) var(--tw-mask-radial-to-position)",
-            ),
-            y(
-              "--tw-mask-radial",
-              "radial-gradient(var(--tw-mask-radial-stops))",
-            ),
-            y("--tw-mask-radial-to-position", e),
-          ],
-        });
-      let T = () =>
-        z([
-          $e("--tw-mask-conic-position", "0deg"),
-          $e("--tw-mask-conic-from-position", "0%"),
-          $e("--tw-mask-conic-to-position", "100%"),
-          $e("--tw-mask-conic-from-color", "black"),
-          $e("--tw-mask-conic-to-color", "transparent"),
-        ]);
-      o("mask-conic", {
-        defaultValue: null,
-        supportsNegative: !0,
-        supportsFractions: !1,
-        handleBareValue: (e) =>
-          de(e.value) ? `calc(1deg * ${e.value})` : null,
-        handleNegativeBareValue: (e) =>
-          de(e.value) ? `calc(1deg * -${e.value})` : null,
-        handle: (e) => [
-          g(),
-          T(),
-          y(
-            "mask-image",
-            "var(--tw-mask-linear), var(--tw-mask-radial), var(--tw-mask-conic)",
-          ),
-          y("mask-composite", "intersect"),
-          y(
-            "--tw-mask-conic",
-            "conic-gradient(var(--tw-mask-conic-stops, var(--tw-mask-conic-position)))",
-          ),
-          y("--tw-mask-conic-position", e),
-        ],
-      }),
-        r("mask-conic", () => [
-          {
-            supportsNegative: !0,
-            values: ["0", "1", "2", "3", "6", "12", "45", "90", "180"],
-          },
-        ]),
-        v("mask-conic-from", {
-          color: (e) => [
+          r("mask-linear", () => [
+            {
+              supportsNegative: !0,
+              values: ["0", "1", "2", "3", "6", "12", "45", "90", "180"],
+            },
+          ]),
+          v("mask-linear-from", {
+            color: (e) => [
+              g(),
+              A(),
+              y(
+                "mask-image",
+                "var(--tw-mask-linear), var(--tw-mask-radial), var(--tw-mask-conic)",
+              ),
+              y("mask-composite", "intersect"),
+              y(
+                "--tw-mask-linear-stops",
+                "var(--tw-mask-linear-position), var(--tw-mask-linear-from-color) var(--tw-mask-linear-from-position), var(--tw-mask-linear-to-color) var(--tw-mask-linear-to-position)",
+              ),
+              y(
+                "--tw-mask-linear",
+                "linear-gradient(var(--tw-mask-linear-stops))",
+              ),
+              y("--tw-mask-linear-from-color", e),
+            ],
+            position: (e) => [
+              g(),
+              A(),
+              y(
+                "mask-image",
+                "var(--tw-mask-linear), var(--tw-mask-radial), var(--tw-mask-conic)",
+              ),
+              y("mask-composite", "intersect"),
+              y(
+                "--tw-mask-linear-stops",
+                "var(--tw-mask-linear-position), var(--tw-mask-linear-from-color) var(--tw-mask-linear-from-position), var(--tw-mask-linear-to-color) var(--tw-mask-linear-to-position)",
+              ),
+              y(
+                "--tw-mask-linear",
+                "linear-gradient(var(--tw-mask-linear-stops))",
+              ),
+              y("--tw-mask-linear-from-position", e),
+            ],
+          }),
+          v("mask-linear-to", {
+            color: (e) => [
+              g(),
+              A(),
+              y(
+                "mask-image",
+                "var(--tw-mask-linear), var(--tw-mask-radial), var(--tw-mask-conic)",
+              ),
+              y("mask-composite", "intersect"),
+              y(
+                "--tw-mask-linear-stops",
+                "var(--tw-mask-linear-position), var(--tw-mask-linear-from-color) var(--tw-mask-linear-from-position), var(--tw-mask-linear-to-color) var(--tw-mask-linear-to-position)",
+              ),
+              y(
+                "--tw-mask-linear",
+                "linear-gradient(var(--tw-mask-linear-stops))",
+              ),
+              y("--tw-mask-linear-to-color", e),
+            ],
+            position: (e) => [
+              g(),
+              A(),
+              y(
+                "mask-image",
+                "var(--tw-mask-linear), var(--tw-mask-radial), var(--tw-mask-conic)",
+              ),
+              y("mask-composite", "intersect"),
+              y(
+                "--tw-mask-linear-stops",
+                "var(--tw-mask-linear-position), var(--tw-mask-linear-from-color) var(--tw-mask-linear-from-position), var(--tw-mask-linear-to-color) var(--tw-mask-linear-to-position)",
+              ),
+              y(
+                "--tw-mask-linear",
+                "linear-gradient(var(--tw-mask-linear-stops))",
+              ),
+              y("--tw-mask-linear-to-position", e),
+            ],
+          });
+        let j = () =>
+          z([
+            $e("--tw-mask-radial-from-position", "0%"),
+            $e("--tw-mask-radial-to-position", "100%"),
+            $e("--tw-mask-radial-from-color", "black"),
+            $e("--tw-mask-radial-to-color", "transparent"),
+            $e("--tw-mask-radial-shape", "ellipse"),
+            $e("--tw-mask-radial-size", "farthest-corner"),
+            $e("--tw-mask-radial-position", "center"),
+          ]);
+        n("mask-circle", [["--tw-mask-radial-shape", "circle"]]),
+          n("mask-ellipse", [["--tw-mask-radial-shape", "ellipse"]]),
+          n("mask-radial-closest-side", [
+            ["--tw-mask-radial-size", "closest-side"],
+          ]),
+          n("mask-radial-farthest-side", [
+            ["--tw-mask-radial-size", "farthest-side"],
+          ]),
+          n("mask-radial-closest-corner", [
+            ["--tw-mask-radial-size", "closest-corner"],
+          ]),
+          n("mask-radial-farthest-corner", [
+            ["--tw-mask-radial-size", "farthest-corner"],
+          ]),
+          n("mask-radial-at-top", [["--tw-mask-radial-position", "top"]]),
+          n("mask-radial-at-top-left", [
+            ["--tw-mask-radial-position", "top left"],
+          ]),
+          n("mask-radial-at-top-right", [
+            ["--tw-mask-radial-position", "top right"],
+          ]),
+          n("mask-radial-at-bottom", [["--tw-mask-radial-position", "bottom"]]),
+          n("mask-radial-at-bottom-left", [
+            ["--tw-mask-radial-position", "bottom left"],
+          ]),
+          n("mask-radial-at-bottom-right", [
+            ["--tw-mask-radial-position", "bottom right"],
+          ]),
+          n("mask-radial-at-left", [["--tw-mask-radial-position", "left"]]),
+          n("mask-radial-at-right", [["--tw-mask-radial-position", "right"]]),
+          n("mask-radial-at-center", [["--tw-mask-radial-position", "center"]]),
+          o("mask-radial-at", {
+            defaultValue: null,
+            supportsNegative: !1,
+            supportsFractions: !1,
+            handle: (e) => [y("--tw-mask-radial-position", e)],
+          }),
+          o("mask-radial", {
+            defaultValue: null,
+            supportsNegative: !1,
+            supportsFractions: !1,
+            handle: (e) => [
+              g(),
+              j(),
+              y(
+                "mask-image",
+                "var(--tw-mask-linear), var(--tw-mask-radial), var(--tw-mask-conic)",
+              ),
+              y("mask-composite", "intersect"),
+              y(
+                "--tw-mask-radial",
+                "radial-gradient(var(--tw-mask-radial-stops, var(--tw-mask-radial-size)))",
+              ),
+              y("--tw-mask-radial-size", e),
+            ],
+          }),
+          v("mask-radial-from", {
+            color: (e) => [
+              g(),
+              j(),
+              y(
+                "mask-image",
+                "var(--tw-mask-linear), var(--tw-mask-radial), var(--tw-mask-conic)",
+              ),
+              y("mask-composite", "intersect"),
+              y(
+                "--tw-mask-radial-stops",
+                "var(--tw-mask-radial-shape) var(--tw-mask-radial-size) at var(--tw-mask-radial-position), var(--tw-mask-radial-from-color) var(--tw-mask-radial-from-position), var(--tw-mask-radial-to-color) var(--tw-mask-radial-to-position)",
+              ),
+              y(
+                "--tw-mask-radial",
+                "radial-gradient(var(--tw-mask-radial-stops))",
+              ),
+              y("--tw-mask-radial-from-color", e),
+            ],
+            position: (e) => [
+              g(),
+              j(),
+              y(
+                "mask-image",
+                "var(--tw-mask-linear), var(--tw-mask-radial), var(--tw-mask-conic)",
+              ),
+              y("mask-composite", "intersect"),
+              y(
+                "--tw-mask-radial-stops",
+                "var(--tw-mask-radial-shape) var(--tw-mask-radial-size) at var(--tw-mask-radial-position), var(--tw-mask-radial-from-color) var(--tw-mask-radial-from-position), var(--tw-mask-radial-to-color) var(--tw-mask-radial-to-position)",
+              ),
+              y(
+                "--tw-mask-radial",
+                "radial-gradient(var(--tw-mask-radial-stops))",
+              ),
+              y("--tw-mask-radial-from-position", e),
+            ],
+          }),
+          v("mask-radial-to", {
+            color: (e) => [
+              g(),
+              j(),
+              y(
+                "mask-image",
+                "var(--tw-mask-linear), var(--tw-mask-radial), var(--tw-mask-conic)",
+              ),
+              y("mask-composite", "intersect"),
+              y(
+                "--tw-mask-radial-stops",
+                "var(--tw-mask-radial-shape) var(--tw-mask-radial-size) at var(--tw-mask-radial-position), var(--tw-mask-radial-from-color) var(--tw-mask-radial-from-position), var(--tw-mask-radial-to-color) var(--tw-mask-radial-to-position)",
+              ),
+              y(
+                "--tw-mask-radial",
+                "radial-gradient(var(--tw-mask-radial-stops))",
+              ),
+              y("--tw-mask-radial-to-color", e),
+            ],
+            position: (e) => [
+              g(),
+              j(),
+              y(
+                "mask-image",
+                "var(--tw-mask-linear), var(--tw-mask-radial), var(--tw-mask-conic)",
+              ),
+              y("mask-composite", "intersect"),
+              y(
+                "--tw-mask-radial-stops",
+                "var(--tw-mask-radial-shape) var(--tw-mask-radial-size) at var(--tw-mask-radial-position), var(--tw-mask-radial-from-color) var(--tw-mask-radial-from-position), var(--tw-mask-radial-to-color) var(--tw-mask-radial-to-position)",
+              ),
+              y(
+                "--tw-mask-radial",
+                "radial-gradient(var(--tw-mask-radial-stops))",
+              ),
+              y("--tw-mask-radial-to-position", e),
+            ],
+          });
+        let T = () =>
+          z([
+            $e("--tw-mask-conic-position", "0deg"),
+            $e("--tw-mask-conic-from-position", "0%"),
+            $e("--tw-mask-conic-to-position", "100%"),
+            $e("--tw-mask-conic-from-color", "black"),
+            $e("--tw-mask-conic-to-color", "transparent"),
+          ]);
+        o("mask-conic", {
+          defaultValue: null,
+          supportsNegative: !0,
+          supportsFractions: !1,
+          handleBareValue: (e) =>
+            de(e.value) ? `calc(1deg * ${e.value})` : null,
+          handleNegativeBareValue: (e) =>
+            de(e.value) ? `calc(1deg * -${e.value})` : null,
+          handle: (e) => [
             g(),
             T(),
             y(
@@ -4684,1913 +4662,1935 @@
             ),
             y("mask-composite", "intersect"),
             y(
-              "--tw-mask-conic-stops",
-              "from var(--tw-mask-conic-position), var(--tw-mask-conic-from-color) var(--tw-mask-conic-from-position), var(--tw-mask-conic-to-color) var(--tw-mask-conic-to-position)",
-            ),
-            y(
               "--tw-mask-conic",
-              "conic-gradient(var(--tw-mask-conic-stops))",
+              "conic-gradient(var(--tw-mask-conic-stops, var(--tw-mask-conic-position)))",
             ),
-            y("--tw-mask-conic-from-color", e),
-          ],
-          position: (e) => [
-            g(),
-            T(),
-            y(
-              "mask-image",
-              "var(--tw-mask-linear), var(--tw-mask-radial), var(--tw-mask-conic)",
-            ),
-            y("mask-composite", "intersect"),
-            y(
-              "--tw-mask-conic-stops",
-              "from var(--tw-mask-conic-position), var(--tw-mask-conic-from-color) var(--tw-mask-conic-from-position), var(--tw-mask-conic-to-color) var(--tw-mask-conic-to-position)",
-            ),
-            y(
-              "--tw-mask-conic",
-              "conic-gradient(var(--tw-mask-conic-stops))",
-            ),
-            y("--tw-mask-conic-from-position", e),
+            y("--tw-mask-conic-position", e),
           ],
         }),
-        v("mask-conic-to", {
-          color: (e) => [
-            g(),
-            T(),
-            y(
-              "mask-image",
-              "var(--tw-mask-linear), var(--tw-mask-radial), var(--tw-mask-conic)",
-            ),
-            y("mask-composite", "intersect"),
-            y(
-              "--tw-mask-conic-stops",
-              "from var(--tw-mask-conic-position), var(--tw-mask-conic-from-color) var(--tw-mask-conic-from-position), var(--tw-mask-conic-to-color) var(--tw-mask-conic-to-position)",
-            ),
-            y(
-              "--tw-mask-conic",
-              "conic-gradient(var(--tw-mask-conic-stops))",
-            ),
-            y("--tw-mask-conic-to-color", e),
-          ],
-          position: (e) => [
-            g(),
-            T(),
-            y(
-              "mask-image",
-              "var(--tw-mask-linear), var(--tw-mask-radial), var(--tw-mask-conic)",
-            ),
-            y("mask-composite", "intersect"),
-            y(
-              "--tw-mask-conic-stops",
-              "from var(--tw-mask-conic-position), var(--tw-mask-conic-from-color) var(--tw-mask-conic-from-position), var(--tw-mask-conic-to-color) var(--tw-mask-conic-to-position)",
-            ),
-            y(
-              "--tw-mask-conic",
-              "conic-gradient(var(--tw-mask-conic-stops))",
-            ),
-            y("--tw-mask-conic-to-position", e),
-          ],
-        }),
-        n("box-decoration-slice", [
-          ["-webkit-box-decoration-break", "slice"],
-          ["box-decoration-break", "slice"],
-        ]),
-        n("box-decoration-clone", [
-          ["-webkit-box-decoration-break", "clone"],
-          ["box-decoration-break", "clone"],
-        ]),
-        n("bg-clip-text", [["background-clip", "text"]]),
-        n("bg-clip-border", [["background-clip", "border-box"]]),
-        n("bg-clip-padding", [["background-clip", "padding-box"]]),
-        n("bg-clip-content", [["background-clip", "content-box"]]),
-        n("bg-origin-border", [["background-origin", "border-box"]]),
-        n("bg-origin-padding", [["background-origin", "padding-box"]]),
-        n("bg-origin-content", [["background-origin", "content-box"]]);
-      for (let e of [
-        "normal",
-        "multiply",
-        "screen",
-        "overlay",
-        "darken",
-        "lighten",
-        "color-dodge",
-        "color-burn",
-        "hard-light",
-        "soft-light",
-        "difference",
-        "exclusion",
-        "hue",
-        "saturation",
-        "color",
-        "luminosity",
-      ])
-        n(`bg-blend-${e}`, [["background-blend-mode", e]]),
-          n(`mix-blend-${e}`, [["mix-blend-mode", e]]);
-      n("mix-blend-plus-darker", [["mix-blend-mode", "plus-darker"]]),
-        n("mix-blend-plus-lighter", [["mix-blend-mode", "plus-lighter"]]),
-        n("fill-none", [["fill", "none"]]),
-        t.functional("fill", (t) => {
-          if (!t.value) return;
-          if ("arbitrary" === t.value.kind) {
-            let r = je(t.value.value, t.modifier, e);
-            return null === r ? void 0 : [y("fill", r)];
-          }
-          let r = Te(t, e, ["--fill", "--color"]);
-          return r ? [y("fill", r)] : void 0;
-        }),
-        r("fill", () => [
-          {
-            values: ["current", "inherit", "transparent"],
-            valueThemeKeys: ["--fill", "--color"],
-            modifiers: Array.from({ length: 21 }, (e, t) => "" + 5 * t),
-          },
-        ]),
-        n("stroke-none", [["stroke", "none"]]),
-        t.functional("stroke", (t) => {
-          if (t.value) {
+          r("mask-conic", () => [
+            {
+              supportsNegative: !0,
+              values: ["0", "1", "2", "3", "6", "12", "45", "90", "180"],
+            },
+          ]),
+          v("mask-conic-from", {
+            color: (e) => [
+              g(),
+              T(),
+              y(
+                "mask-image",
+                "var(--tw-mask-linear), var(--tw-mask-radial), var(--tw-mask-conic)",
+              ),
+              y("mask-composite", "intersect"),
+              y(
+                "--tw-mask-conic-stops",
+                "from var(--tw-mask-conic-position), var(--tw-mask-conic-from-color) var(--tw-mask-conic-from-position), var(--tw-mask-conic-to-color) var(--tw-mask-conic-to-position)",
+              ),
+              y(
+                "--tw-mask-conic",
+                "conic-gradient(var(--tw-mask-conic-stops))",
+              ),
+              y("--tw-mask-conic-from-color", e),
+            ],
+            position: (e) => [
+              g(),
+              T(),
+              y(
+                "mask-image",
+                "var(--tw-mask-linear), var(--tw-mask-radial), var(--tw-mask-conic)",
+              ),
+              y("mask-composite", "intersect"),
+              y(
+                "--tw-mask-conic-stops",
+                "from var(--tw-mask-conic-position), var(--tw-mask-conic-from-color) var(--tw-mask-conic-from-position), var(--tw-mask-conic-to-color) var(--tw-mask-conic-to-position)",
+              ),
+              y(
+                "--tw-mask-conic",
+                "conic-gradient(var(--tw-mask-conic-stops))",
+              ),
+              y("--tw-mask-conic-from-position", e),
+            ],
+          }),
+          v("mask-conic-to", {
+            color: (e) => [
+              g(),
+              T(),
+              y(
+                "mask-image",
+                "var(--tw-mask-linear), var(--tw-mask-radial), var(--tw-mask-conic)",
+              ),
+              y("mask-composite", "intersect"),
+              y(
+                "--tw-mask-conic-stops",
+                "from var(--tw-mask-conic-position), var(--tw-mask-conic-from-color) var(--tw-mask-conic-from-position), var(--tw-mask-conic-to-color) var(--tw-mask-conic-to-position)",
+              ),
+              y(
+                "--tw-mask-conic",
+                "conic-gradient(var(--tw-mask-conic-stops))",
+              ),
+              y("--tw-mask-conic-to-color", e),
+            ],
+            position: (e) => [
+              g(),
+              T(),
+              y(
+                "mask-image",
+                "var(--tw-mask-linear), var(--tw-mask-radial), var(--tw-mask-conic)",
+              ),
+              y("mask-composite", "intersect"),
+              y(
+                "--tw-mask-conic-stops",
+                "from var(--tw-mask-conic-position), var(--tw-mask-conic-from-color) var(--tw-mask-conic-from-position), var(--tw-mask-conic-to-color) var(--tw-mask-conic-to-position)",
+              ),
+              y(
+                "--tw-mask-conic",
+                "conic-gradient(var(--tw-mask-conic-stops))",
+              ),
+              y("--tw-mask-conic-to-position", e),
+            ],
+          }),
+          n("box-decoration-slice", [
+            ["-webkit-box-decoration-break", "slice"],
+            ["box-decoration-break", "slice"],
+          ]),
+          n("box-decoration-clone", [
+            ["-webkit-box-decoration-break", "clone"],
+            ["box-decoration-break", "clone"],
+          ]),
+          n("bg-clip-text", [["background-clip", "text"]]),
+          n("bg-clip-border", [["background-clip", "border-box"]]),
+          n("bg-clip-padding", [["background-clip", "padding-box"]]),
+          n("bg-clip-content", [["background-clip", "content-box"]]),
+          n("bg-origin-border", [["background-origin", "border-box"]]),
+          n("bg-origin-padding", [["background-origin", "padding-box"]]),
+          n("bg-origin-content", [["background-origin", "content-box"]]);
+        for (let e of [
+          "normal",
+          "multiply",
+          "screen",
+          "overlay",
+          "darken",
+          "lighten",
+          "color-dodge",
+          "color-burn",
+          "hard-light",
+          "soft-light",
+          "difference",
+          "exclusion",
+          "hue",
+          "saturation",
+          "color",
+          "luminosity",
+        ])
+          n(`bg-blend-${e}`, [["background-blend-mode", e]]),
+            n(`mix-blend-${e}`, [["mix-blend-mode", e]]);
+        n("mix-blend-plus-darker", [["mix-blend-mode", "plus-darker"]]),
+          n("mix-blend-plus-lighter", [["mix-blend-mode", "plus-lighter"]]),
+          n("fill-none", [["fill", "none"]]),
+          t.functional("fill", (t) => {
+            if (!t.value) return;
             if ("arbitrary" === t.value.kind) {
-              let r = t.value.value;
-              switch (
-              t.value.dataType ??
-              G(r, ["color", "number", "length", "percentage"])
-              ) {
-                case "number":
-                case "length":
-                case "percentage":
-                  return t.modifier ? void 0 : [y("stroke-width", r)];
-                default:
-                  return (
-                    (r = je(t.value.value, t.modifier, e)),
-                    null === r ? void 0 : [y("stroke", r)]
-                  );
+              let r = je(t.value.value, t.modifier, e);
+              return null === r ? void 0 : [y("fill", r)];
+            }
+            let r = Te(t, e, ["--fill", "--color"]);
+            return r ? [y("fill", r)] : void 0;
+          }),
+          r("fill", () => [
+            {
+              values: ["current", "inherit", "transparent"],
+              valueThemeKeys: ["--fill", "--color"],
+              modifiers: Array.from({ length: 21 }, (e, t) => "" + 5 * t),
+            },
+          ]),
+          n("stroke-none", [["stroke", "none"]]),
+          t.functional("stroke", (t) => {
+            if (t.value) {
+              if ("arbitrary" === t.value.kind) {
+                let r = t.value.value;
+                switch (
+                  t.value.dataType ??
+                  G(r, ["color", "number", "length", "percentage"])
+                ) {
+                  case "number":
+                  case "length":
+                  case "percentage":
+                    return t.modifier ? void 0 : [y("stroke-width", r)];
+                  default:
+                    return (
+                      (r = je(t.value.value, t.modifier, e)),
+                      null === r ? void 0 : [y("stroke", r)]
+                    );
+                }
+              }
+              {
+                let r = Te(t, e, ["--stroke", "--color"]);
+                if (r) return [y("stroke", r)];
+              }
+              {
+                let r = e.resolve(t.value.value, ["--stroke-width"]);
+                if (r) return [y("stroke-width", r)];
+                if (de(t.value.value))
+                  return [y("stroke-width", t.value.value)];
               }
             }
+          }),
+          r("stroke", () => [
             {
-              let r = Te(t, e, ["--stroke", "--color"]);
-              if (r) return [y("stroke", r)];
-            }
+              values: ["current", "inherit", "transparent"],
+              valueThemeKeys: ["--stroke", "--color"],
+              modifiers: Array.from({ length: 21 }, (e, t) => "" + 5 * t),
+            },
             {
-              let r = e.resolve(t.value.value, ["--stroke-width"]);
-              if (r) return [y("stroke-width", r)];
-              if (de(t.value.value))
-                return [y("stroke-width", t.value.value)];
-            }
-          }
-        }),
-        r("stroke", () => [
-          {
-            values: ["current", "inherit", "transparent"],
-            valueThemeKeys: ["--stroke", "--color"],
-            modifiers: Array.from({ length: 21 }, (e, t) => "" + 5 * t),
-          },
-          {
-            values: ["0", "1", "2", "3"],
-            valueThemeKeys: ["--stroke-width"],
-          },
-        ]),
-        n("object-contain", [["object-fit", "contain"]]),
-        n("object-cover", [["object-fit", "cover"]]),
-        n("object-fill", [["object-fit", "fill"]]),
-        n("object-none", [["object-fit", "none"]]),
-        n("object-scale-down", [["object-fit", "scale-down"]]),
-        n("object-top", [["object-position", "top"]]),
-        n("object-top-left", [["object-position", "left top"]]),
-        n("object-top-right", [["object-position", "right top"]]),
-        n("object-bottom", [["object-position", "bottom"]]),
-        n("object-bottom-left", [["object-position", "left bottom"]]),
-        n("object-bottom-right", [["object-position", "right bottom"]]),
-        n("object-left", [["object-position", "left"]]),
-        n("object-right", [["object-position", "right"]]),
-        n("object-center", [["object-position", "center"]]),
-        o("object", {
-          themeKeys: ["--object-position"],
-          handle: (e) => [y("object-position", e)],
-        });
-      for (let [e, t] of [
-        ["p", "padding"],
-        ["px", "padding-inline"],
-        ["py", "padding-block"],
-        ["ps", "padding-inline-start"],
-        ["pe", "padding-inline-end"],
-        ["pt", "padding-top"],
-        ["pr", "padding-right"],
-        ["pb", "padding-bottom"],
-        ["pl", "padding-left"],
-      ])
-        i(e, ["--padding", "--spacing"], (e) => [y(t, e)]);
-      n("text-left", [["text-align", "left"]]),
-        n("text-center", [["text-align", "center"]]),
-        n("text-right", [["text-align", "right"]]),
-        n("text-justify", [["text-align", "justify"]]),
-        n("text-start", [["text-align", "start"]]),
-        n("text-end", [["text-align", "end"]]),
-        i(
-          "indent",
-          ["--text-indent", "--spacing"],
-          (e) => [y("text-indent", e)],
-          { supportsNegative: !0 },
-        ),
-        n("align-baseline", [["vertical-align", "baseline"]]),
-        n("align-top", [["vertical-align", "top"]]),
-        n("align-middle", [["vertical-align", "middle"]]),
-        n("align-bottom", [["vertical-align", "bottom"]]),
-        n("align-text-top", [["vertical-align", "text-top"]]),
-        n("align-text-bottom", [["vertical-align", "text-bottom"]]),
-        n("align-sub", [["vertical-align", "sub"]]),
-        n("align-super", [["vertical-align", "super"]]),
-        o("align", {
-          themeKeys: [],
-          handle: (e) => [y("vertical-align", e)],
-        }),
-        t.functional("font", (t) => {
-          if (t.value && !t.modifier) {
-            if ("arbitrary" === t.value.kind) {
-              let e = t.value.value;
-              switch (
-              t.value.dataType ??
-              G(e, ["number", "generic-name", "family-name"])
-              ) {
-                case "generic-name":
-                case "family-name":
-                  return [y("font-family", e)];
-                default:
+              values: ["0", "1", "2", "3"],
+              valueThemeKeys: ["--stroke-width"],
+            },
+          ]),
+          n("object-contain", [["object-fit", "contain"]]),
+          n("object-cover", [["object-fit", "cover"]]),
+          n("object-fill", [["object-fit", "fill"]]),
+          n("object-none", [["object-fit", "none"]]),
+          n("object-scale-down", [["object-fit", "scale-down"]]),
+          n("object-top", [["object-position", "top"]]),
+          n("object-top-left", [["object-position", "left top"]]),
+          n("object-top-right", [["object-position", "right top"]]),
+          n("object-bottom", [["object-position", "bottom"]]),
+          n("object-bottom-left", [["object-position", "left bottom"]]),
+          n("object-bottom-right", [["object-position", "right bottom"]]),
+          n("object-left", [["object-position", "left"]]),
+          n("object-right", [["object-position", "right"]]),
+          n("object-center", [["object-position", "center"]]),
+          o("object", {
+            themeKeys: ["--object-position"],
+            handle: (e) => [y("object-position", e)],
+          });
+        for (let [e, t] of [
+          ["p", "padding"],
+          ["px", "padding-inline"],
+          ["py", "padding-block"],
+          ["ps", "padding-inline-start"],
+          ["pe", "padding-inline-end"],
+          ["pt", "padding-top"],
+          ["pr", "padding-right"],
+          ["pb", "padding-bottom"],
+          ["pl", "padding-left"],
+        ])
+          i(e, ["--padding", "--spacing"], (e) => [y(t, e)]);
+        n("text-left", [["text-align", "left"]]),
+          n("text-center", [["text-align", "center"]]),
+          n("text-right", [["text-align", "right"]]),
+          n("text-justify", [["text-align", "justify"]]),
+          n("text-start", [["text-align", "start"]]),
+          n("text-end", [["text-align", "end"]]),
+          i(
+            "indent",
+            ["--text-indent", "--spacing"],
+            (e) => [y("text-indent", e)],
+            { supportsNegative: !0 },
+          ),
+          n("align-baseline", [["vertical-align", "baseline"]]),
+          n("align-top", [["vertical-align", "top"]]),
+          n("align-middle", [["vertical-align", "middle"]]),
+          n("align-bottom", [["vertical-align", "bottom"]]),
+          n("align-text-top", [["vertical-align", "text-top"]]),
+          n("align-text-bottom", [["vertical-align", "text-bottom"]]),
+          n("align-sub", [["vertical-align", "sub"]]),
+          n("align-super", [["vertical-align", "super"]]),
+          o("align", {
+            themeKeys: [],
+            handle: (e) => [y("vertical-align", e)],
+          }),
+          t.functional("font", (t) => {
+            if (t.value && !t.modifier) {
+              if ("arbitrary" === t.value.kind) {
+                let e = t.value.value;
+                switch (
+                  t.value.dataType ??
+                  G(e, ["number", "generic-name", "family-name"])
+                ) {
+                  case "generic-name":
+                  case "family-name":
+                    return [y("font-family", e)];
+                  default:
+                    return [
+                      z([$e("--tw-font-weight")]),
+                      y("--tw-font-weight", e),
+                      y("font-weight", e),
+                    ];
+                }
+              }
+              {
+                let r = e.resolveWith(
+                  t.value.value,
+                  ["--font"],
+                  ["--font-feature-settings", "--font-variation-settings"],
+                );
+                if (r) {
+                  let [e, t = {}] = r;
+                  return [
+                    y("font-family", e),
+                    y("font-feature-settings", t["--font-feature-settings"]),
+                    y(
+                      "font-variation-settings",
+                      t["--font-variation-settings"],
+                    ),
+                  ];
+                }
+              }
+              {
+                let r = e.resolve(t.value.value, ["--font-weight"]);
+                if (r)
                   return [
                     z([$e("--tw-font-weight")]),
-                    y("--tw-font-weight", e),
-                    y("font-weight", e),
+                    y("--tw-font-weight", r),
+                    y("font-weight", r),
                   ];
               }
             }
+          }),
+          r("font", () => [
+            { values: [], valueThemeKeys: ["--font"] },
+            { values: [], valueThemeKeys: ["--font-weight"] },
+          ]),
+          n("uppercase", [["text-transform", "uppercase"]]),
+          n("lowercase", [["text-transform", "lowercase"]]),
+          n("capitalize", [["text-transform", "capitalize"]]),
+          n("normal-case", [["text-transform", "none"]]),
+          n("italic", [["font-style", "italic"]]),
+          n("not-italic", [["font-style", "normal"]]),
+          n("underline", [["text-decoration-line", "underline"]]),
+          n("overline", [["text-decoration-line", "overline"]]),
+          n("line-through", [["text-decoration-line", "line-through"]]),
+          n("no-underline", [["text-decoration-line", "none"]]),
+          n("font-stretch-normal", [["font-stretch", "normal"]]),
+          n("font-stretch-ultra-condensed", [
+            ["font-stretch", "ultra-condensed"],
+          ]),
+          n("font-stretch-extra-condensed", [
+            ["font-stretch", "extra-condensed"],
+          ]),
+          n("font-stretch-condensed", [["font-stretch", "condensed"]]),
+          n("font-stretch-semi-condensed", [
+            ["font-stretch", "semi-condensed"],
+          ]),
+          n("font-stretch-semi-expanded", [["font-stretch", "semi-expanded"]]),
+          n("font-stretch-expanded", [["font-stretch", "expanded"]]),
+          n("font-stretch-extra-expanded", [
+            ["font-stretch", "extra-expanded"],
+          ]),
+          n("font-stretch-ultra-expanded", [
+            ["font-stretch", "ultra-expanded"],
+          ]),
+          o("font-stretch", {
+            handleBareValue: ({ value: e }) => {
+              if (!e.endsWith("%")) return null;
+              let t = Number(e.slice(0, -1));
+              return !de(t) || Number.isNaN(t) || t < 50 || t > 200 ? null : e;
+            },
+            handle: (e) => [y("font-stretch", e)],
+          }),
+          r("font-stretch", () => [
             {
-              let r = e.resolveWith(
-                t.value.value,
-                ["--font"],
-                ["--font-feature-settings", "--font-variation-settings"],
-              );
-              if (r) {
-                let [e, t = {}] = r;
-                return [
-                  y("font-family", e),
-                  y("font-feature-settings", t["--font-feature-settings"]),
-                  y(
-                    "font-variation-settings",
-                    t["--font-variation-settings"],
-                  ),
-                ];
-              }
-            }
-            {
-              let r = e.resolve(t.value.value, ["--font-weight"]);
-              if (r)
-                return [
-                  z([$e("--tw-font-weight")]),
-                  y("--tw-font-weight", r),
-                  y("font-weight", r),
-                ];
-            }
-          }
-        }),
-        r("font", () => [
-          { values: [], valueThemeKeys: ["--font"] },
-          { values: [], valueThemeKeys: ["--font-weight"] },
-        ]),
-        n("uppercase", [["text-transform", "uppercase"]]),
-        n("lowercase", [["text-transform", "lowercase"]]),
-        n("capitalize", [["text-transform", "capitalize"]]),
-        n("normal-case", [["text-transform", "none"]]),
-        n("italic", [["font-style", "italic"]]),
-        n("not-italic", [["font-style", "normal"]]),
-        n("underline", [["text-decoration-line", "underline"]]),
-        n("overline", [["text-decoration-line", "overline"]]),
-        n("line-through", [["text-decoration-line", "line-through"]]),
-        n("no-underline", [["text-decoration-line", "none"]]),
-        n("font-stretch-normal", [["font-stretch", "normal"]]),
-        n("font-stretch-ultra-condensed", [
-          ["font-stretch", "ultra-condensed"],
-        ]),
-        n("font-stretch-extra-condensed", [
-          ["font-stretch", "extra-condensed"],
-        ]),
-        n("font-stretch-condensed", [["font-stretch", "condensed"]]),
-        n("font-stretch-semi-condensed", [
-          ["font-stretch", "semi-condensed"],
-        ]),
-        n("font-stretch-semi-expanded", [["font-stretch", "semi-expanded"]]),
-        n("font-stretch-expanded", [["font-stretch", "expanded"]]),
-        n("font-stretch-extra-expanded", [
-          ["font-stretch", "extra-expanded"],
-        ]),
-        n("font-stretch-ultra-expanded", [
-          ["font-stretch", "ultra-expanded"],
-        ]),
-        o("font-stretch", {
-          handleBareValue: ({ value: e }) => {
-            if (!e.endsWith("%")) return null;
-            let t = Number(e.slice(0, -1));
-            return !de(t) || Number.isNaN(t) || t < 50 || t > 200 ? null : e;
-          },
-          handle: (e) => [y("font-stretch", e)],
-        }),
-        r("font-stretch", () => [
-          {
-            values: [
-              "50%",
-              "75%",
-              "90%",
-              "95%",
-              "100%",
-              "105%",
-              "110%",
-              "125%",
-              "150%",
-              "200%",
+              values: [
+                "50%",
+                "75%",
+                "90%",
+                "95%",
+                "100%",
+                "105%",
+                "110%",
+                "125%",
+                "150%",
+                "200%",
+              ],
+            },
+          ]),
+          a("placeholder", {
+            themeKeys: ["--background-color", "--color"],
+            handle: (e) => [
+              w("&::placeholder", [
+                y("--tw-sort", "placeholder-color"),
+                y("color", e),
+              ]),
             ],
-          },
-        ]),
-        a("placeholder", {
-          themeKeys: ["--background-color", "--color"],
-          handle: (e) => [
-            w("&::placeholder", [
-              y("--tw-sort", "placeholder-color"),
-              y("color", e),
-            ]),
-          ],
-        }),
-        n("decoration-solid", [["text-decoration-style", "solid"]]),
-        n("decoration-double", [["text-decoration-style", "double"]]),
-        n("decoration-dotted", [["text-decoration-style", "dotted"]]),
-        n("decoration-dashed", [["text-decoration-style", "dashed"]]),
-        n("decoration-wavy", [["text-decoration-style", "wavy"]]),
-        n("decoration-auto", [["text-decoration-thickness", "auto"]]),
-        n("decoration-from-font", [
-          ["text-decoration-thickness", "from-font"],
-        ]),
-        t.functional("decoration", (t) => {
-          if (t.value) {
-            if ("arbitrary" === t.value.kind) {
-              let r = t.value.value;
-              switch (
-              t.value.dataType ??
-              G(r, ["color", "length", "percentage"])
-              ) {
-                case "length":
-                case "percentage":
+          }),
+          n("decoration-solid", [["text-decoration-style", "solid"]]),
+          n("decoration-double", [["text-decoration-style", "double"]]),
+          n("decoration-dotted", [["text-decoration-style", "dotted"]]),
+          n("decoration-dashed", [["text-decoration-style", "dashed"]]),
+          n("decoration-wavy", [["text-decoration-style", "wavy"]]),
+          n("decoration-auto", [["text-decoration-thickness", "auto"]]),
+          n("decoration-from-font", [
+            ["text-decoration-thickness", "from-font"],
+          ]),
+          t.functional("decoration", (t) => {
+            if (t.value) {
+              if ("arbitrary" === t.value.kind) {
+                let r = t.value.value;
+                switch (
+                  t.value.dataType ??
+                  G(r, ["color", "length", "percentage"])
+                ) {
+                  case "length":
+                  case "percentage":
+                    return t.modifier
+                      ? void 0
+                      : [y("text-decoration-thickness", r)];
+                  default:
+                    return (
+                      (r = je(r, t.modifier, e)),
+                      null === r ? void 0 : [y("text-decoration-color", r)]
+                    );
+                }
+              }
+              {
+                let r = e.resolve(t.value.value, [
+                  "--text-decoration-thickness",
+                ]);
+                if (r)
                   return t.modifier
                     ? void 0
                     : [y("text-decoration-thickness", r)];
-                default:
-                  return (
-                    (r = je(r, t.modifier, e)),
-                    null === r ? void 0 : [y("text-decoration-color", r)]
-                  );
+                if (de(t.value.value))
+                  return t.modifier
+                    ? void 0
+                    : [y("text-decoration-thickness", `${t.value.value}px`)];
+              }
+              {
+                let r = Te(t, e, ["--text-decoration-color", "--color"]);
+                if (r) return [y("text-decoration-color", r)];
               }
             }
+          }),
+          r("decoration", () => [
             {
-              let r = e.resolve(t.value.value, [
-                "--text-decoration-thickness",
+              values: ["current", "inherit", "transparent"],
+              valueThemeKeys: ["--text-decoration-color", "--color"],
+              modifiers: Array.from({ length: 21 }, (e, t) => "" + 5 * t),
+            },
+            {
+              values: ["0", "1", "2"],
+              valueThemeKeys: ["--text-decoration-thickness"],
+            },
+          ]),
+          n("animate-none", [["animation", "none"]]),
+          o("animate", {
+            themeKeys: ["--animate"],
+            handle: (e) => [y("animation", e)],
+          });
+        {
+          let a = [
+              "var(--tw-blur,)",
+              "var(--tw-brightness,)",
+              "var(--tw-contrast,)",
+              "var(--tw-grayscale,)",
+              "var(--tw-hue-rotate,)",
+              "var(--tw-invert,)",
+              "var(--tw-saturate,)",
+              "var(--tw-sepia,)",
+              "var(--tw-drop-shadow,)",
+            ].join(" "),
+            i = [
+              "var(--tw-backdrop-blur,)",
+              "var(--tw-backdrop-brightness,)",
+              "var(--tw-backdrop-contrast,)",
+              "var(--tw-backdrop-grayscale,)",
+              "var(--tw-backdrop-hue-rotate,)",
+              "var(--tw-backdrop-invert,)",
+              "var(--tw-backdrop-opacity,)",
+              "var(--tw-backdrop-saturate,)",
+              "var(--tw-backdrop-sepia,)",
+            ].join(" "),
+            l = () =>
+              z([
+                $e("--tw-blur"),
+                $e("--tw-brightness"),
+                $e("--tw-contrast"),
+                $e("--tw-grayscale"),
+                $e("--tw-hue-rotate"),
+                $e("--tw-invert"),
+                $e("--tw-opacity"),
+                $e("--tw-saturate"),
+                $e("--tw-sepia"),
+                $e("--tw-drop-shadow"),
+                $e("--tw-drop-shadow-color"),
+                $e("--tw-drop-shadow-alpha", "100%", "<percentage>"),
+                $e("--tw-drop-shadow-size"),
+              ]),
+            s = () =>
+              z([
+                $e("--tw-backdrop-blur"),
+                $e("--tw-backdrop-brightness"),
+                $e("--tw-backdrop-contrast"),
+                $e("--tw-backdrop-grayscale"),
+                $e("--tw-backdrop-hue-rotate"),
+                $e("--tw-backdrop-invert"),
+                $e("--tw-backdrop-opacity"),
+                $e("--tw-backdrop-saturate"),
+                $e("--tw-backdrop-sepia"),
               ]);
-              if (r)
-                return t.modifier
-                  ? void 0
-                  : [y("text-decoration-thickness", r)];
-              if (de(t.value.value))
-                return t.modifier
-                  ? void 0
-                  : [y("text-decoration-thickness", `${t.value.value}px`)];
-            }
-            {
-              let r = Te(t, e, ["--text-decoration-color", "--color"]);
-              if (r) return [y("text-decoration-color", r)];
-            }
-          }
-        }),
-        r("decoration", () => [
-          {
-            values: ["current", "inherit", "transparent"],
-            valueThemeKeys: ["--text-decoration-color", "--color"],
-            modifiers: Array.from({ length: 21 }, (e, t) => "" + 5 * t),
-          },
-          {
-            values: ["0", "1", "2"],
-            valueThemeKeys: ["--text-decoration-thickness"],
-          },
-        ]),
-        n("animate-none", [["animation", "none"]]),
-        o("animate", {
-          themeKeys: ["--animate"],
-          handle: (e) => [y("animation", e)],
-        });
-      {
-        let a = [
-          "var(--tw-blur,)",
-          "var(--tw-brightness,)",
-          "var(--tw-contrast,)",
-          "var(--tw-grayscale,)",
-          "var(--tw-hue-rotate,)",
-          "var(--tw-invert,)",
-          "var(--tw-saturate,)",
-          "var(--tw-sepia,)",
-          "var(--tw-drop-shadow,)",
-        ].join(" "),
-          i = [
-            "var(--tw-backdrop-blur,)",
-            "var(--tw-backdrop-brightness,)",
-            "var(--tw-backdrop-contrast,)",
-            "var(--tw-backdrop-grayscale,)",
-            "var(--tw-backdrop-hue-rotate,)",
-            "var(--tw-backdrop-invert,)",
-            "var(--tw-backdrop-opacity,)",
-            "var(--tw-backdrop-saturate,)",
-            "var(--tw-backdrop-sepia,)",
-          ].join(" "),
-          l = () =>
-            z([
-              $e("--tw-blur"),
-              $e("--tw-brightness"),
-              $e("--tw-contrast"),
-              $e("--tw-grayscale"),
-              $e("--tw-hue-rotate"),
-              $e("--tw-invert"),
-              $e("--tw-opacity"),
-              $e("--tw-saturate"),
-              $e("--tw-sepia"),
-              $e("--tw-drop-shadow"),
-              $e("--tw-drop-shadow-color"),
-              $e("--tw-drop-shadow-alpha", "100%", "<percentage>"),
-              $e("--tw-drop-shadow-size"),
-            ]),
-          s = () =>
-            z([
-              $e("--tw-backdrop-blur"),
-              $e("--tw-backdrop-brightness"),
-              $e("--tw-backdrop-contrast"),
-              $e("--tw-backdrop-grayscale"),
-              $e("--tw-backdrop-hue-rotate"),
-              $e("--tw-backdrop-invert"),
-              $e("--tw-backdrop-opacity"),
-              $e("--tw-backdrop-saturate"),
-              $e("--tw-backdrop-sepia"),
-            ]);
-        t.functional("filter", (e) => {
-          if (!e.modifier) {
-            if (null === e.value) return [l(), y("filter", a)];
-            if ("arbitrary" === e.value.kind)
-              return [y("filter", e.value.value)];
-            if ("none" === e.value.value) return [y("filter", "none")];
-          }
-        }),
-          t.functional("backdrop-filter", (e) => {
+          t.functional("filter", (e) => {
             if (!e.modifier) {
-              if (null === e.value)
-                return [
-                  s(),
-                  y("-webkit-backdrop-filter", i),
-                  y("backdrop-filter", i),
-                ];
+              if (null === e.value) return [l(), y("filter", a)];
               if ("arbitrary" === e.value.kind)
-                return [
-                  y("-webkit-backdrop-filter", e.value.value),
-                  y("backdrop-filter", e.value.value),
-                ];
-              if ("none" === e.value.value)
-                return [
-                  y("-webkit-backdrop-filter", "none"),
-                  y("backdrop-filter", "none"),
-                ];
+                return [y("filter", e.value.value)];
+              if ("none" === e.value.value) return [y("filter", "none")];
             }
           }),
-          o("blur", {
-            themeKeys: ["--blur"],
-            handle: (e) => [
-              l(),
-              y("--tw-blur", `blur(${e})`),
-              y("filter", a),
-            ],
-          }),
-          n("blur-none", [l, ["--tw-blur", " "], ["filter", a]]),
-          o("backdrop-blur", {
-            themeKeys: ["--backdrop-blur", "--blur"],
-            handle: (e) => [
-              s(),
-              y("--tw-backdrop-blur", `blur(${e})`),
-              y("-webkit-backdrop-filter", i),
-              y("backdrop-filter", i),
-            ],
-          }),
-          n("backdrop-blur-none", [
-            s,
-            ["--tw-backdrop-blur", " "],
-            ["-webkit-backdrop-filter", i],
-            ["backdrop-filter", i],
-          ]),
-          o("brightness", {
-            themeKeys: ["--brightness"],
-            handleBareValue: ({ value: e }) => (de(e) ? `${e}%` : null),
-            handle: (e) => [
-              l(),
-              y("--tw-brightness", `brightness(${e})`),
-              y("filter", a),
-            ],
-          }),
-          o("backdrop-brightness", {
-            themeKeys: ["--backdrop-brightness", "--brightness"],
-            handleBareValue: ({ value: e }) => (de(e) ? `${e}%` : null),
-            handle: (e) => [
-              s(),
-              y("--tw-backdrop-brightness", `brightness(${e})`),
-              y("-webkit-backdrop-filter", i),
-              y("backdrop-filter", i),
-            ],
-          }),
-          r("brightness", () => [
-            {
-              values: [
-                "0",
-                "50",
-                "75",
-                "90",
-                "95",
-                "100",
-                "105",
-                "110",
-                "125",
-                "150",
-                "200",
+            t.functional("backdrop-filter", (e) => {
+              if (!e.modifier) {
+                if (null === e.value)
+                  return [
+                    s(),
+                    y("-webkit-backdrop-filter", i),
+                    y("backdrop-filter", i),
+                  ];
+                if ("arbitrary" === e.value.kind)
+                  return [
+                    y("-webkit-backdrop-filter", e.value.value),
+                    y("backdrop-filter", e.value.value),
+                  ];
+                if ("none" === e.value.value)
+                  return [
+                    y("-webkit-backdrop-filter", "none"),
+                    y("backdrop-filter", "none"),
+                  ];
+              }
+            }),
+            o("blur", {
+              themeKeys: ["--blur"],
+              handle: (e) => [
+                l(),
+                y("--tw-blur", `blur(${e})`),
+                y("filter", a),
               ],
-              valueThemeKeys: ["--brightness"],
-            },
-          ]),
-          r("backdrop-brightness", () => [
-            {
-              values: [
-                "0",
-                "50",
-                "75",
-                "90",
-                "95",
-                "100",
-                "105",
-                "110",
-                "125",
-                "150",
-                "200",
+            }),
+            n("blur-none", [l, ["--tw-blur", " "], ["filter", a]]),
+            o("backdrop-blur", {
+              themeKeys: ["--backdrop-blur", "--blur"],
+              handle: (e) => [
+                s(),
+                y("--tw-backdrop-blur", `blur(${e})`),
+                y("-webkit-backdrop-filter", i),
+                y("backdrop-filter", i),
               ],
-              valueThemeKeys: ["--backdrop-brightness", "--brightness"],
-            },
-          ]),
-          o("contrast", {
-            themeKeys: ["--contrast"],
-            handleBareValue: ({ value: e }) => (de(e) ? `${e}%` : null),
-            handle: (e) => [
-              l(),
-              y("--tw-contrast", `contrast(${e})`),
-              y("filter", a),
-            ],
-          }),
-          o("backdrop-contrast", {
-            themeKeys: ["--backdrop-contrast", "--contrast"],
-            handleBareValue: ({ value: e }) => (de(e) ? `${e}%` : null),
-            handle: (e) => [
-              s(),
-              y("--tw-backdrop-contrast", `contrast(${e})`),
-              y("-webkit-backdrop-filter", i),
-              y("backdrop-filter", i),
-            ],
-          }),
-          r("contrast", () => [
-            {
-              values: ["0", "50", "75", "100", "125", "150", "200"],
-              valueThemeKeys: ["--contrast"],
-            },
-          ]),
-          r("backdrop-contrast", () => [
-            {
-              values: ["0", "50", "75", "100", "125", "150", "200"],
-              valueThemeKeys: ["--backdrop-contrast", "--contrast"],
-            },
-          ]),
-          o("grayscale", {
-            themeKeys: ["--grayscale"],
-            handleBareValue: ({ value: e }) => (de(e) ? `${e}%` : null),
-            defaultValue: "100%",
-            handle: (e) => [
-              l(),
-              y("--tw-grayscale", `grayscale(${e})`),
-              y("filter", a),
-            ],
-          }),
-          o("backdrop-grayscale", {
-            themeKeys: ["--backdrop-grayscale", "--grayscale"],
-            handleBareValue: ({ value: e }) => (de(e) ? `${e}%` : null),
-            defaultValue: "100%",
-            handle: (e) => [
-              s(),
-              y("--tw-backdrop-grayscale", `grayscale(${e})`),
-              y("-webkit-backdrop-filter", i),
-              y("backdrop-filter", i),
-            ],
-          }),
-          r("grayscale", () => [
-            {
-              values: ["0", "25", "50", "75", "100"],
-              valueThemeKeys: ["--grayscale"],
-              hasDefaultValue: !0,
-            },
-          ]),
-          r("backdrop-grayscale", () => [
-            {
-              values: ["0", "25", "50", "75", "100"],
-              valueThemeKeys: ["--backdrop-grayscale", "--grayscale"],
-              hasDefaultValue: !0,
-            },
-          ]),
-          o("hue-rotate", {
-            supportsNegative: !0,
-            themeKeys: ["--hue-rotate"],
-            handleBareValue: ({ value: e }) => (de(e) ? `${e}deg` : null),
-            handle: (e) => [
-              l(),
-              y("--tw-hue-rotate", `hue-rotate(${e})`),
-              y("filter", a),
-            ],
-          }),
-          o("backdrop-hue-rotate", {
-            supportsNegative: !0,
-            themeKeys: ["--backdrop-hue-rotate", "--hue-rotate"],
-            handleBareValue: ({ value: e }) => (de(e) ? `${e}deg` : null),
-            handle: (e) => [
-              s(),
-              y("--tw-backdrop-hue-rotate", `hue-rotate(${e})`),
-              y("-webkit-backdrop-filter", i),
-              y("backdrop-filter", i),
-            ],
-          }),
-          r("hue-rotate", () => [
-            {
-              values: ["0", "15", "30", "60", "90", "180"],
-              valueThemeKeys: ["--hue-rotate"],
-            },
-          ]),
-          r("backdrop-hue-rotate", () => [
-            {
-              values: ["0", "15", "30", "60", "90", "180"],
-              valueThemeKeys: ["--backdrop-hue-rotate", "--hue-rotate"],
-            },
-          ]),
-          o("invert", {
-            themeKeys: ["--invert"],
-            handleBareValue: ({ value: e }) => (de(e) ? `${e}%` : null),
-            defaultValue: "100%",
-            handle: (e) => [
-              l(),
-              y("--tw-invert", `invert(${e})`),
-              y("filter", a),
-            ],
-          }),
-          o("backdrop-invert", {
-            themeKeys: ["--backdrop-invert", "--invert"],
-            handleBareValue: ({ value: e }) => (de(e) ? `${e}%` : null),
-            defaultValue: "100%",
-            handle: (e) => [
-              s(),
-              y("--tw-backdrop-invert", `invert(${e})`),
-              y("-webkit-backdrop-filter", i),
-              y("backdrop-filter", i),
-            ],
-          }),
-          r("invert", () => [
-            {
-              values: ["0", "25", "50", "75", "100"],
-              valueThemeKeys: ["--invert"],
-              hasDefaultValue: !0,
-            },
-          ]),
-          r("backdrop-invert", () => [
-            {
-              values: ["0", "25", "50", "75", "100"],
-              valueThemeKeys: ["--backdrop-invert", "--invert"],
-              hasDefaultValue: !0,
-            },
-          ]),
-          o("saturate", {
-            themeKeys: ["--saturate"],
-            handleBareValue: ({ value: e }) => (de(e) ? `${e}%` : null),
-            handle: (e) => [
-              l(),
-              y("--tw-saturate", `saturate(${e})`),
-              y("filter", a),
-            ],
-          }),
-          o("backdrop-saturate", {
-            themeKeys: ["--backdrop-saturate", "--saturate"],
-            handleBareValue: ({ value: e }) => (de(e) ? `${e}%` : null),
-            handle: (e) => [
-              s(),
-              y("--tw-backdrop-saturate", `saturate(${e})`),
-              y("-webkit-backdrop-filter", i),
-              y("backdrop-filter", i),
-            ],
-          }),
-          r("saturate", () => [
-            {
-              values: ["0", "50", "100", "150", "200"],
-              valueThemeKeys: ["--saturate"],
-            },
-          ]),
-          r("backdrop-saturate", () => [
-            {
-              values: ["0", "50", "100", "150", "200"],
-              valueThemeKeys: ["--backdrop-saturate", "--saturate"],
-            },
-          ]),
-          o("sepia", {
-            themeKeys: ["--sepia"],
-            handleBareValue: ({ value: e }) => (de(e) ? `${e}%` : null),
-            defaultValue: "100%",
-            handle: (e) => [
-              l(),
-              y("--tw-sepia", `sepia(${e})`),
-              y("filter", a),
-            ],
-          }),
-          o("backdrop-sepia", {
-            themeKeys: ["--backdrop-sepia", "--sepia"],
-            handleBareValue: ({ value: e }) => (de(e) ? `${e}%` : null),
-            defaultValue: "100%",
-            handle: (e) => [
-              s(),
-              y("--tw-backdrop-sepia", `sepia(${e})`),
-              y("-webkit-backdrop-filter", i),
-              y("backdrop-filter", i),
-            ],
-          }),
-          r("sepia", () => [
-            {
-              values: ["0", "50", "100"],
-              valueThemeKeys: ["--sepia"],
-              hasDefaultValue: !0,
-            },
-          ]),
-          r("backdrop-sepia", () => [
-            {
-              values: ["0", "50", "100"],
-              valueThemeKeys: ["--backdrop-sepia", "--sepia"],
-              hasDefaultValue: !0,
-            },
-          ]),
-          n("drop-shadow-none", [
-            l,
-            ["--tw-drop-shadow", " "],
-            ["filter", a],
-          ]),
-          t.functional("drop-shadow", (t) => {
-            let r;
-            if (
-              (t.modifier &&
-                ("arbitrary" === t.modifier.kind
-                  ? (r = t.modifier.value)
-                  : de(t.modifier.value) && (r = `${t.modifier.value}%`)),
+            }),
+            n("backdrop-blur-none", [
+              s,
+              ["--tw-backdrop-blur", " "],
+              ["-webkit-backdrop-filter", i],
+              ["backdrop-filter", i],
+            ]),
+            o("brightness", {
+              themeKeys: ["--brightness"],
+              handleBareValue: ({ value: e }) => (de(e) ? `${e}%` : null),
+              handle: (e) => [
+                l(),
+                y("--tw-brightness", `brightness(${e})`),
+                y("filter", a),
+              ],
+            }),
+            o("backdrop-brightness", {
+              themeKeys: ["--backdrop-brightness", "--brightness"],
+              handleBareValue: ({ value: e }) => (de(e) ? `${e}%` : null),
+              handle: (e) => [
+                s(),
+                y("--tw-backdrop-brightness", `brightness(${e})`),
+                y("-webkit-backdrop-filter", i),
+                y("backdrop-filter", i),
+              ],
+            }),
+            r("brightness", () => [
+              {
+                values: [
+                  "0",
+                  "50",
+                  "75",
+                  "90",
+                  "95",
+                  "100",
+                  "105",
+                  "110",
+                  "125",
+                  "150",
+                  "200",
+                ],
+                valueThemeKeys: ["--brightness"],
+              },
+            ]),
+            r("backdrop-brightness", () => [
+              {
+                values: [
+                  "0",
+                  "50",
+                  "75",
+                  "90",
+                  "95",
+                  "100",
+                  "105",
+                  "110",
+                  "125",
+                  "150",
+                  "200",
+                ],
+                valueThemeKeys: ["--backdrop-brightness", "--brightness"],
+              },
+            ]),
+            o("contrast", {
+              themeKeys: ["--contrast"],
+              handleBareValue: ({ value: e }) => (de(e) ? `${e}%` : null),
+              handle: (e) => [
+                l(),
+                y("--tw-contrast", `contrast(${e})`),
+                y("filter", a),
+              ],
+            }),
+            o("backdrop-contrast", {
+              themeKeys: ["--backdrop-contrast", "--contrast"],
+              handleBareValue: ({ value: e }) => (de(e) ? `${e}%` : null),
+              handle: (e) => [
+                s(),
+                y("--tw-backdrop-contrast", `contrast(${e})`),
+                y("-webkit-backdrop-filter", i),
+                y("backdrop-filter", i),
+              ],
+            }),
+            r("contrast", () => [
+              {
+                values: ["0", "50", "75", "100", "125", "150", "200"],
+                valueThemeKeys: ["--contrast"],
+              },
+            ]),
+            r("backdrop-contrast", () => [
+              {
+                values: ["0", "50", "75", "100", "125", "150", "200"],
+                valueThemeKeys: ["--backdrop-contrast", "--contrast"],
+              },
+            ]),
+            o("grayscale", {
+              themeKeys: ["--grayscale"],
+              handleBareValue: ({ value: e }) => (de(e) ? `${e}%` : null),
+              defaultValue: "100%",
+              handle: (e) => [
+                l(),
+                y("--tw-grayscale", `grayscale(${e})`),
+                y("filter", a),
+              ],
+            }),
+            o("backdrop-grayscale", {
+              themeKeys: ["--backdrop-grayscale", "--grayscale"],
+              handleBareValue: ({ value: e }) => (de(e) ? `${e}%` : null),
+              defaultValue: "100%",
+              handle: (e) => [
+                s(),
+                y("--tw-backdrop-grayscale", `grayscale(${e})`),
+                y("-webkit-backdrop-filter", i),
+                y("backdrop-filter", i),
+              ],
+            }),
+            r("grayscale", () => [
+              {
+                values: ["0", "25", "50", "75", "100"],
+                valueThemeKeys: ["--grayscale"],
+                hasDefaultValue: !0,
+              },
+            ]),
+            r("backdrop-grayscale", () => [
+              {
+                values: ["0", "25", "50", "75", "100"],
+                valueThemeKeys: ["--backdrop-grayscale", "--grayscale"],
+                hasDefaultValue: !0,
+              },
+            ]),
+            o("hue-rotate", {
+              supportsNegative: !0,
+              themeKeys: ["--hue-rotate"],
+              handleBareValue: ({ value: e }) => (de(e) ? `${e}deg` : null),
+              handle: (e) => [
+                l(),
+                y("--tw-hue-rotate", `hue-rotate(${e})`),
+                y("filter", a),
+              ],
+            }),
+            o("backdrop-hue-rotate", {
+              supportsNegative: !0,
+              themeKeys: ["--backdrop-hue-rotate", "--hue-rotate"],
+              handleBareValue: ({ value: e }) => (de(e) ? `${e}deg` : null),
+              handle: (e) => [
+                s(),
+                y("--tw-backdrop-hue-rotate", `hue-rotate(${e})`),
+                y("-webkit-backdrop-filter", i),
+                y("backdrop-filter", i),
+              ],
+            }),
+            r("hue-rotate", () => [
+              {
+                values: ["0", "15", "30", "60", "90", "180"],
+                valueThemeKeys: ["--hue-rotate"],
+              },
+            ]),
+            r("backdrop-hue-rotate", () => [
+              {
+                values: ["0", "15", "30", "60", "90", "180"],
+                valueThemeKeys: ["--backdrop-hue-rotate", "--hue-rotate"],
+              },
+            ]),
+            o("invert", {
+              themeKeys: ["--invert"],
+              handleBareValue: ({ value: e }) => (de(e) ? `${e}%` : null),
+              defaultValue: "100%",
+              handle: (e) => [
+                l(),
+                y("--tw-invert", `invert(${e})`),
+                y("filter", a),
+              ],
+            }),
+            o("backdrop-invert", {
+              themeKeys: ["--backdrop-invert", "--invert"],
+              handleBareValue: ({ value: e }) => (de(e) ? `${e}%` : null),
+              defaultValue: "100%",
+              handle: (e) => [
+                s(),
+                y("--tw-backdrop-invert", `invert(${e})`),
+                y("-webkit-backdrop-filter", i),
+                y("backdrop-filter", i),
+              ],
+            }),
+            r("invert", () => [
+              {
+                values: ["0", "25", "50", "75", "100"],
+                valueThemeKeys: ["--invert"],
+                hasDefaultValue: !0,
+              },
+            ]),
+            r("backdrop-invert", () => [
+              {
+                values: ["0", "25", "50", "75", "100"],
+                valueThemeKeys: ["--backdrop-invert", "--invert"],
+                hasDefaultValue: !0,
+              },
+            ]),
+            o("saturate", {
+              themeKeys: ["--saturate"],
+              handleBareValue: ({ value: e }) => (de(e) ? `${e}%` : null),
+              handle: (e) => [
+                l(),
+                y("--tw-saturate", `saturate(${e})`),
+                y("filter", a),
+              ],
+            }),
+            o("backdrop-saturate", {
+              themeKeys: ["--backdrop-saturate", "--saturate"],
+              handleBareValue: ({ value: e }) => (de(e) ? `${e}%` : null),
+              handle: (e) => [
+                s(),
+                y("--tw-backdrop-saturate", `saturate(${e})`),
+                y("-webkit-backdrop-filter", i),
+                y("backdrop-filter", i),
+              ],
+            }),
+            r("saturate", () => [
+              {
+                values: ["0", "50", "100", "150", "200"],
+                valueThemeKeys: ["--saturate"],
+              },
+            ]),
+            r("backdrop-saturate", () => [
+              {
+                values: ["0", "50", "100", "150", "200"],
+                valueThemeKeys: ["--backdrop-saturate", "--saturate"],
+              },
+            ]),
+            o("sepia", {
+              themeKeys: ["--sepia"],
+              handleBareValue: ({ value: e }) => (de(e) ? `${e}%` : null),
+              defaultValue: "100%",
+              handle: (e) => [
+                l(),
+                y("--tw-sepia", `sepia(${e})`),
+                y("filter", a),
+              ],
+            }),
+            o("backdrop-sepia", {
+              themeKeys: ["--backdrop-sepia", "--sepia"],
+              handleBareValue: ({ value: e }) => (de(e) ? `${e}%` : null),
+              defaultValue: "100%",
+              handle: (e) => [
+                s(),
+                y("--tw-backdrop-sepia", `sepia(${e})`),
+                y("-webkit-backdrop-filter", i),
+                y("backdrop-filter", i),
+              ],
+            }),
+            r("sepia", () => [
+              {
+                values: ["0", "50", "100"],
+                valueThemeKeys: ["--sepia"],
+                hasDefaultValue: !0,
+              },
+            ]),
+            r("backdrop-sepia", () => [
+              {
+                values: ["0", "50", "100"],
+                valueThemeKeys: ["--backdrop-sepia", "--sepia"],
+                hasDefaultValue: !0,
+              },
+            ]),
+            n("drop-shadow-none", [
+              l,
+              ["--tw-drop-shadow", " "],
+              ["filter", a],
+            ]),
+            t.functional("drop-shadow", (t) => {
+              let r;
+              if (
+                (t.modifier &&
+                  ("arbitrary" === t.modifier.kind
+                    ? (r = t.modifier.value)
+                    : de(t.modifier.value) && (r = `${t.modifier.value}%`)),
                 !t.value)
-            ) {
-              let t = e.get(["--drop-shadow"]),
-                n = e.resolve(null, ["--drop-shadow"]);
-              return null === t || null === n
-                ? void 0
-                : [
-                  l(),
-                  y("--tw-drop-shadow-alpha", r),
-                  ...Ve(
-                    "--tw-drop-shadow-size",
-                    t,
-                    r,
-                    (e) => `var(--tw-drop-shadow-color, ${e})`,
-                  ),
-                  y(
-                    "--tw-drop-shadow",
-                    R(n, ",")
-                      .map((e) => `drop-shadow(${e})`)
-                      .join(" "),
-                  ),
-                  y("filter", a),
-                ];
-            }
-            if ("arbitrary" === t.value.kind) {
-              let n = t.value.value;
-              return "color" === (t.value.dataType ?? G(n, ["color"]))
-                ? ((n = je(n, t.modifier, e)),
-                  null === n
-                    ? void 0
-                    : [
-                      l(),
-                      y(
-                        "--tw-drop-shadow-color",
-                        ze(n, "var(--tw-drop-shadow-alpha)"),
-                      ),
-                      y("--tw-drop-shadow", "var(--tw-drop-shadow-size)"),
-                    ])
-                : t.modifier && !r
+              ) {
+                let t = e.get(["--drop-shadow"]),
+                  n = e.resolve(null, ["--drop-shadow"]);
+                return null === t || null === n
                   ? void 0
                   : [
-                    l(),
-                    y("--tw-drop-shadow-alpha", r),
-                    ...Ve(
-                      "--tw-drop-shadow-size",
-                      n,
-                      r,
-                      (e) => `var(--tw-drop-shadow-color, ${e})`,
-                    ),
-                    y("--tw-drop-shadow", "var(--tw-drop-shadow-size)"),
-                    y("filter", a),
-                  ];
-            }
-            {
-              let n = e.get([`--drop-shadow-${t.value.value}`]),
-                o = e.resolve(t.value.value, ["--drop-shadow"]);
-              if (n && o)
-                return t.modifier && !r
-                  ? void 0
-                  : r
-                    ? [
                       l(),
                       y("--tw-drop-shadow-alpha", r),
                       ...Ve(
                         "--tw-drop-shadow-size",
-                        n,
-                        r,
-                        (e) => `var(--tw-drop-shadow-color, ${e})`,
-                      ),
-                      y("--tw-drop-shadow", "var(--tw-drop-shadow-size)"),
-                      y("filter", a),
-                    ]
-                    : [
-                      l(),
-                      y("--tw-drop-shadow-alpha", r),
-                      ...Ve(
-                        "--tw-drop-shadow-size",
-                        n,
+                        t,
                         r,
                         (e) => `var(--tw-drop-shadow-color, ${e})`,
                       ),
                       y(
                         "--tw-drop-shadow",
-                        R(o, ",")
+                        R(n, ",")
                           .map((e) => `drop-shadow(${e})`)
                           .join(" "),
                       ),
                       y("filter", a),
                     ];
-            }
-            {
-              let r = Te(t, e, ["--drop-shadow-color", "--color"]);
-              if (r)
-                return "inherit" === r
-                  ? [
-                    l(),
-                    y("--tw-drop-shadow-color", "inherit"),
-                    y("--tw-drop-shadow", "var(--tw-drop-shadow-size)"),
-                  ]
-                  : [
-                    l(),
-                    y(
-                      "--tw-drop-shadow-color",
-                      ze(r, "var(--tw-drop-shadow-alpha)"),
-                    ),
-                    y("--tw-drop-shadow", "var(--tw-drop-shadow-size)"),
-                  ];
-            }
-          }),
-          r("drop-shadow", () => [
-            {
-              values: ["current", "inherit", "transparent"],
-              valueThemeKeys: ["--drop-shadow-color", "--color"],
-              modifiers: Array.from({ length: 21 }, (e, t) => "" + 5 * t),
-            },
-            { valueThemeKeys: ["--drop-shadow"] },
-          ]),
-          o("backdrop-opacity", {
-            themeKeys: ["--backdrop-opacity", "--opacity"],
-            handleBareValue: ({ value: e }) => (he(e) ? `${e}%` : null),
-            handle: (e) => [
-              s(),
-              y("--tw-backdrop-opacity", `opacity(${e})`),
-              y("-webkit-backdrop-filter", i),
-              y("backdrop-filter", i),
-            ],
-          }),
-          r("backdrop-opacity", () => [
-            {
-              values: Array.from({ length: 21 }, (e, t) => "" + 5 * t),
-              valueThemeKeys: ["--backdrop-opacity", "--opacity"],
-            },
-          ]);
-      }
-      {
-        let a = `var(--tw-ease, ${e.resolve(null, ["--default-transition-timing-function"]) ?? "ease"})`,
-          i = `var(--tw-duration, ${e.resolve(null, ["--default-transition-duration"]) ?? "0s"})`;
-        n("transition-none", [["transition-property", "none"]]),
-          n("transition-all", [
-            ["transition-property", "all"],
-            ["transition-timing-function", a],
-            ["transition-duration", i],
-          ]),
-          n("transition-colors", [
-            [
-              "transition-property",
-              "color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, --tw-gradient-from, --tw-gradient-via, --tw-gradient-to",
-            ],
-            ["transition-timing-function", a],
-            ["transition-duration", i],
-          ]),
-          n("transition-opacity", [
-            ["transition-property", "opacity"],
-            ["transition-timing-function", a],
-            ["transition-duration", i],
-          ]),
-          n("transition-shadow", [
-            ["transition-property", "box-shadow"],
-            ["transition-timing-function", a],
-            ["transition-duration", i],
-          ]),
-          n("transition-transform", [
-            ["transition-property", "transform, translate, scale, rotate"],
-            ["transition-timing-function", a],
-            ["transition-duration", i],
-          ]),
-          o("transition", {
-            defaultValue:
-              "color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, --tw-gradient-from, --tw-gradient-via, --tw-gradient-to, opacity, box-shadow, transform, translate, scale, rotate, filter, -webkit-backdrop-filter, backdrop-filter, display, visibility, content-visibility, overlay, pointer-events",
-            themeKeys: ["--transition-property"],
-            handle: (e) => [
-              y("transition-property", e),
-              y("transition-timing-function", a),
-              y("transition-duration", i),
-            ],
-          }),
-          n("transition-discrete", [
-            ["transition-behavior", "allow-discrete"],
-          ]),
-          n("transition-normal", [["transition-behavior", "normal"]]),
-          o("delay", {
-            handleBareValue: ({ value: e }) => (de(e) ? `${e}ms` : null),
-            themeKeys: ["--transition-delay"],
-            handle: (e) => [y("transition-delay", e)],
-          });
-        {
-          let r = () => z([$e("--tw-duration")]);
-          n("duration-initial", [r, ["--tw-duration", "initial"]]),
-            t.functional("duration", (t) => {
-              if (t.modifier || !t.value) return;
-              let n = null;
-              return (
-                "arbitrary" === t.value.kind
-                  ? (n = t.value.value)
-                  : ((n = e.resolve(t.value.fraction ?? t.value.value, [
-                    "--transition-duration",
-                  ])),
-                    null === n &&
-                    de(t.value.value) &&
-                    (n = `${t.value.value}ms`)),
-                null !== n
-                  ? [r(), y("--tw-duration", n), y("transition-duration", n)]
-                  : void 0
-              );
-            });
-        }
-        r("delay", () => [
-          {
-            values: ["75", "100", "150", "200", "300", "500", "700", "1000"],
-            valueThemeKeys: ["--transition-delay"],
-          },
-        ]),
-          r("duration", () => [
-            {
-              values: [
-                "75",
-                "100",
-                "150",
-                "200",
-                "300",
-                "500",
-                "700",
-                "1000",
-              ],
-              valueThemeKeys: ["--transition-duration"],
-            },
-          ]);
-      }
-      {
-        let e = () => z([$e("--tw-ease")]);
-        n("ease-initial", [e, ["--tw-ease", "initial"]]),
-          n("ease-linear", [
-            e,
-            ["--tw-ease", "linear"],
-            ["transition-timing-function", "linear"],
-          ]),
-          o("ease", {
-            themeKeys: ["--ease"],
-            handle: (t) => [
-              e(),
-              y("--tw-ease", t),
-              y("transition-timing-function", t),
-            ],
-          });
-      }
-      n("will-change-auto", [["will-change", "auto"]]),
-        n("will-change-scroll", [["will-change", "scroll-position"]]),
-        n("will-change-contents", [["will-change", "contents"]]),
-        n("will-change-transform", [["will-change", "transform"]]),
-        o("will-change", {
-          themeKeys: [],
-          handle: (e) => [y("will-change", e)],
-        }),
-        n("content-none", [
-          ["--tw-content", "none"],
-          ["content", "none"],
-        ]),
-        o("content", {
-          themeKeys: [],
-          handle: (e) => [
-            z([$e("--tw-content", '""')]),
-            y("--tw-content", e),
-            y("content", "var(--tw-content)"),
-          ],
-        });
-      {
-        let e =
-          "var(--tw-contain-size,) var(--tw-contain-layout,) var(--tw-contain-paint,) var(--tw-contain-style,)",
-          t = () =>
-            z([
-              $e("--tw-contain-size"),
-              $e("--tw-contain-layout"),
-              $e("--tw-contain-paint"),
-              $e("--tw-contain-style"),
-            ]);
-        n("contain-none", [["contain", "none"]]),
-          n("contain-content", [["contain", "content"]]),
-          n("contain-strict", [["contain", "strict"]]),
-          n("contain-size", [
-            t,
-            ["--tw-contain-size", "size"],
-            ["contain", e],
-          ]),
-          n("contain-inline-size", [
-            t,
-            ["--tw-contain-size", "inline-size"],
-            ["contain", e],
-          ]),
-          n("contain-layout", [
-            t,
-            ["--tw-contain-layout", "layout"],
-            ["contain", e],
-          ]),
-          n("contain-paint", [
-            t,
-            ["--tw-contain-paint", "paint"],
-            ["contain", e],
-          ]),
-          n("contain-style", [
-            t,
-            ["--tw-contain-style", "style"],
-            ["contain", e],
-          ]),
-          o("contain", { themeKeys: [], handle: (e) => [y("contain", e)] });
-      }
-      n("forced-color-adjust-none", [["forced-color-adjust", "none"]]),
-        n("forced-color-adjust-auto", [["forced-color-adjust", "auto"]]),
-        n("leading-none", [
-          () => z([$e("--tw-leading")]),
-          ["--tw-leading", "1"],
-          ["line-height", "1"],
-        ]),
-        i("leading", ["--leading", "--spacing"], (e) => [
-          z([$e("--tw-leading")]),
-          y("--tw-leading", e),
-          y("line-height", e),
-        ]),
-        o("tracking", {
-          supportsNegative: !0,
-          themeKeys: ["--tracking"],
-          handle: (e) => [
-            z([$e("--tw-tracking")]),
-            y("--tw-tracking", e),
-            y("letter-spacing", e),
-          ],
-        }),
-        n("antialiased", [
-          ["-webkit-font-smoothing", "antialiased"],
-          ["-moz-osx-font-smoothing", "grayscale"],
-        ]),
-        n("subpixel-antialiased", [
-          ["-webkit-font-smoothing", "auto"],
-          ["-moz-osx-font-smoothing", "auto"],
-        ]);
-      {
-        let e =
-          "var(--tw-ordinal,) var(--tw-slashed-zero,) var(--tw-numeric-figure,) var(--tw-numeric-spacing,) var(--tw-numeric-fraction,)",
-          t = () =>
-            z([
-              $e("--tw-ordinal"),
-              $e("--tw-slashed-zero"),
-              $e("--tw-numeric-figure"),
-              $e("--tw-numeric-spacing"),
-              $e("--tw-numeric-fraction"),
-            ]);
-        n("normal-nums", [["font-variant-numeric", "normal"]]),
-          n("ordinal", [
-            t,
-            ["--tw-ordinal", "ordinal"],
-            ["font-variant-numeric", e],
-          ]),
-          n("slashed-zero", [
-            t,
-            ["--tw-slashed-zero", "slashed-zero"],
-            ["font-variant-numeric", e],
-          ]),
-          n("lining-nums", [
-            t,
-            ["--tw-numeric-figure", "lining-nums"],
-            ["font-variant-numeric", e],
-          ]),
-          n("oldstyle-nums", [
-            t,
-            ["--tw-numeric-figure", "oldstyle-nums"],
-            ["font-variant-numeric", e],
-          ]),
-          n("proportional-nums", [
-            t,
-            ["--tw-numeric-spacing", "proportional-nums"],
-            ["font-variant-numeric", e],
-          ]),
-          n("tabular-nums", [
-            t,
-            ["--tw-numeric-spacing", "tabular-nums"],
-            ["font-variant-numeric", e],
-          ]),
-          n("diagonal-fractions", [
-            t,
-            ["--tw-numeric-fraction", "diagonal-fractions"],
-            ["font-variant-numeric", e],
-          ]),
-          n("stacked-fractions", [
-            t,
-            ["--tw-numeric-fraction", "stacked-fractions"],
-            ["font-variant-numeric", e],
-          ]);
-      }
-      {
-        let a = () => z([$e("--tw-outline-style", "solid")]);
-        t.static("outline-hidden", () => [
-          y("--tw-outline-style", "none"),
-          y("outline-style", "none"),
-          k("@media", "(forced-colors: active)", [
-            y("outline", "2px solid transparent"),
-            y("outline-offset", "2px"),
-          ]),
-        ]),
-          n("outline-none", [
-            ["--tw-outline-style", "none"],
-            ["outline-style", "none"],
-          ]),
-          n("outline-solid", [
-            ["--tw-outline-style", "solid"],
-            ["outline-style", "solid"],
-          ]),
-          n("outline-dashed", [
-            ["--tw-outline-style", "dashed"],
-            ["outline-style", "dashed"],
-          ]),
-          n("outline-dotted", [
-            ["--tw-outline-style", "dotted"],
-            ["outline-style", "dotted"],
-          ]),
-          n("outline-double", [
-            ["--tw-outline-style", "double"],
-            ["outline-style", "double"],
-          ]),
-          t.functional("outline", (t) => {
-            if (null === t.value) {
-              if (t.modifier) return;
-              let r = e.get(["--default-outline-width"]) ?? "1px";
-              return [
-                a(),
-                y("outline-style", "var(--tw-outline-style)"),
-                y("outline-width", r),
-              ];
-            }
-            if ("arbitrary" === t.value.kind) {
-              let r = t.value.value;
-              switch (
-              t.value.dataType ??
-              G(r, ["color", "length", "number", "percentage"])
-              ) {
-                case "length":
-                case "number":
-                case "percentage":
-                  return t.modifier
+              }
+              if ("arbitrary" === t.value.kind) {
+                let n = t.value.value;
+                return "color" === (t.value.dataType ?? G(n, ["color"]))
+                  ? ((n = je(n, t.modifier, e)),
+                    null === n
+                      ? void 0
+                      : [
+                          l(),
+                          y(
+                            "--tw-drop-shadow-color",
+                            ze(n, "var(--tw-drop-shadow-alpha)"),
+                          ),
+                          y("--tw-drop-shadow", "var(--tw-drop-shadow-size)"),
+                        ])
+                  : t.modifier && !r
                     ? void 0
                     : [
-                      a(),
-                      y("outline-style", "var(--tw-outline-style)"),
-                      y("outline-width", r),
-                    ];
-                default:
-                  return (
-                    (r = je(r, t.modifier, e)),
-                    null === r ? void 0 : [y("outline-color", r)]
-                  );
+                        l(),
+                        y("--tw-drop-shadow-alpha", r),
+                        ...Ve(
+                          "--tw-drop-shadow-size",
+                          n,
+                          r,
+                          (e) => `var(--tw-drop-shadow-color, ${e})`,
+                        ),
+                        y("--tw-drop-shadow", "var(--tw-drop-shadow-size)"),
+                        y("filter", a),
+                      ];
               }
-            }
+              {
+                let n = e.get([`--drop-shadow-${t.value.value}`]),
+                  o = e.resolve(t.value.value, ["--drop-shadow"]);
+                if (n && o)
+                  return t.modifier && !r
+                    ? void 0
+                    : r
+                      ? [
+                          l(),
+                          y("--tw-drop-shadow-alpha", r),
+                          ...Ve(
+                            "--tw-drop-shadow-size",
+                            n,
+                            r,
+                            (e) => `var(--tw-drop-shadow-color, ${e})`,
+                          ),
+                          y("--tw-drop-shadow", "var(--tw-drop-shadow-size)"),
+                          y("filter", a),
+                        ]
+                      : [
+                          l(),
+                          y("--tw-drop-shadow-alpha", r),
+                          ...Ve(
+                            "--tw-drop-shadow-size",
+                            n,
+                            r,
+                            (e) => `var(--tw-drop-shadow-color, ${e})`,
+                          ),
+                          y(
+                            "--tw-drop-shadow",
+                            R(o, ",")
+                              .map((e) => `drop-shadow(${e})`)
+                              .join(" "),
+                          ),
+                          y("filter", a),
+                        ];
+              }
+              {
+                let r = Te(t, e, ["--drop-shadow-color", "--color"]);
+                if (r)
+                  return "inherit" === r
+                    ? [
+                        l(),
+                        y("--tw-drop-shadow-color", "inherit"),
+                        y("--tw-drop-shadow", "var(--tw-drop-shadow-size)"),
+                      ]
+                    : [
+                        l(),
+                        y(
+                          "--tw-drop-shadow-color",
+                          ze(r, "var(--tw-drop-shadow-alpha)"),
+                        ),
+                        y("--tw-drop-shadow", "var(--tw-drop-shadow-size)"),
+                      ];
+              }
+            }),
+            r("drop-shadow", () => [
+              {
+                values: ["current", "inherit", "transparent"],
+                valueThemeKeys: ["--drop-shadow-color", "--color"],
+                modifiers: Array.from({ length: 21 }, (e, t) => "" + 5 * t),
+              },
+              { valueThemeKeys: ["--drop-shadow"] },
+            ]),
+            o("backdrop-opacity", {
+              themeKeys: ["--backdrop-opacity", "--opacity"],
+              handleBareValue: ({ value: e }) => (he(e) ? `${e}%` : null),
+              handle: (e) => [
+                s(),
+                y("--tw-backdrop-opacity", `opacity(${e})`),
+                y("-webkit-backdrop-filter", i),
+                y("backdrop-filter", i),
+              ],
+            }),
+            r("backdrop-opacity", () => [
+              {
+                values: Array.from({ length: 21 }, (e, t) => "" + 5 * t),
+                valueThemeKeys: ["--backdrop-opacity", "--opacity"],
+              },
+            ]);
+        }
+        {
+          let a = `var(--tw-ease, ${e.resolve(null, ["--default-transition-timing-function"]) ?? "ease"})`,
+            i = `var(--tw-duration, ${e.resolve(null, ["--default-transition-duration"]) ?? "0s"})`;
+          n("transition-none", [["transition-property", "none"]]),
+            n("transition-all", [
+              ["transition-property", "all"],
+              ["transition-timing-function", a],
+              ["transition-duration", i],
+            ]),
+            n("transition-colors", [
+              [
+                "transition-property",
+                "color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, --tw-gradient-from, --tw-gradient-via, --tw-gradient-to",
+              ],
+              ["transition-timing-function", a],
+              ["transition-duration", i],
+            ]),
+            n("transition-opacity", [
+              ["transition-property", "opacity"],
+              ["transition-timing-function", a],
+              ["transition-duration", i],
+            ]),
+            n("transition-shadow", [
+              ["transition-property", "box-shadow"],
+              ["transition-timing-function", a],
+              ["transition-duration", i],
+            ]),
+            n("transition-transform", [
+              ["transition-property", "transform, translate, scale, rotate"],
+              ["transition-timing-function", a],
+              ["transition-duration", i],
+            ]),
+            o("transition", {
+              defaultValue:
+                "color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, --tw-gradient-from, --tw-gradient-via, --tw-gradient-to, opacity, box-shadow, transform, translate, scale, rotate, filter, -webkit-backdrop-filter, backdrop-filter, display, visibility, content-visibility, overlay, pointer-events",
+              themeKeys: ["--transition-property"],
+              handle: (e) => [
+                y("transition-property", e),
+                y("transition-timing-function", a),
+                y("transition-duration", i),
+              ],
+            }),
+            n("transition-discrete", [
+              ["transition-behavior", "allow-discrete"],
+            ]),
+            n("transition-normal", [["transition-behavior", "normal"]]),
+            o("delay", {
+              handleBareValue: ({ value: e }) => (de(e) ? `${e}ms` : null),
+              themeKeys: ["--transition-delay"],
+              handle: (e) => [y("transition-delay", e)],
+            });
+          {
+            let r = () => z([$e("--tw-duration")]);
+            n("duration-initial", [r, ["--tw-duration", "initial"]]),
+              t.functional("duration", (t) => {
+                if (t.modifier || !t.value) return;
+                let n = null;
+                return (
+                  "arbitrary" === t.value.kind
+                    ? (n = t.value.value)
+                    : ((n = e.resolve(t.value.fraction ?? t.value.value, [
+                        "--transition-duration",
+                      ])),
+                      null === n &&
+                        de(t.value.value) &&
+                        (n = `${t.value.value}ms`)),
+                  null !== n
+                    ? [r(), y("--tw-duration", n), y("transition-duration", n)]
+                    : void 0
+                );
+              });
+          }
+          r("delay", () => [
             {
-              let r = Te(t, e, ["--outline-color", "--color"]);
-              if (r) return [y("outline-color", r)];
-            }
-            {
-              if (t.modifier) return;
-              let r = e.resolve(t.value.value, ["--outline-width"]);
-              if (r)
+              values: ["75", "100", "150", "200", "300", "500", "700", "1000"],
+              valueThemeKeys: ["--transition-delay"],
+            },
+          ]),
+            r("duration", () => [
+              {
+                values: [
+                  "75",
+                  "100",
+                  "150",
+                  "200",
+                  "300",
+                  "500",
+                  "700",
+                  "1000",
+                ],
+                valueThemeKeys: ["--transition-duration"],
+              },
+            ]);
+        }
+        {
+          let e = () => z([$e("--tw-ease")]);
+          n("ease-initial", [e, ["--tw-ease", "initial"]]),
+            n("ease-linear", [
+              e,
+              ["--tw-ease", "linear"],
+              ["transition-timing-function", "linear"],
+            ]),
+            o("ease", {
+              themeKeys: ["--ease"],
+              handle: (t) => [
+                e(),
+                y("--tw-ease", t),
+                y("transition-timing-function", t),
+              ],
+            });
+        }
+        n("will-change-auto", [["will-change", "auto"]]),
+          n("will-change-scroll", [["will-change", "scroll-position"]]),
+          n("will-change-contents", [["will-change", "contents"]]),
+          n("will-change-transform", [["will-change", "transform"]]),
+          o("will-change", {
+            themeKeys: [],
+            handle: (e) => [y("will-change", e)],
+          }),
+          n("content-none", [
+            ["--tw-content", "none"],
+            ["content", "none"],
+          ]),
+          o("content", {
+            themeKeys: [],
+            handle: (e) => [
+              z([$e("--tw-content", '""')]),
+              y("--tw-content", e),
+              y("content", "var(--tw-content)"),
+            ],
+          });
+        {
+          let e =
+              "var(--tw-contain-size,) var(--tw-contain-layout,) var(--tw-contain-paint,) var(--tw-contain-style,)",
+            t = () =>
+              z([
+                $e("--tw-contain-size"),
+                $e("--tw-contain-layout"),
+                $e("--tw-contain-paint"),
+                $e("--tw-contain-style"),
+              ]);
+          n("contain-none", [["contain", "none"]]),
+            n("contain-content", [["contain", "content"]]),
+            n("contain-strict", [["contain", "strict"]]),
+            n("contain-size", [
+              t,
+              ["--tw-contain-size", "size"],
+              ["contain", e],
+            ]),
+            n("contain-inline-size", [
+              t,
+              ["--tw-contain-size", "inline-size"],
+              ["contain", e],
+            ]),
+            n("contain-layout", [
+              t,
+              ["--tw-contain-layout", "layout"],
+              ["contain", e],
+            ]),
+            n("contain-paint", [
+              t,
+              ["--tw-contain-paint", "paint"],
+              ["contain", e],
+            ]),
+            n("contain-style", [
+              t,
+              ["--tw-contain-style", "style"],
+              ["contain", e],
+            ]),
+            o("contain", { themeKeys: [], handle: (e) => [y("contain", e)] });
+        }
+        n("forced-color-adjust-none", [["forced-color-adjust", "none"]]),
+          n("forced-color-adjust-auto", [["forced-color-adjust", "auto"]]),
+          n("leading-none", [
+            () => z([$e("--tw-leading")]),
+            ["--tw-leading", "1"],
+            ["line-height", "1"],
+          ]),
+          i("leading", ["--leading", "--spacing"], (e) => [
+            z([$e("--tw-leading")]),
+            y("--tw-leading", e),
+            y("line-height", e),
+          ]),
+          o("tracking", {
+            supportsNegative: !0,
+            themeKeys: ["--tracking"],
+            handle: (e) => [
+              z([$e("--tw-tracking")]),
+              y("--tw-tracking", e),
+              y("letter-spacing", e),
+            ],
+          }),
+          n("antialiased", [
+            ["-webkit-font-smoothing", "antialiased"],
+            ["-moz-osx-font-smoothing", "grayscale"],
+          ]),
+          n("subpixel-antialiased", [
+            ["-webkit-font-smoothing", "auto"],
+            ["-moz-osx-font-smoothing", "auto"],
+          ]);
+        {
+          let e =
+              "var(--tw-ordinal,) var(--tw-slashed-zero,) var(--tw-numeric-figure,) var(--tw-numeric-spacing,) var(--tw-numeric-fraction,)",
+            t = () =>
+              z([
+                $e("--tw-ordinal"),
+                $e("--tw-slashed-zero"),
+                $e("--tw-numeric-figure"),
+                $e("--tw-numeric-spacing"),
+                $e("--tw-numeric-fraction"),
+              ]);
+          n("normal-nums", [["font-variant-numeric", "normal"]]),
+            n("ordinal", [
+              t,
+              ["--tw-ordinal", "ordinal"],
+              ["font-variant-numeric", e],
+            ]),
+            n("slashed-zero", [
+              t,
+              ["--tw-slashed-zero", "slashed-zero"],
+              ["font-variant-numeric", e],
+            ]),
+            n("lining-nums", [
+              t,
+              ["--tw-numeric-figure", "lining-nums"],
+              ["font-variant-numeric", e],
+            ]),
+            n("oldstyle-nums", [
+              t,
+              ["--tw-numeric-figure", "oldstyle-nums"],
+              ["font-variant-numeric", e],
+            ]),
+            n("proportional-nums", [
+              t,
+              ["--tw-numeric-spacing", "proportional-nums"],
+              ["font-variant-numeric", e],
+            ]),
+            n("tabular-nums", [
+              t,
+              ["--tw-numeric-spacing", "tabular-nums"],
+              ["font-variant-numeric", e],
+            ]),
+            n("diagonal-fractions", [
+              t,
+              ["--tw-numeric-fraction", "diagonal-fractions"],
+              ["font-variant-numeric", e],
+            ]),
+            n("stacked-fractions", [
+              t,
+              ["--tw-numeric-fraction", "stacked-fractions"],
+              ["font-variant-numeric", e],
+            ]);
+        }
+        {
+          let a = () => z([$e("--tw-outline-style", "solid")]);
+          t.static("outline-hidden", () => [
+            y("--tw-outline-style", "none"),
+            y("outline-style", "none"),
+            k("@media", "(forced-colors: active)", [
+              y("outline", "2px solid transparent"),
+              y("outline-offset", "2px"),
+            ]),
+          ]),
+            n("outline-none", [
+              ["--tw-outline-style", "none"],
+              ["outline-style", "none"],
+            ]),
+            n("outline-solid", [
+              ["--tw-outline-style", "solid"],
+              ["outline-style", "solid"],
+            ]),
+            n("outline-dashed", [
+              ["--tw-outline-style", "dashed"],
+              ["outline-style", "dashed"],
+            ]),
+            n("outline-dotted", [
+              ["--tw-outline-style", "dotted"],
+              ["outline-style", "dotted"],
+            ]),
+            n("outline-double", [
+              ["--tw-outline-style", "double"],
+              ["outline-style", "double"],
+            ]),
+            t.functional("outline", (t) => {
+              if (null === t.value) {
+                if (t.modifier) return;
+                let r = e.get(["--default-outline-width"]) ?? "1px";
                 return [
                   a(),
                   y("outline-style", "var(--tw-outline-style)"),
                   y("outline-width", r),
                 ];
-              if (de(t.value.value))
-                return [
-                  a(),
-                  y("outline-style", "var(--tw-outline-style)"),
-                  y("outline-width", `${t.value.value}px`),
-                ];
-            }
-          }),
-          r("outline", () => [
+              }
+              if ("arbitrary" === t.value.kind) {
+                let r = t.value.value;
+                switch (
+                  t.value.dataType ??
+                  G(r, ["color", "length", "number", "percentage"])
+                ) {
+                  case "length":
+                  case "number":
+                  case "percentage":
+                    return t.modifier
+                      ? void 0
+                      : [
+                          a(),
+                          y("outline-style", "var(--tw-outline-style)"),
+                          y("outline-width", r),
+                        ];
+                  default:
+                    return (
+                      (r = je(r, t.modifier, e)),
+                      null === r ? void 0 : [y("outline-color", r)]
+                    );
+                }
+              }
+              {
+                let r = Te(t, e, ["--outline-color", "--color"]);
+                if (r) return [y("outline-color", r)];
+              }
+              {
+                if (t.modifier) return;
+                let r = e.resolve(t.value.value, ["--outline-width"]);
+                if (r)
+                  return [
+                    a(),
+                    y("outline-style", "var(--tw-outline-style)"),
+                    y("outline-width", r),
+                  ];
+                if (de(t.value.value))
+                  return [
+                    a(),
+                    y("outline-style", "var(--tw-outline-style)"),
+                    y("outline-width", `${t.value.value}px`),
+                  ];
+              }
+            }),
+            r("outline", () => [
+              {
+                values: ["current", "inherit", "transparent"],
+                valueThemeKeys: ["--outline-color", "--color"],
+                modifiers: Array.from({ length: 21 }, (e, t) => "" + 5 * t),
+                hasDefaultValue: !0,
+              },
+              {
+                values: ["0", "1", "2", "4", "8"],
+                valueThemeKeys: ["--outline-width"],
+              },
+            ]),
+            o("outline-offset", {
+              supportsNegative: !0,
+              themeKeys: ["--outline-offset"],
+              handleBareValue: ({ value: e }) => (de(e) ? `${e}px` : null),
+              handle: (e) => [y("outline-offset", e)],
+            }),
+            r("outline-offset", () => [
+              {
+                supportsNegative: !0,
+                values: ["0", "1", "2", "4", "8"],
+                valueThemeKeys: ["--outline-offset"],
+              },
+            ]);
+        }
+        o("opacity", {
+          themeKeys: ["--opacity"],
+          handleBareValue: ({ value: e }) => (he(e) ? `${e}%` : null),
+          handle: (e) => [y("opacity", e)],
+        }),
+          r("opacity", () => [
             {
-              values: ["current", "inherit", "transparent"],
-              valueThemeKeys: ["--outline-color", "--color"],
-              modifiers: Array.from({ length: 21 }, (e, t) => "" + 5 * t),
-              hasDefaultValue: !0,
-            },
-            {
-              values: ["0", "1", "2", "4", "8"],
-              valueThemeKeys: ["--outline-width"],
+              values: Array.from({ length: 21 }, (e, t) => "" + 5 * t),
+              valueThemeKeys: ["--opacity"],
             },
           ]),
-          o("outline-offset", {
+          n("underline-offset-auto", [["text-underline-offset", "auto"]]),
+          o("underline-offset", {
             supportsNegative: !0,
-            themeKeys: ["--outline-offset"],
+            themeKeys: ["--text-underline-offset"],
             handleBareValue: ({ value: e }) => (de(e) ? `${e}px` : null),
-            handle: (e) => [y("outline-offset", e)],
+            handle: (e) => [y("text-underline-offset", e)],
           }),
-          r("outline-offset", () => [
+          r("underline-offset", () => [
             {
               supportsNegative: !0,
               values: ["0", "1", "2", "4", "8"],
-              valueThemeKeys: ["--outline-offset"],
+              valueThemeKeys: ["--text-underline-offset"],
             },
-          ]);
-      }
-      o("opacity", {
-        themeKeys: ["--opacity"],
-        handleBareValue: ({ value: e }) => (he(e) ? `${e}%` : null),
-        handle: (e) => [y("opacity", e)],
-      }),
-        r("opacity", () => [
-          {
-            values: Array.from({ length: 21 }, (e, t) => "" + 5 * t),
-            valueThemeKeys: ["--opacity"],
-          },
-        ]),
-        n("underline-offset-auto", [["text-underline-offset", "auto"]]),
-        o("underline-offset", {
-          supportsNegative: !0,
-          themeKeys: ["--text-underline-offset"],
-          handleBareValue: ({ value: e }) => (de(e) ? `${e}px` : null),
-          handle: (e) => [y("text-underline-offset", e)],
-        }),
-        r("underline-offset", () => [
-          {
-            supportsNegative: !0,
-            values: ["0", "1", "2", "4", "8"],
-            valueThemeKeys: ["--text-underline-offset"],
-          },
-        ]),
-        t.functional("text", (t) => {
-          if (t.value) {
-            if ("arbitrary" === t.value.kind) {
-              let r = t.value.value;
-              switch (
-              t.value.dataType ??
-              G(r, [
-                "color",
-                "length",
-                "percentage",
-                "absolute-size",
-                "relative-size",
-              ])
-              ) {
-                case "size":
-                case "length":
-                case "percentage":
-                case "absolute-size":
-                case "relative-size":
+          ]),
+          t.functional("text", (t) => {
+            if (t.value) {
+              if ("arbitrary" === t.value.kind) {
+                let r = t.value.value;
+                switch (
+                  t.value.dataType ??
+                  G(r, [
+                    "color",
+                    "length",
+                    "percentage",
+                    "absolute-size",
+                    "relative-size",
+                  ])
+                ) {
+                  case "size":
+                  case "length":
+                  case "percentage":
+                  case "absolute-size":
+                  case "relative-size":
+                    if (t.modifier) {
+                      let n =
+                        "arbitrary" === t.modifier.kind
+                          ? t.modifier.value
+                          : e.resolve(t.modifier.value, ["--leading"]);
+                      if (!n && pe(t.modifier.value)) {
+                        let r = e.resolve(null, ["--spacing"]);
+                        if (!r) return null;
+                        n = `calc(${r} * ${t.modifier.value})`;
+                      }
+                      return (
+                        !n && "none" === t.modifier.value && (n = "1"),
+                        n ? [y("font-size", r), y("line-height", n)] : null
+                      );
+                    }
+                    return [y("font-size", r)];
+                  default:
+                    return (
+                      (r = je(r, t.modifier, e)),
+                      null === r ? void 0 : [y("color", r)]
+                    );
+                }
+              }
+              {
+                let r = Te(t, e, ["--text-color", "--color"]);
+                if (r) return [y("color", r)];
+              }
+              {
+                let r = e.resolveWith(
+                  t.value.value,
+                  ["--text"],
+                  ["--line-height", "--letter-spacing", "--font-weight"],
+                );
+                if (r) {
+                  let [n, o = {}] = Array.isArray(r) ? r : [r];
                   if (t.modifier) {
-                    let n =
+                    let r =
                       "arbitrary" === t.modifier.kind
                         ? t.modifier.value
                         : e.resolve(t.modifier.value, ["--leading"]);
-                    if (!n && pe(t.modifier.value)) {
-                      let r = e.resolve(null, ["--spacing"]);
-                      if (!r) return null;
-                      n = `calc(${r} * ${t.modifier.value})`;
+                    if (!r && pe(t.modifier.value)) {
+                      let n = e.resolve(null, ["--spacing"]);
+                      if (!n) return null;
+                      r = `calc(${n} * ${t.modifier.value})`;
                     }
-                    return (
-                      !n && "none" === t.modifier.value && (n = "1"),
-                      n ? [y("font-size", r), y("line-height", n)] : null
-                    );
+                    if ((!r && "none" === t.modifier.value && (r = "1"), !r))
+                      return null;
+                    let o = [y("font-size", n)];
+                    return r && o.push(y("line-height", r)), o;
                   }
-                  return [y("font-size", r)];
-                default:
-                  return (
-                    (r = je(r, t.modifier, e)),
-                    null === r ? void 0 : [y("color", r)]
-                  );
+                  return "string" == typeof o
+                    ? [y("font-size", n), y("line-height", o)]
+                    : [
+                        y("font-size", n),
+                        y(
+                          "line-height",
+                          o["--line-height"]
+                            ? `var(--tw-leading, ${o["--line-height"]})`
+                            : void 0,
+                        ),
+                        y(
+                          "letter-spacing",
+                          o["--letter-spacing"]
+                            ? `var(--tw-tracking, ${o["--letter-spacing"]})`
+                            : void 0,
+                        ),
+                        y(
+                          "font-weight",
+                          o["--font-weight"]
+                            ? `var(--tw-font-weight, ${o["--font-weight"]})`
+                            : void 0,
+                        ),
+                      ];
+                }
               }
             }
+          }),
+          r("text", () => [
             {
-              let r = Te(t, e, ["--text-color", "--color"]);
-              if (r) return [y("color", r)];
+              values: ["current", "inherit", "transparent"],
+              valueThemeKeys: ["--text-color", "--color"],
+              modifiers: Array.from({ length: 21 }, (e, t) => "" + 5 * t),
+            },
+            {
+              values: [],
+              valueThemeKeys: ["--text"],
+              modifiers: [],
+              modifierThemeKeys: ["--leading"],
+            },
+          ]);
+        let C = () =>
+          z([
+            $e("--tw-text-shadow-color"),
+            $e("--tw-text-shadow-alpha", "100%", "<percentage>"),
+          ]);
+        n("text-shadow-initial", [C, ["--tw-text-shadow-color", "initial"]]),
+          t.functional("text-shadow", (t) => {
+            let r;
+            if (
+              (t.modifier &&
+                ("arbitrary" === t.modifier.kind
+                  ? (r = t.modifier.value)
+                  : de(t.modifier.value) && (r = `${t.modifier.value}%`)),
+              !t.value)
+            ) {
+              let t = e.get(["--text-shadow"]);
+              return null === t
+                ? void 0
+                : [
+                    C(),
+                    y("--tw-text-shadow-alpha", r),
+                    ...Ee(
+                      "text-shadow",
+                      t,
+                      r,
+                      (e) => `var(--tw-text-shadow-color, ${e})`,
+                    ),
+                  ];
+            }
+            if ("arbitrary" === t.value.kind) {
+              let n = t.value.value;
+              return "color" === (t.value.dataType ?? G(n, ["color"]))
+                ? ((n = je(n, t.modifier, e)),
+                  null === n
+                    ? void 0
+                    : [
+                        C(),
+                        y(
+                          "--tw-text-shadow-color",
+                          ze(n, "var(--tw-text-shadow-alpha)"),
+                        ),
+                      ])
+                : [
+                    C(),
+                    y("--tw-text-shadow-alpha", r),
+                    ...Ee(
+                      "text-shadow",
+                      n,
+                      r,
+                      (e) => `var(--tw-text-shadow-color, ${e})`,
+                    ),
+                  ];
+            }
+            switch (t.value.value) {
+              case "none":
+                return t.modifier ? void 0 : [C(), y("text-shadow", "none")];
+              case "inherit":
+                return t.modifier
+                  ? void 0
+                  : [C(), y("--tw-text-shadow-color", "inherit")];
             }
             {
-              let r = e.resolveWith(
-                t.value.value,
-                ["--text"],
-                ["--line-height", "--letter-spacing", "--font-weight"],
-              );
-              if (r) {
-                let [n, o = {}] = Array.isArray(r) ? r : [r];
-                if (t.modifier) {
-                  let r =
-                    "arbitrary" === t.modifier.kind
-                      ? t.modifier.value
-                      : e.resolve(t.modifier.value, ["--leading"]);
-                  if (!r && pe(t.modifier.value)) {
-                    let n = e.resolve(null, ["--spacing"]);
-                    if (!n) return null;
-                    r = `calc(${n} * ${t.modifier.value})`;
-                  }
-                  if ((!r && "none" === t.modifier.value && (r = "1"), !r))
-                    return null;
-                  let o = [y("font-size", n)];
-                  return r && o.push(y("line-height", r)), o;
-                }
-                return "string" == typeof o
-                  ? [y("font-size", n), y("line-height", o)]
+              let n = e.get([`--text-shadow-${t.value.value}`]);
+              if (n)
+                return [
+                  C(),
+                  y("--tw-text-shadow-alpha", r),
+                  ...Ee(
+                    "text-shadow",
+                    n,
+                    r,
+                    (e) => `var(--tw-text-shadow-color, ${e})`,
+                  ),
+                ];
+            }
+            {
+              let r = Te(t, e, ["--text-shadow-color", "--color"]);
+              if (r)
+                return [
+                  C(),
+                  y(
+                    "--tw-text-shadow-color",
+                    ze(r, "var(--tw-text-shadow-alpha)"),
+                  ),
+                ];
+            }
+          }),
+          r("text-shadow", () => [
+            {
+              values: ["current", "inherit", "transparent"],
+              valueThemeKeys: ["--text-shadow-color", "--color"],
+              modifiers: Array.from({ length: 21 }, (e, t) => "" + 5 * t),
+            },
+            { values: ["none"] },
+            {
+              valueThemeKeys: ["--text-shadow"],
+              modifiers: Array.from({ length: 21 }, (e, t) => "" + 5 * t),
+              hasDefaultValue: null !== e.get(["--text-shadow"]),
+            },
+          ]);
+        {
+          let o = function (e) {
+              return `var(--tw-ring-inset,) 0 0 0 calc(${e} + var(--tw-ring-offset-width)) var(--tw-ring-color, ${c})`;
+            },
+            a = function (e) {
+              return `inset 0 0 0 ${e} var(--tw-inset-ring-color, currentcolor)`;
+            },
+            i = [
+              "var(--tw-inset-shadow)",
+              "var(--tw-inset-ring-shadow)",
+              "var(--tw-ring-offset-shadow)",
+              "var(--tw-ring-shadow)",
+              "var(--tw-shadow)",
+            ].join(", "),
+            l = "0 0 #0000",
+            s = () =>
+              z([
+                $e("--tw-shadow", l),
+                $e("--tw-shadow-color"),
+                $e("--tw-shadow-alpha", "100%", "<percentage>"),
+                $e("--tw-inset-shadow", l),
+                $e("--tw-inset-shadow-color"),
+                $e("--tw-inset-shadow-alpha", "100%", "<percentage>"),
+                $e("--tw-ring-color"),
+                $e("--tw-ring-shadow", l),
+                $e("--tw-inset-ring-color"),
+                $e("--tw-inset-ring-shadow", l),
+                $e("--tw-ring-inset"),
+                $e("--tw-ring-offset-width", "0px", "<length>"),
+                $e("--tw-ring-offset-color", "#fff"),
+                $e("--tw-ring-offset-shadow", l),
+              ]);
+          n("shadow-initial", [s, ["--tw-shadow-color", "initial"]]),
+            t.functional("shadow", (t) => {
+              let r;
+              if (
+                (t.modifier &&
+                  ("arbitrary" === t.modifier.kind
+                    ? (r = t.modifier.value)
+                    : de(t.modifier.value) && (r = `${t.modifier.value}%`)),
+                !t.value)
+              ) {
+                let t = e.get(["--shadow"]);
+                return null === t
+                  ? void 0
                   : [
-                    y("font-size", n),
-                    y(
-                      "line-height",
-                      o["--line-height"]
-                        ? `var(--tw-leading, ${o["--line-height"]})`
-                        : void 0,
+                      s(),
+                      y("--tw-shadow-alpha", r),
+                      ...Ee(
+                        "--tw-shadow",
+                        t,
+                        r,
+                        (e) => `var(--tw-shadow-color, ${e})`,
+                      ),
+                      y("box-shadow", i),
+                    ];
+              }
+              if ("arbitrary" === t.value.kind) {
+                let n = t.value.value;
+                return "color" === (t.value.dataType ?? G(n, ["color"]))
+                  ? ((n = je(n, t.modifier, e)),
+                    null === n
+                      ? void 0
+                      : [
+                          s(),
+                          y(
+                            "--tw-shadow-color",
+                            ze(n, "var(--tw-shadow-alpha)"),
+                          ),
+                        ])
+                  : [
+                      s(),
+                      y("--tw-shadow-alpha", r),
+                      ...Ee(
+                        "--tw-shadow",
+                        n,
+                        r,
+                        (e) => `var(--tw-shadow-color, ${e})`,
+                      ),
+                      y("box-shadow", i),
+                    ];
+              }
+              switch (t.value.value) {
+                case "none":
+                  return t.modifier
+                    ? void 0
+                    : [s(), y("--tw-shadow", l), y("box-shadow", i)];
+                case "inherit":
+                  return t.modifier
+                    ? void 0
+                    : [s(), y("--tw-shadow-color", "inherit")];
+              }
+              {
+                let n = e.get([`--shadow-${t.value.value}`]);
+                if (n)
+                  return [
+                    s(),
+                    y("--tw-shadow-alpha", r),
+                    ...Ee(
+                      "--tw-shadow",
+                      n,
+                      r,
+                      (e) => `var(--tw-shadow-color, ${e})`,
                     ),
-                    y(
-                      "letter-spacing",
-                      o["--letter-spacing"]
-                        ? `var(--tw-tracking, ${o["--letter-spacing"]})`
-                        : void 0,
+                    y("box-shadow", i),
+                  ];
+              }
+              {
+                let r = Te(t, e, ["--box-shadow-color", "--color"]);
+                if (r)
+                  return [
+                    s(),
+                    y("--tw-shadow-color", ze(r, "var(--tw-shadow-alpha)")),
+                  ];
+              }
+            }),
+            r("shadow", () => [
+              {
+                values: ["current", "inherit", "transparent"],
+                valueThemeKeys: ["--box-shadow-color", "--color"],
+                modifiers: Array.from({ length: 21 }, (e, t) => "" + 5 * t),
+              },
+              { values: ["none"] },
+              {
+                valueThemeKeys: ["--shadow"],
+                modifiers: Array.from({ length: 21 }, (e, t) => "" + 5 * t),
+                hasDefaultValue: null !== e.get(["--shadow"]),
+              },
+            ]),
+            n("inset-shadow-initial", [
+              s,
+              ["--tw-inset-shadow-color", "initial"],
+            ]),
+            t.functional("inset-shadow", (t) => {
+              let r;
+              if (
+                (t.modifier &&
+                  ("arbitrary" === t.modifier.kind
+                    ? (r = t.modifier.value)
+                    : de(t.modifier.value) && (r = `${t.modifier.value}%`)),
+                !t.value)
+              ) {
+                let t = e.get(["--inset-shadow"]);
+                return null === t
+                  ? void 0
+                  : [
+                      s(),
+                      y("--tw-inset-shadow-alpha", r),
+                      ...Ee(
+                        "--tw-inset-shadow",
+                        t,
+                        r,
+                        (e) => `var(--tw-inset-shadow-color, ${e})`,
+                      ),
+                      y("box-shadow", i),
+                    ];
+              }
+              if ("arbitrary" === t.value.kind) {
+                let n = t.value.value;
+                return "color" === (t.value.dataType ?? G(n, ["color"]))
+                  ? ((n = je(n, t.modifier, e)),
+                    null === n
+                      ? void 0
+                      : [
+                          s(),
+                          y(
+                            "--tw-inset-shadow-color",
+                            ze(n, "var(--tw-inset-shadow-alpha)"),
+                          ),
+                        ])
+                  : [
+                      s(),
+                      y("--tw-inset-shadow-alpha", r),
+                      ...Ee(
+                        "--tw-inset-shadow",
+                        n,
+                        r,
+                        (e) => `var(--tw-inset-shadow-color, ${e})`,
+                        "inset ",
+                      ),
+                      y("box-shadow", i),
+                    ];
+              }
+              switch (t.value.value) {
+                case "none":
+                  return t.modifier
+                    ? void 0
+                    : [s(), y("--tw-inset-shadow", l), y("box-shadow", i)];
+                case "inherit":
+                  return t.modifier
+                    ? void 0
+                    : [s(), y("--tw-inset-shadow-color", "inherit")];
+              }
+              {
+                let n = e.get([`--inset-shadow-${t.value.value}`]);
+                if (n)
+                  return [
+                    s(),
+                    y("--tw-inset-shadow-alpha", r),
+                    ...Ee(
+                      "--tw-inset-shadow",
+                      n,
+                      r,
+                      (e) => `var(--tw-inset-shadow-color, ${e})`,
                     ),
+                    y("box-shadow", i),
+                  ];
+              }
+              {
+                let r = Te(t, e, ["--box-shadow-color", "--color"]);
+                if (r)
+                  return [
+                    s(),
                     y(
-                      "font-weight",
-                      o["--font-weight"]
-                        ? `var(--tw-font-weight, ${o["--font-weight"]})`
-                        : void 0,
+                      "--tw-inset-shadow-color",
+                      ze(r, "var(--tw-inset-shadow-alpha)"),
                     ),
                   ];
               }
-            }
-          }
-        }),
-        r("text", () => [
-          {
-            values: ["current", "inherit", "transparent"],
-            valueThemeKeys: ["--text-color", "--color"],
-            modifiers: Array.from({ length: 21 }, (e, t) => "" + 5 * t),
-          },
-          {
-            values: [],
-            valueThemeKeys: ["--text"],
-            modifiers: [],
-            modifierThemeKeys: ["--leading"],
-          },
-        ]);
-      let C = () =>
-        z([
-          $e("--tw-text-shadow-color"),
-          $e("--tw-text-shadow-alpha", "100%", "<percentage>"),
-        ]);
-      n("text-shadow-initial", [C, ["--tw-text-shadow-color", "initial"]]),
-        t.functional("text-shadow", (t) => {
-          let r;
-          if (
-            (t.modifier &&
-              ("arbitrary" === t.modifier.kind
-                ? (r = t.modifier.value)
-                : de(t.modifier.value) && (r = `${t.modifier.value}%`)),
-              !t.value)
-          ) {
-            let t = e.get(["--text-shadow"]);
-            return null === t
-              ? void 0
-              : [
-                C(),
-                y("--tw-text-shadow-alpha", r),
-                ...Ee(
-                  "text-shadow",
-                  t,
-                  r,
-                  (e) => `var(--tw-text-shadow-color, ${e})`,
-                ),
-              ];
-          }
-          if ("arbitrary" === t.value.kind) {
-            let n = t.value.value;
-            return "color" === (t.value.dataType ?? G(n, ["color"]))
-              ? ((n = je(n, t.modifier, e)),
-                null === n
-                  ? void 0
-                  : [
-                    C(),
-                    y(
-                      "--tw-text-shadow-color",
-                      ze(n, "var(--tw-text-shadow-alpha)"),
-                    ),
-                  ])
-              : [
-                C(),
-                y("--tw-text-shadow-alpha", r),
-                ...Ee(
-                  "text-shadow",
-                  n,
-                  r,
-                  (e) => `var(--tw-text-shadow-color, ${e})`,
-                ),
-              ];
-          }
-          switch (t.value.value) {
-            case "none":
-              return t.modifier ? void 0 : [C(), y("text-shadow", "none")];
-            case "inherit":
-              return t.modifier
-                ? void 0
-                : [C(), y("--tw-text-shadow-color", "inherit")];
-          }
-          {
-            let n = e.get([`--text-shadow-${t.value.value}`]);
-            if (n)
-              return [
-                C(),
-                y("--tw-text-shadow-alpha", r),
-                ...Ee(
-                  "text-shadow",
-                  n,
-                  r,
-                  (e) => `var(--tw-text-shadow-color, ${e})`,
-                ),
-              ];
-          }
-          {
-            let r = Te(t, e, ["--text-shadow-color", "--color"]);
-            if (r)
-              return [
-                C(),
-                y(
-                  "--tw-text-shadow-color",
-                  ze(r, "var(--tw-text-shadow-alpha)"),
-                ),
-              ];
-          }
-        }),
-        r("text-shadow", () => [
-          {
-            values: ["current", "inherit", "transparent"],
-            valueThemeKeys: ["--text-shadow-color", "--color"],
-            modifiers: Array.from({ length: 21 }, (e, t) => "" + 5 * t),
-          },
-          { values: ["none"] },
-          {
-            valueThemeKeys: ["--text-shadow"],
-            modifiers: Array.from({ length: 21 }, (e, t) => "" + 5 * t),
-            hasDefaultValue: null !== e.get(["--text-shadow"]),
-          },
-        ]);
-      {
-        let o = function(e) {
-          return `var(--tw-ring-inset,) 0 0 0 calc(${e} + var(--tw-ring-offset-width)) var(--tw-ring-color, ${c})`;
-        },
-          a = function(e) {
-            return `inset 0 0 0 ${e} var(--tw-inset-ring-color, currentcolor)`;
-          },
-          i = [
-            "var(--tw-inset-shadow)",
-            "var(--tw-inset-ring-shadow)",
-            "var(--tw-ring-offset-shadow)",
-            "var(--tw-ring-shadow)",
-            "var(--tw-shadow)",
-          ].join(", "),
-          l = "0 0 #0000",
-          s = () =>
-            z([
-              $e("--tw-shadow", l),
-              $e("--tw-shadow-color"),
-              $e("--tw-shadow-alpha", "100%", "<percentage>"),
-              $e("--tw-inset-shadow", l),
-              $e("--tw-inset-shadow-color"),
-              $e("--tw-inset-shadow-alpha", "100%", "<percentage>"),
-              $e("--tw-ring-color"),
-              $e("--tw-ring-shadow", l),
-              $e("--tw-inset-ring-color"),
-              $e("--tw-inset-ring-shadow", l),
-              $e("--tw-ring-inset"),
-              $e("--tw-ring-offset-width", "0px", "<length>"),
-              $e("--tw-ring-offset-color", "#fff"),
-              $e("--tw-ring-offset-shadow", l),
-            ]);
-        n("shadow-initial", [s, ["--tw-shadow-color", "initial"]]),
-          t.functional("shadow", (t) => {
-            let r;
-            if (
-              (t.modifier &&
-                ("arbitrary" === t.modifier.kind
-                  ? (r = t.modifier.value)
-                  : de(t.modifier.value) && (r = `${t.modifier.value}%`)),
-                !t.value)
-            ) {
-              let t = e.get(["--shadow"]);
-              return null === t
-                ? void 0
-                : [
-                  s(),
-                  y("--tw-shadow-alpha", r),
-                  ...Ee(
-                    "--tw-shadow",
-                    t,
-                    r,
-                    (e) => `var(--tw-shadow-color, ${e})`,
-                  ),
-                  y("box-shadow", i),
-                ];
-            }
-            if ("arbitrary" === t.value.kind) {
-              let n = t.value.value;
-              return "color" === (t.value.dataType ?? G(n, ["color"]))
-                ? ((n = je(n, t.modifier, e)),
-                  null === n
-                    ? void 0
-                    : [
-                      s(),
-                      y(
-                        "--tw-shadow-color",
-                        ze(n, "var(--tw-shadow-alpha)"),
-                      ),
-                    ])
-                : [
-                  s(),
-                  y("--tw-shadow-alpha", r),
-                  ...Ee(
-                    "--tw-shadow",
-                    n,
-                    r,
-                    (e) => `var(--tw-shadow-color, ${e})`,
-                  ),
-                  y("box-shadow", i),
-                ];
-            }
-            switch (t.value.value) {
-              case "none":
-                return t.modifier
-                  ? void 0
-                  : [s(), y("--tw-shadow", l), y("box-shadow", i)];
-              case "inherit":
-                return t.modifier
-                  ? void 0
-                  : [s(), y("--tw-shadow-color", "inherit")];
-            }
-            {
-              let n = e.get([`--shadow-${t.value.value}`]);
-              if (n)
-                return [
-                  s(),
-                  y("--tw-shadow-alpha", r),
-                  ...Ee(
-                    "--tw-shadow",
-                    n,
-                    r,
-                    (e) => `var(--tw-shadow-color, ${e})`,
-                  ),
-                  y("box-shadow", i),
-                ];
-            }
-            {
-              let r = Te(t, e, ["--box-shadow-color", "--color"]);
-              if (r)
-                return [
-                  s(),
-                  y("--tw-shadow-color", ze(r, "var(--tw-shadow-alpha)")),
-                ];
-            }
-          }),
-          r("shadow", () => [
-            {
-              values: ["current", "inherit", "transparent"],
-              valueThemeKeys: ["--box-shadow-color", "--color"],
-              modifiers: Array.from({ length: 21 }, (e, t) => "" + 5 * t),
-            },
-            { values: ["none"] },
-            {
-              valueThemeKeys: ["--shadow"],
-              modifiers: Array.from({ length: 21 }, (e, t) => "" + 5 * t),
-              hasDefaultValue: null !== e.get(["--shadow"]),
-            },
-          ]),
-          n("inset-shadow-initial", [
-            s,
-            ["--tw-inset-shadow-color", "initial"],
-          ]),
-          t.functional("inset-shadow", (t) => {
-            let r;
-            if (
-              (t.modifier &&
-                ("arbitrary" === t.modifier.kind
-                  ? (r = t.modifier.value)
-                  : de(t.modifier.value) && (r = `${t.modifier.value}%`)),
-                !t.value)
-            ) {
-              let t = e.get(["--inset-shadow"]);
-              return null === t
-                ? void 0
-                : [
-                  s(),
-                  y("--tw-inset-shadow-alpha", r),
-                  ...Ee(
-                    "--tw-inset-shadow",
-                    t,
-                    r,
-                    (e) => `var(--tw-inset-shadow-color, ${e})`,
-                  ),
-                  y("box-shadow", i),
-                ];
-            }
-            if ("arbitrary" === t.value.kind) {
-              let n = t.value.value;
-              return "color" === (t.value.dataType ?? G(n, ["color"]))
-                ? ((n = je(n, t.modifier, e)),
-                  null === n
-                    ? void 0
-                    : [
-                      s(),
-                      y(
-                        "--tw-inset-shadow-color",
-                        ze(n, "var(--tw-inset-shadow-alpha)"),
-                      ),
-                    ])
-                : [
-                  s(),
-                  y("--tw-inset-shadow-alpha", r),
-                  ...Ee(
-                    "--tw-inset-shadow",
-                    n,
-                    r,
-                    (e) => `var(--tw-inset-shadow-color, ${e})`,
-                    "inset ",
-                  ),
-                  y("box-shadow", i),
-                ];
-            }
-            switch (t.value.value) {
-              case "none":
-                return t.modifier
-                  ? void 0
-                  : [s(), y("--tw-inset-shadow", l), y("box-shadow", i)];
-              case "inherit":
-                return t.modifier
-                  ? void 0
-                  : [s(), y("--tw-inset-shadow-color", "inherit")];
-            }
-            {
-              let n = e.get([`--inset-shadow-${t.value.value}`]);
-              if (n)
-                return [
-                  s(),
-                  y("--tw-inset-shadow-alpha", r),
-                  ...Ee(
-                    "--tw-inset-shadow",
-                    n,
-                    r,
-                    (e) => `var(--tw-inset-shadow-color, ${e})`,
-                  ),
-                  y("box-shadow", i),
-                ];
-            }
-            {
-              let r = Te(t, e, ["--box-shadow-color", "--color"]);
-              if (r)
-                return [
-                  s(),
-                  y(
-                    "--tw-inset-shadow-color",
-                    ze(r, "var(--tw-inset-shadow-alpha)"),
-                  ),
-                ];
-            }
-          }),
-          r("inset-shadow", () => [
-            {
-              values: ["current", "inherit", "transparent"],
-              valueThemeKeys: ["--box-shadow-color", "--color"],
-              modifiers: Array.from({ length: 21 }, (e, t) => "" + 5 * t),
-            },
-            { values: ["none"] },
-            {
-              valueThemeKeys: ["--inset-shadow"],
-              modifiers: Array.from({ length: 21 }, (e, t) => "" + 5 * t),
-              hasDefaultValue: null !== e.get(["--inset-shadow"]),
-            },
-          ]),
-          n("ring-inset", [s, ["--tw-ring-inset", "inset"]]);
-        let c = e.get(["--default-ring-color"]) ?? "currentcolor";
-        t.functional("ring", (t) => {
-          if (!t.value) {
-            if (t.modifier) return;
-            let r = e.get(["--default-ring-width"]) ?? "1px";
-            return [s(), y("--tw-ring-shadow", o(r)), y("box-shadow", i)];
-          }
-          if ("arbitrary" === t.value.kind) {
-            let r = t.value.value;
-            return "length" ===
-              (t.value.dataType ?? G(r, ["color", "length"]))
-              ? t.modifier
-                ? void 0
-                : [s(), y("--tw-ring-shadow", o(r)), y("box-shadow", i)]
-              : ((r = je(r, t.modifier, e)),
-                null === r ? void 0 : [y("--tw-ring-color", r)]);
-          }
-          {
-            let r = Te(t, e, ["--ring-color", "--color"]);
-            if (r) return [y("--tw-ring-color", r)];
-          }
-          {
-            if (t.modifier) return;
-            let r = e.resolve(t.value.value, ["--ring-width"]);
-            if (
-              (null === r && de(t.value.value) && (r = `${t.value.value}px`),
-                r)
-            )
+            }),
+            r("inset-shadow", () => [
+              {
+                values: ["current", "inherit", "transparent"],
+                valueThemeKeys: ["--box-shadow-color", "--color"],
+                modifiers: Array.from({ length: 21 }, (e, t) => "" + 5 * t),
+              },
+              { values: ["none"] },
+              {
+                valueThemeKeys: ["--inset-shadow"],
+                modifiers: Array.from({ length: 21 }, (e, t) => "" + 5 * t),
+                hasDefaultValue: null !== e.get(["--inset-shadow"]),
+              },
+            ]),
+            n("ring-inset", [s, ["--tw-ring-inset", "inset"]]);
+          let c = e.get(["--default-ring-color"]) ?? "currentcolor";
+          t.functional("ring", (t) => {
+            if (!t.value) {
+              if (t.modifier) return;
+              let r = e.get(["--default-ring-width"]) ?? "1px";
               return [s(), y("--tw-ring-shadow", o(r)), y("box-shadow", i)];
-          }
-        }),
-          r("ring", () => [
-            {
-              values: ["current", "inherit", "transparent"],
-              valueThemeKeys: ["--ring-color", "--color"],
-              modifiers: Array.from({ length: 21 }, (e, t) => "" + 5 * t),
-            },
-            {
-              values: ["0", "1", "2", "4", "8"],
-              valueThemeKeys: ["--ring-width"],
-              hasDefaultValue: !0,
-            },
-          ]),
-          t.functional("inset-ring", (t) => {
-            if (!t.value)
-              return t.modifier
-                ? void 0
-                : [
-                  s(),
-                  y("--tw-inset-ring-shadow", a("1px")),
-                  y("box-shadow", i),
-                ];
+            }
             if ("arbitrary" === t.value.kind) {
               let r = t.value.value;
               return "length" ===
                 (t.value.dataType ?? G(r, ["color", "length"]))
                 ? t.modifier
                   ? void 0
-                  : [
-                    s(),
-                    y("--tw-inset-ring-shadow", a(r)),
-                    y("box-shadow", i),
-                  ]
+                  : [s(), y("--tw-ring-shadow", o(r)), y("box-shadow", i)]
                 : ((r = je(r, t.modifier, e)),
-                  null === r ? void 0 : [y("--tw-inset-ring-color", r)]);
+                  null === r ? void 0 : [y("--tw-ring-color", r)]);
             }
             {
               let r = Te(t, e, ["--ring-color", "--color"]);
-              if (r) return [y("--tw-inset-ring-color", r)];
+              if (r) return [y("--tw-ring-color", r)];
             }
             {
               if (t.modifier) return;
               let r = e.resolve(t.value.value, ["--ring-width"]);
               if (
-                (null === r &&
-                  de(t.value.value) &&
-                  (r = `${t.value.value}px`),
-                  r)
+                (null === r && de(t.value.value) && (r = `${t.value.value}px`),
+                r)
               )
-                return [
-                  s(),
-                  y("--tw-inset-ring-shadow", a(r)),
-                  y("box-shadow", i),
-                ];
+                return [s(), y("--tw-ring-shadow", o(r)), y("box-shadow", i)];
             }
           }),
-          r("inset-ring", () => [
+            r("ring", () => [
+              {
+                values: ["current", "inherit", "transparent"],
+                valueThemeKeys: ["--ring-color", "--color"],
+                modifiers: Array.from({ length: 21 }, (e, t) => "" + 5 * t),
+              },
+              {
+                values: ["0", "1", "2", "4", "8"],
+                valueThemeKeys: ["--ring-width"],
+                hasDefaultValue: !0,
+              },
+            ]),
+            t.functional("inset-ring", (t) => {
+              if (!t.value)
+                return t.modifier
+                  ? void 0
+                  : [
+                      s(),
+                      y("--tw-inset-ring-shadow", a("1px")),
+                      y("box-shadow", i),
+                    ];
+              if ("arbitrary" === t.value.kind) {
+                let r = t.value.value;
+                return "length" ===
+                  (t.value.dataType ?? G(r, ["color", "length"]))
+                  ? t.modifier
+                    ? void 0
+                    : [
+                        s(),
+                        y("--tw-inset-ring-shadow", a(r)),
+                        y("box-shadow", i),
+                      ]
+                  : ((r = je(r, t.modifier, e)),
+                    null === r ? void 0 : [y("--tw-inset-ring-color", r)]);
+              }
+              {
+                let r = Te(t, e, ["--ring-color", "--color"]);
+                if (r) return [y("--tw-inset-ring-color", r)];
+              }
+              {
+                if (t.modifier) return;
+                let r = e.resolve(t.value.value, ["--ring-width"]);
+                if (
+                  (null === r &&
+                    de(t.value.value) &&
+                    (r = `${t.value.value}px`),
+                  r)
+                )
+                  return [
+                    s(),
+                    y("--tw-inset-ring-shadow", a(r)),
+                    y("box-shadow", i),
+                  ];
+              }
+            }),
+            r("inset-ring", () => [
+              {
+                values: ["current", "inherit", "transparent"],
+                valueThemeKeys: ["--ring-color", "--color"],
+                modifiers: Array.from({ length: 21 }, (e, t) => "" + 5 * t),
+              },
+              {
+                values: ["0", "1", "2", "4", "8"],
+                valueThemeKeys: ["--ring-width"],
+                hasDefaultValue: !0,
+              },
+            ]);
+          let u =
+            "var(--tw-ring-inset,) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color)";
+          t.functional("ring-offset", (t) => {
+            if (t.value) {
+              if ("arbitrary" === t.value.kind) {
+                let r = t.value.value;
+                return "length" ===
+                  (t.value.dataType ?? G(r, ["color", "length"]))
+                  ? t.modifier
+                    ? void 0
+                    : [
+                        y("--tw-ring-offset-width", r),
+                        y("--tw-ring-offset-shadow", u),
+                      ]
+                  : ((r = je(r, t.modifier, e)),
+                    null === r ? void 0 : [y("--tw-ring-offset-color", r)]);
+              }
+              {
+                let r = e.resolve(t.value.value, ["--ring-offset-width"]);
+                if (r)
+                  return t.modifier
+                    ? void 0
+                    : [
+                        y("--tw-ring-offset-width", r),
+                        y("--tw-ring-offset-shadow", u),
+                      ];
+                if (de(t.value.value))
+                  return t.modifier
+                    ? void 0
+                    : [
+                        y("--tw-ring-offset-width", `${t.value.value}px`),
+                        y("--tw-ring-offset-shadow", u),
+                      ];
+              }
+              {
+                let r = Te(t, e, ["--ring-offset-color", "--color"]);
+                if (r) return [y("--tw-ring-offset-color", r)];
+              }
+            }
+          });
+        }
+        return (
+          r("ring-offset", () => [
             {
               values: ["current", "inherit", "transparent"],
-              valueThemeKeys: ["--ring-color", "--color"],
+              valueThemeKeys: ["--ring-offset-color", "--color"],
               modifiers: Array.from({ length: 21 }, (e, t) => "" + 5 * t),
             },
             {
               values: ["0", "1", "2", "4", "8"],
-              valueThemeKeys: ["--ring-width"],
-              hasDefaultValue: !0,
+              valueThemeKeys: ["--ring-offset-width"],
             },
-          ]);
-        let u =
-          "var(--tw-ring-inset,) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color)";
-        t.functional("ring-offset", (t) => {
-          if (t.value) {
-            if ("arbitrary" === t.value.kind) {
-              let r = t.value.value;
-              return "length" ===
-                (t.value.dataType ?? G(r, ["color", "length"]))
-                ? t.modifier
-                  ? void 0
-                  : [
-                    y("--tw-ring-offset-width", r),
-                    y("--tw-ring-offset-shadow", u),
-                  ]
-                : ((r = je(r, t.modifier, e)),
-                  null === r ? void 0 : [y("--tw-ring-offset-color", r)]);
-            }
-            {
-              let r = e.resolve(t.value.value, ["--ring-offset-width"]);
-              if (r)
-                return t.modifier
-                  ? void 0
-                  : [
-                    y("--tw-ring-offset-width", r),
-                    y("--tw-ring-offset-shadow", u),
-                  ];
-              if (de(t.value.value))
-                return t.modifier
-                  ? void 0
-                  : [
-                    y("--tw-ring-offset-width", `${t.value.value}px`),
-                    y("--tw-ring-offset-shadow", u),
-                  ];
-            }
-            {
-              let r = Te(t, e, ["--ring-offset-color", "--color"]);
-              if (r) return [y("--tw-ring-offset-color", r)];
-            }
-          }
-        });
-      }
-      return (
-        r("ring-offset", () => [
-          {
-            values: ["current", "inherit", "transparent"],
-            valueThemeKeys: ["--ring-offset-color", "--color"],
-            modifiers: Array.from({ length: 21 }, (e, t) => "" + 5 * t),
-          },
-          {
-            values: ["0", "1", "2", "4", "8"],
-            valueThemeKeys: ["--ring-offset-width"],
-          },
-        ]),
-        t.functional("@container", (e) => {
-          let t = null;
-          if (
-            (null === e.value
-              ? (t = "inline-size")
-              : "arbitrary" === e.value.kind
-                ? (t = e.value.value)
-                : "named" === e.value.kind &&
-                "normal" === e.value.value &&
-                (t = "normal"),
+          ]),
+          t.functional("@container", (e) => {
+            let t = null;
+            if (
+              (null === e.value
+                ? (t = "inline-size")
+                : "arbitrary" === e.value.kind
+                  ? (t = e.value.value)
+                  : "named" === e.value.kind &&
+                    "normal" === e.value.value &&
+                    (t = "normal"),
               null !== t)
-          )
-            return e.modifier
-              ? [
-                y("container-type", t),
-                y("container-name", e.modifier.value),
-              ]
-              : [y("container-type", t)];
-        }),
-        r("@container", () => [
-          { values: ["normal"], valueThemeKeys: [], hasDefaultValue: !0 },
-        ]),
-        t
-      );
-    })(e),
-      r = (function(e) {
+            )
+              return e.modifier
+                ? [
+                    y("container-type", t),
+                    y("container-name", e.modifier.value),
+                  ]
+                : [y("container-type", t)];
+          }),
+          r("@container", () => [
+            { values: ["normal"], valueThemeKeys: [], hasDefaultValue: !0 },
+          ]),
+          t
+        );
+      })(e),
+      r = (function (e) {
         let t = new Le();
         function r(e, r, { compounds: n } = {}) {
           (n = n ?? Me(r)),
@@ -6633,8 +6633,8 @@
           return e.includes("::")
             ? null
             : `&:not(${R(e, ",")
-              .map((e) => e.replaceAll("&", "*"))
-              .join(", ")})`;
+                .map((e) => e.replaceAll("&", "*"))
+                .join(", ")})`;
         }
         t.compound("not", 3, (e, t) => {
           if (
@@ -6669,9 +6669,9 @@
               return Object.assign(e, w("&", s)), (r = !0), 1;
             }),
             "rule" === e.kind &&
-            "&" === e.selector &&
-            1 === e.nodes.length &&
-            Object.assign(e, e.nodes[0]),
+              "&" === e.selector &&
+              1 === e.nodes.length &&
+              Object.assign(e, e.nodes[0]),
             r ? void 0 : null
           );
         }),
@@ -6682,8 +6682,8 @@
             if ("arbitrary" === r.variant.kind && r.variant.relative)
               return null;
             let n = r.modifier
-              ? `:where(.${e.prefix ? `${e.prefix}\\:` : ""}group\\/${r.modifier.value})`
-              : `:where(.${e.prefix ? `${e.prefix}\\:` : ""}group)`,
+                ? `:where(.${e.prefix ? `${e.prefix}\\:` : ""}group\\/${r.modifier.value})`
+                : `:where(.${e.prefix ? `${e.prefix}\\:` : ""}group)`,
               o = !1;
             return (
               A([t], (e, { path: t }) => {
@@ -6705,8 +6705,8 @@
             if ("arbitrary" === r.variant.kind && r.variant.relative)
               return null;
             let n = r.modifier
-              ? `:where(.${e.prefix ? `${e.prefix}\\:` : ""}peer\\/${r.modifier.value})`
-              : `:where(.${e.prefix ? `${e.prefix}\\:` : ""}peer)`,
+                ? `:where(.${e.prefix ? `${e.prefix}\\:` : ""}peer\\/${r.modifier.value})`
+                : `:where(.${e.prefix ? `${e.prefix}\\:` : ""}peer)`,
               o = !1;
             return (
               A([t], (e, { path: t }) => {
@@ -6738,7 +6738,7 @@
           r("backdrop", ["&::backdrop"]),
           r("details-content", ["&::details-content"]);
         {
-          let e = function() {
+          let e = function () {
             return z([
               k("@property", "--tw-content", [
                 y("syntax", '"*"'),
@@ -6922,7 +6922,7 @@
           r("contrast-more", ["@media (prefers-contrast: more)"]),
           r("contrast-less", ["@media (prefers-contrast: less)"]);
         {
-          let r = function(e, t, r, n) {
+          let r = function (e, t, r, n) {
             if (e === t) return 0;
             let o = n.get(e);
             if (null === o) return "asc" === r ? -1 : 1;
@@ -6942,7 +6942,7 @@
                       "arbitrary" === t.value.kind
                         ? (r = t.value.value)
                         : "named" === t.value.kind &&
-                        (r = e.resolveValue(t.value.value, ["--breakpoint"])),
+                          (r = e.resolveValue(t.value.value, ["--breakpoint"])),
                       !r || r.includes("var(") ? null : r
                     );
                   }
@@ -7008,7 +7008,7 @@
                       "arbitrary" === t.value.kind
                         ? (r = t.value.value)
                         : "named" === t.value.kind &&
-                        (r = e.resolveValue(t.value.value, ["--container"])),
+                          (r = e.resolveValue(t.value.value, ["--container"])),
                       !r || r.includes("var(") ? null : r
                     );
                   }
@@ -7111,7 +7111,7 @@
         );
       })(e),
       n = new c((e) =>
-        (function(e, t) {
+        (function (e, t) {
           if ("[" === e[0] && "]" === e[e.length - 1]) {
             if ("@" === e[1] && e.includes("&")) return null;
             let t = W(e.slice(1, -1));
@@ -7147,11 +7147,11 @@
                     let n = W(r.slice(1, -1));
                     return L(n) && 0 !== n.length && 0 !== n.trim().length
                       ? {
-                        kind: "functional",
-                        root: e,
-                        modifier: t,
-                        value: { kind: "arbitrary", value: n },
-                      }
+                          kind: "functional",
+                          root: e,
+                          modifier: t,
+                          value: { kind: "arbitrary", value: n },
+                        }
                       : null;
                   }
                   if (")" === r[r.length - 1]) {
@@ -7163,11 +7163,11 @@
                       ("-" !== n[0] && "-" !== n[1])
                       ? null
                       : {
-                        kind: "functional",
-                        root: e,
-                        modifier: t,
-                        value: { kind: "arbitrary", value: `var(${n})` },
-                      };
+                          kind: "functional",
+                          root: e,
+                          modifier: t,
+                          value: { kind: "arbitrary", value: `var(${n})` },
+                        };
                   }
                   return {
                     kind: "functional",
@@ -7193,7 +7193,7 @@
       ),
       a = new c((e) =>
         Array.from(
-          (function*(e, t) {
+          (function* (e, t) {
             let r = R(e, ":");
             if (t.theme.prefix) {
               if (1 === r.length || r[0] !== t.theme.prefix) return null;
@@ -7211,14 +7211,14 @@
               ? ((a = !0), (n = n.slice(0, -1)))
               : "!" === n[0] && ((a = !0), (n = n.slice(1))),
               t.utilities.has(n, "static") &&
-              !n.includes("[") &&
-              (yield {
-                kind: "static",
-                root: n,
-                variants: o,
-                important: a,
-                raw: e,
-              });
+                !n.includes("[") &&
+                (yield {
+                  kind: "static",
+                  root: n,
+                  variants: o,
+                  important: a,
+                  raw: e,
+                });
             let [i, l = null, s] = R(n, "/");
             if (s) return;
             let c,
@@ -7241,7 +7241,7 @@
                     a = null;
                   if (
                     (2 === o.length && ((a = o[0]), (n = o[1])),
-                      "-" !== n[0] && "-" !== n[1])
+                    "-" !== n[0] && "-" !== n[1])
                   )
                     return;
                   c = [[r, null === a ? `[var(${n})]` : `[${a}:var(${n})]`]];
@@ -7313,8 +7313,8 @@
         ),
       ),
       i = new c((e) => {
-        let t = (function(e, t) {
-          let r = (function(e, t) {
+        let t = (function (e, t) {
+          let r = (function (e, t) {
             if ("arbitrary" === e.kind) {
               let r = e.value;
               return (
@@ -7391,7 +7391,7 @@
           return t;
         },
         getClassOrder(e) {
-          return (function(e, t) {
+          return (function (e, t) {
             let { astNodes: r, nodeSorting: n } = He(Array.from(t), e),
               o = new Map(t.map((e) => [e, null])),
               a = 0n;
@@ -7406,10 +7406,10 @@
           return Be(this);
         },
         getVariants() {
-          return (function(e) {
+          return (function (e) {
             let t = [];
             for (let [r, n] of e.variants.entries()) {
-              let o = function({ value: t, modifier: n } = {}) {
+              let o = function ({ value: t, modifier: n } = {}) {
                 let o = r;
                 t && (o += a ? `-${t}` : t), n && (o += `/${n}`);
                 let i = e.parseVariant(o);
@@ -7430,14 +7430,14 @@
                       return r && !n ? -1 : !r && n ? 1 : 0;
                     });
                     let r = t.flatMap((e) =>
-                      "rule" === e.kind
-                        ? "&" === e.selector
-                          ? []
-                          : [e.selector]
-                        : "at-rule" === e.kind
-                          ? [`${e.name} ${e.params}`]
-                          : [],
-                    ),
+                        "rule" === e.kind
+                          ? "&" === e.selector
+                            ? []
+                            : [e.selector]
+                          : "at-rule" === e.kind
+                            ? [`${e.name} ${e.params}`]
+                            : [],
+                      ),
                       n = "";
                     for (let e = r.length - 1; e >= 0; e--)
                       n = "" === n ? r[e] : `${r[e]} { ${n} }`;
@@ -7485,8 +7485,8 @@
           for (let n of e)
             null !== n &&
               (void 0 !== t && 0 !== this.variants.compare(t, n) && o++,
-                r.set(n, o),
-                (t = n));
+              r.set(n, o),
+              (t = n));
           return r;
         },
         resolveThemeValue(t, r = !0) {
@@ -7938,7 +7938,7 @@
       r = 0,
       n = e.slice(),
       o = !1;
-    for (; n.length > 0;) {
+    for (; n.length > 0; ) {
       let e = n.shift();
       if ("declaration" === e.kind) {
         if (void 0 === e.value || (r++, o)) continue;
@@ -8019,9 +8019,9 @@
                           );
                     }
               }),
-              new Error(
-                `Circular dependency detected:\n\n${C([e])}\nRelies on:\n\n${C([n])}`,
-              ))
+            new Error(
+              `Circular dependency detected:\n\n${C([e])}\nRelies on:\n\n${C([n])}`,
+            ))
           );
         }
         u.add(e);
@@ -8037,10 +8037,10 @@
           let n = e.nodes[r];
           if ("at-rule" === n.kind && "@apply" === n.name) {
             let o = He(n.params.split(/\s+/g), t, {
-              onInvalidCandidate: (e) => {
-                throw new Error(`Cannot apply unknown utility class: ${e}`);
-              },
-            }).astNodes,
+                onInvalidCandidate: (e) => {
+                  throw new Error(`Cannot apply unknown utility class: ${e}`);
+                },
+              }).astNodes,
               a = [];
             for (let e of o)
               if ("rule" === e.kind) for (let t of e.nodes) a.push(t);
@@ -8070,7 +8070,7 @@
           "at-rule" === e.kind &&
           ("@import" === e.name || "@reference" === e.name)
         ) {
-          let s = (function(e) {
+          let s = (function (e) {
             let t,
               r = null,
               n = null,
@@ -8135,13 +8135,13 @@
                 let e = await n(c, r),
                   a = t(e.content);
                 await et(a, e.base, n, o + 1),
-                  (p.nodes = (function(e, t, r, n) {
+                  (p.nodes = (function (e, t, r, n) {
                     let o = e;
                     return (
                       null !== t && (o = [k("@layer", t, o)]),
                       null !== r && (o = [k("@media", r, o)]),
                       null !== n &&
-                      (o = [k("@supports", "(" === n[0] ? n : `(${n})`, o)]),
+                        (o = [k("@supports", "(" === n[0] ? n : `(${n})`, o)]),
                       o
                     );
                   })([$({ base: e.base }, a)], u, d, f));
@@ -8175,18 +8175,18 @@
       let r = ot([t]);
       r && e.theme.clearNamespace(`--${r}`, 4);
     }
-    for (let [r, n] of (function(e) {
+    for (let [r, n] of (function (e) {
       let t = [];
       return (
         at(e, [], (e, r) => {
           if (
-            (function(e) {
+            (function (e) {
               return "number" == typeof e || "string" == typeof e;
             })(e)
           )
             return t.push([r, e]), 1;
           if (
-            (function(e) {
+            (function (e) {
               if (
                 !Array.isArray(e) ||
                 2 !== e.length ||
@@ -8212,9 +8212,9 @@
           }
           return Array.isArray(e) && e.every((e) => "string" == typeof e)
             ? ("fontSize" === r[0]
-              ? (t.push([r, e[0]]),
-                e.length >= 2 && t.push([[...r, "-line-height"], e[1]]))
-              : t.push([r, e.join(", ")]),
+                ? (t.push([r, e[0]]),
+                  e.length >= 2 && t.push([[...r, "-line-height"], e[1]]))
+                : t.push([r, e.join(", ")]),
               1)
             : void 0;
         }),
@@ -8224,7 +8224,7 @@
       if ("string" != typeof n && "number" != typeof n) continue;
       if (
         ("string" == typeof n && (n = n.replace(/<alpha-value>/g, "1")),
-          "opacity" === r[0] && ("number" == typeof n || "string" == typeof n))
+        "opacity" === r[0] && ("number" == typeof n || "string" == typeof n))
       ) {
         let e = "string" == typeof n ? parseFloat(n) : n;
         e >= 0 && e <= 1 && (n = 100 * e + "%");
@@ -8239,32 +8239,32 @@
         n &&
           e.theme.hasDefault("--font-sans") &&
           (e.theme.add("--default-font-family", n, r),
-            e.theme.add(
-              "--default-font-feature-settings",
-              tt(t.fontFamily.sans, "fontFeatureSettings") ?? "normal",
-              r,
-            ),
-            e.theme.add(
-              "--default-font-variation-settings",
-              tt(t.fontFamily.sans, "fontVariationSettings") ?? "normal",
-              r,
-            ));
+          e.theme.add(
+            "--default-font-feature-settings",
+            tt(t.fontFamily.sans, "fontFeatureSettings") ?? "normal",
+            r,
+          ),
+          e.theme.add(
+            "--default-font-variation-settings",
+            tt(t.fontFamily.sans, "fontVariationSettings") ?? "normal",
+            r,
+          ));
       }
       {
         let n = tt(t.fontFamily.mono);
         n &&
           e.theme.hasDefault("--font-mono") &&
           (e.theme.add("--default-mono-font-family", n, r),
-            e.theme.add(
-              "--default-mono-font-feature-settings",
-              tt(t.fontFamily.mono, "fontFeatureSettings") ?? "normal",
-              r,
-            ),
-            e.theme.add(
-              "--default-mono-font-variation-settings",
-              tt(t.fontFamily.mono, "fontVariationSettings") ?? "normal",
-              r,
-            ));
+          e.theme.add(
+            "--default-mono-font-feature-settings",
+            tt(t.fontFamily.mono, "fontFeatureSettings") ?? "normal",
+            r,
+          ),
+          e.theme.add(
+            "--default-mono-font-variation-settings",
+            tt(t.fontFamily.mono, "fontVariationSettings") ?? "normal",
+            r,
+          ));
       }
     }
     return t;
@@ -8317,7 +8317,7 @@
         continue;
       }
       let e = 0;
-      for (; ;) {
+      for (;;) {
         let n = r.indexOf("[", e),
           o = r.indexOf("]", n);
         if (-1 === n || -1 === o) break;
@@ -8348,13 +8348,13 @@
     return e;
   }
   function ct(e, t, r) {
-    return function(n, o) {
+    return function (n, o) {
       let i = n.lastIndexOf("/"),
         l = null;
       -1 !== i && ((l = n.slice(i + 1).trim()), (n = n.slice(0, i).trim()));
       let s = (() => {
         let o = it(n),
-          [i, l] = (function(e, t) {
+          [i, l] = (function (e, t) {
             if (1 === t.length && t[0].startsWith("--"))
               return [e.get([t[0]]), e.getOptions(t[0])];
             let r = ot(t),
@@ -8399,7 +8399,7 @@
           s = r(ut(t() ?? {}, o) ?? null);
         if (
           ("string" == typeof s && (s = s.replace("<alpha-value>", "1")),
-            "object" != typeof i)
+          "object" != typeof i)
         )
           return "object" != typeof l && 4 & l ? (s ?? i) : i;
         if (null !== s && "object" == typeof s && !Array.isArray(s)) {
@@ -8468,13 +8468,13 @@
             replaceWith(t) {
               a ||
                 ((a = !0),
-                  Array.isArray(t)
-                    ? 0 === t.length
-                      ? (e.splice(n, 1), (i = 0))
-                      : 1 === t.length
-                        ? ((e[n] = t[0]), (i = 1))
-                        : (e.splice(n, 1, ...t), (i = t.length))
-                    : ((e[n] = t), (i = 1)));
+                Array.isArray(t)
+                  ? 0 === t.length
+                    ? (e.splice(n, 1), (i = 0))
+                    : 1 === t.length
+                      ? ((e[n] = t[0]), (i = 1))
+                      : (e.splice(n, 1, ...t), (i = t.length))
+                  : ((e[n] = t), (i = 1)));
             },
           }) ?? 0;
       if (a) 0 === l ? n-- : (n += i - 1);
@@ -8527,7 +8527,7 @@
             ;
             l < e.length &&
             ((t = e.charCodeAt(l)),
-              44 === t ||
+            44 === t ||
               62 === t ||
               10 === t ||
               32 === t ||
@@ -8546,7 +8546,7 @@
           let l = pt(a, []);
           if (
             ((a = ""),
-              ":not" !== l.value &&
+            ":not" !== l.value &&
               ":where" !== l.value &&
               ":has" !== l.value &&
               ":is" !== l.value)
@@ -8656,12 +8656,12 @@
           );
         "string" == typeof r || Array.isArray(r)
           ? e.variants.static(
-            t,
-            (e) => {
-              e.nodes = $t(r, e.nodes);
-            },
-            { compounds: Me("string" == typeof r ? [r] : r) },
-          )
+              t,
+              (e) => {
+                e.nodes = $t(r, e.nodes);
+              },
+              { compounds: Me("string" == typeof r ? [r] : r) },
+            )
           : "object" == typeof r && e.variants.fromAst(t, xt(r));
       },
       matchVariant(t, r, n) {
@@ -8735,7 +8735,7 @@
               }
               if ("function" === e.kind && ":not" === e.value) return 1;
             }),
-              !a)
+            !a)
           )
             throw new Error(
               `\`addUtilities({ '${e}' : … })\` defines an invalid utility selector. Utilities must be a single class name and start with a lowercase letter, eg. \`.scrollbar-none\`.`,
@@ -8766,7 +8766,7 @@
             : [r.type]
           : ["any"];
         for (let [a, i] of Object.entries(t)) {
-          let t = function({ negative: t }) {
+          let t = function ({ negative: t }) {
             return (l) => {
               if (
                 "arbitrary" === l.value?.kind &&
@@ -8799,7 +8799,7 @@
                         : e[l.value.value]
                           ? (u = e[l.value.value])
                           : e.__BARE_VALUE__ &&
-                          ((u = e.__BARE_VALUE__(l.value) ?? null),
+                            ((u = e.__BARE_VALUE__(l.value) ?? null),
                             (d =
                               (null !== l.value.fraction && u?.includes("/")) ??
                               !1))
@@ -8921,7 +8921,7 @@
     });
   }
   function At(e, t, r) {
-    for (let r of (function(e) {
+    for (let r of (function (e) {
       let t = [];
       if ("keyframes" in e.theme)
         for (let [r, n] of Object.entries(e.theme.keyframes))
@@ -9227,8 +9227,8 @@
     return { __BARE_VALUE__: e };
   }
   var Ct = Tt((e) => {
-    if (de(e.value)) return e.value;
-  }),
+      if (de(e.value)) return e.value;
+    }),
     St = Tt((e) => {
       if (de(e.value)) return `${e.value}%`;
     }),
@@ -10275,15 +10275,15 @@
         void 0 !== e.darkMode &&
         (r.result.darkMode = e.darkMode ?? null),
         "prefix" in e &&
-        void 0 !== e.prefix &&
-        (r.result.prefix = e.prefix ?? ""),
+          void 0 !== e.prefix &&
+          (r.result.prefix = e.prefix ?? ""),
         "blocklist" in e &&
-        void 0 !== e.blocklist &&
-        (r.result.blocklist = e.blocklist ?? []),
+          void 0 !== e.blocklist &&
+          (r.result.blocklist = e.blocklist ?? []),
         "important" in e &&
-        void 0 !== e.important &&
-        (r.result.important = e.important ?? !1);
-    let n = (function(e) {
+          void 0 !== e.important &&
+          (r.result.important = e.important ?? !1);
+    let n = (function (e) {
       let t = new Set(),
         r = ct(e.design, () => e.theme, o),
         n = Object.assign(r, { theme: r, colors: jt });
@@ -10350,12 +10350,12 @@
     for (let t of a)
       e.plugins.push(t),
         t.config &&
-        _t(e, {
-          path: n,
-          base: r,
-          config: t.config,
-          reference: !!t.reference,
-        });
+          _t(e, {
+            path: n,
+            base: r,
+            config: t.config,
+            reference: !!t.reference,
+          });
     let i = t.content ?? [],
       l = Array.isArray(i) ? i : i.files;
     for (let t of l)
@@ -10365,15 +10365,15 @@
   function Lt(e, t) {
     let r = e.theme.container || {};
     if ("object" != typeof r || null === r) return;
-    let n = (function({ center: e, padding: t, screens: r }, n) {
+    let n = (function ({ center: e, padding: t, screens: r }, n) {
       let o = [],
         a = null;
       if (
         (e && o.push(y("margin-inline", "auto")),
-          ("string" == typeof t ||
-            ("object" == typeof t && null !== t && "DEFAULT" in t)) &&
+        ("string" == typeof t ||
+          ("object" == typeof t && null !== t && "DEFAULT" in t)) &&
           o.push(y("padding-inline", "string" == typeof t ? t : t.DEFAULT)),
-          "object" == typeof r && null !== r)
+        "object" == typeof r && null !== r)
       ) {
         a = new Map();
         let e = Array.from(n.theme.namespace("--breakpoint").entries());
@@ -10424,7 +10424,7 @@
         (Array.isArray(o) || "function" == typeof o
           ? (e = o)
           : "string" == typeof o && (e = [o]),
-          Array.isArray(e))
+        Array.isArray(e))
       )
         for (let t of e)
           ".dark" === t
@@ -10433,7 +10433,7 @@
                 'When using `variant` for `darkMode`, you must provide a selector.\nExample: `darkMode: ["variant", ".your-selector &"]`',
               ))
             : t.includes("&") ||
-            ((n = !1),
+              ((n = !1),
               console.warn(
                 'When using `variant` for `darkMode`, your selector must contain `&`.\nExample `darkMode: ["variant", ".your-selector &"]`',
               ));
@@ -10538,7 +10538,7 @@
         }
       }
     }),
-      (function(e) {
+      (function (e) {
         for (let [t, r] of [
           ["t", "top"],
           ["tr", "top right"],
@@ -10612,20 +10612,20 @@
       })(e);
     let s = e.resolveThemeValue;
     if (
-      ((e.resolveThemeValue = function(n, i) {
+      ((e.resolveThemeValue = function (n, i) {
         return n.startsWith("--")
           ? s(n, i)
           : ((a |= Pt({
-            designSystem: e,
-            base: t,
-            ast: r,
-            sources: o,
-            configs: [],
-            pluginDetails: [],
-          })),
+              designSystem: e,
+              base: t,
+              ast: r,
+              sources: o,
+              configs: [],
+              pluginDetails: [],
+            })),
             e.resolveThemeValue(n, i));
       }),
-        !i.length && !l.length)
+      !i.length && !l.length)
     )
       return 0;
     let [c, u] = await Promise.all([
@@ -10694,7 +10694,7 @@
       ]),
       { resolvedConfig: c, replacedThemeKeys: u } = Dt(e, l),
       d = e.resolveThemeValue;
-    e.resolveThemeValue = function(e, t) {
+    e.resolveThemeValue = function (e, t) {
       if ("-" === e[0] && "-" === e[1]) return d(e, t);
       let r = h.theme(e, void 0);
       return Array.isArray(r) && 2 === r.length
@@ -10721,72 +10721,72 @@
       t ? ((f ||= yt({ ...p, referenceMode: !0 })), e(f)) : e(h);
     if (
       (rt(e, c, u),
-        At(e, c),
-        (function(e, t) {
-          let r = e.theme.aria || {},
-            n = e.theme.supports || {},
-            o = e.theme.data || {};
-          if (Object.keys(r).length > 0) {
-            let e = t.variants.get("aria"),
-              n = e?.applyFn,
-              o = e?.compounds;
-            t.variants.functional(
-              "aria",
-              (e, t) => {
-                let o = t.value;
-                return o && "named" === o.kind && o.value in r
-                  ? n?.(e, {
+      At(e, c),
+      (function (e, t) {
+        let r = e.theme.aria || {},
+          n = e.theme.supports || {},
+          o = e.theme.data || {};
+        if (Object.keys(r).length > 0) {
+          let e = t.variants.get("aria"),
+            n = e?.applyFn,
+            o = e?.compounds;
+          t.variants.functional(
+            "aria",
+            (e, t) => {
+              let o = t.value;
+              return o && "named" === o.kind && o.value in r
+                ? n?.(e, {
                     ...t,
                     value: { kind: "arbitrary", value: r[o.value] },
                   })
-                  : n?.(e, t);
-              },
-              { compounds: o },
-            );
-          }
-          if (Object.keys(n).length > 0) {
-            let e = t.variants.get("supports"),
-              r = e?.applyFn,
-              o = e?.compounds;
-            t.variants.functional(
-              "supports",
-              (e, t) => {
-                let o = t.value;
-                return o && "named" === o.kind && o.value in n
-                  ? r?.(e, {
+                : n?.(e, t);
+            },
+            { compounds: o },
+          );
+        }
+        if (Object.keys(n).length > 0) {
+          let e = t.variants.get("supports"),
+            r = e?.applyFn,
+            o = e?.compounds;
+          t.variants.functional(
+            "supports",
+            (e, t) => {
+              let o = t.value;
+              return o && "named" === o.kind && o.value in n
+                ? r?.(e, {
                     ...t,
                     value: { kind: "arbitrary", value: n[o.value] },
                   })
-                  : r?.(e, t);
-              },
-              { compounds: o },
-            );
-          }
-          if (Object.keys(o).length > 0) {
-            let e = t.variants.get("data"),
-              r = e?.applyFn,
-              n = e?.compounds;
-            t.variants.functional(
-              "data",
-              (e, t) => {
-                let n = t.value;
-                return n && "named" === n.kind && n.value in o
-                  ? r?.(e, {
+                : r?.(e, t);
+            },
+            { compounds: o },
+          );
+        }
+        if (Object.keys(o).length > 0) {
+          let e = t.variants.get("data"),
+            r = e?.applyFn,
+            n = e?.compounds;
+          t.variants.functional(
+            "data",
+            (e, t) => {
+              let n = t.value;
+              return n && "named" === n.kind && n.value in o
+                ? r?.(e, {
                     ...t,
                     value: { kind: "arbitrary", value: o[n.value] },
                   })
-                  : r?.(e, t);
-              },
-              { compounds: n },
-            );
-          }
-        })(c, e),
-        (function(e, t) {
-          let r = e.theme.screens || {},
-            n = t.variants.get("min")?.order ?? 0,
-            o = [];
-          for (let [e, a] of Object.entries(r)) {
-            let r = function(r) {
+                : r?.(e, t);
+            },
+            { compounds: n },
+          );
+        }
+      })(c, e),
+      (function (e, t) {
+        let r = e.theme.screens || {},
+          n = t.variants.get("min")?.order ?? 0,
+          o = [];
+        for (let [e, a] of Object.entries(r)) {
+          let r = function (r) {
               t.variants.static(
                 e,
                 (e) => {
@@ -10795,35 +10795,35 @@
                 { order: r },
               );
             },
-              i = t.variants.get(e),
-              l = t.theme.resolveValue(e, ["--breakpoint"]);
-            if (i && l && !t.theme.hasDefault(`--breakpoint-${e}`)) continue;
-            let s = !0;
-            "string" == typeof a && (s = !1);
-            let c = Rt(a);
-            s ? o.push(r) : r(n);
-          }
-          if (0 !== o.length) {
-            for (let [, e] of t.variants.variants)
-              e.order > n && (e.order += o.length);
-            t.variants.compareFns = new Map(
-              Array.from(t.variants.compareFns).map(
-                ([e, t]) => (e > n && (e += o.length), [e, t]),
-              ),
-            );
-            for (let [e, t] of o.entries()) t(n + e + 1);
-          }
-        })(c, e),
-        Lt(c, e),
-        !e.theme.prefix && s.prefix)
+            i = t.variants.get(e),
+            l = t.theme.resolveValue(e, ["--breakpoint"]);
+          if (i && l && !t.theme.hasDefault(`--breakpoint-${e}`)) continue;
+          let s = !0;
+          "string" == typeof a && (s = !1);
+          let c = Rt(a);
+          s ? o.push(r) : r(n);
+        }
+        if (0 !== o.length) {
+          for (let [, e] of t.variants.variants)
+            e.order > n && (e.order += o.length);
+          t.variants.compareFns = new Map(
+            Array.from(t.variants.compareFns).map(
+              ([e, t]) => (e > n && (e += o.length), [e, t]),
+            ),
+          );
+          for (let [e, t] of o.entries()) t(n + e + 1);
+        }
+      })(c, e),
+      Lt(c, e),
+      !e.theme.prefix && s.prefix)
     ) {
       if (
         (s.prefix.endsWith("-") &&
           ((s.prefix = s.prefix.slice(0, -1)),
-            console.warn(
-              `The prefix "${s.prefix}" is invalid. Prefixes must be lowercase ASCII letters (a-z) only and is written as a variant before all utilities. We have fixed up the prefix for you. Remove the trailing \`-\` to silence this warning.`,
-            )),
-          !It.test(s.prefix))
+          console.warn(
+            `The prefix "${s.prefix}" is invalid. Prefixes must be lowercase ASCII letters (a-z) only and is written as a variant before all utilities. We have fixed up the prefix for you. Remove the trailing \`-\` to silence this warning.`,
+          )),
+        !It.test(s.prefix))
       )
         throw new Error(
           `The prefix "${s.prefix}" is invalid. Prefixes must be lowercase ASCII letters (a-z) only.`,
@@ -10832,7 +10832,7 @@
     }
     if (
       (!e.important && !0 === s.important && (e.important = !0),
-        "string" == typeof s.important)
+      "string" == typeof s.important)
     ) {
       let e = s.important;
       A(r, (t, { replaceWith: r, parent: n }) => {
@@ -10877,26 +10877,26 @@
     let l,
       s = o.slice(1, i),
       c = o.slice(i + 1);
-    (l = (function(e) {
+    (l = (function (e) {
       return Ht.test(e);
     })(s)
-      ? (function(e) {
-        let t = e.match(Ht);
-        if (!t) return [e];
-        let [, r, n, o] = t,
-          a = o ? parseInt(o, 10) : void 0,
-          i = [];
-        if (/^-?\d+$/.test(r) && /^-?\d+$/.test(n)) {
-          let e = parseInt(r, 10),
-            t = parseInt(n, 10);
-          if ((void 0 === a && (a = e <= t ? 1 : -1), 0 === a))
-            throw new Error("Step cannot be zero in sequence expansion.");
-          let o = e < t;
-          o && a < 0 && (a = -a), !o && a > 0 && (a = -a);
-          for (let r = e; o ? r <= t : r >= t; r += a) i.push(r.toString());
-        }
-        return i;
-      })(s)
+      ? (function (e) {
+          let t = e.match(Ht);
+          if (!t) return [e];
+          let [, r, n, o] = t,
+            a = o ? parseInt(o, 10) : void 0,
+            i = [];
+          if (/^-?\d+$/.test(r) && /^-?\d+$/.test(n)) {
+            let e = parseInt(r, 10),
+              t = parseInt(n, 10);
+            if ((void 0 === a && (a = e <= t ? 1 : -1), 0 === a))
+              throw new Error("Step cannot be zero in sequence expansion.");
+            let o = e < t;
+            o && a < 0 && (a = -a), !o && a > 0 && (a = -a);
+            for (let r = e; o ? r <= t : r >= t; r += a) i.push(r.toString());
+          }
+          return i;
+        })(s)
       : R(s, ",")),
       (l = l.flatMap((e) => Zt(e)));
     let u = Zt(c);
@@ -10958,208 +10958,208 @@
             throw new Error(
               `\`@utility ${e.params}\` is empty. Utilities should include at least one property.`,
             );
-          let r = (function(e) {
+          let r = (function (e) {
             let t = e.params;
             return be.test(t)
               ? (r) => {
-                let n = {
-                  "--value": {
-                    usedSpacingInteger: !1,
-                    usedSpacingNumber: !1,
-                    themeKeys: new Set(),
-                    literals: new Set(),
-                  },
-                  "--modifier": {
-                    usedSpacingInteger: !1,
-                    usedSpacingNumber: !1,
-                    themeKeys: new Set(),
-                    literals: new Set(),
-                  },
-                };
-                A(e.nodes, (e) => {
-                  if (
-                    "declaration" !== e.kind ||
-                    !e.value ||
-                    (!e.value.includes("--value(") &&
-                      !e.value.includes("--modifier("))
-                  )
-                    return;
-                  let t = m(e.value);
-                  p(t, (e) => {
-                    if ("function" !== e.kind) return;
+                  let n = {
+                    "--value": {
+                      usedSpacingInteger: !1,
+                      usedSpacingNumber: !1,
+                      themeKeys: new Set(),
+                      literals: new Set(),
+                    },
+                    "--modifier": {
+                      usedSpacingInteger: !1,
+                      usedSpacingNumber: !1,
+                      themeKeys: new Set(),
+                      literals: new Set(),
+                    },
+                  };
+                  A(e.nodes, (e) => {
                     if (
-                      !(
-                        "--spacing" !== e.value ||
-                        (n["--modifier"].usedSpacingNumber &&
-                          n["--value"].usedSpacingNumber)
-                      )
+                      "declaration" !== e.kind ||
+                      !e.value ||
+                      (!e.value.includes("--value(") &&
+                        !e.value.includes("--modifier("))
                     )
-                      return (
-                        p(e.nodes, (e) => {
+                      return;
+                    let t = m(e.value);
+                    p(t, (e) => {
+                      if ("function" !== e.kind) return;
+                      if (
+                        !(
+                          "--spacing" !== e.value ||
+                          (n["--modifier"].usedSpacingNumber &&
+                            n["--value"].usedSpacingNumber)
+                        )
+                      )
+                        return (
+                          p(e.nodes, (e) => {
+                            if (
+                              "function" !== e.kind ||
+                              ("--value" !== e.value &&
+                                "--modifier" !== e.value)
+                            )
+                              return;
+                            let t = e.value;
+                            for (let r of e.nodes)
+                              if ("word" === r.kind)
+                                if ("integer" === r.value)
+                                  n[t].usedSpacingInteger ||= !0;
+                                else if (
+                                  "number" === r.value &&
+                                  ((n[t].usedSpacingNumber ||= !0),
+                                  n["--modifier"].usedSpacingNumber &&
+                                    n["--value"].usedSpacingNumber)
+                                )
+                                  return 2;
+                          }),
+                          0
+                        );
+                      if ("--value" !== e.value && "--modifier" !== e.value)
+                        return;
+                      let t = R(h(e.nodes), ",");
+                      for (let [e, r] of t.entries())
+                        (r = r.replace(/\\\*/g, "*")),
+                          (r = r.replace(/--(.*?)\s--(.*?)/g, "--$1-*--$2")),
+                          (r = r.replace(/\s+/g, "")),
+                          (r = r.replace(/(-\*){2,}/g, "-*")),
+                          "-" === r[0] &&
+                            "-" === r[1] &&
+                            !r.includes("-*") &&
+                            (r += "-*"),
+                          (t[e] = r);
+                      e.nodes = m(t.join(","));
+                      for (let t of e.nodes)
+                        if (
+                          "word" !== t.kind ||
+                          ('"' !== t.value[0] && "'" !== t.value[0]) ||
+                          t.value[0] !== t.value[t.value.length - 1]
+                        ) {
                           if (
-                            "function" !== e.kind ||
-                            ("--value" !== e.value &&
-                              "--modifier" !== e.value)
+                            "word" === t.kind &&
+                            "-" === t.value[0] &&
+                            "-" === t.value[1]
+                          ) {
+                            let r = t.value.replace(/-\*.*$/g, "");
+                            n[e.value].themeKeys.add(r);
+                          } else if (
+                            "word" === t.kind &&
+                            ("[" !== t.value[0] ||
+                              "]" !== t.value[t.value.length - 1]) &&
+                            !Se.includes(t.value)
+                          ) {
+                            console.warn(
+                              `Unsupported bare value data type: "${t.value}".\nOnly valid data types are: ${Se.map((e) => `"${e}"`).join(", ")}.\n`,
+                            );
+                            let r = t.value,
+                              n = structuredClone(e),
+                              o = "¶";
+                            p(n.nodes, (e, { replaceWith: t }) => {
+                              "word" === e.kind &&
+                                e.value === r &&
+                                t({ kind: "word", value: o });
+                            });
+                            let a = "^".repeat(h([t]).length),
+                              i = h([n]).indexOf(o),
+                              l = [
+                                "```css",
+                                h([e]),
+                                " ".repeat(i) + a,
+                                "```",
+                              ].join("\n");
+                            console.warn(l);
+                          }
+                        } else {
+                          let r = t.value.slice(1, -1);
+                          n[e.value].literals.add(r);
+                        }
+                    }),
+                      (e.value = h(t));
+                  }),
+                    r.utilities.functional(t.slice(0, -2), (t) => {
+                      let n = structuredClone(e),
+                        o = t.value,
+                        a = t.modifier;
+                      if (null === o) return;
+                      let i = !1,
+                        l = !1,
+                        s = !1,
+                        c = !1,
+                        u = new Map(),
+                        d = !1;
+                      if (
+                        (A([n], (e, { parent: t, replaceWith: n }) => {
+                          if (
+                            ("rule" !== t?.kind && "at-rule" !== t?.kind) ||
+                            "declaration" !== e.kind ||
+                            !e.value
                           )
                             return;
-                          let t = e.value;
-                          for (let r of e.nodes)
-                            if ("word" === r.kind)
-                              if ("integer" === r.value)
-                                n[t].usedSpacingInteger ||= !0;
-                              else if (
-                                "number" === r.value &&
-                                ((n[t].usedSpacingNumber ||= !0),
-                                  n["--modifier"].usedSpacingNumber &&
-                                  n["--value"].usedSpacingNumber)
-                              )
-                                return 2;
+                          let f = m(e.value);
+                          0 ===
+                            (p(f, (f, { replaceWith: p }) => {
+                              if ("function" === f.kind) {
+                                if ("--value" === f.value) {
+                                  i = !0;
+                                  let a = Ke(o, f, r);
+                                  return a
+                                    ? ((l = !0),
+                                      a.ratio ? (d = !0) : u.set(e, t),
+                                      p(a.nodes),
+                                      1)
+                                    : ((i ||= !1), n([]), 2);
+                                }
+                                if ("--modifier" === f.value) {
+                                  if (null === a) return n([]), 2;
+                                  s = !0;
+                                  let e = Ke(a, f, r);
+                                  return e
+                                    ? ((c = !0), p(e.nodes), 1)
+                                    : ((s ||= !1), n([]), 2);
+                                }
+                              }
+                            }) ?? 0) && (e.value = h(f));
                         }),
-                        0
-                      );
-                    if ("--value" !== e.value && "--modifier" !== e.value)
-                      return;
-                    let t = R(h(e.nodes), ",");
-                    for (let [e, r] of t.entries())
-                      (r = r.replace(/\\\*/g, "*")),
-                        (r = r.replace(/--(.*?)\s--(.*?)/g, "--$1-*--$2")),
-                        (r = r.replace(/\s+/g, "")),
-                        (r = r.replace(/(-\*){2,}/g, "-*")),
-                        "-" === r[0] &&
-                        "-" === r[1] &&
-                        !r.includes("-*") &&
-                        (r += "-*"),
-                        (t[e] = r);
-                    e.nodes = m(t.join(","));
-                    for (let t of e.nodes)
-                      if (
-                        "word" !== t.kind ||
-                        ('"' !== t.value[0] && "'" !== t.value[0]) ||
-                        t.value[0] !== t.value[t.value.length - 1]
-                      ) {
-                        if (
-                          "word" === t.kind &&
-                          "-" === t.value[0] &&
-                          "-" === t.value[1]
-                        ) {
-                          let r = t.value.replace(/-\*.*$/g, "");
-                          n[e.value].themeKeys.add(r);
-                        } else if (
-                          "word" === t.kind &&
-                          ("[" !== t.value[0] ||
-                            "]" !== t.value[t.value.length - 1]) &&
-                          !Se.includes(t.value)
-                        ) {
-                          console.warn(
-                            `Unsupported bare value data type: "${t.value}".\nOnly valid data types are: ${Se.map((e) => `"${e}"`).join(", ")}.\n`,
-                          );
-                          let r = t.value,
-                            n = structuredClone(e),
-                            o = "¶";
-                          p(n.nodes, (e, { replaceWith: t }) => {
-                            "word" === e.kind &&
-                              e.value === r &&
-                              t({ kind: "word", value: o });
-                          });
-                          let a = "^".repeat(h([t]).length),
-                            i = h([n]).indexOf(o),
-                            l = [
-                              "```css",
-                              h([e]),
-                              " ".repeat(i) + a,
-                              "```",
-                            ].join("\n");
-                          console.warn(l);
-                        }
-                      } else {
-                        let r = t.value.slice(1, -1);
-                        n[e.value].literals.add(r);
-                      }
-                  }),
-                    (e.value = h(t));
-                }),
-                  r.utilities.functional(t.slice(0, -2), (t) => {
-                    let n = structuredClone(e),
-                      o = t.value,
-                      a = t.modifier;
-                    if (null === o) return;
-                    let i = !1,
-                      l = !1,
-                      s = !1,
-                      c = !1,
-                      u = new Map(),
-                      d = !1;
-                    if (
-                      (A([n], (e, { parent: t, replaceWith: n }) => {
-                        if (
-                          ("rule" !== t?.kind && "at-rule" !== t?.kind) ||
-                          "declaration" !== e.kind ||
-                          !e.value
-                        )
-                          return;
-                        let f = m(e.value);
-                        0 ===
-                          (p(f, (f, { replaceWith: p }) => {
-                            if ("function" === f.kind) {
-                              if ("--value" === f.value) {
-                                i = !0;
-                                let a = Ke(o, f, r);
-                                return a
-                                  ? ((l = !0),
-                                    a.ratio ? (d = !0) : u.set(e, t),
-                                    p(a.nodes),
-                                    1)
-                                  : ((i ||= !1), n([]), 2);
-                              }
-                              if ("--modifier" === f.value) {
-                                if (null === a) return n([]), 2;
-                                s = !0;
-                                let e = Ke(a, f, r);
-                                return e
-                                  ? ((c = !0), p(e.nodes), 1)
-                                  : ((s ||= !1), n([]), 2);
-                              }
-                            }
-                          }) ?? 0) && (e.value = h(f));
-                      }),
                         (i && !l) || (s && !c) || (d && c) || (a && !d && !c))
-                    )
-                      return null;
-                    if (d)
-                      for (let [e, t] of u) {
-                        let r = t.nodes.indexOf(e);
-                        -1 !== r && t.nodes.splice(r, 1);
-                      }
-                    return n.nodes;
-                  }),
-                  r.utilities.suggest(t.slice(0, -2), () => {
-                    let e = [],
-                      t = [];
-                    for (let [
-                      o,
-                      {
-                        literals: a,
-                        usedSpacingNumber: i,
-                        usedSpacingInteger: l,
-                        themeKeys: s,
-                      },
-                    ] of [
+                      )
+                        return null;
+                      if (d)
+                        for (let [e, t] of u) {
+                          let r = t.nodes.indexOf(e);
+                          -1 !== r && t.nodes.splice(r, 1);
+                        }
+                      return n.nodes;
+                    }),
+                    r.utilities.suggest(t.slice(0, -2), () => {
+                      let e = [],
+                        t = [];
+                      for (let [
+                        o,
+                        {
+                          literals: a,
+                          usedSpacingNumber: i,
+                          usedSpacingInteger: l,
+                          themeKeys: s,
+                        },
+                      ] of [
                         [e, n["--value"]],
                         [t, n["--modifier"]],
                       ]) {
-                      for (let e of a) o.push(e);
-                      if (i) o.push(...ye);
-                      else if (l) for (let e of ye) de(e) && o.push(e);
-                      for (let e of r.theme.keysInNamespaces(s))
-                        o.push(e.replace(Ce, (e, t, r) => `${t}.${r}`));
-                    }
-                    return [{ values: e, modifiers: t }];
-                  });
-              }
+                        for (let e of a) o.push(e);
+                        if (i) o.push(...ye);
+                        else if (l) for (let e of ye) de(e) && o.push(e);
+                        for (let e of r.theme.keysInNamespaces(s))
+                          o.push(e.replace(Ce, (e, t, r) => `${t}.${r}`));
+                      }
+                      return [{ values: e, modifiers: t }];
+                    });
+                }
               : ke.test(t)
                 ? (r) => {
-                  r.utilities.static(t, () => structuredClone(e.nodes));
-                }
+                    r.utilities.static(t, () => structuredClone(e.nodes));
+                  }
                 : null;
           })(e);
           if (null === r)
@@ -11179,10 +11179,10 @@
             ("n" === i[0] &&
               i.startsWith("not ") &&
               ((o = !0), (i = i.slice(4))),
-              "i" === i[0] &&
+            "i" === i[0] &&
               i.startsWith("inline(") &&
               ((a = !0), (i = i.slice(7, -1))),
-              ('"' === i[0] && '"' !== i[i.length - 1]) ||
+            ('"' === i[0] && '"' !== i[i.length - 1]) ||
               ("'" === i[0] && "'" !== i[i.length - 1]) ||
               ("'" !== i[0] && '"' !== i[0]))
           )
@@ -11201,12 +11201,12 @@
               ? 0 === e.nodes.length
                 ? (e.name = "@custom-variant")
                 : (A(e.nodes, (t) => {
-                  if ("at-rule" === t.kind && "@slot" === t.name)
-                    return (e.name = "@custom-variant"), 2;
-                }),
+                    if ("at-rule" === t.kind && "@slot" === t.name)
+                      return (e.name = "@custom-variant"), 2;
+                  }),
                   "@variant" === e.name && v.push(e))
               : v.push(e)),
-            "@custom-variant" === e.name)
+          "@custom-variant" === e.name)
         ) {
           if (null !== t)
             throw new Error("`@custom-variant` cannot be nested.");
@@ -11297,7 +11297,7 @@
           o.length > 0 ? (e.params = o.join(" ")) : t.length > 0 && r(e.nodes);
         }
         if ("@theme" === e.name) {
-          let [t, o] = (function(e) {
+          let [t, o] = (function (e) {
             let t = 0,
               r = null;
             for (let n of R(e, " "))
@@ -11310,8 +11310,8 @@
                     : "static" === n
                       ? (t |= 8)
                       : n.startsWith("prefix(") &&
-                      n.endsWith(")") &&
-                      (r = n.slice(7, -1));
+                        n.endsWith(")") &&
+                        (r = n.slice(7, -1));
             return [t, r];
           })(e.params);
           if ((n.reference && (t |= 2), o)) {
@@ -11401,7 +11401,7 @@
   }
   async function Qt(e, r = {}) {
     let n = t(e),
-      o = await (async function(e, t = {}) {
+      o = await (async function (e, t = {}) {
         let {
           designSystem: r,
           ast: n,
@@ -11494,7 +11494,7 @@
     })();
   async function cr(e, t) {
     try {
-      let r = (function() {
+      let r = (function () {
         if ("tailwindcss" === e) return { base: t, content: er.index };
         if (
           "tailwindcss/preflight" === e ||
@@ -11529,7 +11529,7 @@
           base: t,
           error: r.message ?? r,
         }),
-          r)
+        r)
       );
     }
   }
@@ -11540,39 +11540,39 @@
   }
   function dr(e) {
     ir = ir
-      .then(async function() {
+      .then(async function () {
         if (!tr && "full" !== e) return;
         let t = lr++;
         sr.start(`Build #${t} (${e})`),
           "full" === e &&
-          (await (async function() {
-            sr.start("Create compiler"), sr.start("Reading Stylesheets");
-            let e = document.querySelectorAll(`style[type="${rr}"]`),
-              t = "";
-            for (let r of e) pr(r), (t += r.textContent + "\n");
-            if (
-              (t.includes("@import") || (t = `@import "tailwindcss";${t}`),
+            (await (async function () {
+              sr.start("Create compiler"), sr.start("Reading Stylesheets");
+              let e = document.querySelectorAll(`style[type="${rr}"]`),
+                t = "";
+              for (let r of e) pr(r), (t += r.textContent + "\n");
+              if (
+                (t.includes("@import") || (t = `@import "tailwindcss";${t}`),
                 sr.end("Reading Stylesheets", {
                   size: t.length,
                   changed: or !== t,
                 }),
                 or !== t)
-            ) {
-              (or = t), sr.start("Compile CSS");
-              try {
-                tr = await Qt(t, {
-                  base: "/",
-                  loadStylesheet: cr,
-                  loadModule: ur,
-                });
-              } finally {
-                sr.end("Compile CSS"), sr.end("Create compiler");
+              ) {
+                (or = t), sr.start("Compile CSS");
+                try {
+                  tr = await Qt(t, {
+                    base: "/",
+                    loadStylesheet: cr,
+                    loadModule: ur,
+                  });
+                } finally {
+                  sr.end("Compile CSS"), sr.end("Create compiler");
+                }
+                nr.clear();
               }
-              nr.clear();
-            }
-          })()),
+            })()),
           sr.start("Build"),
-          await (async function(e) {
+          await (async function (e) {
             if (!tr) return;
             let t = new Set();
             sr.start("Collect classes");
@@ -11580,7 +11580,7 @@
               for (let r of e.classList) nr.has(r) || (nr.add(r), t.add(r));
             sr.end("Collect classes", { count: t.size }),
               (0 !== t.size || "incremental" !== e) &&
-              (sr.start("Build utilities"),
+                (sr.start("Build utilities"),
                 (ar.textContent = tr.build(Array.from(t))),
                 sr.end("Build utilities"));
           })(e),

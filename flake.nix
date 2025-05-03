@@ -159,6 +159,8 @@
             svgcleaner
             sqlite-web
 
+            harper
+
             openssl.dev
           ]
           ++ (with pkgs;

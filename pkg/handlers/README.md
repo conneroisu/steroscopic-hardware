@@ -16,16 +16,15 @@ Package handlers contains functions for handling API requests.
 
 ## Index
 
-- [Variables](<#variables>)
-- [func Make\(fn APIFn\) http.HandlerFunc](<#Make>)
-- [func MorphableHandler\(wrapper func\(templ.Component\) templ.Component, morph templ.Component\) http.HandlerFunc](<#MorphableHandler>)
-- [type APIFn](<#APIFn>)
-  - [func LogHandler\(logger \*logger.Logger\) APIFn](<#LogHandler>)
-  - [func ManualCalcDepthMapHandler\(logger \*logger.Logger\) APIFn](<#ManualCalcDepthMapHandler>)
-  - [func ParametersHandler\(logger \*logger.Logger, params \*despair.Parameters\) APIFn](<#ParametersHandler>)
-  - [func StreamHandlerFn\(manager \*camera.StreamManager\) APIFn](<#StreamHandlerFn>)
-- [type Target](<#Target>)
-
+- [Variables](#variables)
+- [func Make\(fn APIFn\) http.HandlerFunc](#Make)
+- [func MorphableHandler\(wrapper func\(templ.Component\) templ.Component, morph templ.Component\) http.HandlerFunc](#MorphableHandler)
+- [type APIFn](#APIFn)
+  - [func LogHandler\(logger \*logger.Logger\) APIFn](#LogHandler)
+  - [func ManualCalcDepthMapHandler\(logger \*logger.Logger\) APIFn](#ManualCalcDepthMapHandler)
+  - [func ParametersHandler\(logger \*logger.Logger, params \*despair.Parameters\) APIFn](#ParametersHandler)
+  - [func StreamHandlerFn\(manager \*camera.StreamManager\) APIFn](#StreamHandlerFn)
+- [type Target](#Target)
 
 ## Variables
 
@@ -61,7 +60,8 @@ var (
 ```
 
 <a name="Make"></a>
-## func [Make](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/handlers/api.go#L15>)
+
+## func [Make](https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/handlers/api.go#L15)
 
 ```go
 func Make(fn APIFn) http.HandlerFunc
@@ -70,7 +70,8 @@ func Make(fn APIFn) http.HandlerFunc
 Make returns a function that can be used as an http.HandlerFunc.
 
 <a name="MorphableHandler"></a>
-## func [MorphableHandler](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/handlers/api.go#L34-L37>)
+
+## func [MorphableHandler](https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/handlers/api.go#L34-L37)
 
 ```go
 func MorphableHandler(wrapper func(templ.Component) templ.Component, morph templ.Component) http.HandlerFunc
@@ -79,7 +80,8 @@ func MorphableHandler(wrapper func(templ.Component) templ.Component, morph templ
 MorphableHandler returns a handler that checks for the presence of the hx\-trigger header and serves either the full or morphed view.
 
 <a name="APIFn"></a>
-## type [APIFn](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/handlers/api.go#L12>)
+
+## type [APIFn](https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/handlers/api.go#L12)
 
 APIFn is a function that handles an API request.
 
@@ -88,7 +90,8 @@ type APIFn func(w http.ResponseWriter, r *http.Request) error
 ```
 
 <a name="LogHandler"></a>
-### func [LogHandler](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/handlers/stream.go#L111-L113>)
+
+### func [LogHandler](https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/handlers/stream.go#L111-L113)
 
 ```go
 func LogHandler(logger *logger.Logger) APIFn
@@ -97,7 +100,8 @@ func LogHandler(logger *logger.Logger) APIFn
 LogHandler returns a handler for streaming logs to the browser console
 
 <a name="ManualCalcDepthMapHandler"></a>
-### func [ManualCalcDepthMapHandler](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/handlers/manual.go#L10-L12>)
+
+### func [ManualCalcDepthMapHandler](https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/handlers/manual.go#L10-L12)
 
 ```go
 func ManualCalcDepthMapHandler(logger *logger.Logger) APIFn
@@ -106,7 +110,8 @@ func ManualCalcDepthMapHandler(logger *logger.Logger) APIFn
 ManualCalcDepthMapHandler is a handler for the manual depth map calculation endpoint.
 
 <a name="ParametersHandler"></a>
-### func [ParametersHandler](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/handlers/parameters.go#L14>)
+
+### func [ParametersHandler](https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/handlers/parameters.go#L14)
 
 ```go
 func ParametersHandler(logger *logger.Logger, params *despair.Parameters) APIFn
@@ -115,7 +120,8 @@ func ParametersHandler(logger *logger.Logger, params *despair.Parameters) APIFn
 ParametersHandler handles client requests to change the parameters of the desparity map generator.
 
 <a name="StreamHandlerFn"></a>
-### func [StreamHandlerFn](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/handlers/stream.go#L19>)
+
+### func [StreamHandlerFn](https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/handlers/stream.go#L19)
 
 ```go
 func StreamHandlerFn(manager *camera.StreamManager) APIFn
@@ -124,7 +130,8 @@ func StreamHandlerFn(manager *camera.StreamManager) APIFn
 StreamHandlerFn returns a handler for streaming camera images to multiple clients
 
 <a name="Target"></a>
-## type [Target](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/handlers/targets.go#L4-L7>)
+
+## type [Target](https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/handlers/targets.go#L4-L7)
 
 Target is a struct representing a dom target.
 
@@ -135,7 +142,6 @@ type Target struct {
 }
 ```
 
-Generated by [gomarkdoc](<https://github.com/princjef/gomarkdoc>)
-
+Generated by [gomarkdoc](https://github.com/princjef/gomarkdoc)
 
 <!-- gomarkdoc:embed:end -->

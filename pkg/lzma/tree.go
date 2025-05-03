@@ -1,7 +1,6 @@
 package lzma
 
 import (
-	"fmt"
 	"io"
 )
 
@@ -17,8 +16,11 @@ const (
 
 var crcTable = make([]uint32, 256)
 
-type lzBinTree struct {
-	iw                   *lzInWindow
+// binTree is a binary tree implementation is specialized for LZMA compression,
+// using a cyclic buffer approach to maintain a sliding window of data for
+// finding repeated patterns in the input stream.
+type binTree struct {
+	iw                   *inWindow
 	son                  []uint32
 	hash                 []uint32
 	cyclicBufPos         uint32
@@ -33,20 +35,30 @@ type lzBinTree struct {
 	hashArray            bool
 }
 
-func newLzBinTree(
+func newBinTree(
 	r io.Reader,
-	historySize, keepAddBufBefore, matchMaxLen, keepAddBufAfter, numHashBytes uint32,
-) *lzBinTree {
-	bt := &lzBinTree{
-		son:           make([]uint32, (historySize+1)*2), // history size is the dictSize from the encoder
+	historySize uint32, // the dictSize from the encoder
+	keepAddBufBefore uint32,
+	matchMaxLen uint32,
+	keepAddBufAfter uint32,
+	numHashBytes uint32,
+) (*binTree, error) {
+	bt := &binTree{
+		son:           make([]uint32, (historySize+1)*2),
 		cyclicBufPos:  0,
 		cyclicBufSize: historySize + 1,
 		matchMaxLen:   matchMaxLen,
 		cutValue:      16 + (matchMaxLen >> 1),
 	}
 
-	winSizeReserv := (historySize+keepAddBufBefore+matchMaxLen+keepAddBufAfter)/2 + 256
-	bt.iw = newLzInWindow(r, historySize+keepAddBufBefore, matchMaxLen+keepAddBufAfter, winSizeReserv)
+	var err error
+
+	winArea := historySize + keepAddBufBefore + matchMaxLen + keepAddBufAfter
+	winSizeReserv := (winArea)/2 + 256
+	bt.iw, err = newInWindow(r, historySize+keepAddBufBefore, matchMaxLen+keepAddBufAfter, winSizeReserv)
+	if err != nil {
+		return nil, err
+	}
 
 	if numHashBytes > 2 {
 		bt.hashArray = true
@@ -83,69 +95,64 @@ func newLzBinTree(
 	}
 
 	bt.iw.reduceOffsets(0xFFFFFFFF)
-	return bt
+	return bt, nil
 }
 
-func (bt *lzBinTree) normalize() {
+func (bt *binTree) normalize() {
 	subValue := bt.iw.pos - bt.cyclicBufSize
 	for i := range bt.son {
-		value := bt.son[i]
-		if value <= subValue {
-			value = kEmptyHashValue
+		if bt.son[i] <= subValue {
+			bt.son[i] = kEmptyHashValue
 		} else {
-			value -= subValue
+			bt.son[i] -= subValue
 		}
-		bt.son[i] = value
 	}
-	// println(len(bt.hash))
-	// println(bt.hashSizeSum)
-	fmt.Println(len(bt.hash))
-	fmt.Println(bt.hashSizeSum)
 	for i := range bt.son {
-		value := bt.son[i]
-		if value <= subValue {
-			value = kEmptyHashValue
+		if bt.son[i] <= subValue {
+			bt.son[i] = kEmptyHashValue
 		} else {
-			value -= subValue
+			bt.son[i] -= subValue
 		}
-		bt.son[i] = value
 	}
 	bt.iw.reduceOffsets(subValue)
 }
 
-func (bt *lzBinTree) movePos() {
+func (bt *binTree) movePos() error {
 	bt.cyclicBufPos++
 	if bt.cyclicBufPos >= bt.cyclicBufSize {
 		bt.cyclicBufPos = 0
 	}
-	bt.iw.movePos()
+	err := bt.iw.movePos()
+	if err != nil {
+		return err
+	}
 	if bt.iw.pos == kMaxValForNormalize {
 		bt.normalize()
 	}
+	return nil
 }
 
-func (bt *lzBinTree) getMatches(distances []uint32) uint32 {
+func (bt *binTree) getMatches(distances []uint32) (uint32, error) {
 	var lenLimit uint32
 	if bt.iw.pos+bt.matchMaxLen <= bt.iw.streamPos {
 		lenLimit = bt.matchMaxLen
 	} else {
 		lenLimit = bt.iw.streamPos - bt.iw.pos
 		if lenLimit < bt.kvMinMatchCheck {
-			bt.movePos()
-			return 0
+			err := bt.movePos()
+			if err != nil {
+				return 0, err
+			}
+			return 0, nil
 		}
 	}
 
-	offset := uint32(0)
-	matchMinPos := uint32(0)
+	var matchMinPos, hashValue, hash2Value, hash3Value, offset uint32
 	if bt.iw.pos > bt.cyclicBufSize {
 		matchMinPos = bt.iw.pos - bt.cyclicBufSize
 	}
 	cur := bt.iw.bufOffset + bt.iw.pos
 	maxLen := uint32(kStartMaxLen)
-	var hashValue uint32
-	hash2Value := uint32(0)
-	hash3Value := uint32(0)
 
 	if bt.hashArray {
 		tmp := crcTable[bt.iw.buf[cur]] ^ uint32(bt.iw.buf[cur+1])
@@ -195,7 +202,8 @@ func (bt *lzBinTree) getMatches(distances []uint32) uint32 {
 
 	if bt.kvNumHashDirectBytes != 0 {
 		if curMatch > matchMinPos {
-			if bt.iw.buf[bt.iw.bufOffset+curMatch+bt.kvNumHashDirectBytes] != bt.iw.buf[cur+bt.kvNumHashDirectBytes] {
+			match := bt.iw.buf[bt.iw.bufOffset+curMatch+bt.kvNumHashDirectBytes]
+			if match != bt.iw.buf[cur+bt.kvNumHashDirectBytes] {
 				maxLen = bt.kvNumHashDirectBytes
 				distances[offset] = maxLen
 				offset++
@@ -227,7 +235,7 @@ func (bt *lzBinTree) getMatches(distances []uint32) uint32 {
 			cyclicPos = (bt.cyclicBufPos - delta + bt.cyclicBufSize) << 1
 		}
 		pby1 := bt.iw.bufOffset + curMatch
-		length := minUInt32(len0, len1)
+		length := min(len0, len1)
 		if bt.iw.buf[pby1+length] == bt.iw.buf[cur+length] {
 			for length++; length != lenLimit; length++ {
 				if bt.iw.buf[pby1+length] != bt.iw.buf[cur+length] {
@@ -260,11 +268,14 @@ func (bt *lzBinTree) getMatches(distances []uint32) uint32 {
 			len0 = length
 		}
 	}
-	bt.movePos()
-	return offset
+	err := bt.movePos()
+	if err != nil {
+		return 0, err
+	}
+	return offset, nil
 }
 
-func (bt *lzBinTree) skip(num uint32) {
+func (bt *binTree) skip(num uint32) error {
 	var i uint32
 	for ; i < num; i++ {
 		var lenLimit uint32
@@ -273,17 +284,19 @@ func (bt *lzBinTree) skip(num uint32) {
 		} else {
 			lenLimit = bt.iw.streamPos - bt.iw.pos
 			if lenLimit < bt.kvMinMatchCheck {
-				bt.movePos()
+				err := bt.movePos()
+				if err != nil {
+					return err
+				}
 				continue
 			}
 		}
 
-		matchMinPos := uint32(0)
+		var matchMinPos, hashValue uint32
 		if bt.iw.pos > bt.cyclicBufSize {
 			matchMinPos = bt.iw.pos - bt.cyclicBufSize
 		}
 		cur := bt.iw.bufOffset + bt.iw.pos
-		var hashValue uint32
 		if bt.hashArray {
 			tmp := crcTable[bt.iw.buf[cur]] ^ uint32(bt.iw.buf[cur+1])
 			hash2Value := tmp & (kHash2Size - 1)
@@ -319,7 +332,7 @@ func (bt *lzBinTree) skip(num uint32) {
 				cyclicPos = (bt.cyclicBufPos - delta + bt.cyclicBufSize) << 1
 			}
 			pby1 := bt.iw.bufOffset + curMatch
-			length := minUInt32(len0, len1)
+			length := min(len0, len1)
 			if bt.iw.buf[pby1+length] == bt.iw.buf[cur+length] {
 				for length++; length != lenLimit; length++ {
 					if bt.iw.buf[pby1+length] != bt.iw.buf[cur+length] {
@@ -345,11 +358,12 @@ func (bt *lzBinTree) skip(num uint32) {
 				len0 = length
 			}
 		}
-		bt.movePos()
+		return bt.movePos()
 	}
+	return nil
 }
 
-// should be called in the encoder's contructor
+// should be called in the encoder's constructor
 func initCrcTable() {
 	var i uint32
 	for ; i < 256; i++ {
@@ -377,39 +391,48 @@ func newRangeBitTreeCoder(numBitLevels uint32) *rangeBitTreeCoder {
 	}
 }
 
-func (rc *rangeBitTreeCoder) decode(rd *rangeDecoder) (res uint32) {
-	res = 1
+func (rc *rangeBitTreeCoder) decode(rd *rangeDecoder) (uint32, error) {
+	var res = uint32(1)
 	for bitIndex := rc.numBitLevels; bitIndex != 0; bitIndex-- {
-		bit := rd.decodeBit(rc.models, res)
+		bit, err := rd.decodeBit(rc.models, res)
+		if err != nil {
+			return 0, err
+		}
 		res = res<<1 + bit
 	}
 	res -= 1 << rc.numBitLevels
-	return
+	return res, nil
 }
 
-func (rc *rangeBitTreeCoder) reverseDecode(rd *rangeDecoder) (res uint32) {
+func (rc *rangeBitTreeCoder) reverseDecode(rd *rangeDecoder) (uint32, error) {
+	var res uint32
 	index := uint32(1)
-	res = 0
 	var bitIndex uint32
 	for ; bitIndex < rc.numBitLevels; bitIndex++ {
-		bit := rd.decodeBit(rc.models, index)
+		bit, err := rd.decodeBit(rc.models, index)
+		if err != nil {
+			return 0, err
+		}
 		index <<= 1
 		index += bit
 		res |= bit << bitIndex
 	}
-	return
+	return res, nil
 }
 
 func reverseDecodeIndex(
 	rd *rangeDecoder,
 	models []uint16,
 	startIndex, numBitModels uint32,
-) (res uint32) {
+) (res uint32, err error) {
 	index := uint32(1)
 	res = 0
 	var bitIndex uint32
 	for ; bitIndex < numBitModels; bitIndex++ {
-		bit := rd.decodeBit(models, startIndex+index)
+		bit, err := rd.decodeBit(models, startIndex+index)
+		if err != nil {
+			return 0, err
+		}
 		index <<= 1
 		index += bit
 		res |= bit << bitIndex
@@ -428,8 +451,8 @@ func (rc *rangeBitTreeCoder) encode(re *rangeEncoder, symbol uint32) {
 }
 
 func (rc *rangeBitTreeCoder) reverseEncode(re *rangeEncoder, symbol uint32) {
-	m := uint32(1)
 	var i uint32
+	m := uint32(1)
 	for ; i < rc.numBitLevels; i++ {
 		bit := symbol & 1
 		re.encode(rc.models, m, bit)
