@@ -24,8 +24,6 @@ reg [PIX_W-1:0] win_l [0:WIN-1][0:WIN-1];
 reg [PIX_W-1:0] win_r [0:WIN-1][0:WIN-1];
 
 localparam COST_W = $clog2(WIN*WIN*(2**PIX_W));
-
-reg  [COST_W-1:0]cost_acc [0:MAX_DISP-1];
 reg  [5:0]ter;
 reg  [COST_W-1:0]sad;
 reg  last_pixel_in_window;
