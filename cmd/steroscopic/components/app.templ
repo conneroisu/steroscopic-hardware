@@ -20,6 +20,10 @@ templ App(title string, comp templ.Component) {
 			<script defer src="/static/index.js"></script>
 			<script type="module" src="/static/ds.js"></script>
 			<script type="module" src="/static/tw.js"></script>
+			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+			<meta name="description" content="ZedBoard Stereo Vision"/>
+			<link rel="icon" href="/static/favicon.ico" type="image/x-icon"/>
+			<link rel="shortcut icon" href="/static/favicon.ico" type="image/x-icon"/>
 		</head>
 		<body class="bg-gray-900 text-gray-200 min-h-screen">
 			<div data-on-load="@get('/logs')"></div>
