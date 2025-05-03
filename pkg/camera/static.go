@@ -103,5 +103,5 @@ func (z *StaticCamera) getImage() (*image.Gray, error) {
 
 // Close closes the camera
 func (z *StaticCamera) Close() error {
-	panic("not implemented") // TODO: Implement
+	return nil
 }
