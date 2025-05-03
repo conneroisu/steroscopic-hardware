@@ -1,0 +1,87 @@
+module Disparity #(
+    parameter IMG_W      = 1920,
+    parameter IMG_H      = 1080,
+    parameter WIN        = 5,
+    parameter MAX_DISP   = 64,
+    parameter PIX_W      = 8
+)(
+    input wire                 clk,
+    input wire                 rst_n,
+    input wire [PIX_W-1:0]     in_left,
+    input wire [PIX_W-1:0]     in_right,
+    input wire                 in_valid,
+    output reg  [7:0]           out_disp,
+    output reg                  out_valid
+);
+
+localparam LB_DEPTH = IMG_W;
+localparam WIN_OFF= (WIN>>1);
+
+reg  [PIX_W-1:0] lb_l [0:WIN-2][0:LB_DEPTH-1];
+reg  [PIX_W-1:0] lb_r [0:WIN-2][0:LB_DEPTH-1];
+
+reg [PIX_W-1:0] win_l [0:WIN-1][0:WIN-1];
+reg [PIX_W-1:0] win_r [0:WIN-1][0:WIN-1];
+
+localparam COST_W = $clog2(WIN*WIN*(2**PIX_W));
+
+reg  [COST_W-1:0]cost_acc [0:MAX_DISP-1];
+reg  [5:0]ter;
+reg  [COST_W-1:0]sad;
+reg  last_pixel_in_window;
+
+integer i;
+always @(posedge clk) if (in_valid) begin
+    for (i = WIN-2; i > 0; i = i - 1) begin
+        lb_l[i] <= lb_l[i-1];
+        lb_r[i] <= lb_r[i-1];
+    end
+    lb_l[0] <= in_left;
+    lb_r[0] <= in_right;
+end
+
+always @(posedge clk) if (in_valid) begin
+    integer r,c;
+    for (r = 0; r < WIN; r = r + 1) begin
+        for (c = WIN-1; c > 0; c = c - 1) begin
+            win_l[r][c] <= win_l[r][c-1];
+            win_r[r][c] <= win_r[r][c-1];
+        end
+    end
+    win_l[0][0] <= in_left;
+    win_r[0][0] <= in_right;
+    for (r = 1; r < WIN; r = r + 1) begin
+        win_l[r][0] <= lb_l[r-1][0];
+        win_r[r][0] <= lb_r[r-1][0];
+    end
+end
+
+reg [11:0] col;
+reg [11:0] row;
+always @(posedge clk or negedge rst_n) begin
+    if (!rst_n) begin
+        col <= 0;
+        row <= 0;
+    end else if (in_valid) begin
+        if (col == IMG_W-1) begin
+            col <= 0;
+            row <= (row == IMG_H-1) ? 0 : row + 1;
+        end else begin
+            col <= col + 1;
+        end
+    end
+end
+
+integer wr, wc;
+always @(*) begin
+    sad = 0;
+    for (wr = 0; wr < WIN; wr = wr + 1)
+        for (wc = 0; wc < WIN; wc = wc + 1) begin
+            if (col >= iter + wc)
+                sad = sad + (win_l[wr][wc] > win_r[wr][wc + iter] ?
+                              win_l[wr][wc] - win_r[wr][wc + iter] :
+                              win_r[wr][wc + iter] - win_l[wr][wc]);
+            else
+                sad = sad + {COST_W{1'b1}};
+        end
+end
