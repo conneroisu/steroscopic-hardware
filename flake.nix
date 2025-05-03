@@ -158,29 +158,15 @@
             nodePackages.prettier
             svgcleaner
             sqlite-web
-
             harper
-
+            htmx-lsp
             openssl.dev
           ]
           ++ (with pkgs;
             lib.optionals stdenv.isDarwin [
-              libiconv
             ])
           ++ (with pkgs;
             lib.optionals stdenv.isLinux [
-              chromium # Chromium browser
-              xorg.libXcomposite # X11 Composite extension - needed by browsers
-              xorg.libXdamage # X11 Damage extension - needed by browsers
-              xorg.libXfixes # X11 Fixes extension - needed by browsers
-              xorg.libXrandr # X11 RandR extension - needed by browsers
-              xorg.libX11 # X11 client-side library
-              xorg.libxcb # X11 C Bindings library
-              mesa # OpenGL implementation
-              alsa-lib # Audio library
-              nss # Network Security Services
-              nspr # NetScape Portable Runtime
-              pango # Text layout and rendering
             ])
           ++ builtins.attrValues scriptPackages;
       };

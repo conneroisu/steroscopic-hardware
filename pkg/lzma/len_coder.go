@@ -25,7 +25,7 @@ func newLenCoder(
 }
 
 func (lc *lenCoder) decode(rd *rangeDecoder, posState uint32) (uint32, error) {
-	var res uint32
+	var res, k uint32
 	i, err := rd.decodeBit(lc.choice, 0)
 	if err != nil {
 		return 0, err
@@ -43,7 +43,7 @@ func (lc *lenCoder) decode(rd *rangeDecoder, posState uint32) (uint32, error) {
 		return 0, err
 	}
 	if j == 0 {
-		k, err := lc.midCoder[posState].decode(rd)
+		k, err = lc.midCoder[posState].decode(rd)
 		if err != nil {
 			return 0, err
 		}

@@ -171,13 +171,14 @@ func (z *decoder) doDecode() error {
 		}
 		if decoded != 1 {
 			repr3, repr2, repr1 = repr2, repr1, repr0
+			var posSlot uint32
 			decoded, err = z.lenCoder.decode(z.rd, posState)
 			if err != nil {
 				return err
 			}
 			length = decoded + kMatchMinLen
 			state = stateUpdateMatch(state)
-			posSlot, err := z.posSlotCoders[getLenToPosState(length)].decode(z.rd)
+			posSlot, err = z.posSlotCoders[getLenToPosState(length)].decode(z.rd)
 			if err != nil {
 				return err
 			}
