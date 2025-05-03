@@ -1,0 +1,140 @@
+package components
+
+templ Manual(
+	blockSize int,
+	maxDisparity int,
+) {
+	<header class="py-6 text-center">
+		<h1 class="text-3xl font-bold text-blue-400 mb-2">
+			Manual Depth Map Generator
+		</h1>
+		<p class="text-gray-400">
+			Upload stereo images to generate a depth map using SAD algorithm
+		</p>
+	</header>
+	<div class="container mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-6">
+		<div class="col-span-1 md:col-span-3 space-y-6">
+			<!-- Image Upload Panel -->
+			<div class="bg-gray-800 rounded-lg shadow-lg p-4">
+				<form id="depth-map-form" action="/manual-calc-depth-map" method="post" enctype="multipart/form-data">
+					<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+						<div class="flex flex-col items-center">
+							<h2 class="text-xl font-semibold text-gray-200 mb-2">
+								Left Image
+							</h2>
+							@UploadViewer("left-image")
+						</div>
+						<div class="flex flex-col items-center">
+							<h2 class="text-xl font-semibold text-gray-200 mb-2">
+								Right Image
+							</h2>
+							@UploadViewer("right-image")
+						</div>
+					</div>
+					<!-- Hidden form fields for parameters -->
+					<input type="hidden" id="blockSizeField" name="blockSize" value="7"/>
+					<input type="hidden" id="maxDisparityField" name="maxDisparity" value="64"/>
+					<div class="text-center mt-4">
+						<button
+							type="submit"
+							id="generate-button"
+							class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed"
+						>
+							Generate Depth Map
+						</button>
+					</div>
+				</form>
+			</div>
+			<!-- Depth Map Panel -->
+			<div class="bg-gray-800 rounded-lg shadow-lg p-4">
+				<h2 class="text-xl font-semibold text-gray-200 mb-2 text-center">
+					Depth Map Result
+				</h2>
+				<div
+					id="depth-map-image"
+					class="w-full h-64 bg-black rounded-lg overflow-hidden relative"
+				>
+					<div
+						class="absolute inset-0 flex items-center justify-center text-gray-500"
+						id="depth-map-placeholder"
+					>
+						No depth map available
+					</div>
+					<img
+						id="depth-map-preview"
+						class="w-full h-full object-contain hidden"
+						alt="Depth map preview"
+					/>
+				</div>
+				<div class="flex justify-center mt-3">
+					<button
+						id="download-button"
+						class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed"
+						disabled
+					>
+						Download Depth Map
+					</button>
+				</div>
+			</div>
+			<!-- Algorithm Controls Panel -->
+			@Control(blockSize, maxDisparity)
+			<!-- Status Component -->
+			@StatusComponent()
+		</div>
+	</div>
+}
+
+// Modified UploadViewer to accept an ID parameter for unique file inputs
+templ UploadViewer(id string) {
+	<script>
+		function previewImage() {
+		    return {
+			    imageUrl: "",
+
+			fileChosen(event) {
+			    this.fileToDataUrl(event, (src) => (this.imageUrl = src));
+			},
+
+			fileToDataUrl(event, callback) {
+			    if (!event.target.files.length) return;
+
+			    let file = event.target.files[0],
+				reader = new FileReader();
+
+			    reader.readAsDataURL(file);
+			    reader.onload = (e) => callback(e.target.result);
+			},
+		    };
+		}
+	</script>
+	<div class="upload-viewer w-full">
+		<div class="p-4 text-sm w-full">
+			<div x-data="previewImage()" class="cursor-pointer mt-2">
+				<label for={ id }>
+					<div class="w-full h-48 rounded bg-gray-700 border border-gray-600 flex items-center justify-center overflow-hidden">
+						<img x-show="imageUrl" :src="imageUrl" class="w-full h-full object-contain"/>
+						<div x-show="!imageUrl" class="text-gray-300 flex flex-col items-center">
+							<svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+								<path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+							</svg>
+							<div class="mt-2">Drop image or click to upload</div>
+						</div>
+					</div>
+				</label>
+				<div class="mt-2">
+					<input class="w-full text-gray-300 bg-gray-700 rounded p-2 cursor-pointer" type="file" name={ id } id={ id } @change="fileChosen" accept="image/*"/>
+				</div>
+			</div>
+		</div>
+	</div>
+}
+
+// New status component for better feedback
+templ StatusComponent() {
+	<div
+		id="status-container"
+		class="fixed bottom-4 right-4 bg-gray-800 text-white px-6 py-3 rounded-lg shadow-lg hidden"
+	>
+		<p id="status-message">Processing...</p>
+	</div>
+}

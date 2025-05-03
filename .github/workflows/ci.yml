@@ -1,0 +1,56 @@
+name: Build and Test
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch: {}
+
+jobs:
+  goci:
+    name: Build, Test, and Lint Go Project
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      - name: Install Nix
+        uses: cachix/install-nix-action@08dcb3a5e62fa31e2da3d490afc4176ef55ecd72 # v30
+        with:
+          github_access_token: ${{ secrets.GITHUB_TOKEN }}
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+            accept-flake-config = true
+      - name: Build
+        run: |
+          echo "Building Go project..."
+          nix run .\#build-go
+      - name: Test
+        run: |
+          echo "Testing Go project..."
+          nix run .\#test-go
+      - name: Lint
+        run: |
+          echo "Linting Go project..."
+          nix run .\#lint-go
+  nixci:
+    name: Test and Lint Nix Project
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      - name: Install Nix
+        uses: cachix/install-nix-action@08dcb3a5e62fa31e2da3d490afc4176ef55ecd72 # v30
+        with:
+          github_access_token: ${{ secrets.GITHUB_TOKEN }}
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+            accept-flake-config = true
+      - name: Checks
+        run: |
+          echo "Linting Nix project..."
+          nix run .\#lint-nix
+          echo "Checking Nix project..."
+          nix flake check
+    

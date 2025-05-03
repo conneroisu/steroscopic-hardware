@@ -8,7 +8,6 @@
 *.so
 *.dylib
 *.dll
-*.mod
 *.smod
 *.lai
 *.la
@@ -21,3 +20,7 @@
 .DS_Store
 .vscode
 .idea
+# Added by goreleaser init:
+dist/
+tmp
+node_modules

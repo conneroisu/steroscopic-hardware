@@ -1,0 +1,61 @@
+{
+  "formatters": {
+    "exclusions": {
+      "generated": "lax",
+      "paths": ["third_party$", "builtin$", "examples$"]
+    }
+  },
+  "linters": {
+    "enable": [
+      "asasalint",
+      "bidichk",
+      "bodyclose",
+      "gocheckcompilerdirectives",
+      "staticcheck",
+      "intrange",
+      "makezero",
+      "misspell",
+      "nosprintfhostport",
+      "revive",
+      "unconvert",
+      "usestdlibvars",
+      "wastedassign",
+      "whitespace",
+      "govet"
+    ],
+    "exclusions": {
+      "generated": "lax",
+      "paths": ["(^|/)vendor($|/)", "third_party$", "builtin$", "examples$"],
+      "presets": [
+        "comments",
+        "common-false-positives",
+        "legacy",
+        "std-error-handling"
+      ]
+    },
+    "settings": {
+      "revive": {
+        "enable-all-rules": false,
+        "rules": [
+          {
+            "exclude": ["vendor/"],
+            "name": "blank-imports"
+          }
+        ]
+      },
+      "staticcheck": {
+        "checks": ["-SA1019", "all"]
+      }
+    }
+  },
+  "severity": {
+    "default": "error",
+    "rules": [
+      {
+        "linters": ["goimports", "intrange", "usestdlibvars"],
+        "severity": "info"
+      }
+    ]
+  },
+  "version": "2"
+}

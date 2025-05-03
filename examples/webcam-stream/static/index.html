@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Server Webcam Stream</title>
+    <script
+      src="https://unpkg.com/htmx.org@2.0.4"
+      integrity="sha384-HGfztofotfshcF7+8n44JQL2oJmowVChPTg48S+jvZoztPfvwD79OC/LTtG6dMp+"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://unpkg.com/htmx-ext-ws@2.0.2"
+      integrity="sha384-932iIqjARv+Gy0+r6RTGrfCkCKS5MsF539Iqf6Vt8L4YmbnnWI2DSFoMD90bvXd0"
+      crossorigin="anonymous"
+    ></script>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+
+      .video-container {
+        margin-top: 20px;
+        text-align: center;
+      }
+
+      #video-frame {
+        max-width: 100%;
+        border: 1px solid #ddd;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      }
+
+      h1,
+      h2 {
+        color: #333;
+      }
+
+      .stats {
+        font-size: 12px;
+        color: #666;
+        margin-top: 5px;
+      }
+    </style>
+  </head>
+  <body hx-ext="ws">
+    <h1>Server Webcam Stream</h1>
+
+    <div 
+      class="video-container"
+        hx-ws="connect:/ws/video"
+    >
+      <h2>Live Webcam Feed</h2>
+      <img id="video-frame" src="placeholder.png" alt="Webcam Stream" />
+      <div class="stats">
+        Frames received: <span id="frame-count">0</span> | Last frame at:
+        <span id="last-frame-time">Never</span> | FPS: <span id="fps">0</span>
+      </div>
+    </div>
+
+    <script>
+      // Elements
+      const videoFrame = document.getElementById("video-frame");
+      const frameCount = document.getElementById("frame-count");
+      const lastFrameTime = document.getElementById("last-frame-time");
+      const fpsElement = document.getElementById("fps");
+
+      // Variables for FPS calculation
+      let frames = 0;
+      let lastTime = Date.now();
+      let frameTimestamps = [];
+
+      // Handle incoming WebSocket messages
+      document.body.addEventListener("htmx:wsBeforeMessage", function (evt) {
+        // Only process binary messages (video frames)
+        if (evt.detail.message instanceof Blob) {
+          // Prevent HTMX from trying to process it as HTML
+          evt.preventDefault();
+
+          // Convert the blob to an image URL
+          const url = URL.createObjectURL(evt.detail.message);
+
+          // Save the old URL to clean up later
+          const oldUrl = videoFrame.src;
+
+          // Update the image source
+          videoFrame.src = url;
+
+          // Update stats
+          frames++;
+          frameCount.textContent = frames;
+          lastFrameTime.textContent = new Date().toLocaleTimeString();
+
+          // Add timestamp for FPS calculation
+          frameTimestamps.push(Date.now());
+
+          // Only keep the last 30 frames for FPS calculation
+          if (frameTimestamps.length > 30) {
+            frameTimestamps.shift();
+          }
+
+          // Calculate FPS every 10 frames
+          if (frames % 10 === 0 && frameTimestamps.length > 1) {
+            const timeElapsed =
+              frameTimestamps[frameTimestamps.length - 1] - frameTimestamps[0];
+            const fps = (
+              ((frameTimestamps.length - 1) / timeElapsed) *
+              1000
+            ).toFixed(1);
+            fpsElement.textContent = fps;
+          }
+
+          // Clean up old URL to prevent memory leaks
+          videoFrame.onload = function () {
+            if (oldUrl.startsWith("blob:")) {
+              URL.revokeObjectURL(oldUrl);
+            }
+          };
+        }
+      });
+    </script>
+  </body>
+</html>

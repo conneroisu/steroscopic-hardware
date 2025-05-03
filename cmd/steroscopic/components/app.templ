@@ -1,0 +1,161 @@
+package components
+
+import (
+	"github.com/conneroisu/steroscopic-hardware/pkg/handlers"
+	"github.com/conneroisu/steroscopic-hardware/pkg/svg"
+)
+
+// AppFn returns a function that wraps the given component with the app template.
+func AppFn(title string) func(templ.Component) templ.Component {
+	return func(c templ.Component) templ.Component {
+		return App(title, c)
+	}
+}
+
+templ App(title string, comp templ.Component) {
+	<!DOCTYPE html>
+	<html>
+		<head>
+			<title>{ title }</title>
+			<script defer src="/static/index.js"></script>
+			<script type="module" src="/static/ds.js"></script>
+			<script type="module" src="/static/tw.js"></script>
+		</head>
+		<body class="bg-gray-900 text-gray-200 min-h-screen">
+			<div data-on-load="@get('/logs')"></div>
+			@header()
+			<div id="app" class="pt-4">
+				@comp
+			</div>
+		</body>
+	</html>
+}
+
+templ header() {
+	<nav
+		class="bg-gray-800 border-b border-gray-700 shadow-md"
+		x-data="{ index: $persist(true) }"
+		id="main-nav"
+	>
+		<div
+			class="container mx-auto px-4"
+		>
+			<div
+				class="flex justify-between items-center py-3"
+			>
+				<div
+					class="flex items-center"
+				>
+					<h1
+						class="text-xl font-bold text-blue-400 mr-6"
+					>
+						ZedBoard Stereo Vision
+					</h1>
+				</div>
+				<a
+					href="https://github.com/conneroisu/steroscopic-hardware/issues/new"
+					class="px-4 py-2 rounded-lg transition inline-flex items-center gap-1 text-gray-300 hover:text-white"
+				>
+					@svg.CircleQuestion
+					Report a Bug
+				</a>
+				<div
+					class="flex space-x-4"
+				>
+					<a
+						hx-get="/"
+						hx-target="#app"
+						hx-push-url="true"
+						class="px-4 py-2 rounded-lg transition"
+						@click="index = true"
+						:class="{
+							'bg-blue-700 hover:bg-gray-600': index,
+							'bg-gray-800 hover:bg-blue-300': !index
+						}"
+					>
+						Live Camera System
+					</a>
+					<a
+						hx-get="/manual"
+						hx-target="#app"
+						hx-push-url="true"
+						class="px-4 py-2 rounded-lg transition"
+						@click="index = false"
+						:class="{
+							'bg-blue-700 hover:bg-gray-600': !index,
+							'bg-gray-800 hover:bg-blue-300': index
+						}"
+					>
+						Manual Upload
+					</a>
+				</div>
+			</div>
+		</div>
+	</nav>
+}
+
+templ status() {
+	<div
+		class="lg:col-span-1 space-y-6"
+		x-data="{ open_stats: true }"
+	>
+		<!-- System Status Panel -->
+		<div class="bg-gray-800 rounded-lg shadow-lg p-4">
+			<div
+				class="flex justify-between items-center cursor-pointer"
+				@click="open_stats = !open_stats"
+				x-data="{ text: '▶' }"
+				x-on:click="open_stats ? text = '▶' : text = '▼'"
+			>
+				<h2 class="text-xl font-semibold text-gray-200">System Status</h2>
+				<span x-text="text"></span>
+			</div>
+			@statusContent()
+		</div>
+	</div>
+}
+
+templ statusContent() {
+	<div
+		class="mt-4 space-y-2"
+		id={ handlers.TargetStatusContent.ID }
+		x-show="open_stats"
+		x-collapse
+	>
+		<div class="flex justify-between py-2 border-b border-gray-700">
+			<span class="font-medium">Left Image:</span>
+			<span
+				id="left-image-status"
+				class="px-2 py-1 rounded text-sm bg-red-900/30 text-red-400"
+			>Not uploaded</span>
+		</div>
+		<div class="flex justify-between py-2 border-b border-gray-700">
+			<span class="font-medium">Right Image:</span>
+			<span
+				id="right-image-status"
+				class="px-2 py-1 rounded text-sm bg-red-900/30 text-red-400"
+			>Not uploaded</span>
+		</div>
+		<div class="flex justify-between py-2 border-b border-gray-700">
+			<span class="font-medium">Depth Map:</span>
+			<span
+				id="depth-map-status"
+				class="px-2 py-1 rounded text-sm bg-red-900/30 text-red-400"
+			>Not available</span>
+		</div>
+		<div class="flex justify-between py-2 border-b border-gray-700">
+			<span class="font-medium">Block Size:</span>
+			<span
+				id="block-size-status"
+				class="px-2 py-1 rounded text-sm bg-gray-700 text-gray-300"
+			>7</span>
+		</div>
+		<div class="flex justify-between py-2 border-b border-gray-700">
+			<span class="font-medium">Max Disparity:</span>
+			<span
+				id="max-disparity-status"
+				class="px-2 py-1 rounded text-sm bg-gray-700 text-gray-300"
+			>64</span>
+		</div>
+	</div>
+}
