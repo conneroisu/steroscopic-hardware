@@ -14,13 +14,13 @@ import (
 
 // SerialCameraConfig holds configuration for a camera connected via serial port
 type SerialCameraConfig struct {
-	PortName           string // Serial port name (e.g., "COM3" on Windows, "/dev/ttyUSB0" on Linux)
-	BaudRate           int    // Serial port baud rate (e.g., 115200)
-	ImageWidth         int    // Expected image width in pixels
-	ImageHeight        int    // Expected image height in pixels
-	StartDelimiter     []byte // Byte sequence indicating start of image data
-	EndDelimiter       []byte // Byte sequence indicating end of image data
-	UseJPEGCompression bool   // Whether the camera sends JPEG compressed images
+	PortName       string // Serial port name (e.g., "COM3" on Windows, "/dev/ttyUSB0" on Linux)
+	BaudRate       int    // Serial port baud rate (e.g., 115200)
+	ImageWidth     int    // Expected image width in pixels
+	ImageHeight    int    // Expected image height in pixels
+	StartDelimiter []byte // Byte sequence indicating start of image data
+	EndDelimiter   []byte // Byte sequence indicating end of image data
+	UseCompression bool   // Whether the camera sends lzma compressed data
 }
 
 // SerialCamera represents a camera connected via serial port

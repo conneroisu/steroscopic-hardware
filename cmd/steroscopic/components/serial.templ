@@ -1,0 +1,79 @@
+package components
+
+// SerialPortSelector is a component that allows selecting serial ports for cameras
+templ SerialPortSelector(
+	availablePorts []string,
+	selectedPortLeft string,
+	selectedPortRight string,
+) {
+	<div class="bg-gray-800 rounded-lg shadow-lg p-4 mb-4" id="ports-container">
+		<h2 class="text-xl font-semibold text-gray-200 mb-4">Camera Serial Ports</h2>
+		<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+			<div class="space-y-2">
+				<label for="left-camera-port" class="block font-medium text-gray-300">Left Camera Port:</label>
+				<select
+					id="left-camera-port"
+					class="w-full bg-gray-700 border border-gray-600 rounded p-2 text-white"
+					hx-post="/update-camera-port"
+					hx-trigger="change"
+					hx-vals="js:{camera: 'left', port: this.value}"
+					hx-swap="none"
+				>
+					<option value="">Select a port</option>
+					for _, port := range availablePorts {
+						if port == selectedPortLeft {
+							<option value={ port } selected>{ port }</option>
+						} else {
+							<option value={ port }>{ port }</option>
+						}
+					}
+				</select>
+				<div id="left-camera-status" class="text-sm mt-1">
+					if selectedPortLeft != "" {
+						<span class="px-2 py-1 rounded text-sm bg-green-900/30 text-green-400">Connected to { selectedPortLeft }</span>
+					} else {
+						<span class="px-2 py-1 rounded text-sm bg-red-900/30 text-red-400">Not connected</span>
+					}
+				</div>
+			</div>
+			<div class="space-y-2">
+				<label for="right-camera-port" class="block font-medium text-gray-300">Right Camera Port:</label>
+				<select
+					id="right-camera-port"
+					class="w-full bg-gray-700 border border-gray-600 rounded p-2 text-white"
+					hx-post="/update-camera-port"
+					hx-trigger="change"
+					hx-vals="js:{camera: 'right', port: this.value}"
+					hx-swap="none"
+				>
+					<option value="">Select a port</option>
+					for _, port := range availablePorts {
+						if port == selectedPortRight {
+							<option value={ port } selected>{ port }</option>
+						} else {
+							<option value={ port }>{ port }</option>
+						}
+					}
+				</select>
+				<div id="right-camera-status" class="text-sm mt-1">
+					if selectedPortRight != "" {
+						<span class="px-2 py-1 rounded text-sm bg-green-900/30 text-green-400">Connected to { selectedPortRight }</span>
+					} else {
+						<span class="px-2 py-1 rounded text-sm bg-red-900/30 text-red-400">Not connected</span>
+					}
+				</div>
+			</div>
+		</div>
+		<div class="mt-4 flex justify-center">
+			<button
+				id="refresh-ports-button"
+				class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50"
+				hx-get="/refresh-ports"
+				hx-target="#ports-container"
+				hx-swap="outerHTML"
+			>
+				Refresh Available Ports
+			</button>
+		</div>
+	</div>
+}

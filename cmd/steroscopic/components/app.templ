@@ -1,6 +1,7 @@
 package components
 
 import (
+	"github.com/conneroisu/steroscopic-hardware/pkg/camera"
 	"github.com/conneroisu/steroscopic-hardware/pkg/handlers"
 	"github.com/conneroisu/steroscopic-hardware/pkg/svg"
 )
@@ -114,52 +115,35 @@ templ status() {
 				<h2 class="text-xl font-semibold text-gray-200">System Status</h2>
 				<span x-text="text"></span>
 			</div>
-			@statusContent()
+			<div
+				class="mt-4 space-y-2"
+				id={ handlers.TargetStatusContent.ID }
+				x-show="open_stats"
+				x-collapse
+			>
+				@cameraStatus(camera.LeftCameraType)
+				@cameraStatus(camera.RightCameraType)
+			</div>
 		</div>
 	</div>
 }
 
-templ statusContent() {
+templ cameraStatus(typeOf camera.CameraType) {
 	<div
-		class="mt-4 space-y-2"
-		id={ handlers.TargetStatusContent.ID }
-		x-show="open_stats"
-		x-collapse
+		class="bg-gray-800 rounded-lg shadow-lg p-4"
 	>
-		<div class="flex justify-between py-2 border-b border-gray-700">
-			<span class="font-medium">Left Image:</span>
-			<span
-				id="left-image-status"
-				class="px-2 py-1 rounded text-sm bg-red-900/30 text-red-400"
-			>Not uploaded</span>
+		<div class="flex justify-between items-center">
+			<span class="font-medium">{ typeOf } camera:</span>
+			<div
+				class="flex justify-between items-center cursor-pointer"
+			>
+				@svg.SettingsGear
+			</div>
 		</div>
-		<div class="flex justify-between py-2 border-b border-gray-700">
-			<span class="font-medium">Right Image:</span>
-			<span
-				id="right-image-status"
-				class="px-2 py-1 rounded text-sm bg-red-900/30 text-red-400"
-			>Not uploaded</span>
-		</div>
-		<div class="flex justify-between py-2 border-b border-gray-700">
-			<span class="font-medium">Depth Map:</span>
-			<span
-				id="depth-map-status"
-				class="px-2 py-1 rounded text-sm bg-red-900/30 text-red-400"
-			>Not available</span>
-		</div>
-		<div class="flex justify-between py-2 border-b border-gray-700">
-			<span class="font-medium">Block Size:</span>
-			<span
-				id="block-size-status"
-				class="px-2 py-1 rounded text-sm bg-gray-700 text-gray-300"
-			>7</span>
-		</div>
-		<div class="flex justify-between py-2 border-b border-gray-700">
-			<span class="font-medium">Max Disparity:</span>
-			<span
-				id="max-disparity-status"
-				class="px-2 py-1 rounded text-sm bg-gray-700 text-gray-300"
-			>64</span>
+		<!-- spacer -->
+		<br/>
+		<div>
+			<!-- TODO: Add config for cameras -->
 		</div>
 	</div>
 }
