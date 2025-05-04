@@ -44,7 +44,10 @@ func ParametersHandler(logger *logger.Logger, params *despair.Parameters) APIFn 
 }
 
 // ConfigureCameraHandler handles client requests to configure the camera.
-func ConfigureCameraHandler(logger *logger.Logger, camera camera.Camer) APIFn {
+func ConfigureCameraHandler(
+	logger *logger.Logger,
+	camera camera.Camer,
+) APIFn {
 	return func(_ http.ResponseWriter, r *http.Request) error {
 		return nil
 	}

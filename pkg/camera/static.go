@@ -26,9 +26,9 @@ func NewStaticCamera(path string) *StaticCamera {
 
 var _ Camer = (*StaticCamera)(nil)
 
-// ID returns the camera ID
-func (z *StaticCamera) ID() string {
-	return filepath.Clean(z.Path)
+// ConfigurePort configures the port
+func (z *StaticCamera) ConfigurePort(_ int) error {
+	return nil
 }
 
 // Stream streams the camera

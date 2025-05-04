@@ -26,6 +26,11 @@ var _ Camer = (*OutputCamera)(nil)
 
 const defaultNumWorkers = 32
 
+// ConfigurePort configures the port implementing the Camer interface.
+func (o *OutputCamera) ConfigurePort(_ int) error {
+	return nil
+}
+
 // NewOutputCamera creates a new OutputCamera
 func NewOutputCamera(
 	logger *logger.Logger,
@@ -115,9 +120,4 @@ func (o *OutputCamera) Close() error {
 	o.Left.Stop()
 	o.Right.Stop()
 	return nil
-}
-
-// ID returns the ID of the "camera".
-func (o *OutputCamera) ID() string {
-	return "output"
 }

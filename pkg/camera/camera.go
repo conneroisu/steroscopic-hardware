@@ -12,7 +12,7 @@ import (
 type Camer interface {
 	Stream(context.Context, chan *image.Gray)
 	Close() error
-	ID() string
+	ConfigurePort(int) error
 }
 
 // StreamManager manages multiple client connections to a single camera stream
@@ -42,6 +42,12 @@ func NewStreamManager(camera Camer) *StreamManager {
 		running:    false,
 	}
 }
+
+// Lock locks the mutex
+func (b *StreamManager) Lock() { b.mu.Lock() }
+
+// Unlock unlocks the mutex
+func (b *StreamManager) Unlock() { b.mu.Unlock() }
 
 // Start begins streaming from the camera and broadcasting to clients
 func (b *StreamManager) Start() {

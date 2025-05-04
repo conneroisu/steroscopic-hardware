@@ -66,5 +66,6 @@ func AddRoutes(
 	mux.HandleFunc("GET /configure/right", handlers.Make(
 		handlers.ConfigureCameraHandler(logger, rightCam),
 	))
+	mux.HandleFunc("GET /ports", handlers.Make(handlers.GetPorts(logger)))
 	return nil
 }
