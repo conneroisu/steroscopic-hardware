@@ -50,7 +50,7 @@ func NewServer(
 	slogLogHandler := http.HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
 			logger.Info(
-				"reqwuest",
+				"request",
 				slog.String("method", r.Method),
 				slog.String("url", r.URL.String()),
 			)
