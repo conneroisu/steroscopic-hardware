@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/conneroisu/steroscopic-hardware/pkg/camera"
 	"github.com/conneroisu/steroscopic-hardware/pkg/despair"
 	"github.com/conneroisu/steroscopic-hardware/pkg/logger"
 )
@@ -38,6 +39,13 @@ func ParametersHandler(logger *logger.Logger, params *despair.Parameters) APIFn 
 		params.MaxDisparity = maxDisparity
 		logger.Info(
 			"received parameters:", "blocksize", params.BlockSize, "maxdisparity", params.MaxDisparity)
+		return nil
+	}
+}
+
+// ConfigureCameraHandler handles client requests to configure the camera.
+func ConfigureCameraHandler(logger *logger.Logger, camera camera.Camer) APIFn {
+	return func(_ http.ResponseWriter, r *http.Request) error {
 		return nil
 	}
 }

@@ -20,6 +20,7 @@ func AddRoutes(
 	logger *logger.Logger,
 	params *despair.Parameters,
 	leftStream, rightStream, outputStream *camera.StreamManager,
+	leftCam, rightCam camera.Camer,
 ) error {
 	mux.Handle(
 		"GET /",
@@ -58,12 +59,12 @@ func AddRoutes(
 	mux.HandleFunc(
 		"GET /logs",
 		handlers.Make(handlers.LogHandler(logger)))
-	//
-	// mux.HandleFunc("GET /configure/left", handlers.Make(
-	// 	handlers.ConfigureCameraHandler(logger, leftStream),
-	// ))
-	// mux.HandleFunc("GET /configure/right", handlers.Make(
-	// 	handlers.ConfigureCameraHandler(logger, rightStream),
-	// ))
+
+	mux.HandleFunc("GET /configure/left", handlers.Make(
+		handlers.ConfigureCameraHandler(logger, leftCam),
+	))
+	mux.HandleFunc("GET /configure/right", handlers.Make(
+		handlers.ConfigureCameraHandler(logger, rightCam),
+	))
 	return nil
 }
