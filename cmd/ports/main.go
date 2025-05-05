@@ -1,3 +1,4 @@
+// Package main contains the main function for the ports cli example.
 package main
 
 import (
