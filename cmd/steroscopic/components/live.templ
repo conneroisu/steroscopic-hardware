@@ -61,13 +61,18 @@ templ Live(
 					Depth Map
 				</h2>
 				<div
-					id="depth-map-image"
-					class="w-full h-64 bg-black rounded-lg overflow-hidden relative"
+					id="depth-map-container"
+					class="w-full rounded-lg overflow-hidden relative"
 				>
-					<img
-						class="absolute inset-0 flex items-center justify-center text-gray-500"
-						src="/stream/out"
-					/>
+					<div
+						id="depth-map-image"
+						class="w-full h-96 bg-black rounded-lg overflow-hidden relative"
+					>
+						<img
+							class="absolute inset-0 w-full h-full object-contain"
+							src="/stream/out"
+						/>
+					</div>
 				</div>
 			</div>
 			// Algorithm Controls Panel

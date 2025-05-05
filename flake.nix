@@ -1,5 +1,5 @@
 {
-  description = "Personal Website for Conner Ohnesorge";
+  description = "Steroscopic Hardware Project";
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";

@@ -31,7 +31,7 @@ Package despair provides an implemntation of a current Stereoscopic Depth Mappin
 
 
 <a name="AssembleDisparityMap"></a>
-## func [AssembleDisparityMap](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/despair/main.go#L169-L173>)
+## func [AssembleDisparityMap](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/despair/main.go#L168-L172>)
 
 ```go
 func AssembleDisparityMap(outputChan <-chan OutputChunk, dimensions image.Rectangle, chunks int) *image.Gray
@@ -67,7 +67,7 @@ func MustSavePNG(filename string, img image.Image)
 MustSavePNG saves a PNG image with optimizations to the given filename and panics if an error occurs.
 
 <a name="RunSad"></a>
-## func [RunSad](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/despair/main.go#L117-L120>)
+## func [RunSad](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/despair/main.go#L116-L119>)
 
 ```go
 func RunSad(left, right *image.Gray, blockSize, maxDisparity int) *image.Gray

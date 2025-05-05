@@ -1,7 +1,8 @@
 package components
 
 import (
-	"github.com/conneroisu/steroscopic-hardware/pkg/handlers"
+	"github.com/conneroisu/steroscopic-hardware/cmd/steroscopic/handlers"
+	"github.com/conneroisu/steroscopic-hardware/pkg/camera"
 	"github.com/conneroisu/steroscopic-hardware/pkg/svg"
 )
 
@@ -114,52 +115,114 @@ templ status() {
 				<h2 class="text-xl font-semibold text-gray-200">System Status</h2>
 				<span x-text="text"></span>
 			</div>
-			@statusContent()
+			<div
+				class="mt-4 space-y-2"
+				id={ handlers.TargetStatusContent.ID }
+				x-show="open_stats"
+				x-collapse
+			>
+				@cameraStatus(camera.LeftCameraType)
+				@cameraStatus(camera.RightCameraType)
+			</div>
 		</div>
 	</div>
 }
 
-templ statusContent() {
+templ cameraStatus(typeOf camera.CameraType) {
 	<div
-		class="mt-4 space-y-2"
-		id={ handlers.TargetStatusContent.ID }
-		x-show="open_stats"
-		x-collapse
+		class="bg-gray-800 rounded-lg shadow-lg p-4"
 	>
-		<div class="flex justify-between py-2 border-b border-gray-700">
-			<span class="font-medium">Left Image:</span>
-			<span
-				id="left-image-status"
-				class="px-2 py-1 rounded text-sm bg-red-900/30 text-red-400"
-			>Not uploaded</span>
+		<div class="flex justify-between items-center">
+			<span class="font-medium">{ typeOf } camera:</span>
+			<div
+				class="flex justify-between items-center cursor-pointer"
+			>
+				@svg.SettingsGear
+			</div>
 		</div>
-		<div class="flex justify-between py-2 border-b border-gray-700">
-			<span class="font-medium">Right Image:</span>
-			<span
-				id="right-image-status"
-				class="px-2 py-1 rounded text-sm bg-red-900/30 text-red-400"
-			>Not uploaded</span>
-		</div>
-		<div class="flex justify-between py-2 border-b border-gray-700">
-			<span class="font-medium">Depth Map:</span>
-			<span
-				id="depth-map-status"
-				class="px-2 py-1 rounded text-sm bg-red-900/30 text-red-400"
-			>Not available</span>
-		</div>
-		<div class="flex justify-between py-2 border-b border-gray-700">
-			<span class="font-medium">Block Size:</span>
-			<span
-				id="block-size-status"
-				class="px-2 py-1 rounded text-sm bg-gray-700 text-gray-300"
-			>7</span>
-		</div>
-		<div class="flex justify-between py-2 border-b border-gray-700">
-			<span class="font-medium">Max Disparity:</span>
-			<span
-				id="max-disparity-status"
-				class="px-2 py-1 rounded text-sm bg-gray-700 text-gray-300"
-			>64</span>
+		<!-- spacer -->
+		<br/>
+		<div class="space-y-4">
+			<!-- Camera Configuration -->
+			<div class="space-y-2">
+				<h3 class="text-sm font-medium text-gray-400">Configuration</h3>
+				<!-- Configuration Form -->
+				<form id={ string(typeOf) + "-config-form" } hx-post={ "/" + string(typeOf) + "/configure" } hx-target={ "#" + string(typeOf) + "-status" }>
+					<!-- Port Selection -->
+					<div class="flex items-center justify-between mb-2">
+						<label for={ string(typeOf) + "-port" } class="text-sm text-gray-300">Port:</label>
+						<div class="flex items-center gap-2">
+							<select
+								id={ string(typeOf) + "-port" }
+								name="port"
+								class="bg-gray-700 text-gray-200 rounded px-3 py-1 text-sm border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+							>
+								<option value="">Select port</option>
+								<option value="/dev/ttyUSB0">/dev/ttyUSB0</option>
+								<option value="/dev/ttyUSB1">/dev/ttyUSB1</option>
+								<option value="/dev/ttyS0">/dev/ttyS0</option>
+								<option value="/dev/ttyS1">/dev/ttyS1</option>
+							</select>
+							<button
+								hx-get="/ports"
+								hx-target={ "#" + string(typeOf) + "-port" }
+								class="bg-blue-600 hover:bg-blue-700 text-white rounded p-1"
+								title="Refresh available ports"
+								type="button"
+							>
+								@svg.RefreshCw
+							</button>
+						</div>
+					</div>
+					<!-- Baud Rate Setting -->
+					<div class="flex items-center justify-between mb-2">
+						<label for={ string(typeOf) + "-baud" } class="text-sm text-gray-300">Baud Rate:</label>
+						<div class="flex items-center gap-2">
+							<input
+								id={ string(typeOf) + "-baud" }
+								name="baudrate"
+								type="number"
+								value="115200"
+								class="bg-gray-700 text-gray-200 rounded px-3 py-1 text-sm border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 w-24"
+							/>
+						</div>
+					</div>
+					<!-- Camera Compression -->
+					<div class="flex items-center justify-between mb-2">
+						<span class="text-sm text-gray-300">Compression:</span>
+						<div class="flex items-center gap-2">
+							<select
+								id={ string(typeOf) + "-compression" }
+								name="compression"
+								class="bg-gray-700 text-gray-200 rounded px-3 py-1 text-sm border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 w-24"
+							>
+								<option value="0">No</option>
+								<option value="1">Yes</option>
+							</select>
+						</div>
+					</div>
+					<!-- Status Indicator -->
+					<div class="flex items-center justify-between mt-2">
+						<span class="text-sm text-gray-300">Status:</span>
+						<div
+							id={ string(typeOf) + "-status" }
+							class="flex items-center gap-2"
+						>
+							<span class="inline-block w-3 h-3 bg-red-500 rounded-full"></span>
+							<span class="text-sm">Disconnected</span>
+						</div>
+					</div>
+					<!-- Connect Button -->
+					<div class="flex justify-end mt-3">
+						<button
+							type="submit"
+							class="bg-blue-600 hover:bg-blue-700 text-white rounded px-3 py-1 text-sm"
+						>
+							Connect
+						</button>
+					</div>
+				</form>
+			</div>
 		</div>
 	</div>
 }

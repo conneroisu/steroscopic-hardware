@@ -5,9 +5,9 @@ import (
 	"net/http"
 
 	"github.com/conneroisu/steroscopic-hardware/cmd/steroscopic/components"
+	"github.com/conneroisu/steroscopic-hardware/cmd/steroscopic/handlers"
 	"github.com/conneroisu/steroscopic-hardware/pkg/camera"
 	"github.com/conneroisu/steroscopic-hardware/pkg/despair"
-	"github.com/conneroisu/steroscopic-hardware/pkg/handlers"
 	"github.com/conneroisu/steroscopic-hardware/pkg/logger"
 )
 
@@ -58,5 +58,16 @@ func AddRoutes(
 	mux.HandleFunc(
 		"GET /logs",
 		handlers.Make(handlers.LogHandler(logger)))
+
+	mux.HandleFunc(
+		"POST /left/configure",
+		handlers.Make(handlers.ConfigureCamera(logger, leftStream)),
+	)
+	mux.HandleFunc(
+		"POST /right/configure",
+		handlers.Make(handlers.ConfigureCamera(logger, rightStream)),
+	)
+
+	mux.HandleFunc("GET /ports", handlers.Make(handlers.GetPorts(logger)))
 	return nil
 }

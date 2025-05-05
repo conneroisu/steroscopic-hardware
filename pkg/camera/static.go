@@ -26,9 +26,12 @@ func NewStaticCamera(path string) *StaticCamera {
 
 var _ Camer = (*StaticCamera)(nil)
 
-// ID returns the camera ID
-func (z *StaticCamera) ID() string {
-	return filepath.Clean(z.Path)
+// Info returns the port, baud rate, and compression status of the camera.
+//
+// It is not implemented for the static camera since it does not connect to a
+// physical camera.
+func (z *StaticCamera) Info() (port string, baud int, compression bool) {
+	return "", 0, false
 }
 
 // Stream streams the camera

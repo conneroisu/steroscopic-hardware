@@ -48,14 +48,13 @@ func SetupConcurrentSAD(
 				data := make([]uint8,
 					chunk.Region.Dx()*chunk.Region.Dy(),
 				)
-
 				// Process each row in the region
 				for y := range chunk.Region.Dy() { // y := 0; y < height; y++
 					globalY := chunk.Region.Min.Y + y
 					for x := range chunk.Region.Dx() { // x := 0; x < width; x++
 						// Calculate disparity for this pixel
 						minSAD := math.MaxInt32
-						bestDisparity := 0
+						var bestDisparity int
 
 						for d := 0; d <= params.MaxDisparity; d++ {
 							// Skip if we would go beyond the left edge

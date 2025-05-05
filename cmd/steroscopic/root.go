@@ -38,8 +38,8 @@ var (
 // NewServer creates a new web-ui server
 func NewServer(
 	logger *logger.Logger,
-	leftStream, rightStream, outputStream *camera.StreamManager,
 	params *despair.Parameters,
+	leftStream, rightStream, outputStream *camera.StreamManager,
 ) (http.Handler, error) {
 	mux := http.NewServeMux()
 	err := AddRoutes(mux, logger, params, leftStream, rightStream, outputStream)
@@ -49,7 +49,7 @@ func NewServer(
 	slogLogHandler := http.HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
 			logger.Info(
-				"reqwuest",
+				"request",
 				slog.String("method", r.Method),
 				slog.String("url", r.URL.String()),
 			)
@@ -83,21 +83,21 @@ func Run(
 
 	leftCamera := camera.NewStaticCamera("./testdata/L_00001.png")
 	rightCamera := camera.NewStaticCamera("./testdata/R_00001.png")
-	leftStreamManager := camera.NewStreamManager(leftCamera)
-	rightStreamManager := camera.NewStreamManager(rightCamera)
+	leftStreamManager := camera.NewStreamManager(leftCamera, &logger)
+	rightStreamManager := camera.NewStreamManager(rightCamera, &logger)
 	outputCamera := camera.NewOutputCamera(
 		&logger,
 		&defaultParams,
 		leftStreamManager,
 		rightStreamManager,
 	)
-	outputStreamManager := camera.NewStreamManager(outputCamera)
+	outputStreamManager := camera.NewStreamManager(outputCamera, &logger)
 	handler, err := NewServer(
 		&logger,
+		&defaultParams,
 		leftStreamManager,
 		rightStreamManager,
 		outputStreamManager,
-		&defaultParams,
 	)
 	if err != nil {
 		return err

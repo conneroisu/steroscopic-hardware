@@ -17,7 +17,7 @@ Package steroscopic contains the command line interface for the application.
 ## Index
 
 - [func AddRoutes\(mux \*http.ServeMux, logger \*logger.Logger, params \*despair.Parameters, leftStream, rightStream, outputStream \*camera.StreamManager\) error](<#AddRoutes>)
-- [func NewServer\(logger \*logger.Logger, leftStream, rightStream, outputStream \*camera.StreamManager, params \*despair.Parameters\) \(http.Handler, error\)](<#NewServer>)
+- [func NewServer\(logger \*logger.Logger, params \*despair.Parameters, leftStream, rightStream, outputStream \*camera.StreamManager\) \(http.Handler, error\)](<#NewServer>)
 - [func Run\(ctx context.Context, onStart func\(\)\) error](<#Run>)
 
 
@@ -34,7 +34,7 @@ AddRoutes adds the routes/handlers to the mux.
 ## func [NewServer](<https://github.com/conneroisu/steroscopic-hardware/blob/main/cmd/steroscopic/root.go#L39-L43>)
 
 ```go
-func NewServer(logger *logger.Logger, leftStream, rightStream, outputStream *camera.StreamManager, params *despair.Parameters) (http.Handler, error)
+func NewServer(logger *logger.Logger, params *despair.Parameters, leftStream, rightStream, outputStream *camera.StreamManager) (http.Handler, error)
 ```
 
 NewServer creates a new web\-ui server

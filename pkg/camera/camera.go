@@ -6,13 +6,31 @@ import (
 	"image"
 	"log/slog"
 	"sync"
+
+	"github.com/conneroisu/steroscopic-hardware/pkg/logger"
 )
 
 // Camer is the interface for a camera.
 type Camer interface {
 	Stream(context.Context, chan *image.Gray)
 	Close() error
-	ID() string
+	Info() (port string, baud int, compression bool)
+}
+
+// Config represents all configurable camera parameters
+type Config struct {
+	Port        string
+	BaudRate    int
+	Compression int
+}
+
+// DefaultCameraConfig returns default camera configuration
+func DefaultCameraConfig() Config {
+	return Config{
+		Port:        "/dev/ttyUSB0",
+		BaudRate:    115200,
+		Compression: 0,
+	}
 }
 
 // StreamManager manages multiple client connections to a single camera stream
@@ -24,12 +42,15 @@ type StreamManager struct {
 	frames     chan *image.Gray
 	mu         sync.Mutex
 	ctx        context.Context
+	logger     *logger.Logger
 	cancel     context.CancelFunc
+	runCtx     context.Context
+	runCancel  context.CancelFunc
 	running    bool
 }
 
 // NewStreamManager creates a new broadcaster for the given camera
-func NewStreamManager(camera Camer) *StreamManager {
+func NewStreamManager(camera Camer, logger *logger.Logger) *StreamManager {
 	ctx, cancel := context.WithCancel(context.Background())
 	return &StreamManager{
 		clients:    make(map[chan *image.Gray]bool),
@@ -37,11 +58,18 @@ func NewStreamManager(camera Camer) *StreamManager {
 		Unregister: make(chan chan *image.Gray),
 		camera:     camera,
 		frames:     make(chan *image.Gray),
+		logger:     logger,
 		ctx:        ctx,
 		cancel:     cancel,
 		running:    false,
 	}
 }
+
+// Lock locks the mutex
+func (b *StreamManager) Lock() { b.mu.Lock() }
+
+// Unlock unlocks the mutex
+func (b *StreamManager) Unlock() { b.mu.Unlock() }
 
 // Start begins streaming from the camera and broadcasting to clients
 func (b *StreamManager) Start() {
@@ -51,6 +79,7 @@ func (b *StreamManager) Start() {
 		return
 	}
 	b.running = true
+	b.runCtx, b.runCancel = context.WithCancel(b.ctx)
 	b.mu.Unlock()
 
 	// Start camera stream
@@ -98,6 +127,13 @@ func (b *StreamManager) Start() {
 				b.running = false
 				b.mu.Unlock()
 				return
+
+			case <-b.runCtx.Done():
+				// Run context canceled, clean up
+				b.mu.Lock()
+				b.running = false
+				b.mu.Unlock()
+				return
 			}
 		}
 	}()
@@ -114,4 +150,49 @@ func (b *StreamManager) Stop() {
 		// Create a new context for future clients
 		b.ctx, b.cancel = context.WithCancel(context.Background())
 	}
+}
+
+// Configure configures the camera owned by this StreamManager.
+func (b *StreamManager) Configure(config Config) error {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+
+	var err error
+
+	oldPort, oldBaud, oldCompression := b.camera.Info()
+
+	var camera Camer
+	camera, err = NewSerialCamera(
+		config.Port,
+		config.BaudRate,
+		config.Compression == 1,
+	)
+	if err != nil {
+		return err
+	}
+
+	b.runCancel()
+
+	err = b.camera.Close()
+	if err != nil {
+		return err
+	}
+	b.camera = camera
+	b.logger.Info(
+		"configured camera",
+		"port",
+		config.Port,
+		"baud",
+		config.BaudRate,
+		"compression",
+		config.Compression == 1,
+		"old port",
+		oldPort,
+		"old baud",
+		oldBaud,
+		"old compression",
+		oldCompression,
+	)
+	go b.Start()
+	return nil
 }
