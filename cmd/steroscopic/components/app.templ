@@ -1,8 +1,8 @@
 package components
 
 import (
+	"github.com/conneroisu/steroscopic-hardware/cmd/steroscopic/handlers"
 	"github.com/conneroisu/steroscopic-hardware/pkg/camera"
-	"github.com/conneroisu/steroscopic-hardware/pkg/handlers"
 	"github.com/conneroisu/steroscopic-hardware/pkg/svg"
 )
 
@@ -131,6 +131,25 @@ templ status() {
 templ cameraStatus(typeOf camera.CameraType) {
 	<div
 		class="bg-gray-800 rounded-lg shadow-lg p-4"
+		x-data="{
+			port: '',
+			baudrate: 115200,
+			compression: 0,
+			sendConfig() {
+				// Create form data
+				const formData = new FormData();
+				formData.append('port', this.port);
+				formData.append('baudrate', this.baudrate);
+				formData.append('compression', this.compression);
+				
+				// Send via htmx
+				htmx.ajax('POST', '/configure/' + '{ string(typeOf) }', {
+					values: formData,
+					target: '#' + '{ string(typeOf) }' + '-status',
+					swap: 'innerHTML'
+				});
+			}
+		}"
 	>
 		<div class="flex justify-between items-center">
 			<span class="font-medium">{ typeOf } camera:</span>
@@ -154,9 +173,8 @@ templ cameraStatus(typeOf camera.CameraType) {
 							id={ string(typeOf) + "-port" }
 							name="port"
 							class="bg-gray-700 text-gray-200 rounded px-3 py-1 text-sm border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-							hx-get={ "/config/camera/" + string(typeOf) + "/port" }
-							hx-trigger="change"
-							hx-target={ "#" + string(typeOf) + "-status" }
+							x-model="port"
+							@change="sendConfig()"
 						>
 							<option value="">Select port</option>
 							<option value="/dev/ttyUSB0">/dev/ttyUSB0</option>
@@ -169,6 +187,7 @@ templ cameraStatus(typeOf camera.CameraType) {
 							hx-target={ "#" + string(typeOf) + "-port" }
 							class="bg-blue-600 hover:bg-blue-700 text-white rounded p-1"
 							title="Refresh available ports"
+							@htmx:after-settle="setTimeout(() => { port = document.getElementById('{ string(typeOf) }-port').value; sendConfig(); }, 100)"
 						>
 							@svg.RefreshCw
 						</button>
@@ -184,10 +203,24 @@ templ cameraStatus(typeOf camera.CameraType) {
 							type="number"
 							value="115200"
 							class="bg-gray-700 text-gray-200 rounded px-3 py-1 text-sm border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 w-24"
-							hx-get={ "/config/camera/" + string(typeOf) + "/baud" }
-							hx-trigger="change"
-							hx-target={ "#" + string(typeOf) + "-status" }
+							x-model="baudrate"
+							@change="sendConfig()"
 						/>
+					</div>
+				</div>
+				<!-- Camera Compression -->
+				<div class="flex items-center justify-between mt-2">
+					<span class="text-sm text-gray-300">Compression:</span>
+					<div class="flex items-center gap-2">
+						<select
+							name="compression"
+							class="bg-gray-700 text-gray-200 rounded px-3 py-1 text-sm border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 w-24"
+							x-model="compression"
+							@change="sendConfig()"
+						>
+							<option value="0">No</option>
+							<option value="1">Yes</option>
+						</select>
 					</div>
 				</div>
 				<!-- Status Indicator -->
@@ -204,9 +237,8 @@ templ cameraStatus(typeOf camera.CameraType) {
 				<!-- Connect Button -->
 				<div class="flex justify-end mt-3">
 					<button
-						hx-post={ "/camera/" + string(typeOf) + "/connect" }
-						hx-target={ "#" + string(typeOf) + "-status" }
 						class="bg-blue-600 hover:bg-blue-700 text-white rounded px-3 py-1 text-sm"
+						@click="sendConfig()"
 					>
 						Connect
 					</button>

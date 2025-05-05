@@ -12,49 +12,99 @@ import (
 	"go.bug.st/serial"
 )
 
-// SerialCameraConfig holds configuration for a camera connected via serial port
-type SerialCameraConfig struct {
-	PortName       string // Serial port name (e.g., "COM3" on Windows, "/dev/ttyUSB0" on Linux)
-	BaudRate       int    // Serial port baud rate (e.g., 115200)
-	ImageWidth     int    // Expected image width in pixels
-	ImageHeight    int    // Expected image height in pixels
-	StartDelimiter []byte // Byte sequence indicating start of image data
-	UseCompression bool   // Whether the camera sends lzma compressed data
-}
+var (
+	// DefaultStartDelimiter is the default start marker for image data
+	DefaultStartDelimiter = []byte{0xff, 0xd8}
+	// DefaultEndDelimiter is the default end marker for image data
+	DefaultEndDelimiter = []byte{0xff, 0xd9}
+	// DefaultImageWidth is the default expected image width in pixels
+	DefaultImageWidth = 640
+	// DefaultImageHeight is the default expected image height in pixels
+	DefaultImageHeight       = 480
+	_                  Camer = (*SerialCamera)(nil)
+)
 
 // SerialCamera represents a camera connected via serial port
 type SerialCamera struct {
+	ctx            context.Context
+	cancel         context.CancelFunc
 	port           serial.Port
-	mutex          sync.Mutex
+	mutex          *sync.Mutex
 	portID         string
 	StartDelimiter []byte // Byte sequence indicating start of image data
+	EndDelimiter   []byte // Byte sequence indicating end of image data
 	ImageWidth     int    // Expected image width in pixels
 	ImageHeight    int    // Expected image height in pixels
+	baudRate       int
+	useCompression bool
+	ch             chan *image.Gray
 }
 
-// DefaultStartDelimiter is the default start marker for image data
-var DefaultStartDelimiter = []byte{0xFF, 0xD8} // JPEG SOI marker
+// ConfigureCompression configures the compression of the serial port implementing the Camer interface.
+func (sc *SerialCamera) ConfigureCompression(useCompression bool) error {
+	sc.mutex.Lock()
+	defer sc.mutex.Unlock()
+	sc.useCompression = useCompression
+	return nil
+}
+
+// ConfigureBaud configures the baud rate of the serial port implementing the Camer interface.
+func (sc *SerialCamera) ConfigureBaud(baudRate int) error {
+	mu := sc.mutex
+	mu.Lock()
+	var err error
+	sc.cancel()
+	portID := sc.portID
+	ch := sc.ch
+	useCompression := sc.useCompression
+	sc, err = NewSerialCamera(portID, baudRate, useCompression)
+	if err != nil {
+		return err
+	}
+	sc.mutex = mu
+	sc.ch = ch
+	mu.Unlock()
+	return nil
+}
+
+// ConfigurePort configures the port of the serial port implementing the Camer interface.
+func (sc *SerialCamera) ConfigurePort(portName string) error {
+	sc.mutex.Lock()
+	defer sc.mutex.Unlock()
+	sc.portID = portName
+	return nil
+}
+
+// Info returns the port and baud rate of the serial port implementing the Camer interface.
+func (sc *SerialCamera) Info() (port string, baud int, compression bool) {
+	return sc.portID, sc.baudRate, sc.useCompression
+}
 
 // NewSerialCamera creates a new SerialCamera instance
-func NewSerialCamera(config SerialCameraConfig) (*SerialCamera, error) {
-	// Set defaults if not specified
-	if config.StartDelimiter == nil {
-		config.StartDelimiter = DefaultStartDelimiter
-	}
+func NewSerialCamera(
+	portName string,
+	baudRate int,
+	useCompression bool,
+) (*SerialCamera, error) {
+	ctx, cancel := context.WithCancel(context.Background())
 	sc := SerialCamera{
-		StartDelimiter: config.StartDelimiter,
-		ImageWidth:     config.ImageWidth,
-		ImageHeight:    config.ImageHeight,
+		ctx:            ctx,
+		cancel:         cancel,
+		StartDelimiter: DefaultStartDelimiter,
+		ImageWidth:     DefaultImageWidth,
+		ImageHeight:    DefaultImageHeight,
 		port:           nil,
-		mutex:          sync.Mutex{},
-		portID:         config.PortName,
+		mutex:          &sync.Mutex{},
+		portID:         portName,
+		baudRate:       baudRate,
+		useCompression: useCompression,
 	}
 	sc.mutex.Lock()
 	defer sc.mutex.Unlock()
 
 	// Configure serial port
 	mode := &serial.Mode{
-		BaudRate: config.BaudRate,
+		BaudRate: baudRate,
 		DataBits: 8,
 		Parity:   serial.NoParity,
 		StopBits: serial.OneStopBit,
@@ -64,7 +114,7 @@ func NewSerialCamera(config SerialCameraConfig) (*SerialCamera, error) {
 	var err error
 	sc.port, err = serial.Open(sc.portID, mode)
 	if err != nil {
-		return nil, fmt.Errorf("failed to open serial port %s: %v", config.PortName, err)
+		return nil, fmt.Errorf("failed to open serial port %s: %v", portName, err)
 	}
 
 	// Set read timeout
@@ -87,6 +137,8 @@ func (sc *SerialCamera) Close() error {
 		return err
 	}
 
+	sc.cancel()
+
 	return nil
 }
 
@@ -95,10 +147,13 @@ func (sc *SerialCamera) Stream(
 	ctx context.Context,
 	ch chan *image.Gray,
 ) {
+	sc.ch = ch
 	var errChan = make(chan error, 1)
 	for {
 		select {
 		case <-ctx.Done():
+			return
+		case <-sc.ctx.Done():
 			return
 		case img := <-sc.read(errChan):
 			if img == nil {
@@ -140,6 +195,8 @@ func (sc *SerialCamera) readImageData() ([]byte, error) {
 	tempBuf := make([]byte, 1024)
 
 	for {
+		sc.mutex.Lock()
+
 		n, err := sc.port.Read(tempBuf)
 		if err != nil {
 			return nil, fmt.Errorf("error reading from serial port: %v", err)
@@ -149,7 +206,6 @@ func (sc *SerialCamera) readImageData() ([]byte, error) {
 			// Timeout occurred
 			if inImageData {
 				// If we were in the middle of reading image data, we may have finished
-				// (some cameras might not send an end delimiter)
 				break
 			}
 			return nil, fmt.Errorf("timeout waiting for image data")
@@ -163,7 +219,6 @@ func (sc *SerialCamera) readImageData() ([]byte, error) {
 					inImageData = true
 					buffer.Write(startDelimiter)
 					i += len(startDelimiter) - 1 // -1 because the loop will increment i
-					continue
 				}
 			}
 		}
@@ -173,6 +228,8 @@ func (sc *SerialCamera) readImageData() ([]byte, error) {
 			// If buffer size exceeds expected image size by a lot, something might be wrong
 			return nil, fmt.Errorf("received data exceeds expected image size")
 		}
+
+		sc.mutex.Unlock()
 	}
 
 	// If we're here, we either timed out or didn't find an end delimiter

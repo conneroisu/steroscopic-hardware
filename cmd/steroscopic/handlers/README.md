@@ -9,7 +9,7 @@ Http handlers for the web ui can be found here.
 # handlers
 
 ```go
-import "github.com/conneroisu/steroscopic-hardware/pkg/handlers"
+import "github.com/conneroisu/steroscopic-hardware/cmd/steroscopic/handlers"
 ```
 
 Package handlers contains functions for handling API requests.
@@ -20,10 +20,14 @@ Package handlers contains functions for handling API requests.
 - [func Make\(fn APIFn\) http.HandlerFunc](<#Make>)
 - [func MorphableHandler\(wrapper func\(templ.Component\) templ.Component, morph templ.Component\) http.HandlerFunc](<#MorphableHandler>)
 - [type APIFn](<#APIFn>)
+  - [func ConfigureCamera\(logger \*logger.Logger, stream \*camera.StreamManager\) APIFn](<#ConfigureCamera>)
+  - [func GetPorts\(logger \*logger.Logger\) APIFn](<#GetPorts>)
   - [func LogHandler\(logger \*logger.Logger\) APIFn](<#LogHandler>)
   - [func ManualCalcDepthMapHandler\(logger \*logger.Logger\) APIFn](<#ManualCalcDepthMapHandler>)
   - [func ParametersHandler\(logger \*logger.Logger, params \*despair.Parameters\) APIFn](<#ParametersHandler>)
   - [func StreamHandlerFn\(manager \*camera.StreamManager\) APIFn](<#StreamHandlerFn>)
+- [type CameraConfig](<#CameraConfig>)
+  - [func DefaultCameraConfig\(\) CameraConfig](<#DefaultCameraConfig>)
 - [type Target](<#Target>)
 
 
@@ -61,7 +65,7 @@ var (
 ```
 
 <a name="Make"></a>
-## func [Make](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/handlers/api.go#L15>)
+## func [Make](<https://github.com/conneroisu/steroscopic-hardware/blob/main/cmd/steroscopic/handlers/api.go#L15>)
 
 ```go
 func Make(fn APIFn) http.HandlerFunc
@@ -70,7 +74,7 @@ func Make(fn APIFn) http.HandlerFunc
 Make returns a function that can be used as an http.HandlerFunc.
 
 <a name="MorphableHandler"></a>
-## func [MorphableHandler](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/handlers/api.go#L34-L37>)
+## func [MorphableHandler](<https://github.com/conneroisu/steroscopic-hardware/blob/main/cmd/steroscopic/handlers/api.go#L34-L37>)
 
 ```go
 func MorphableHandler(wrapper func(templ.Component) templ.Component, morph templ.Component) http.HandlerFunc
@@ -79,7 +83,7 @@ func MorphableHandler(wrapper func(templ.Component) templ.Component, morph templ
 MorphableHandler returns a handler that checks for the presence of the hx\-trigger header and serves either the full or morphed view.
 
 <a name="APIFn"></a>
-## type [APIFn](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/handlers/api.go#L12>)
+## type [APIFn](<https://github.com/conneroisu/steroscopic-hardware/blob/main/cmd/steroscopic/handlers/api.go#L12>)
 
 APIFn is a function that handles an API request.
 
@@ -87,8 +91,26 @@ APIFn is a function that handles an API request.
 type APIFn func(w http.ResponseWriter, r *http.Request) error
 ```
 
+<a name="ConfigureCamera"></a>
+### func [ConfigureCamera](<https://github.com/conneroisu/steroscopic-hardware/blob/main/cmd/steroscopic/handlers/configure.go#L63-L66>)
+
+```go
+func ConfigureCamera(logger *logger.Logger, stream *camera.StreamManager) APIFn
+```
+
+ConfigureCamera handles all camera configuration in a single handler
+
+<a name="GetPorts"></a>
+### func [GetPorts](<https://github.com/conneroisu/steroscopic-hardware/blob/main/cmd/steroscopic/handlers/targets.go#L14-L16>)
+
+```go
+func GetPorts(logger *logger.Logger) APIFn
+```
+
+GetPorts handles client requests to configure the camera.
+
 <a name="LogHandler"></a>
-### func [LogHandler](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/handlers/stream.go#L111-L113>)
+### func [LogHandler](<https://github.com/conneroisu/steroscopic-hardware/blob/main/cmd/steroscopic/handlers/stream.go#L111-L113>)
 
 ```go
 func LogHandler(logger *logger.Logger) APIFn
@@ -97,7 +119,7 @@ func LogHandler(logger *logger.Logger) APIFn
 LogHandler returns a handler for streaming logs to the browser console
 
 <a name="ManualCalcDepthMapHandler"></a>
-### func [ManualCalcDepthMapHandler](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/handlers/manual.go#L10-L12>)
+### func [ManualCalcDepthMapHandler](<https://github.com/conneroisu/steroscopic-hardware/blob/main/cmd/steroscopic/handlers/manual.go#L10-L12>)
 
 ```go
 func ManualCalcDepthMapHandler(logger *logger.Logger) APIFn
@@ -106,7 +128,7 @@ func ManualCalcDepthMapHandler(logger *logger.Logger) APIFn
 ManualCalcDepthMapHandler is a handler for the manual depth map calculation endpoint.
 
 <a name="ParametersHandler"></a>
-### func [ParametersHandler](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/handlers/parameters.go#L14>)
+### func [ParametersHandler](<https://github.com/conneroisu/steroscopic-hardware/blob/main/cmd/steroscopic/handlers/configure.go#L15>)
 
 ```go
 func ParametersHandler(logger *logger.Logger, params *despair.Parameters) APIFn
@@ -115,7 +137,7 @@ func ParametersHandler(logger *logger.Logger, params *despair.Parameters) APIFn
 ParametersHandler handles client requests to change the parameters of the desparity map generator.
 
 <a name="StreamHandlerFn"></a>
-### func [StreamHandlerFn](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/handlers/stream.go#L19>)
+### func [StreamHandlerFn](<https://github.com/conneroisu/steroscopic-hardware/blob/main/cmd/steroscopic/handlers/stream.go#L19>)
 
 ```go
 func StreamHandlerFn(manager *camera.StreamManager) APIFn
@@ -123,8 +145,30 @@ func StreamHandlerFn(manager *camera.StreamManager) APIFn
 
 StreamHandlerFn returns a handler for streaming camera images to multiple clients
 
+<a name="CameraConfig"></a>
+## type [CameraConfig](<https://github.com/conneroisu/steroscopic-hardware/blob/main/cmd/steroscopic/handlers/configure.go#L47-L51>)
+
+CameraConfig represents all configurable camera parameters
+
+```go
+type CameraConfig struct {
+    Port        string
+    BaudRate    int
+    Compression int
+}
+```
+
+<a name="DefaultCameraConfig"></a>
+### func [DefaultCameraConfig](<https://github.com/conneroisu/steroscopic-hardware/blob/main/cmd/steroscopic/handlers/configure.go#L54>)
+
+```go
+func DefaultCameraConfig() CameraConfig
+```
+
+DefaultCameraConfig returns default camera configuration
+
 <a name="Target"></a>
-## type [Target](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/handlers/targets.go#L4-L7>)
+## type [Target](<https://github.com/conneroisu/steroscopic-hardware/blob/main/cmd/steroscopic/handlers/targets.go#L43-L46>)
 
 Target is a struct representing a dom target.
 

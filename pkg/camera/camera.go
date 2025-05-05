@@ -3,6 +3,7 @@ package camera
 
 import (
 	"context"
+	"fmt"
 	"image"
 	"log/slog"
 	"sync"
@@ -12,7 +13,7 @@ import (
 type Camer interface {
 	Stream(context.Context, chan *image.Gray)
 	Close() error
-	ConfigurePort(int) error
+	Info() (port string, baud int, compression bool)
 }
 
 // StreamManager manages multiple client connections to a single camera stream
@@ -25,6 +26,8 @@ type StreamManager struct {
 	mu         sync.Mutex
 	ctx        context.Context
 	cancel     context.CancelFunc
+	runCtx     context.Context
+	runCancel  context.CancelFunc
 	running    bool
 }
 
@@ -57,6 +60,7 @@ func (b *StreamManager) Start() {
 		return
 	}
 	b.running = true
+	b.runCtx, b.runCancel = context.WithCancel(b.ctx)
 	b.mu.Unlock()
 
 	// Start camera stream
@@ -104,6 +108,13 @@ func (b *StreamManager) Start() {
 				b.running = false
 				b.mu.Unlock()
 				return
+
+			case <-b.runCtx.Done():
+				// Run context canceled, clean up
+				b.mu.Lock()
+				b.running = false
+				b.mu.Unlock()
+				return
 			}
 		}
 	}()
@@ -119,5 +130,39 @@ func (b *StreamManager) Stop() {
 		b.cancel()
 		// Create a new context for future clients
 		b.ctx, b.cancel = context.WithCancel(context.Background())
+	}
+}
+
+// Configure configures the camera owned by this StreamManager.
+func (b *StreamManager) Configure(val any) error {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+
+	b.runCancel()
+
+	err := b.camera.Close()
+	if err != nil {
+		return err
+	}
+
+	oldPort, oldBaud, oldCompression := b.camera.Info()
+	switch v := val.(type) {
+	case int:
+		// baud
+		b.camera, err = NewSerialCamera(oldPort, v, oldCompression)
+		go b.Start()
+		return err
+	case string:
+		// port
+		b.camera, err = NewSerialCamera(v, oldBaud, oldCompression)
+		go b.Start()
+		return err
+	case bool:
+		// compression
+		b.camera, err = NewSerialCamera(oldPort, oldBaud, v)
+		go b.Start()
+		return err
+	default:
+		return fmt.Errorf("invalid type")
 	}
 }
