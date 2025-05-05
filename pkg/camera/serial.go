@@ -29,7 +29,7 @@ type SerialCamera struct {
 	ctx            context.Context
 	cancel         context.CancelFunc
 	port           serial.Port
-	mutex          *sync.Mutex
+	mutex          sync.Mutex
 	portID         string
 	StartDelimiter []byte // Byte sequence indicating start of image data
 	EndDelimiter   []byte // Byte sequence indicating end of image data
@@ -38,41 +38,6 @@ type SerialCamera struct {
 	baudRate       int
 	useCompression bool
 	ch             chan *image.Gray
-}
-
-// ConfigureCompression configures the compression of the serial port implementing the Camer interface.
-func (sc *SerialCamera) ConfigureCompression(useCompression bool) error {
-	sc.mutex.Lock()
-	defer sc.mutex.Unlock()
-	sc.useCompression = useCompression
-	return nil
-}
-
-// ConfigureBaud configures the baud rate of the serial port implementing the Camer interface.
-func (sc *SerialCamera) ConfigureBaud(baudRate int) error {
-	mu := sc.mutex
-	mu.Lock()
-	var err error
-	sc.cancel()
-	portID := sc.portID
-	ch := sc.ch
-	useCompression := sc.useCompression
-	sc, err = NewSerialCamera(portID, baudRate, useCompression)
-	if err != nil {
-		return err
-	}
-	sc.mutex = mu
-	sc.ch = ch
-	mu.Unlock()
-	return nil
-}
-
-// ConfigurePort configures the port of the serial port implementing the Camer interface.
-func (sc *SerialCamera) ConfigurePort(portName string) error {
-	sc.mutex.Lock()
-	defer sc.mutex.Unlock()
-	sc.portID = portName
-	return nil
 }
 
 // Info returns the port and baud rate of the serial port implementing the Camer interface.
@@ -87,7 +52,6 @@ func NewSerialCamera(
 	useCompression bool,
 ) (*SerialCamera, error) {
 	ctx, cancel := context.WithCancel(context.Background())
-	mu := sync.Mutex{}
 	sc := SerialCamera{
 		ctx:            ctx,
 		cancel:         cancel,
@@ -95,7 +59,7 @@ func NewSerialCamera(
 		ImageWidth:     DefaultImageWidth,
 		ImageHeight:    DefaultImageHeight,
 		port:           nil,
-		mutex:          &mu,
+		mutex:          sync.Mutex{},
 		portID:         portName,
 		baudRate:       baudRate,
 		useCompression: useCompression,
