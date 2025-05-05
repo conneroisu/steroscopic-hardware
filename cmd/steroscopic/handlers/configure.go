@@ -89,18 +89,24 @@ func ConfigureCamera(
 		err = stream.Configure(config)
 		if err != nil {
 			// Return error response
-			w.Write([]byte(`
+			_, err = w.Write([]byte(`
 				<span class="inline-block w-3 h-3 bg-red-500 rounded-full"></span>
 				<span class="text-sm">Failed to connect: ` + err.Error() + `</span>
 			`))
+			if err != nil {
+				return fmt.Errorf("failed to write error response: %w", err)
+			}
 			return nil // Return nil to avoid additional error response
 		}
 
 		// Return success response
-		w.Write([]byte(`
+		_, err = w.Write([]byte(`
 			<span class="inline-block w-3 h-3 bg-green-500 rounded-full"></span>
 			<span class="text-sm">Connected</span>
 		`))
+		if err != nil {
+			return fmt.Errorf("failed to write success response: %w", err)
+		}
 		return nil
 	}
 }
