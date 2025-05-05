@@ -26,8 +26,6 @@ Package handlers contains functions for handling API requests.
   - [func ManualCalcDepthMapHandler\(logger \*logger.Logger\) APIFn](<#ManualCalcDepthMapHandler>)
   - [func ParametersHandler\(logger \*logger.Logger, params \*despair.Parameters\) APIFn](<#ParametersHandler>)
   - [func StreamHandlerFn\(manager \*camera.StreamManager\) APIFn](<#StreamHandlerFn>)
-- [type CameraConfig](<#CameraConfig>)
-  - [func DefaultCameraConfig\(\) CameraConfig](<#DefaultCameraConfig>)
 - [type Target](<#Target>)
 
 
@@ -92,13 +90,13 @@ type APIFn func(w http.ResponseWriter, r *http.Request) error
 ```
 
 <a name="ConfigureCamera"></a>
-### func [ConfigureCamera](<https://github.com/conneroisu/steroscopic-hardware/blob/main/cmd/steroscopic/handlers/configure.go#L63-L66>)
+### func [ConfigureCamera](<https://github.com/conneroisu/steroscopic-hardware/blob/main/cmd/steroscopic/handlers/configure.go#L47-L50>)
 
 ```go
 func ConfigureCamera(logger *logger.Logger, stream *camera.StreamManager) APIFn
 ```
 
-ConfigureCamera handles all camera configuration in a single handler
+ConfigureCamera handles client requests to configure all camera parameters at once.
 
 <a name="GetPorts"></a>
 ### func [GetPorts](<https://github.com/conneroisu/steroscopic-hardware/blob/main/cmd/steroscopic/handlers/targets.go#L14-L16>)
@@ -144,28 +142,6 @@ func StreamHandlerFn(manager *camera.StreamManager) APIFn
 ```
 
 StreamHandlerFn returns a handler for streaming camera images to multiple clients
-
-<a name="CameraConfig"></a>
-## type [CameraConfig](<https://github.com/conneroisu/steroscopic-hardware/blob/main/cmd/steroscopic/handlers/configure.go#L47-L51>)
-
-CameraConfig represents all configurable camera parameters
-
-```go
-type CameraConfig struct {
-    Port        string
-    BaudRate    int
-    Compression int
-}
-```
-
-<a name="DefaultCameraConfig"></a>
-### func [DefaultCameraConfig](<https://github.com/conneroisu/steroscopic-hardware/blob/main/cmd/steroscopic/handlers/configure.go#L54>)
-
-```go
-func DefaultCameraConfig() CameraConfig
-```
-
-DefaultCameraConfig returns default camera configuration
 
 <a name="Target"></a>
 ## type [Target](<https://github.com/conneroisu/steroscopic-hardware/blob/main/cmd/steroscopic/handlers/targets.go#L43-L46>)
