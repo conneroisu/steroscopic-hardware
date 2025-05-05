@@ -5,4 +5,7 @@
 !/**/
 !*.*
 
+# Allow Makefile
+!Makefile
+
 *.o
