@@ -161,6 +161,7 @@
             harper
             htmx-lsp
             openssl.dev
+            yaml-language-server
           ]
           ++ (with pkgs;
             lib.optionals stdenv.isDarwin [

@@ -1,3 +1,4 @@
+// Package main contains the main function for the ports cli example.
 package main
 
 import (
@@ -15,9 +16,6 @@ func main() {
 }
 
 func doStuff() {
-	targetID := "1a86:7523" // the esp boards
-
-	var found *enumerator.PortDetails
 	for {
 		ports, err := enumerator.GetDetailedPortsList()
 		if err != nil {
@@ -34,22 +32,10 @@ func doStuff() {
 			if port.IsUSB {
 				fmt.Printf("   USB ID     %s:%s\n", port.VID, port.PID)
 				fmt.Printf("   USB serial %s\n", port.SerialNumber)
-				if port.VID+":"+port.PID == targetID {
-					if found != nil {
-						slog.Error("Multiple ports found with expected ID", "id", targetID)
-						time.Sleep(1 * time.Second)
-						continue
-					}
-					found = port
-				}
 			}
 			if port.Product != "" {
 				fmt.Printf("   Product    %s\n", port.Product)
 			}
-		}
-
-		if found != nil {
-			break
 		}
 
 		time.Sleep(1 * time.Second)
