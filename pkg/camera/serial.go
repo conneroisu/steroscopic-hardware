@@ -64,8 +64,6 @@ func NewSerialCamera(
 		baudRate:       baudRate,
 		useCompression: useCompression,
 	}
-	sc.mutex.Lock()
-	defer sc.mutex.Unlock()
 
 	// Configure serial port
 	mode := &serial.Mode{

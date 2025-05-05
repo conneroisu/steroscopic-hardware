@@ -157,20 +157,42 @@ func (b *StreamManager) Configure(config Config) error {
 	b.mu.Lock()
 	defer b.mu.Unlock()
 
-	b.runCancel()
-
-	err := b.camera.Close()
-	if err != nil {
-		return err
-	}
+	var err error
 
 	oldPort, oldBaud, oldCompression := b.camera.Info()
 
-	b.camera, err = NewSerialCamera(config.Port, config.BaudRate, config.Compression == 1)
+	var camera Camer
+	camera, err = NewSerialCamera(
+		config.Port,
+		config.BaudRate,
+		config.Compression == 1,
+	)
 	if err != nil {
 		return err
 	}
-	b.logger.Info("configured camera", "port", config.Port, "baud", config.BaudRate, "compression", config.Compression == 1, "old port", oldPort, "old baud", oldBaud, "old compression", oldCompression)
+
+	b.runCancel()
+
+	err = b.camera.Close()
+	if err != nil {
+		return err
+	}
+	b.camera = camera
+	b.logger.Info(
+		"configured camera",
+		"port",
+		config.Port,
+		"baud",
+		config.BaudRate,
+		"compression",
+		config.Compression == 1,
+		"old port",
+		oldPort,
+		"old baud",
+		oldBaud,
+		"old compression",
+		oldCompression,
+	)
 	go b.Start()
 	return nil
 }

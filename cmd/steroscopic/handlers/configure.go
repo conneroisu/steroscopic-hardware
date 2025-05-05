@@ -49,6 +49,7 @@ func ConfigureCamera(
 	stream *camera.StreamManager,
 ) APIFn {
 	return func(w http.ResponseWriter, r *http.Request) error {
+		var compression int
 		// Parse form data
 		err := r.ParseForm()
 		if err != nil {
@@ -78,7 +79,7 @@ func ConfigureCamera(
 
 		// Configure compression if provided
 		if compressionStr != "" {
-			compression, err := strconv.Atoi(compressionStr)
+			compression, err = strconv.Atoi(compressionStr)
 			if err != nil {
 				return fmt.Errorf("invalid compression value: %w", err)
 			}
@@ -90,8 +91,7 @@ func ConfigureCamera(
 		if err != nil {
 			// Return error response
 			_, err = w.Write([]byte(`
-				<span class="inline-block w-3 h-3 bg-red-500 rounded-full"></span>
-				<span class="text-sm">Failed to connect: ` + err.Error() + `</span>
+				<span class="text-sm text-red-500">Failed to connect: ` + err.Error() + `</span>
 			`))
 			if err != nil {
 				return fmt.Errorf("failed to write error response: %w", err)
@@ -101,8 +101,7 @@ func ConfigureCamera(
 
 		// Return success response
 		_, err = w.Write([]byte(`
-			<span class="inline-block w-3 h-3 bg-green-500 rounded-full"></span>
-			<span class="text-sm">Connected</span>
+			<span class="text-sm text-green-500">Successfully connected</span>
 		`))
 		if err != nil {
 			return fmt.Errorf("failed to write success response: %w", err)
