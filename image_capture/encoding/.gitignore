@@ -1,0 +1,8 @@
+# Ignore everything
+*
+
+# Allow for folders and files with extensions
+!/**/
+!*.*
+
+*.o
