@@ -3,10 +3,11 @@ package camera
 
 import (
 	"context"
-	"fmt"
 	"image"
 	"log/slog"
 	"sync"
+
+	"github.com/conneroisu/steroscopic-hardware/pkg/logger"
 )
 
 // Camer is the interface for a camera.
@@ -14,6 +15,22 @@ type Camer interface {
 	Stream(context.Context, chan *image.Gray)
 	Close() error
 	Info() (port string, baud int, compression bool)
+}
+
+// Config represents all configurable camera parameters
+type Config struct {
+	Port        string
+	BaudRate    int
+	Compression int
+}
+
+// DefaultCameraConfig returns default camera configuration
+func DefaultCameraConfig() Config {
+	return Config{
+		Port:        "/dev/ttyUSB0",
+		BaudRate:    115200,
+		Compression: 0,
+	}
 }
 
 // StreamManager manages multiple client connections to a single camera stream
@@ -25,6 +42,7 @@ type StreamManager struct {
 	frames     chan *image.Gray
 	mu         sync.Mutex
 	ctx        context.Context
+	logger     *logger.Logger
 	cancel     context.CancelFunc
 	runCtx     context.Context
 	runCancel  context.CancelFunc
@@ -32,7 +50,7 @@ type StreamManager struct {
 }
 
 // NewStreamManager creates a new broadcaster for the given camera
-func NewStreamManager(camera Camer) *StreamManager {
+func NewStreamManager(camera Camer, logger *logger.Logger) *StreamManager {
 	ctx, cancel := context.WithCancel(context.Background())
 	return &StreamManager{
 		clients:    make(map[chan *image.Gray]bool),
@@ -40,6 +58,7 @@ func NewStreamManager(camera Camer) *StreamManager {
 		Unregister: make(chan chan *image.Gray),
 		camera:     camera,
 		frames:     make(chan *image.Gray),
+		logger:     logger,
 		ctx:        ctx,
 		cancel:     cancel,
 		running:    false,
@@ -134,7 +153,7 @@ func (b *StreamManager) Stop() {
 }
 
 // Configure configures the camera owned by this StreamManager.
-func (b *StreamManager) Configure(val any) error {
+func (b *StreamManager) Configure(config Config) error {
 	b.mu.Lock()
 	defer b.mu.Unlock()
 
@@ -146,23 +165,12 @@ func (b *StreamManager) Configure(val any) error {
 	}
 
 	oldPort, oldBaud, oldCompression := b.camera.Info()
-	switch v := val.(type) {
-	case int:
-		// baud
-		b.camera, err = NewSerialCamera(oldPort, v, oldCompression)
-		go b.Start()
+
+	b.camera, err = NewSerialCamera(config.Port, config.BaudRate, config.Compression == 1)
+	if err != nil {
 		return err
-	case string:
-		// port
-		b.camera, err = NewSerialCamera(v, oldBaud, oldCompression)
-		go b.Start()
-		return err
-	case bool:
-		// compression
-		b.camera, err = NewSerialCamera(oldPort, oldBaud, v)
-		go b.Start()
-		return err
-	default:
-		return fmt.Errorf("invalid type")
 	}
+	b.logger.Info("configured camera", "port", config.Port, "baud", config.BaudRate, "compression", config.Compression == 1, "old port", oldPort, "old baud", oldBaud, "old compression", oldCompression)
+	go b.Start()
+	return nil
 }

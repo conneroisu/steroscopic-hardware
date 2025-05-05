@@ -43,107 +43,64 @@ func ParametersHandler(logger *logger.Logger, params *despair.Parameters) APIFn 
 	}
 }
 
-// CameraConfig represents all configurable camera parameters
-type CameraConfig struct {
-	Port        string
-	BaudRate    int
-	Compression int
-}
-
-// DefaultCameraConfig returns default camera configuration
-func DefaultCameraConfig() CameraConfig {
-	return CameraConfig{
-		Port:        "",
-		BaudRate:    115200,
-		Compression: 0,
-	}
-}
-
-// ConfigureCamera handles all camera configuration in a single handler
+// ConfigureCamera handles client requests to configure all camera parameters at once.
 func ConfigureCamera(
 	logger *logger.Logger,
 	stream *camera.StreamManager,
 ) APIFn {
 	return func(w http.ResponseWriter, r *http.Request) error {
-		// Parse form/query data
-		if err := r.ParseForm(); err != nil {
+		// Parse form data
+		err := r.ParseForm()
+		if err != nil {
 			return fmt.Errorf("failed to parse form data: %w", err)
 		}
+		config := camera.DefaultCameraConfig()
 
-		config := DefaultCameraConfig()
+		// Get all camera parameters
+		config.Port = r.FormValue("port")
+		baudStr := r.FormValue("baudrate")
+		compressionStr := r.FormValue("compression")
 
-		// Get port value (check both form values and query parameters)
-		if port := r.FormValue("port"); port != "" {
-			config.Port = port
-		} else if port := r.URL.Query().Get("port"); port != "" {
-			config.Port = port
-		}
-
-		// Get baud rate value
-		if baudStr := r.FormValue("baudrate"); baudStr != "" {
-			baud, err := strconv.Atoi(baudStr)
-			if err != nil {
-				return fmt.Errorf("invalid baud rate value: %w", err)
-			}
-			config.BaudRate = baud
-		} else if baudStr := r.URL.Query().Get("baudrate"); baudStr != "" {
-			baud, err := strconv.Atoi(baudStr)
-			if err != nil {
-				return fmt.Errorf("invalid baud rate value: %w", err)
-			}
-			config.BaudRate = baud
-		}
-
-		// Get compression value
-		if compStr := r.FormValue("compression"); compStr != "" {
-			comp, err := strconv.Atoi(compStr)
-			if err != nil {
-				return fmt.Errorf("invalid compression value: %w", err)
-			}
-			config.Compression = comp
-		} else if compStr := r.URL.Query().Get("compression"); compStr != "" {
-			comp, err := strconv.Atoi(compStr)
-			if err != nil {
-				return fmt.Errorf("invalid compression value: %w", err)
-			}
-			config.Compression = comp
-		}
-
-		// Configure the camera with all parameters
-		logger.Info("configuring camera",
-			"port", config.Port,
-			"baudrate", config.BaudRate,
-			"compression", config.Compression)
-
-		// First configure port if provided
+		// Configure port if provided
 		if config.Port != "" {
-			if err := stream.Configure(config.Port); err != nil {
-				return fmt.Errorf("failed to configure camera port: %w", err)
+			logger.Info("configured camera port", "port", config.Port)
+		}
+
+		// Configure baud rate if provided
+		if baudStr != "" {
+			config.BaudRate, err = strconv.Atoi(baudStr)
+			if err != nil {
+				return fmt.Errorf("invalid baud value: %w", err)
 			}
+
+			logger.Info("configured camera baud rate", "baud", config.BaudRate)
 		}
 
-		// Then configure baud rate
-		if err := stream.Configure(config.BaudRate); err != nil {
-			return fmt.Errorf("failed to configure camera baud rate: %w", err)
+		// Configure compression if provided
+		if compressionStr != "" {
+			compression, err := strconv.Atoi(compressionStr)
+			if err != nil {
+				return fmt.Errorf("invalid compression value: %w", err)
+			}
+			logger.Info("configured camera compression", "compression", compression)
 		}
 
-		// Finally configure compression
-		if err := stream.Configure(config.Compression); err != nil {
-			return fmt.Errorf("failed to configure camera compression: %w", err)
+		// After configuration, attempt to connect
+		err = stream.Configure(config)
+		if err != nil {
+			// Return error response
+			w.Write([]byte(`
+				<span class="inline-block w-3 h-3 bg-red-500 rounded-full"></span>
+				<span class="text-sm">Failed to connect: ` + err.Error() + `</span>
+			`))
+			return nil // Return nil to avoid additional error response
 		}
 
-		// Write a status response
-		w.Header().Set("Content-Type", "text/html")
-		connected := (config.Port != "")
-		var statusHTML string
-		if connected {
-			statusHTML = `<span class="inline-block w-3 h-3 bg-green-500 rounded-full"></span>
-<span class="text-sm">Connected</span>`
-		} else {
-			statusHTML = `<span class="inline-block w-3 h-3 bg-red-500 rounded-full"></span>
-<span class="text-sm">Disconnected</span>`
-		}
-		_, err := w.Write([]byte(statusHTML))
-		return err
+		// Return success response
+		w.Write([]byte(`
+			<span class="inline-block w-3 h-3 bg-green-500 rounded-full"></span>
+			<span class="text-sm">Connected</span>
+		`))
+		return nil
 	}
 }

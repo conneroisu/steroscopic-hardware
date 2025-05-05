@@ -87,6 +87,7 @@ func NewSerialCamera(
 	useCompression bool,
 ) (*SerialCamera, error) {
 	ctx, cancel := context.WithCancel(context.Background())
+	mu := sync.Mutex{}
 	sc := SerialCamera{
 		ctx:            ctx,
 		cancel:         cancel,
@@ -94,7 +95,7 @@ func NewSerialCamera(
 		ImageWidth:     DefaultImageWidth,
 		ImageHeight:    DefaultImageHeight,
 		port:           nil,
-		mutex:          &sync.Mutex{},
+		mutex:          &mu,
 		portID:         portName,
 		baudRate:       baudRate,
 		useCompression: useCompression,

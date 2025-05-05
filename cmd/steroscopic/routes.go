@@ -59,13 +59,14 @@ func AddRoutes(
 		"GET /logs",
 		handlers.Make(handlers.LogHandler(logger)))
 
-	// Unified camera configuration endpoints - support both GET and POST
-	mux.HandleFunc("GET /configure/left", handlers.Make(
-		handlers.ConfigureCamera(logger, leftStream),
-	))
-	mux.HandleFunc("GET /configure/right", handlers.Make(
-		handlers.ConfigureCamera(logger, rightStream),
-	))
+	mux.HandleFunc(
+		"POST /left/configure",
+		handlers.Make(handlers.ConfigureCamera(logger, leftStream)),
+	)
+	mux.HandleFunc(
+		"POST /right/configure",
+		handlers.Make(handlers.ConfigureCamera(logger, rightStream)),
+	)
 
 	mux.HandleFunc("GET /ports", handlers.Make(handlers.GetPorts(logger)))
 	return nil

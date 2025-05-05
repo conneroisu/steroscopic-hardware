@@ -83,15 +83,15 @@ func Run(
 
 	leftCamera := camera.NewStaticCamera("./testdata/L_00001.png")
 	rightCamera := camera.NewStaticCamera("./testdata/R_00001.png")
-	leftStreamManager := camera.NewStreamManager(leftCamera)
-	rightStreamManager := camera.NewStreamManager(rightCamera)
+	leftStreamManager := camera.NewStreamManager(leftCamera, &logger)
+	rightStreamManager := camera.NewStreamManager(rightCamera, &logger)
 	outputCamera := camera.NewOutputCamera(
 		&logger,
 		&defaultParams,
 		leftStreamManager,
 		rightStreamManager,
 	)
-	outputStreamManager := camera.NewStreamManager(outputCamera)
+	outputStreamManager := camera.NewStreamManager(outputCamera, &logger)
 	handler, err := NewServer(
 		&logger,
 		&defaultParams,
