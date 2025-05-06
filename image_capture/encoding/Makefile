@@ -1,5 +1,5 @@
-EXEC_NAME = range_code
-SOURCE_FILE_NAMES = range_code
+EXEC_NAME = range_code_demo
+SOURCE_FILE_NAMES = range_code demo
 OBJS = $(foreach src,$(SOURCE_FILE_NAMES),$(src).o)
 
 # .o rules are implicit
