@@ -1,12 +1,12 @@
 package camera
 
-// CameraType is a type for cameras.
+// Type is a type for cameras.
 // string
-type CameraType string
+type Type string
 
 const (
 	// LeftCameraType is the type for the left camera.
-	LeftCameraType CameraType = "left"
+	LeftCameraType Type = "left"
 	// RightCameraType is the type for the right camera.
-	RightCameraType CameraType = "right"
+	RightCameraType Type = "right"
 )

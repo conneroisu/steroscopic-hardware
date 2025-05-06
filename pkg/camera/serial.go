@@ -209,8 +209,12 @@ func (sc *SerialCamera) convertRawToImage(data []byte) (*image.Gray, error) {
 
 	// Check if we have reasonable data size for grayscale or RGB format
 	if len(data) != expectedSize && len(data) != expectedSize*3 {
-		return nil, fmt.Errorf("unexpected data size: got %d bytes, expected %d (grayscale) or %d (RGB)",
-			len(data), expectedSize, expectedSize*3)
+		return nil, fmt.Errorf(
+			"unexpected data size: got %d bytes, expected %d (grayscale) or %d (RGB)",
+			len(data),
+			expectedSize,
+			expectedSize*3,
+		)
 	}
 
 	// Create a new RGBA image
@@ -226,14 +230,11 @@ func (sc *SerialCamera) convertRawToImage(data []byte) (*image.Gray, error) {
 			}
 		}
 	} else {
-		// RGB format (3 bytes per pixel)
-		for y := range sc.ImageHeight { // y := 0; y < sc.config.ImageHeight; y++
-			for x := range sc.ImageWidth { // x := 0; x < sc.config.ImageWidth; x++
-				i := (y*sc.ImageWidth + x) * 3
-				r, g, b := data[i], data[i+1], data[i+2]
-				img.Set(x, y, color.RGBA{r, g, b, 255})
-			}
-		}
+		return nil, fmt.Errorf(
+			"unexpected data size: got %d bytes, expected %d (grayscale)",
+			len(data),
+			expectedSize,
+		)
 	}
 
 	return img, nil
