@@ -73,6 +73,7 @@ func TestGeneratedFiles(t *testing.T) {
 	t.Run("Decoder", func(t *testing.T) {
 		for _, tt := range tests {
 			t.Run(tt.name, func(t *testing.T) {
+				t.Parallel()
 				testDecoder(t, tt)
 			})
 		}
@@ -82,6 +83,7 @@ func TestGeneratedFiles(t *testing.T) {
 	t.Run("Encoder", func(t *testing.T) {
 		for _, tt := range tests {
 			t.Run(tt.name, func(t *testing.T) {
+				t.Parallel()
 				testEncoder(t, tt)
 			})
 		}
@@ -91,6 +93,7 @@ func TestGeneratedFiles(t *testing.T) {
 	t.Run("RoundTrip", func(t *testing.T) {
 		for _, tt := range tests {
 			t.Run(tt.name, func(t *testing.T) {
+				t.Parallel()
 				testRoundTrip(t, tt)
 			})
 		}
