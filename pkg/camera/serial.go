@@ -18,51 +18,56 @@ var (
 	// DefaultEndDelimiter is the default end marker for image data
 	DefaultEndDelimiter = []byte{0xff, 0xd9}
 	// DefaultImageWidth is the default expected image width in pixels
-	DefaultImageWidth = 640
+	DefaultImageWidth = 1920
 	// DefaultImageHeight is the default expected image height in pixels
-	DefaultImageHeight       = 480
+	DefaultImageHeight       = 1080
 	_                  Camer = (*SerialCamera)(nil)
 )
 
-// SerialCamera represents a camera connected via serial port
-type SerialCamera struct {
-	ctx            context.Context
-	cancel         context.CancelFunc
-	port           serial.Port
-	mutex          sync.Mutex
-	portID         string
-	StartDelimiter []byte // Byte sequence indicating start of image data
-	EndDelimiter   []byte // Byte sequence indicating end of image data
-	ImageWidth     int    // Expected image width in pixels
-	ImageHeight    int    // Expected image height in pixels
-	baudRate       int
-	useCompression bool
-	ch             chan *image.Gray
-}
+type (
+	// SerialCamera represents a camera connected via serial port
+	SerialCamera struct {
+		mu             sync.Mutex
+		ctx            context.Context
+		cancel         context.CancelFunc
+		port           serial.Port
+		portID         string
+		StartDelimiter []byte // Byte sequence indicating start of image data
+		EndDelimiter   []byte // Byte sequence indicating end of image data
+		ImageWidth     int    // Expected image width in pixels
+		ImageHeight    int    // Expected image height in pixels
+		baudRate       int
+		useCompression bool
+		ch             chan *image.Gray
+	}
 
-// Info returns the port and baud rate of the serial port implementing the Camer interface.
-func (sc *SerialCamera) Info() (port string, baud int, compression bool) {
-	return sc.portID, sc.baudRate, sc.useCompression
-}
+	// SerialCameraOption is a function that configures a SerialCamera.
+	SerialCameraOption func(*SerialCamera)
+)
 
 // NewSerialCamera creates a new SerialCamera instance
 func NewSerialCamera(
 	portName string,
 	baudRate int,
 	useCompression bool,
+	opts ...SerialCameraOption,
 ) (*SerialCamera, error) {
 	ctx, cancel := context.WithCancel(context.Background())
 	sc := SerialCamera{
 		ctx:            ctx,
 		cancel:         cancel,
 		StartDelimiter: DefaultStartDelimiter,
+		EndDelimiter:   DefaultEndDelimiter,
 		ImageWidth:     DefaultImageWidth,
 		ImageHeight:    DefaultImageHeight,
 		port:           nil,
-		mutex:          sync.Mutex{},
+		mu:             sync.Mutex{},
 		portID:         portName,
 		baudRate:       baudRate,
 		useCompression: useCompression,
+	}
+	for _, opt := range opts {
+		opt(&sc)
 	}
 
 	// Configure serial port
@@ -90,10 +95,20 @@ func NewSerialCamera(
 	return &sc, nil
 }
 
+// WithStartDelimiter sets the start delimiter for the serial camera.
+func WithStartDelimiter(startDelimiter []byte) SerialCameraOption {
+	return func(sc *SerialCamera) { sc.StartDelimiter = startDelimiter }
+}
+
+// WithEndDelimiter sets the end delimiter for the serial camera.
+func WithEndDelimiter(endDelimiter []byte) SerialCameraOption {
+	return func(sc *SerialCamera) { sc.EndDelimiter = endDelimiter }
+}
+
 // Close closes the serial connection
 func (sc *SerialCamera) Close() error {
-	sc.mutex.Lock()
-	defer sc.mutex.Unlock()
+	sc.mu.Lock()
+	defer sc.mu.Unlock()
 
 	err := sc.port.Close()
 	if err != nil {
@@ -110,6 +125,8 @@ func (sc *SerialCamera) Stream(
 	ctx context.Context,
 	ch chan *image.Gray,
 ) {
+	sc.mu.Lock()
+	defer sc.mu.Unlock()
 	sc.ch = ch
 	var errChan = make(chan error, 1)
 	for {
@@ -158,7 +175,7 @@ func (sc *SerialCamera) readImageData() ([]byte, error) {
 	tempBuf := make([]byte, 1024)
 
 	for {
-		sc.mutex.Lock()
+		sc.mu.Lock()
 
 		n, err := sc.port.Read(tempBuf)
 		if err != nil {
@@ -192,7 +209,7 @@ func (sc *SerialCamera) readImageData() ([]byte, error) {
 			return nil, fmt.Errorf("received data exceeds expected image size")
 		}
 
-		sc.mutex.Unlock()
+		sc.mu.Unlock()
 	}
 
 	// If we're here, we either timed out or didn't find an end delimiter

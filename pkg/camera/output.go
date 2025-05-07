@@ -26,14 +26,6 @@ var _ Camer = (*OutputCamera)(nil)
 
 const defaultNumWorkers = 32
 
-// Info returns the port, baud rate, and compression status of the camera.
-//
-// It is not implemented for the output camera since it does not connect to a
-// physical camera.
-func (o *OutputCamera) Info() (port string, baud int, compression bool) {
-	return "", 0, false
-}
-
 // NewOutputCamera creates a new OutputCamera
 func NewOutputCamera(
 	logger *logger.Logger,

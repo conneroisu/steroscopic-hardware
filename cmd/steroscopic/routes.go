@@ -9,6 +9,7 @@ import (
 	"github.com/conneroisu/steroscopic-hardware/pkg/camera"
 	"github.com/conneroisu/steroscopic-hardware/pkg/despair"
 	"github.com/conneroisu/steroscopic-hardware/pkg/logger"
+	"github.com/conneroisu/steroscopic-hardware/pkg/web"
 )
 
 //go:embed static/*
@@ -27,11 +28,11 @@ func AddRoutes(
 	)
 
 	mux.Handle("GET /{$}", handlers.MorphableHandler(
-		components.AppFn(handlers.LivePageTitle),
+		components.AppFn(web.LivePageTitle),
 		components.Live(params.BlockSize, params.MaxDisparity),
 	))
 	mux.Handle("GET /manual", handlers.MorphableHandler(
-		components.AppFn(handlers.ManualPageTitle),
+		components.AppFn(web.ManualPageTitle),
 		components.Manual(params.BlockSize, params.MaxDisparity),
 	))
 
@@ -69,5 +70,6 @@ func AddRoutes(
 	)
 
 	mux.HandleFunc("GET /ports", handlers.Make(handlers.GetPorts(logger)))
+	mux.HandleFunc("POST /preview-delimiter", handlers.PreviewDelimiterHandler)
 	return nil
 }
