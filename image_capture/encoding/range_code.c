@@ -14,18 +14,6 @@ typedef struct
 
 const uint32_t MAX_RANGE = UINT32_MAX;
 
-range_t get_next_range(uint8_t symbol, range_t current_range, counts_t** counts, size_t size)
-{
-    range_t result = {.low = 0, .high = 0};
-
-    size_t prev_range_size = current_range.high - current_range.low;
-
-    result.low = (uint32_t) (((*counts)[symbol].previous_count_sum * prev_range_size) / size);
-    result.high = ((uint32_t) (((*counts)[symbol].current_count * prev_range_size) / size)) + result.low;
-
-    return result;
-}
-
 /* 
     Basic Description:
     Range encoding uses integer ranges whose range size is proportional to the probability
@@ -42,7 +30,7 @@ range_t get_next_range(uint8_t symbol, range_t current_range, counts_t** counts,
     the "low" and "high" range values by simply multiplying the previous sequence's range size by the
     sum of prior probabilities and the current symbol probability. This results in the following equation:
 
-    new_low_n = Sum(prob_0 to prob_n-1) * prev_seq_range_size
+    new_low_n = low_n-1 + Sum(prob_0 to prob_n-1) * prev_seq_range_size
     new_high_n = new_low_n + prob_n * prev_seq_range_size
 
     In addition, since we are dealing with a large data set, there will be basically an uncountable number of possible sequences,
@@ -53,6 +41,7 @@ size_t range_code(uint8_t* uncoded, uint8_t* coded, size_t size)
 {
     size_t result = 0;
     uint8_t* next_coded = coded;
+    uint8_t* next_uncoded = uncoded;
 
     range_t range = {.low = 0, .high = MAX_RANGE};
 
@@ -66,7 +55,7 @@ size_t range_code(uint8_t* uncoded, uint8_t* coded, size_t size)
     // Count the bytes
     for(size_t i = 0; i < size; ++i)
     {
-        byte_counts[uncoded[size]].current_count++;
+        byte_counts[uncoded[i]].current_count++;
     }
 
     // Calculate the previous counts
@@ -79,9 +68,16 @@ size_t range_code(uint8_t* uncoded, uint8_t* coded, size_t size)
     size_t block_count = size / 4;
 
     // Iterate through all blocks.
-    for(size_t i = 0; i < block_count; ++i)
+    for(size_t i = 0; i < size; ++i)
     {
+        // See if we can shift off a bit.
 
+        // Calculate the next range
+        size_t prev_range_size = range.high - range.low;
+
+        range.low += (uint32_t) ((byte_counts[*next_uncoded].previous_count_sum * prev_range_size) / size);
+        range.high = ((uint32_t) ((byte_counts[*next_uncoded].current_count * prev_range_size) / size)) + range.low;
+        next_uncoded++;
     }
 
     return result;
