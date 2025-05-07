@@ -1,0 +1,7 @@
+
+<div style="width: 30px; height: 30px;">
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <!-- Upward-pointing triangle -->
+  <path d="M50 10 L90 80 L10 80 Z" fill="#2ecc71" stroke="#27ae60" stroke-width="2"/>
+</svg>
+</div>

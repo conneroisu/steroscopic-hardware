@@ -1,0 +1,10 @@
+{
+  "theme": "obsidian",
+  "accentColor": "",
+  "baseFontSize": 11,
+  "enabledCssSnippets": [
+    "poetry"
+  ],
+  "textFontFamily": "Times New Roman",
+  "cssTheme": ""
+}
