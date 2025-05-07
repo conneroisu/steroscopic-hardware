@@ -1,11 +1,12 @@
 EXEC_NAME = range_code_demo
 SOURCE_FILE_NAMES = range_code demo
 OBJS = $(foreach src,$(SOURCE_FILE_NAMES),$(src).o)
-CFLAGS += -g
+CC_ARGS = -g
+CFLAGS += $(CC_ARGS)
 
 # .o rules are implicit
 $(EXEC_NAME) : $(OBJS)
-	cc -g -o $@ $^
+	cc $(CC_ARGS) -o $@ $^
 
 .PHONY : clean
 clean :
