@@ -259,7 +259,12 @@ templ cameraStatus(typeOf camera.Type) {
 					</div>
 					<!-- Start Delimiter -->
 					<div class="flex flex-col mt-2">
-						<span class="text-sm text-gray-300 mb-1">Start delimiter:</span>
+						<div
+							class="flex flex-row"
+						>
+							<span class="text-sm text-gray-300 mb-1">Start delimiter:</span>
+							@web.GreenUp
+						</div>
 						<input
 							type="text"
 							name="startdelimiter"
@@ -273,12 +278,17 @@ templ cameraStatus(typeOf camera.Type) {
 						/>
 					</div>
 					<!-- End Delimiter -->
-					<div class="flex flex-col mt-3">
-						<span
-							class="text-sm text-gray-300 mb-1"
+					<div class="flex flex-col mt-2">
+						<div
+							class="flex flex-row"
 						>
-							End delimiter:
-						</span>
+							<span
+								class="text-sm text-gray-300 mb-1"
+							>
+								End delimiter:
+							</span>
+							@web.RedDown
+						</div>
 						<input
 							type="text"
 							name="enddelimiter"
@@ -292,44 +302,58 @@ templ cameraStatus(typeOf camera.Type) {
 						/>
 					</div>
 					<!-- Preview Container - HTMX will update this -->
-					<div
-						id={ string(typeOf) + "-preview-container" }
-						class="mt-3"
-					>
-						<div class="flex flex-col">
-							<span
-								class="text-sm text-gray-300 mb-1"
-							>
-								Start preview:
-							</span>
-							<div
-								class="bg-gray-700 text-gray-200 rounded px-3 py-2 text-sm border border-gray-600 min-h-8 font-mono"
-								id={ string(typeOf) + "-startPreview" }
-							>
-								Preview will appear here
-							</div>
-						</div>
-						<div class="flex flex-col mt-2">
-							<span class="text-sm text-gray-300 mb-1">End preview:</span>
-							<div
-								class="bg-gray-700 text-gray-200 rounded px-3 py-2 text-sm border border-gray-600 min-h-8 font-mono"
-								id={ string(typeOf) + "-endPreview" }
-							>
-								Preview will appear here
-							</div>
-						</div>
-					</div>
-					<!-- Connect Button -->
-					<div class="flex justify-end mt-3">
-						<button
-							type="submit"
-							class="bg-blue-600 hover:bg-blue-700 text-white rounded px-3 py-1 text-sm"
-						>
-							Connect
-						</button>
-					</div>
+					@DelimPreviewContainer(typeOf, web.FormatBytesForPreview(camera.DefaultStartDelimiter), web.FormatBytesForPreview(camera.DefaultEndDelimiter))
 				</form>
 			</div>
 		</div>
+	</div>
+}
+
+templ DelimPreviewContainer(typeOf camera.Type, startDelimiterVal, endDelimiterVal string) {
+	<div
+		id={ string(typeOf) + "-preview-container" }
+		class="mt-2"
+	>
+		<div class="flex flex-col">
+			<div
+				class="flex flex-row"
+			>
+				<span
+					class="text-sm text-gray-300 mb-1"
+				>
+					Start preview:
+				</span>
+				@web.GreenUp
+			</div>
+			<div
+				class="bg-gray-700 text-gray-200 rounded px-3 py-2 text-sm border border-gray-600 min-h-8 font-mono"
+				id={ string(typeOf) + "-startPreview" }
+			>
+				{ startDelimiterVal }
+			</div>
+		</div>
+		<div class="flex flex-col mt-2">
+			<div
+				class="flex flex-row"
+			>
+				<span class="text-sm text-gray-300 mb-1">End preview:</span>
+				@web.RedDown
+			</div>
+			<div
+				class="bg-gray-700 text-gray-200 rounded px-3 py-2 text-sm border border-gray-600 min-h-8 font-mono"
+				id={ string(typeOf) + "-endPreview" }
+			>
+				{ endDelimiterVal }
+			</div>
+		</div>
+	</div>
+	<!-- Connect Button -->
+	<div class="flex justify-end mt-2">
+		<button
+			type="submit"
+			class="bg-blue-600 hover:bg-blue-700 text-white rounded px-3 py-1 text-sm"
+		>
+			Connect
+		</button>
 	</div>
 }

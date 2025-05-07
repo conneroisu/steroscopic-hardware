@@ -1,11 +1,14 @@
 package handlers
 
 import (
-	"fmt"
-	"html/template"
 	"net/http"
 	"strconv"
 	"strings"
+
+	"github.com/a-h/templ"
+	"github.com/conneroisu/steroscopic-hardware/cmd/steroscopic/components"
+	"github.com/conneroisu/steroscopic-hardware/pkg/camera"
+	"github.com/conneroisu/steroscopic-hardware/pkg/web"
 )
 
 // PreviewDelimiterHandler handles requests to preview delimiters in different formats
@@ -32,62 +35,17 @@ func PreviewDelimiterHandler(w http.ResponseWriter, r *http.Request) {
 	endBytes := parseDelimiter(endDelimiter, mode)
 
 	// Create the preview HTML
-	startPreviewHTML := formatBytesForPreview(startBytes)
-	endPreviewHTML := formatBytesForPreview(endBytes)
+	startPreviewHTML := web.FormatBytesForPreview(startBytes)
+	endPreviewHTML := web.FormatBytesForPreview(endBytes)
 
 	// Get camera type from the form data (if not provided, use a default)
 	cameraType := strings.TrimSuffix(r.FormValue("id"), "-startDelimiter")
 	cameraType = strings.TrimSuffix(cameraType, "-endDelimiter")
 	if cameraType == "" {
-		// Try to extract from the referer or other parts of the request
-		// For now, use a default
 		cameraType = "camera"
 	}
 
-	// Render the preview template
-	tmpl := `
-	<div class="flex flex-col">
-		<span class="text-sm text-gray-300 mb-1">Start preview:</span>
-		<div class="bg-gray-700 text-gray-200 rounded px-3 py-2 text-sm border border-gray-600 min-h-8 font-mono" id="{{ .CameraType }}-startPreview">
-			{{ if .StartPreview }}{{ .StartPreview | unescapeHTML }}{{ else }}Preview will appear here{{ end }}
-		</div>
-	</div>
-	<div class="flex flex-col mt-2">
-		<span class="text-sm text-gray-300 mb-1">End preview:</span>
-		<div class="bg-gray-700 text-gray-200 rounded px-3 py-2 text-sm border border-gray-600 min-h-8 font-mono" id="{{ .CameraType }}-endPreview">
-			{{ if .EndPreview }}{{ .EndPreview | unescapeHTML }}{{ else }}Preview will appear here{{ end }}
-		</div>
-	</div>
-	`
-
-	// Create template with a function to unescape HTML
-	t, err := template.New("preview").Funcs(template.FuncMap{
-		"unescapeHTML": func(s string) template.HTML {
-			return template.HTML(s)
-		},
-	}).Parse(tmpl)
-
-	if err != nil {
-		http.Error(w, "Failed to parse template", http.StatusInternalServerError)
-		return
-	}
-
-	// Execute the template
-	data := struct {
-		CameraType   string
-		StartPreview string
-		EndPreview   string
-	}{
-		CameraType:   cameraType,
-		StartPreview: startPreviewHTML,
-		EndPreview:   endPreviewHTML,
-	}
-
-	w.Header().Set("Content-Type", "text/html")
-	err = t.Execute(w, data)
-	if err != nil {
-		http.Error(w, "Failed to render template", http.StatusInternalServerError)
-	}
+	templ.Handler(components.DelimPreviewContainer(camera.Type(cameraType), startPreviewHTML, endPreviewHTML)).ServeHTTP(w, r)
 }
 
 // parseDelimiter parses a delimiter string based on the specified mode
@@ -125,32 +83,4 @@ func parseDelimiter(input string, mode string) []byte {
 	}
 
 	return bytes
-}
-
-// formatBytesForPreview converts a byte slice to an HTML preview
-func formatBytesForPreview(bytes []byte) string {
-	if len(bytes) == 0 {
-		return ""
-	}
-
-	var sb strings.Builder
-	for _, b := range bytes {
-		var visual string
-		if b >= 32 && b <= 126 {
-			// Printable ASCII
-			visual = string(b)
-			// Escape HTML special characters
-			visual = strings.ReplaceAll(visual, "&", "&amp;")
-			visual = strings.ReplaceAll(visual, "<", "&lt;")
-			visual = strings.ReplaceAll(visual, ">", "&gt;")
-			visual = strings.ReplaceAll(visual, "\"", "&quot;")
-		} else {
-			// Non-printable, show as dot
-			visual = "·"
-		}
-
-		sb.WriteString(fmt.Sprintf(`<span title="Decimal: %d">0x%02x (%s)</span> `, b, b, visual))
-	}
-
-	return sb.String()
 }
