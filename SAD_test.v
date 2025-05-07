@@ -2,7 +2,7 @@ module SAD_test;
 
     reg  [7:0] winL [0:8];
     reg  [7:0] winR [0:8];
-    wire [0:8] sad;
+    wire [7:0] sad;
 
     // Flattened wires to connect to DUT
     wire [71:0] input_a_flat;

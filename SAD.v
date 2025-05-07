@@ -14,14 +14,15 @@ module SAD #(
     // Flattened input since 2001 doesn't allow for port arrays
     input wire [DATA_SIZE * WIN_SIZE - 1 : 0] input_a,
     input wire [DATA_SIZE * WIN_SIZE - 1 : 0] input_b,
-    output wire [DATA_SIZE : 0] sad 
+    output wire [DATA_SIZE - 1 : 0] sad 
 ); 
 
-wire [7:0] array_a [0 : WIN_SIZE - 1];
-wire [7:0] array_b [0 : WIN_SIZE - 1];
+wire [DATA_SIZE - 1 : 0] array_a [0 : WIN_SIZE - 1];
+wire [DATA_SIZE - 1 : 0] array_b [0 : WIN_SIZE - 1];
 
-wire [7:0] diff [0 : WIN_SIZE - 1];
+wire [DATA_SIZE - 1 : 0] diff [0 : WIN_SIZE - 1];
 
+// Unpacking flattened vector to arrays
 genvar r;
 generate
     for (r = 0; r < WIN_SIZE; r = r + 1) begin : unpack
@@ -30,6 +31,7 @@ generate
     end
 endgenerate
 
+// Compute SAD outputs in parallel
 genvar i;
 generate 
     for (i = 0; i < WIN_SIZE; i = i + 1) begin : abs_diff
