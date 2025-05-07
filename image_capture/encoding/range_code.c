@@ -12,6 +12,20 @@ typedef struct
     uint32_t high;
 } range_t;
 
+// Gets either byte 0, 1, 2, or 3
+int find_set_msb(uint32_t value)
+{
+    for(int i = 3; i >= 0; --i)
+    {
+        if(value & 0xFF << (i * 8))
+        {
+            return i;
+        }
+    }
+
+    return 0;
+}
+
 const uint32_t MAX_RANGE = UINT32_MAX;
 
 /* 
@@ -64,17 +78,27 @@ size_t range_code(uint8_t* uncoded, uint8_t* coded, size_t size)
         byte_counts[i].previous_count_sum = byte_counts[i - 1].previous_count_sum + byte_counts[i - 1].current_count;
     }
 
-    // Calculate the number of MAX_RANGE blocks that we need to process.
-    size_t block_count = size / 4;
-
     // Iterate through all blocks.
     for(size_t i = 0; i < size; ++i)
     {
-        // See if we can shift off a bit.
-
         // Calculate the next range
         size_t prev_range_size = range.high - range.low;
 
+        // See if we can shift off bytes.
+        int low_set_msb_loc = find_set_msb(range.low);
+        int high_set_msb_loc = find_set_msb(range.high);
+        uint32_t low_byte_value = range.low & (0xFF << (low_set_msb_loc * 8));
+        uint32_t high_byte_value = range.high & (0xFF << (low_set_msb_loc * 8));
+
+        if(low_byte_value > prev_range_size && low_set_msb_loc == high_set_msb_loc && low_byte_value == high_byte_value)
+        {
+            *next_coded = (uint8_t) (low_byte_value >> (low_set_msb_loc * 8));
+            next_coded++;
+
+            range.low = range.low << 8;
+            range.high = range.high << 8;
+        }
+        
         range.low += (uint32_t) ((byte_counts[*next_uncoded].previous_count_sum * prev_range_size) / size);
         range.high = ((uint32_t) ((byte_counts[*next_uncoded].current_count * prev_range_size) / size)) + range.low;
         next_uncoded++;
