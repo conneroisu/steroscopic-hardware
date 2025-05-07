@@ -26,14 +26,6 @@ func NewStaticCamera(path string) *StaticCamera {
 
 var _ Camer = (*StaticCamera)(nil)
 
-// Info returns the port, baud rate, and compression status of the camera.
-//
-// It is not implemented for the static camera since it does not connect to a
-// physical camera.
-func (z *StaticCamera) Info() (port string, baud int, compression bool) {
-	return "", 0, false
-}
-
 // Stream streams the camera
 func (z *StaticCamera) Stream(ctx context.Context, outCh chan *image.Gray) {
 	var errChan = make(chan error, 1)

@@ -1,5 +1,5 @@
 // Package svg contains SVG templates for the web UI.
-package svg
+package web
 
 import (
 	_ "embed"

@@ -1,9 +1,8 @@
 package components
 
 import (
-	"github.com/conneroisu/steroscopic-hardware/cmd/steroscopic/handlers"
 	"github.com/conneroisu/steroscopic-hardware/pkg/camera"
-	"github.com/conneroisu/steroscopic-hardware/pkg/svg"
+	"github.com/conneroisu/steroscopic-hardware/pkg/web"
 )
 
 // AppFn returns a function that wraps the given component with the app template.
@@ -61,7 +60,7 @@ templ header() {
 					href="https://github.com/conneroisu/steroscopic-hardware/issues/new"
 					class="px-4 py-2 rounded-lg transition inline-flex items-center gap-1 text-gray-300 hover:text-white"
 				>
-					@svg.CircleQuestion
+					@web.CircleQuestion
 					Report a Bug
 				</a>
 				<div
@@ -117,7 +116,7 @@ templ status() {
 			</div>
 			<div
 				class="mt-4 space-y-2"
-				id={ handlers.TargetStatusContent.ID }
+				id={ web.TargetStatusContent.ID }
 				x-show="open_stats"
 				x-collapse
 			>
@@ -128,7 +127,7 @@ templ status() {
 	</div>
 }
 
-templ cameraStatus(typeOf camera.CameraType) {
+templ cameraStatus(typeOf camera.Type) {
 	<div
 		class="bg-gray-800 rounded-lg shadow-lg p-4"
 	>
@@ -137,7 +136,7 @@ templ cameraStatus(typeOf camera.CameraType) {
 			<div
 				class="flex justify-between items-center cursor-pointer"
 			>
-				@svg.SettingsGear
+				@web.SettingsGear
 			</div>
 		</div>
 		<!-- spacer -->
@@ -170,7 +169,7 @@ templ cameraStatus(typeOf camera.CameraType) {
 								title="Refresh available ports"
 								type="button"
 							>
-								@svg.RefreshCw
+								@web.RefreshCw
 							</button>
 						</div>
 					</div>
@@ -210,6 +209,114 @@ templ cameraStatus(typeOf camera.CameraType) {
 						>
 							<span class="inline-block w-3 h-3 bg-red-500 rounded-full"></span>
 							<span class="text-sm">Disconnected</span>
+						</div>
+					</div>
+					<!-- Input Mode Selection -->
+					<div class="mt-4 mb-2">
+						<span class="text-sm text-gray-300">Delimiter Format:</span>
+						<div class="flex items-center gap-3 mt-1">
+							<label class="flex items-center gap-1">
+								<input
+									type="radio"
+									name={ string(typeOf) + "-mode" }
+									value="hex"
+									checked
+									hx-trigger="change"
+									hx-post="/preview-delimiter"
+									hx-include={ "#" + string(typeOf) + "-startDelimiter,#" + string(typeOf) + "-endDelimiter" }
+									hx-target={ "#" + string(typeOf) + "-preview-container" }
+									class="text-blue-500"
+								/>
+								<span class="text-sm text-gray-300">Hex</span>
+							</label>
+							<label class="flex items-center gap-1">
+								<input
+									type="radio"
+									name={ string(typeOf) + "-mode" }
+									value="decimal"
+									hx-trigger="change"
+									hx-post="/preview-delimiter"
+									hx-include={ "#" + string(typeOf) + "-startDelimiter,#" + string(typeOf) + "-endDelimiter" }
+									hx-target={ "#" + string(typeOf) + "-preview-container" }
+									class="text-blue-500"
+								/>
+								<span class="text-sm text-gray-300">Decimal</span>
+							</label>
+							<label class="flex items-center gap-1">
+								<input
+									type="radio"
+									name={ string(typeOf) + "-mode" }
+									value="text"
+									hx-trigger="change"
+									hx-post="/preview-delimiter"
+									hx-include={ "#" + string(typeOf) + "-startDelimiter,#" + string(typeOf) + "-endDelimiter" }
+									hx-target={ "#" + string(typeOf) + "-preview-container" }
+									class="text-blue-500"
+								/>
+								<span class="text-sm text-gray-300">Text</span>
+							</label>
+						</div>
+					</div>
+					<!-- Start Delimiter -->
+					<div class="flex flex-col mt-2">
+						<span class="text-sm text-gray-300 mb-1">Start delimiter:</span>
+						<input
+							type="text"
+							name="startdelimiter"
+							id={ string(typeOf) + "-startDelimiter" }
+							class="bg-gray-700 text-gray-200 rounded px-3 py-1 text-sm border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full mb-1"
+							value={ web.BytesToHex(camera.DefaultStartDelimiter) }
+							hx-post="/preview-delimiter"
+							hx-trigger="input changed delay:300ms, revealed"
+							hx-include={ "input[name='" + string(typeOf) + "-mode']:checked" }
+							hx-target={ "#" + string(typeOf) + "-preview-container" }
+						/>
+					</div>
+					<!-- End Delimiter -->
+					<div class="flex flex-col mt-3">
+						<span
+							class="text-sm text-gray-300 mb-1"
+						>
+							End delimiter:
+						</span>
+						<input
+							type="text"
+							name="enddelimiter"
+							id={ string(typeOf) + "-endDelimiter" }
+							class="bg-gray-700 text-gray-200 rounded px-3 py-1 text-sm border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full mb-1"
+							value={ web.BytesToHex(camera.DefaultEndDelimiter) }
+							hx-post="/preview-delimiter"
+							hx-trigger="input changed delay:300ms, revealed"
+							hx-include={ "input[name='" + string(typeOf) + "-mode']:checked" }
+							hx-target={ "#" + string(typeOf) + "-preview-container" }
+						/>
+					</div>
+					<!-- Preview Container - HTMX will update this -->
+					<div
+						id={ string(typeOf) + "-preview-container" }
+						class="mt-3"
+					>
+						<div class="flex flex-col">
+							<span
+								class="text-sm text-gray-300 mb-1"
+							>
+								Start preview:
+							</span>
+							<div
+								class="bg-gray-700 text-gray-200 rounded px-3 py-2 text-sm border border-gray-600 min-h-8 font-mono"
+								id={ string(typeOf) + "-startPreview" }
+							>
+								Preview will appear here
+							</div>
+						</div>
+						<div class="flex flex-col mt-2">
+							<span class="text-sm text-gray-300 mb-1">End preview:</span>
+							<div
+								class="bg-gray-700 text-gray-200 rounded px-3 py-2 text-sm border border-gray-600 min-h-8 font-mono"
+								id={ string(typeOf) + "-endPreview" }
+							>
+								Preview will appear here
+							</div>
 						</div>
 					</div>
 					<!-- Connect Button -->

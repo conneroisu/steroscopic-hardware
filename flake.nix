@@ -163,12 +163,6 @@
             openssl.dev
             yaml-language-server
           ]
-          ++ (with pkgs;
-            lib.optionals stdenv.isDarwin [
-            ])
-          ++ (with pkgs;
-            lib.optionals stdenv.isLinux [
-            ])
           ++ builtins.attrValues scriptPackages;
       };
 

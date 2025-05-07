@@ -14,14 +14,15 @@ import (
 type Camer interface {
 	Stream(context.Context, chan *image.Gray)
 	Close() error
-	Info() (port string, baud int, compression bool)
 }
 
 // Config represents all configurable camera parameters
 type Config struct {
-	Port        string
-	BaudRate    int
-	Compression int
+	Port           string
+	BaudRate       int
+	Compression    int
+	StartDelimiter []byte
+	EndDelimiter   []byte
 }
 
 // DefaultCameraConfig returns default camera configuration
@@ -159,13 +160,19 @@ func (b *StreamManager) Configure(config Config) error {
 
 	var err error
 
-	oldPort, oldBaud, oldCompression := b.camera.Info()
-
+	opts := []SerialCameraOption{}
+	if config.StartDelimiter != nil {
+		opts = append(opts, WithStartDelimiter(config.StartDelimiter))
+	}
+	if config.EndDelimiter != nil {
+		opts = append(opts, WithEndDelimiter(config.EndDelimiter))
+	}
 	var camera Camer
 	camera, err = NewSerialCamera(
 		config.Port,
 		config.BaudRate,
 		config.Compression == 1,
+		opts...,
 	)
 	if err != nil {
 		return err
@@ -186,12 +193,6 @@ func (b *StreamManager) Configure(config Config) error {
 		config.BaudRate,
 		"compression",
 		config.Compression == 1,
-		"old port",
-		oldPort,
-		"old baud",
-		oldBaud,
-		"old compression",
-		oldCompression,
 	)
 	go b.Start()
 	return nil
