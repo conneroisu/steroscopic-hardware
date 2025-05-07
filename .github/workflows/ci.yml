@@ -9,19 +9,15 @@ on:
   workflow_dispatch: {}
 
 jobs:
-  goci:
+  envCI:
     name: Build, Test, and Lint Go Project
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
-      - name: Install Nix
-        uses: cachix/install-nix-action@08dcb3a5e62fa31e2da3d490afc4176ef55ecd72 # v30
+      - uses: "DeterminateSystems/nix-installer-action@main"
         with:
-          github_access_token: ${{ secrets.GITHUB_TOKEN }}
-          extra_nix_config: |
-            experimental-features = nix-command flakes
-            accept-flake-config = true
+          determinate: true
       - name: Build
         run: |
           echo "Building Go project..."
@@ -34,23 +30,15 @@ jobs:
         run: |
           echo "Linting Go project..."
           nix run .\#lint-go
-  nixci:
-    name: Test and Lint Nix Project
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-      - name: Install Nix
-        uses: cachix/install-nix-action@08dcb3a5e62fa31e2da3d490afc4176ef55ecd72 # v30
-        with:
-          github_access_token: ${{ secrets.GITHUB_TOKEN }}
-          extra_nix_config: |
-            experimental-features = nix-command flakes
-            accept-flake-config = true
-      - name: Checks
+      - name: Check
         run: |
-          echo "Linting Nix project..."
-          nix run .\#lint-nix
           echo "Checking Nix project..."
           nix flake check
-    
+  DeterminateCI:
+    uses: conneroisu/ci/.github/workflows/workflow.yml@main
+    permissions:
+      id-token: write
+      contents: read
+    with:
+      visibility: public
+      fail-fast: true

@@ -9,8 +9,34 @@ permissions:
   contents: write
 
 jobs:
+  envCI:
+    name: Build, Test, and Lint Go Project
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      - uses: "DeterminateSystems/nix-installer-action@main"
+        with:
+          determinate: true
+      - name: Build
+        run: |
+          echo "Building Go project..."
+          nix run .\#build-go
+      - name: Test
+        run: |
+          echo "Testing Go project..."
+          nix run .\#test-go
+      - name: Lint
+        run: |
+          echo "Linting Go project..."
+          nix run .\#lint-go
+      - name: Check
+        run: |
+          echo "Checking Nix project..."
+          nix flake check
   release:
     name: Release
+    needs: envCI
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
