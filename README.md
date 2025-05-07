@@ -2,8 +2,7 @@
 
 
 MVP Software Implementation WebUI:
-![[WebUI_Privew.png]]
-![[Pasted image 20250507075639.png]]
+
 ![WebUI Preview showing the MVP software interface](assets/WebUI_Preview.png)
 Steroscopic Depth Map in HW
 
