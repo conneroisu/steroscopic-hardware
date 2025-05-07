@@ -22,7 +22,7 @@ Package steroscopic contains the command line interface for the application.
 
 
 <a name="AddRoutes"></a>
-## func [AddRoutes](<https://github.com/conneroisu/steroscopic-hardware/blob/main/cmd/steroscopic/routes.go#L18-L23>)
+## func [AddRoutes](<https://github.com/conneroisu/steroscopic-hardware/blob/main/cmd/steroscopic/routes.go#L19-L24>)
 
 ```go
 func AddRoutes(mux *http.ServeMux, logger *logger.Logger, params *despair.Parameters, leftStream, rightStream, outputStream *camera.StreamManager) error
