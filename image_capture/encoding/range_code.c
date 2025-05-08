@@ -101,6 +101,7 @@ size_t range_code(uint8_t* uncoded, uint8_t* coded, size_t size)
             {
                 *next_coded = (uint8_t) (low_byte_value >> (low_set_msb_loc * 8));
                 next_coded++;
+                result += 8;
 
                 range.low = range.low << 8;
                 range.high = range.high << 8;
@@ -111,6 +112,15 @@ size_t range_code(uint8_t* uncoded, uint8_t* coded, size_t size)
             }
         }
     }
+
+    // Emit the remaining bits.
+    int low_bit_value = 0;
+    int high_bit_value = 0;
+    int bit_index = 7;
+    do
+    {
+    }
+    while(1);
 
 
     return result;

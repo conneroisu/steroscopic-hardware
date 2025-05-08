@@ -5,6 +5,9 @@
 #include <string.h>
 #include <math.h>
 
+
+// Outputs the number of BITS that make up the coded data
+// We are not guaranteed that the coded data will be byte aligned.
 size_t range_code(uint8_t* uncoded, uint8_t* coded, size_t size);
 
 #endif
