@@ -18,11 +18,11 @@ type Camer interface {
 
 // Config represents all configurable camera parameters
 type Config struct {
-	Port           string
-	BaudRate       int
-	Compression    int
-	StartDelimiter []byte
-	EndDelimiter   []byte
+	Port        string
+	BaudRate    int
+	Compression int
+	StartSeq    []byte
+	EndSeq      []byte
 }
 
 // DefaultCameraConfig returns default camera configuration
@@ -161,11 +161,11 @@ func (b *StreamManager) Configure(config Config) error {
 	var err error
 
 	opts := []SerialCameraOption{}
-	if config.StartDelimiter != nil {
-		opts = append(opts, WithStartDelimiter(config.StartDelimiter))
+	if config.StartSeq != nil {
+		opts = append(opts, WithStartSeq(config.StartSeq))
 	}
-	if config.EndDelimiter != nil {
-		opts = append(opts, WithEndDelimiter(config.EndDelimiter))
+	if config.EndSeq != nil {
+		opts = append(opts, WithEndSeq(config.EndSeq))
 	}
 	var camera Camer
 	camera, err = NewSerialCamera(
