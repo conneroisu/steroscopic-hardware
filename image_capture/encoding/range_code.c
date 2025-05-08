@@ -89,7 +89,7 @@ size_t range_code(uint8_t* uncoded, uint8_t* coded, size_t size)
         next_uncoded++;
 
         // Emit digits. Max of 3.
-        for(int j = 0; j , 3; ++j)
+        for(int j = 0; j < 3; ++j)
         {
             // See if we can shift off bytes.
             int low_set_msb_loc = find_set_msb(range.low);
@@ -106,22 +106,26 @@ size_t range_code(uint8_t* uncoded, uint8_t* coded, size_t size)
                 range.low = range.low << 8;
                 range.high = range.high << 8;
             }
-            else
-            {
-                break;
-            }
         }
     }
 
     // Emit the remaining bits.
-    int low_bit_value = 0;
-    int high_bit_value = 0;
+    uint8_t low_byte = (uint8_t) ((range.low & 0xFF000000) >> 24);
+    uint8_t high_byte = (uint8_t) ((range.high & 0xFF000000) >> 24);
     int bit_index = 7;
-    do
+    int low_bit_value = (low_byte & (0x1 << bit_index)) != 0;
+    int high_bit_value = (high_byte & (0x1 << bit_index)) != 0;
+    uint8_t byte_to_write = 0;
+    
+    while(high_bit_value == low_bit_value && bit_index >= 0)
     {
-    }
-    while(1);
+        bit_index--;
+        byte_to_write |= (bit_index << ((uint8_t)low_bit_value & 0x1));
+        result++;
 
+        low_bit_value = (low_byte & (0x1 << bit_index)) == 1;
+        high_bit_value = (low_byte & (0x1 << bit_index)) == 1;
+    }
 
     return result;
 }
