@@ -88,8 +88,8 @@ size_t range_code(uint8_t* uncoded, uint8_t* coded, size_t size)
         range.high = ((uint32_t) ((byte_counts[*next_uncoded].current_count * prev_range_size) / size)) + range.low;
         next_uncoded++;
 
-        // Emit digits.
-        for(int j = 3; j >= 0; --j)
+        // Emit digits. Max of 3.
+        for(int j = 0; j , 3; ++j)
         {
             // See if we can shift off bytes.
             int low_set_msb_loc = find_set_msb(range.low);
