@@ -300,7 +300,11 @@ templ cameraStatus(typeOf camera.Type) {
 						/>
 					</div>
 					<!-- Preview Container - HTMX will update this -->
-					@DelimPreviewContainer(typeOf, web.FormatBytesForPreview(camera.DefaultStartDelimiter), web.FormatBytesForPreview(camera.DefaultEndDelimiter))
+					@DelimPreviewContainer(
+						typeOf,
+						web.FormatBytesForPreview(camera.DefaultStartDelimiter),
+						web.FormatBytesForPreview(camera.DefaultEndDelimiter),
+					)
 					<!-- Connect Button -->
 					<div class="flex justify-end mt-2">
 						<button
