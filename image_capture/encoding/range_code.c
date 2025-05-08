@@ -83,8 +83,13 @@ size_t range_code(uint8_t* uncoded, uint8_t* coded, size_t size)
     {
         // Calculate the next range
         size_t prev_range_size = range.high - range.low;
+        
+        range.low += (uint32_t) ((byte_counts[*next_uncoded].previous_count_sum * prev_range_size) / size);
+        range.high = ((uint32_t) ((byte_counts[*next_uncoded].current_count * prev_range_size) / size)) + range.low;
+        next_uncoded++;
 
-        for(int i = 3; i >= 0; --i)
+        // Emit digits.
+        for(int j = 3; j >= 0; --j)
         {
             // See if we can shift off bytes.
             int low_set_msb_loc = find_set_msb(range.low);
@@ -99,15 +104,12 @@ size_t range_code(uint8_t* uncoded, uint8_t* coded, size_t size)
 
                 range.low = range.low << 8;
                 range.high = range.high << 8;
-
-                // Recompute
-                prev_range_size = range.high - range.low;
+            }
+            else
+            {
+                break;
             }
         }
-        
-        range.low += (uint32_t) ((byte_counts[*next_uncoded].previous_count_sum * prev_range_size) / size);
-        range.high = ((uint32_t) ((byte_counts[*next_uncoded].current_count * prev_range_size) / size)) + range.low;
-        next_uncoded++;
     }
 
 
