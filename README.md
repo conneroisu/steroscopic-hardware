@@ -1,4 +1,7 @@
-# steroscopic-hardware
+[]()# steroscopic-hardware
+
+[![built with nix](https://builtwithnix.org/badge.svg)](https://builtwithnix.org)
+<img class="badge" tag="github.com/conneroisu/steroscopic-hardware" src="https://goreportcard.com/badge/github.com/conneroisu/conneroh.com">
 
 
 MVP Software Implementation WebUI:
