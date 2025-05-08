@@ -84,25 +84,32 @@ size_t range_code(uint8_t* uncoded, uint8_t* coded, size_t size)
         // Calculate the next range
         size_t prev_range_size = range.high - range.low;
 
-        // See if we can shift off bytes.
-        int low_set_msb_loc = find_set_msb(range.low);
-        int high_set_msb_loc = find_set_msb(range.high);
-        uint32_t low_byte_value = range.low & (0xFF << (low_set_msb_loc * 8));
-        uint32_t high_byte_value = range.high & (0xFF << (low_set_msb_loc * 8));
-
-        if(low_byte_value > prev_range_size && low_set_msb_loc == high_set_msb_loc && low_byte_value == high_byte_value)
+        for(int i = 3; i >= 0; --i)
         {
-            *next_coded = (uint8_t) (low_byte_value >> (low_set_msb_loc * 8));
-            next_coded++;
+            // See if we can shift off bytes.
+            int low_set_msb_loc = find_set_msb(range.low);
+            int high_set_msb_loc = find_set_msb(range.high);
+            uint32_t low_byte_value = range.low & (0xFF << (low_set_msb_loc * 8));
+            uint32_t high_byte_value = range.high & (0xFF << (low_set_msb_loc * 8));
 
-            range.low = range.low << 8;
-            range.high = range.high << 8;
+            if(low_byte_value > prev_range_size && low_set_msb_loc == high_set_msb_loc && low_byte_value == high_byte_value)
+            {
+                *next_coded = (uint8_t) (low_byte_value >> (low_set_msb_loc * 8));
+                next_coded++;
+
+                range.low = range.low << 8;
+                range.high = range.high << 8;
+
+                // Recompute
+                prev_range_size = range.high - range.low;
+            }
         }
         
         range.low += (uint32_t) ((byte_counts[*next_uncoded].previous_count_sum * prev_range_size) / size);
         range.high = ((uint32_t) ((byte_counts[*next_uncoded].current_count * prev_range_size) / size)) + range.low;
         next_uncoded++;
     }
+
 
     return result;
 }

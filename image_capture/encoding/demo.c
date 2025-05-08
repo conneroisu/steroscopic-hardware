@@ -2,10 +2,15 @@
 
 int main()
 {
-    uint8_t data[5] = {128, 45, 96, 4, 239};
-    uint8_t coded[5];
+    uint8_t data[256];
+    uint8_t coded[256];
 
-    range_code(data, coded, 5);
+    for(int i = 0; i < 256; ++i)
+    {
+        data[i] = i;
+    }
+
+    range_code(data, coded, 256);
 
     return 0;
 }
