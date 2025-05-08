@@ -11,8 +11,6 @@ import (
 	"time"
 
 	"github.com/conneroisu/steroscopic-hardware/pkg/camera"
-	"github.com/conneroisu/steroscopic-hardware/pkg/logger"
-	datastar "github.com/starfederation/datastar/sdk/go"
 )
 
 // StreamHandlerFn returns a handler for streaming camera images to multiple clients
@@ -101,36 +99,6 @@ func StreamHandlerFn(manager *camera.StreamManager) APIFn {
 
 				default:
 					// No new frame available, continue
-				}
-			}
-		}
-	}
-}
-
-// LogHandler returns a handler for streaming logs to the browser console
-func LogHandler(
-	logger *logger.Logger,
-) APIFn {
-	logCh := logger.Channel()
-	return func(w http.ResponseWriter, r *http.Request) error {
-		w.Header().Set("Cache-Control", "no-cache")
-		w.Header().Set("Connection", "close")
-		w.Header().Set("Pragma", "no-cache")
-		sse := datastar.NewSSE(w, r)
-		for {
-			select {
-			case <-r.Context().Done():
-				return nil
-			case log := <-logCh:
-				println("logging using slog")
-				err := sse.ConsoleLog(fmt.Sprintf(
-					"%s %s - %s",
-					log.Level,
-					log.Time.Format(time.RFC3339),
-					log.Message,
-				), datastar.WithExecuteScriptAutoRemove(true))
-				if err != nil {
-					return err
 				}
 			}
 		}

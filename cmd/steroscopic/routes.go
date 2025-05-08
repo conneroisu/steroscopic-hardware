@@ -56,9 +56,6 @@ func AddRoutes(
 		"POST /manual-calc-depth-map",
 		handlers.Make(handlers.ManualCalcDepthMapHandler(logger)),
 	)
-	// mux.HandleFunc(
-	// 	"GET /logs",
-	// 	handlers.Make(handlers.LogHandler(logger)))
 
 	mux.HandleFunc(
 		"POST /left/configure",
