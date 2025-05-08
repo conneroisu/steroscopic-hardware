@@ -13,10 +13,10 @@ import (
 )
 
 var (
-	// DefaultStartDelimiter is the default start marker for image data
-	DefaultStartDelimiter = []byte{0xff, 0xd8}
-	// DefaultEndDelimiter is the default end marker for image data
-	DefaultEndDelimiter = []byte{0xff, 0xd9}
+	// DefaultStartSeq is the default start marker for image data
+	DefaultStartSeq = []byte{0xff, 0xd8}
+	// DefaultEndSeq is the default end marker for image data
+	DefaultEndSeq = []byte{0xff, 0xd9}
 	// DefaultImageWidth is the default expected image width in pixels
 	DefaultImageWidth = 1920
 	// DefaultImageHeight is the default expected image height in pixels
@@ -32,12 +32,13 @@ type (
 		cancel         context.CancelFunc
 		port           serial.Port
 		portID         string
-		StartDelimiter []byte // Byte sequence indicating start of image data
-		EndDelimiter   []byte // Byte sequence indicating end of image data
+		StartSeq       []byte // Byte sequence indicating start of image data
+		EndSeq         []byte // Byte sequence indicating end of image data
 		ImageWidth     int    // Expected image width in pixels
 		ImageHeight    int    // Expected image height in pixels
 		baudRate       int
 		useCompression bool
+		OnClose        func()
 		ch             chan *image.Gray
 	}
 
@@ -56,8 +57,8 @@ func NewSerialCamera(
 	sc := SerialCamera{
 		ctx:            ctx,
 		cancel:         cancel,
-		StartDelimiter: DefaultStartDelimiter,
-		EndDelimiter:   DefaultEndDelimiter,
+		StartSeq:       DefaultStartSeq,
+		EndSeq:         DefaultEndSeq,
 		ImageWidth:     DefaultImageWidth,
 		ImageHeight:    DefaultImageHeight,
 		port:           nil,
@@ -95,14 +96,14 @@ func NewSerialCamera(
 	return &sc, nil
 }
 
-// WithStartDelimiter sets the start delimiter for the serial camera.
-func WithStartDelimiter(startDelimiter []byte) SerialCameraOption {
-	return func(sc *SerialCamera) { sc.StartDelimiter = startDelimiter }
+// WithStartSeq sets the start sequence for the serial camera.
+func WithStartSeq(startSeq []byte) SerialCameraOption {
+	return func(sc *SerialCamera) { sc.StartSeq = startSeq }
 }
 
-// WithEndDelimiter sets the end delimiter for the serial camera.
-func WithEndDelimiter(endDelimiter []byte) SerialCameraOption {
-	return func(sc *SerialCamera) { sc.EndDelimiter = endDelimiter }
+// WithEndSeq sets the end sequence for the serial camera.
+func WithEndSeq(endSeq []byte) SerialCameraOption {
+	return func(sc *SerialCamera) { sc.EndSeq = endSeq }
 }
 
 // Close closes the serial connection
@@ -110,6 +111,9 @@ func (sc *SerialCamera) Close() error {
 	sc.mu.Lock()
 	defer sc.mu.Unlock()
 
+	if sc.OnClose != nil {
+		sc.OnClose()
+	}
 	err := sc.port.Close()
 	if err != nil {
 		return err
@@ -167,40 +171,27 @@ func (sc *SerialCamera) readImageData() ([]byte, error) {
 	// Buffer to store image data
 	var buffer bytes.Buffer
 
-	// Read data until timeout or end delimiter is found
-	inImageData := false
-	startDelimiter := sc.StartDelimiter
-
 	// Temporary read buffer
 	tempBuf := make([]byte, 1024)
+
+	// Send the start sequence
+	_, err := sc.port.Write(sc.StartSeq)
+	if err != nil {
+		return nil, fmt.Errorf("failed to send start sequence: %v", err)
+	}
+	sc.OnClose = func() {
+		_, err := sc.port.Write(sc.EndSeq)
+		if err != nil {
+			log.Printf("failed to send end sequence: %v", err)
+		}
+	}
 
 	for {
 		sc.mu.Lock()
 
-		n, err := sc.port.Read(tempBuf)
+		_, err := sc.port.Read(tempBuf)
 		if err != nil {
 			return nil, fmt.Errorf("error reading from serial port: %v", err)
-		}
-
-		if n == 0 {
-			// Timeout occurred
-			if inImageData {
-				// If we were in the middle of reading image data, we may have finished
-				break
-			}
-			return nil, fmt.Errorf("timeout waiting for image data")
-		}
-
-		// Process the received data
-		for i := 0; i < n; i++ {
-			if !inImageData {
-				// Look for start delimiter
-				if i+len(startDelimiter) <= n && bytes.Equal(tempBuf[i:i+len(startDelimiter)], startDelimiter) {
-					inImageData = true
-					buffer.Write(startDelimiter)
-					i += len(startDelimiter) - 1 // -1 because the loop will increment i
-				}
-			}
 		}
 
 		// Safety check for buffer size
@@ -211,13 +202,6 @@ func (sc *SerialCamera) readImageData() ([]byte, error) {
 
 		sc.mu.Unlock()
 	}
-
-	// If we're here, we either timed out or didn't find an end delimiter
-	if buffer.Len() == 0 {
-		return nil, fmt.Errorf("no image data received")
-	}
-
-	return buffer.Bytes(), nil
 }
 
 // convertRawToImage converts raw pixel data to an image.Image

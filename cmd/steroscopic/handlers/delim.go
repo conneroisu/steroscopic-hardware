@@ -11,8 +11,8 @@ import (
 	"github.com/conneroisu/steroscopic-hardware/pkg/web"
 )
 
-// PreviewDelimiterHandler handles requests to preview delimiters in different formats
-func PreviewDelimiterHandler(w http.ResponseWriter, r *http.Request) {
+// PreviewSeqHandler handles requests to preview sequences in different formats
+func PreviewSeqHandler(w http.ResponseWriter, r *http.Request) {
 	// Parse form data
 	err := r.ParseForm()
 	if err != nil {
@@ -21,8 +21,8 @@ func PreviewDelimiterHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Get the input values
-	startDelimiter := r.FormValue("startdelimiter")
-	endDelimiter := r.FormValue("enddelimiter")
+	startSeq := r.FormValue("startSeq")
+	endSeq := r.FormValue("endSeq")
 	mode := r.FormValue("mode")
 
 	// If no mode is specified, default to hex
@@ -31,25 +31,25 @@ func PreviewDelimiterHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Parse the delimiters based on the selected mode
-	startBytes := parseDelimiter(startDelimiter, mode)
-	endBytes := parseDelimiter(endDelimiter, mode)
+	startBytes := parseSeq(startSeq, mode)
+	endBytes := parseSeq(endSeq, mode)
 
 	// Create the preview HTML
 	startPreviewHTML := web.FormatBytesForPreview(startBytes)
 	endPreviewHTML := web.FormatBytesForPreview(endBytes)
 
 	// Get camera type from the form data (if not provided, use a default)
-	cameraType := strings.TrimSuffix(r.FormValue("id"), "-startDelimiter")
-	cameraType = strings.TrimSuffix(cameraType, "-endDelimiter")
+	cameraType := strings.TrimSuffix(r.FormValue("id"), "-startSeq")
+	cameraType = strings.TrimSuffix(cameraType, "-endSeq")
 	if cameraType == "" {
 		cameraType = "camera"
 	}
 
-	templ.Handler(components.DelimPreviewContainer(camera.Type(cameraType), startPreviewHTML, endPreviewHTML)).ServeHTTP(w, r)
+	templ.Handler(components.SeqPreviewContainer(camera.Type(cameraType), startPreviewHTML, endPreviewHTML)).ServeHTTP(w, r)
 }
 
-// parseDelimiter parses a delimiter string based on the specified mode
-func parseDelimiter(input string, mode string) []byte {
+// parseSeq parses a delimiter string based on the specified mode
+func parseSeq(input string, mode string) []byte {
 	var bytes []byte
 
 	switch mode {
