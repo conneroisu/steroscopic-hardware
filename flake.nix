@@ -44,7 +44,7 @@
           description = "Generate JS files";
         };
         clean = {
-          exec = ''${pkgs.git}/bin/git clean -fdx'';
+          exec = ''git clean -fdx'';
           description = "Clean Project";
         };
         build-go = {
