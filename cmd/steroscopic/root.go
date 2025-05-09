@@ -30,8 +30,8 @@ const (
 
 var (
 	defaultParams = despair.Parameters{
-		BlockSize:    16,
-		MaxDisparity: 32,
+		BlockSize:    8,
+		MaxDisparity: 64,
 	}
 )
 
