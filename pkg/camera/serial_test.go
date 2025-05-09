@@ -88,32 +88,20 @@ func (m *MockSerialPort) SetReadTimeout(_ time.Duration) error {
 	return nil
 }
 
-func (m *MockSerialPort) ResetInputBuffer() error {
-	return nil
-}
+func (m *MockSerialPort) ResetInputBuffer() error { return nil }
 
-func (m *MockSerialPort) ResetOutputBuffer() error {
-	return nil
-}
+func (m *MockSerialPort) ResetOutputBuffer() error { return nil }
 
-func (m *MockSerialPort) SetDTR(_ bool) error {
-	return nil
-}
+func (m *MockSerialPort) SetDTR(_ bool) error { return nil }
 
-func (m *MockSerialPort) SetRTS(_ bool) error {
-	return nil
-}
+func (m *MockSerialPort) SetRTS(_ bool) error { return nil }
+
+func (m *MockSerialPort) Break(_ time.Duration) error { return nil }
+
+func (m *MockSerialPort) Drain() error { return nil }
 
 func (m *MockSerialPort) GetModemStatusBits() (*serial.ModemStatusBits, error) {
 	return &serial.ModemStatusBits{}, nil
-}
-
-func (m *MockSerialPort) Break(_ time.Duration) error {
-	return nil
-}
-
-func (m *MockSerialPort) Drain() error {
-	return nil
 }
 
 // Simple tests for SerialCamera initialization
