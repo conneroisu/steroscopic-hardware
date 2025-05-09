@@ -32,7 +32,6 @@ func SetLogger() chan LogEntry {
 
 // NewLogger creates a new Logger.
 func NewLogger() Logger {
-	ch := make(chan LogEntry, 100)
 	logger := slog.New(consoleHandler)
 	return Logger{
 		ch:     make(chan LogEntry, 100),
