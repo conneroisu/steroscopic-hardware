@@ -163,6 +163,7 @@ templ cameraStatus(typeOf camera.Type) {
 							<button
 								hx-get="/ports"
 								hx-target={ "#" + string(typeOf) + "-port" }
+								hx-trigger="load, click"
 								class="bg-blue-600 hover:bg-blue-700 text-white rounded p-1"
 								title="Refresh available ports"
 								type="button"
@@ -260,7 +261,6 @@ templ cameraStatus(typeOf camera.Type) {
 						</div>
 					</div>
 					@SeqController(typeOf)
-
 					<!-- Connect Button -->
 					<div class="flex justify-end mt-2">
 						<button

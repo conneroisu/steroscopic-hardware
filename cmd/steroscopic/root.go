@@ -134,12 +134,10 @@ func Run(
 		}
 	}()
 
-	// Wait for either server error or shutdown signal
-	select {
+	select { // Wait for either server error or shutdown signal
 	case err := <-serverErrors:
 		return fmt.Errorf("server error: %w", err)
-	case <-innerCtx.Done():
-		// Signal received, initiate graceful shutdown
+	case <-innerCtx.Done(): // Signal received, initiate graceful shutdown
 		slog.Info("shutdown signal received, shutting down server...")
 
 		// Create shutdown context with timeout
@@ -163,19 +161,17 @@ func Run(
 		wg.Wait()
 		slog.Info("server shutdown completed")
 		return nil
-	case <-ctx.Done():
-		// Parent context cancelled
+	case <-ctx.Done(): // Parent context cancelled
 		slog.Info("parent context cancelled, shutting down...")
 
 		// Create shutdown context with timeout
 		shutdownCtx, cancel := context.WithTimeout(
-			context.Background(), // Use a fresh context for shutdown
+			context.Background(), // Fresh context for shutdown
 			shutdownTimeout,
 		)
 		defer cancel()
 
-		// Attempt graceful shutdown
-		err := httpServer.Shutdown(shutdownCtx)
+		err := httpServer.Shutdown(shutdownCtx) // Attempt shutdown
 		if err != nil {
 			slog.Error("error during server shutdown",
 				slog.String("error", err.Error()),
