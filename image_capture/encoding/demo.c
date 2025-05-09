@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <errno.h>
 
-#define TEST_MODE 2
+#define TEST_MODE 1
 
 #define SIZE 2073600U
 int main()
@@ -31,6 +31,10 @@ int main()
 
     size_t result = range_code(data, coded, SIZE);
 
+    free(data);
+    free(coded);
+    printf("Result: %ld\n", result);
+
 #elif TEST_MODE == 2
     uint8_t* data = calloc(1000, sizeof(uint8_t));
     uint8_t* coded = calloc(1000, sizeof(uint8_t));
@@ -43,6 +47,11 @@ int main()
     }
 
     size_t result = range_code(data, coded, 1000);
+
+    free(data);
+    free(coded);
+    printf("Result: %ld\n", result);
+    
 #else
     uint8_t data[10] = {130, 55, 39, 55, 130, 72, 72, 9, 72, 8};
     uint8_t coded[10];
@@ -55,8 +64,9 @@ int main()
     }
 
     size_t result = range_code(data, coded, 10);
-#endif
 
     printf("Result: %ld\n", result);
+#endif
+
     return 0;
 }

@@ -1,4 +1,6 @@
 #include "range_code.h"
+#define MAX_RANGE UINT32_MAX
+#define SYMBOL_COUNT 256
 
 typedef struct
 {
@@ -26,7 +28,6 @@ int find_set_msb(uint32_t value)
     return 0;
 }
 
-const uint32_t MAX_RANGE = UINT32_MAX;
 
 /* 
     Basic Description:
@@ -61,10 +62,10 @@ size_t range_code(uint8_t* uncoded, uint8_t* coded, size_t size)
 
     // Store byte counts
     // This will be used to calculate probabilities without storing them as floating point.
-    counts_t byte_counts[UINT8_MAX];
+    counts_t byte_counts[SYMBOL_COUNT];
     
     // Zeroize the counts
-    memset(byte_counts, 0, sizeof(counts_t) * UINT8_MAX);
+    memset(byte_counts, 0, sizeof(counts_t) * SYMBOL_COUNT);
 
     // Count the bytes
     for(size_t i = 0; i < size; ++i)
@@ -73,7 +74,7 @@ size_t range_code(uint8_t* uncoded, uint8_t* coded, size_t size)
     }
 
     // Calculate the previous counts
-    for(int i = 1; i < UINT8_MAX; ++i)
+    for(int i = 1; i < SYMBOL_COUNT; ++i)
     {
         byte_counts[i].previous_count_sum = byte_counts[i - 1].previous_count_sum + byte_counts[i - 1].current_count;
     }
@@ -81,16 +82,20 @@ size_t range_code(uint8_t* uncoded, uint8_t* coded, size_t size)
     // Iterate through all blocks.
     for(size_t i = 0; i < size; ++i)
     {
+        
         // Calculate the next range
         size_t prev_range_size = range.high - range.low;
-        
+
         range.low += (uint32_t) ((byte_counts[*next_uncoded].previous_count_sum * prev_range_size) / size);
         range.high = ((uint32_t) ((byte_counts[*next_uncoded].current_count * prev_range_size) / size)) + range.low;
         next_uncoded++;
 
+        prev_range_size = range.high - range.low;
+
         // Emit digits. Max of 3.
         for(int j = 0; j < 3; ++j)
         {
+
             // See if we can shift off bytes.
             int low_set_msb_loc = find_set_msb(range.low);
             int high_set_msb_loc = find_set_msb(range.high);
@@ -107,6 +112,7 @@ size_t range_code(uint8_t* uncoded, uint8_t* coded, size_t size)
                 range.high = range.high << 8;
             }
         }
+
     }
 
     // Emit the remaining bits.
