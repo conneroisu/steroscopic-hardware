@@ -125,7 +125,7 @@
           )}
 
           echo "Git Status:"
-          ${pkgs.git}/bin/git status
+          git status
         '';
         packages = with pkgs;
           [
