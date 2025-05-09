@@ -41,17 +41,17 @@ def generate_mem(filename, size, pattern='increment', base=0):
 
         values.append(f"{val:02X}")
 
-    # Write hex values to file
     with open(filename, 'w') as f:
         for v in values:
             f.write(v + '\n')
 
     print(f"[+] Generated {size} values in {filename} using '{pattern}' pattern.")
 
-# Example usage
 if __name__ == "__main__":
+    IMG_W = 64
     WIN = 15
-    WIN_SIZE = WIN * WIN
+    ROWS = WIN
 
-    generate_mem("winL.mem", WIN_SIZE, pattern='increment', base=0)
-    generate_mem("winR.mem", WIN_SIZE, pattern='random')
+    total_pixels = IMG_W * ROWS
+
+    generate_mem("compute_SAD.mem", total_pixels, pattern='increment', base=0)
