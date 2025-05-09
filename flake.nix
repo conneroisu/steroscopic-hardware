@@ -51,7 +51,7 @@
           exec = ''${pkgs.go}/bin/go build .'';
           description = "Build all go packages";
         };
-        test-go = {
+        tests = {
           exec = ''${pkgs.go}/bin/go test -v ./...'';
           description = "Run all go tests";
         };
@@ -62,22 +62,15 @@
           '';
           description = "Reload the application for air";
         };
-        lint-go = {
+        lint = {
           exec = ''
             export REPO_ROOT=$(git rev-parse --show-toplevel)
 
             ${pkgs.golangci-lint}/bin/golangci-lint run
-          '';
-          description = "Run Linting Steps for go files.";
-        };
-        lint-nix = {
-          exec = ''
-            export REPO_ROOT=$(git rev-parse --show-toplevel)
-
             ${pkgs.statix}/bin/statix check $REPO_ROOT/flake.nix
             ${pkgs.deadnix}/bin/deadnix $REPO_ROOT/flake.nix
           '';
-          description = "Run Linting Steps for nix files.";
+          description = "Run Linting Steps for go files.";
         };
         format = {
           exec = ''
