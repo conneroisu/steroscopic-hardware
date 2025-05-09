@@ -7,18 +7,19 @@
     }
   },
   "customizations": {
-		"vscode": {
+    "vscode": {
       "settings": {
-       "editor.formatOnSave": true,
-       "editor.lineNumbers": "relative"
+        "editor.formatOnSave": true,
+        "editor.lineNumbers": "relative"
       },
-			"extensions": [
-				"nicolasdschmidt.lunar-pink",
-				"github.copilot",
-				"github.copilot-chat",
+      "extensions": [
+        "nicolasdschmidt.lunar-pink",
+        "github.copilot",
+        "github.copilot-chat",
         "JasonMcGhee.claude-debugs-for-you",
         "golang.Go",
         "a-h.templ",
+        "Rubymaniac.vscode-direnv",
         "jnoortheen.nix-ide",
         "DavidAnson.vscode-markdownlint",
         "VisualStudioExptTeam.vscodeintellicode",
@@ -26,7 +27,7 @@
         "qwtel.sqlite-viewer",
         "danprince.vsnetrw",
         "eamodio.gitlens"
-			]
-		}
-	}
+      ]
+    }
+  }
 }
