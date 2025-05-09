@@ -215,8 +215,10 @@ func (sc *SerialCamera) read(
 			}
 			select {
 			case <-ctx.Done():
+				slog.Debug("context done, stopping read")
 				return
 			case imgCh <- img:
+				slog.Debug("image sent to channel")
 			}
 			slog.Debug("image data read successfully", "size", buffer.Len())
 			sc.mu.Unlock()

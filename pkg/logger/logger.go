@@ -33,11 +33,7 @@ func SetLogger() chan LogEntry {
 // NewLogger creates a new Logger.
 func NewLogger() Logger {
 	ch := make(chan LogEntry, 100)
-	channelHandler := NewChannelHandler(ch, slog.LevelInfo)
-
-	// Combine handlers
-	multiHandler := NewMultiHandler(channelHandler, consoleHandler)
-	logger := slog.New(multiHandler)
+	logger := slog.New(consoleHandler)
 	return Logger{
 		ch:     make(chan LogEntry, 100),
 		Logger: logger,
