@@ -89,6 +89,7 @@ func ConfigureCamera(
 		}
 
 		// After configuration, attempt to connect
+		logger.Info("attempting to connect/configure to camera")
 		err = stream.Configure(config)
 		if err != nil {
 			// Return error response

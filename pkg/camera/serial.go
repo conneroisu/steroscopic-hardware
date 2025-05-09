@@ -7,6 +7,7 @@ import (
 	"image"
 	"image/color"
 	"log"
+	"log/slog"
 	"sync"
 
 	"github.com/conneroisu/steroscopic-hardware/pkg/logger"
@@ -56,6 +57,7 @@ func NewSerialCamera(
 	opts ...SerialCameraOption,
 ) (*SerialCamera, error) {
 	ctx, cancel := context.WithCancel(context.Background())
+	lggr := logger.NewLogger()
 	sc := SerialCamera{
 		ctx:            ctx,
 		cancel:         cancel,
@@ -68,10 +70,11 @@ func NewSerialCamera(
 		portID:         portName,
 		baudRate:       baudRate,
 		useCompression: useCompression,
+		logger:         &lggr,
 	}
-	// for _, opt := range opts {
-	// 	opt(&sc)
-	// }
+	for _, opt := range opts {
+		opt(&sc)
+	}
 
 	// Configure serial port
 	mode := &serial.Mode{
@@ -83,6 +86,7 @@ func NewSerialCamera(
 
 	// Open the port
 	var err error
+	sc.logger.Info("opening serial port", "port", portName)
 	sc.port, err = serial.Open(sc.portID, mode)
 	if err != nil {
 		return nil, fmt.Errorf("failed to open serial port %s: %v", portName, err)
@@ -149,8 +153,10 @@ func (sc *SerialCamera) Stream(
 	for {
 		select {
 		case <-ctx.Done():
+			sc.logger.Debug("context done, stopping read")
 			return
 		case <-sc.ctx.Done():
+			sc.logger.Debug("context done, stopping read")
 			return
 		case img := <-ch:
 			if img == nil {
@@ -158,7 +164,7 @@ func (sc *SerialCamera) Stream(
 			}
 			ch <- img
 		case err := <-errChan:
-			log.Printf("Error reading image: %v", err)
+			sc.logger.Debug("error reading image", "err", err)
 		}
 	}
 }
@@ -180,17 +186,19 @@ func (sc *SerialCamera) read(
 	if err != nil {
 		return nil, fmt.Errorf("failed to send start sequence: %v", err)
 	}
-	slog.Debug("sent start sequence", "seq", sc.StartSeq)
+	sc.logger.Debug("sent start sequence", "seq", sc.StartSeq)
 	// After sending the start sequence, we should receive a 1-byte acknowledgement
 	bit, err := sc.port.Read(tempBuf)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read acknowledgement: %v", err)
 	}
+	sc.logger.Debug("received acknowledgement checking if it is one byte", "byte", tempBuf[0])
 	if bit != 1 {
 		return nil, fmt.Errorf("unexpected acknowledgement byte: %d", bit)
 	}
-	slog.Debug("received acknowledgement", "byte", tempBuf[0])
+	sc.logger.Debug("received acknowledgement", "byte", tempBuf[0])
 	sc.OnClose = func() {
+		sc.logger.Debug("sending end sequence")
 		_, err := sc.port.Write(sc.EndSeq)
 		if err != nil {
 			log.Printf("failed to send end sequence: %v", err)
@@ -205,28 +213,29 @@ func (sc *SerialCamera) read(
 			tempBuf := make([]byte, sc.ImageWidth*sc.ImageHeight)
 			_, err := sc.port.Read(tempBuf)
 			if err != nil {
+				sc.logger.Error("error reading from serial port", "err", err)
 				errChan <- fmt.Errorf("error reading from serial port: %v", err)
 			}
 
 			// Safety check for buffer size
 			if buffer.Len() > sc.ImageWidth*sc.ImageHeight {
-				slog.Error("buffer overflow", "size", buffer.Len())
+				sc.logger.Error("buffer overflow", "size", buffer.Len())
 				errChan <- fmt.Errorf("received data exceeds expected image size")
 			}
 
 			img, err := sc.convertRawToImage(tempBuf)
 			if err != nil {
-				slog.Error("failed to convert raw data to image", "err", err)
+				sc.logger.Error("failed to convert raw data to image", "err", err)
 				errChan <- fmt.Errorf("failed to convert raw data to image: %v", err)
 			}
 			select {
 			case <-ctx.Done():
-				slog.Debug("context done, stopping read")
+				sc.logger.Debug("context done, stopping read")
 				return
 			case imgCh <- img:
-				slog.Debug("image sent to channel")
+				sc.logger.Debug("image sent to channel")
 			}
-			slog.Debug("image data read successfully", "size", buffer.Len())
+			sc.logger.Debug("image data read successfully", "size", buffer.Len())
 			sc.mu.Unlock()
 		}
 	}, nil

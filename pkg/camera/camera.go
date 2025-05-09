@@ -163,14 +163,23 @@ func (b *StreamManager) Configure(config Config) error {
 	var err error
 
 	opts := []SerialCameraOption{}
-	if config.StartSeq != nil {
-		opts = append(opts, WithStartSeq(config.StartSeq))
-	}
-	if config.EndSeq != nil {
-		opts = append(opts, WithEndSeq(config.EndSeq))
-	}
+	// if config.StartSeq != nil {
+	// 	opts = append(opts, WithStartSeq(config.StartSeq))
+	// }
+	// if config.EndSeq != nil {
+	// 	opts = append(opts, WithEndSeq(config.EndSeq))
+	// }
 	opts = append(opts, WithLogger(b.logger))
 	var camera Camer
+	b.logger.Info(
+		"opening new camera",
+		"port",
+		config.Port,
+		"baud",
+		config.BaudRate,
+		"compression",
+		config.Compression == 1,
+	)
 	camera, err = NewSerialCamera(
 		config.Port,
 		config.BaudRate,
@@ -183,6 +192,15 @@ func (b *StreamManager) Configure(config Config) error {
 
 	b.runCancel()
 
+	b.logger.Info(
+		"closing old camera",
+		"port",
+		config.Port,
+		"baud",
+		config.BaudRate,
+		"compression",
+		config.Compression == 1,
+	)
 	err = b.camera.Close()
 	if err != nil {
 		return err
