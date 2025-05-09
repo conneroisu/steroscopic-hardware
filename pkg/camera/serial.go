@@ -7,9 +7,9 @@ import (
 	"image"
 	"image/color"
 	"log"
-	"log/slog"
 	"sync"
 
+	"github.com/conneroisu/steroscopic-hardware/pkg/logger"
 	"go.bug.st/serial"
 )
 
@@ -37,6 +37,7 @@ type (
 		EndSeq         []byte // Byte sequence indicating end of image data
 		ImageWidth     int    // Expected image width in pixels
 		ImageHeight    int    // Expected image height in pixels
+		logger         *logger.Logger
 		baudRate       int
 		useCompression bool
 		OnClose        func()
@@ -97,6 +98,11 @@ func NewSerialCamera(
 	return &sc, nil
 }
 
+// WithLogger sets the logger for the serial camera.
+func WithLogger(logger *logger.Logger) SerialCameraOption {
+	return func(sc *SerialCamera) { sc.logger = logger }
+}
+
 // WithStartSeq sets the start sequence for the serial camera.
 func WithStartSeq(startSeq []byte) SerialCameraOption {
 	return func(sc *SerialCamera) { sc.StartSeq = startSeq }
@@ -136,7 +142,7 @@ func (sc *SerialCamera) Stream(
 	var errChan = make(chan error, 1)
 	readFn, err := sc.read(ctx, errChan, ch)
 	if err != nil {
-		slog.Error("failed to read image data", "err", err)
+		sc.logger.Error("failed to read image data", "err", err)
 		return
 	}
 	go readFn()

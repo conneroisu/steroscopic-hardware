@@ -83,9 +83,11 @@ func (b *StreamManager) Start() {
 	b.runCtx, b.runCancel = context.WithCancel(b.ctx)
 	b.mu.Unlock()
 
+	slog.Info("starting camera stream")
 	// Start camera stream
 	go b.camera.Stream(b.ctx, b.frames)
 
+	slog.Info("starting broadcasting loop")
 	// Main broadcasting loop
 	go func() {
 		for {
@@ -167,6 +169,7 @@ func (b *StreamManager) Configure(config Config) error {
 	if config.EndSeq != nil {
 		opts = append(opts, WithEndSeq(config.EndSeq))
 	}
+	opts = append(opts, WithLogger(b.logger))
 	var camera Camer
 	camera, err = NewSerialCamera(
 		config.Port,
