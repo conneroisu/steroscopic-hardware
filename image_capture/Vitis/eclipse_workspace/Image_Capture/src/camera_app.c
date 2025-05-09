@@ -5,15 +5,24 @@
 #include "xtime_l.h"
 #include <stdio.h>
 #include "xil_printf.h"
+#include <xuartps_hw.h>
 
 // Opcodes
-#define STOP_OP_CODE 0
-#define SEND_IMAGE_OP_CODE 1
+#define IMAGE_STREAM_START 0xFFD8
+#define IMAGE_STREAM_STOP 0xFFD9
 
 #define IMAGE_WIDTH 1920
 #define IMAGE_HEIGHT 1080
 
 camera_config_t camera_config;
+
+void empty_uart_fifo()
+{
+	while(XUartPs_IsReceiveData(STDIN_BASEADDRESS))
+	{
+		inbyte();
+	}
+}
 
 u8 get_current_frame_pointer(XAxiVdma* vdma, u16 dir)
 {
@@ -117,13 +126,19 @@ void camera_loop(camera_config_t *config)
 	// Main loop
 	while(1)
 	{
-		char opcode = inbyte();
+		// Read two bytes.
+		uint8_t msb = inbyte();
+		uint8_t lsb = inbyte();
+
+		uint16_t op = (((uint16_t) msb) << 8) | lsb;
 
 		// Send image
-		if(opcode == SEND_IMAGE_OP_CODE)
+		if(op == IMAGE_STREAM_START)
 		{
-			// Reply with the opcode byte to let the host PC know that we got the opcode
-			outbyte(opcode);
+			empty_uart_fifo();
+
+			// Reply with a 0x1 to indicate we read the command.
+			outbyte(0x1);
 
 			// Save a snapshot to frame 0.
 			set_park_frame(&(config->vdma_hdmi), 0, XAXIVDMA_WRITE);
@@ -143,16 +158,42 @@ void camera_loop(camera_config_t *config)
 			}
 
 			// Send the entire greyscale image over UART.
-			// Note: Two bytes need to be sent for a single sensor reading
-			for(int i = 0; i < (IMAGE_WIDTH * IMAGE_HEIGHT); i++)
+			// If we receive the IMAGE_STOP_STREAM opcode, then stop streaming the image.
+			int bytes_read = 0;
+
+			// Only check op when two bytes have been read
+			int terminate_send = 0;
+			for(int i = 0; i < (IMAGE_WIDTH * IMAGE_HEIGHT) && !terminate_send; i++)
 			{
 				outbyte((char) (snapshot[i] & 0xFF));
+
+				if(XUartPs_IsReceiveData(STDIN_BASEADDRESS))
+				{
+					if(!bytes_read)
+					{
+						msb = inbyte();
+					}
+					else
+					{
+						lsb = inbyte();
+
+						uint16_t op = (((uint16_t) msb) << 8) | lsb;
+
+						// Check opcode.
+						if(op == IMAGE_STREAM_STOP)
+						{
+							empty_uart_fifo();
+							terminate_send = 1;
+						}
+					}
+				}
 			}
+
+			empty_uart_fifo();
 		}
-		else if(!opcode)
+		else
 		{
-			// Terminate
-			break;
+			empty_uart_fifo();
 		}
 	}
 

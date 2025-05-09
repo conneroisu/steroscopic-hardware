@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="ASCII"?>
-<systemproject:SystemProject xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:sdkproject="http://www.xilinx.com/sdkproject" xmlns:systemproject="http://www.xilinx.com/systemproject" name="Image_Capture_system" platform="C:/Users/neastbur/steroscopic-hardware/image_capture/Vitis/eclipse_workspace/digital_camera_wrapper/export/digital_camera_wrapper/digital_camera_wrapper.xpfm" platformUID="xilinx:zed::0.0(custom)" sysConfig="digital_camera_wrapper" runtime="cpp" dimmRepoPath="" rootFSLocation="" linuxImage="" sysroot="">
+<systemproject:SystemProject xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:sdkproject="http://www.xilinx.com/sdkproject" xmlns:systemproject="http://www.xilinx.com/systemproject" name="Image_Capture_system" platform="C:/Users/neastbur/steroscopic-hardware/image_capture/Vitis/eclipse_workspace/Image_Capure_HW/export/Image_Capure_HW/Image_Capure_HW.xpfm" platformUID="xilinx:zed::0.0(custom)" sysConfig="Image_Capure_HW" runtime="cpp" dimmRepoPath="" rootFSLocation="" linuxImage="" sysroot="">
   <configuration name="Debug">
     <configBuildOptions xsi:type="systemproject:SystemOptions">
-      <applications name="Image_Capture" domainName="domain_ps7_cortexa9_0" domainPrettyName="domain_ps7_cortexa9_0" appBuildConfig="Debug"/>
+      <applications name="Image_Capture" domainName="standalone_domain" domainPrettyName="standalone_domain" appBuildConfig="Debug"/>
       <options xsi:type="sdkproject:SdkOptions" generateSdCard="true"/>
     </configBuildOptions>
     <lastBuildOptions xsi:type="systemproject:SystemOptions">
-      <applications name="Image_Capture" domainName="domain_ps7_cortexa9_0" domainPrettyName="domain_ps7_cortexa9_0" appBuildConfig="Debug"/>
+      <applications name="Image_Capture" domainName="standalone_domain" domainPrettyName="standalone_domain" appBuildConfig="Debug"/>
       <options xsi:type="sdkproject:SdkOptions" generateSdCard="true"/>
     </lastBuildOptions>
   </configuration>
