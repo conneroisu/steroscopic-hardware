@@ -157,7 +157,6 @@
             nodePackages.typescript-language-server
             nodePackages.prettier
             svgcleaner
-            sqlite-web
             harper
             htmx-lsp
             openssl.dev
