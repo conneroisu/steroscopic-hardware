@@ -1,0 +1,11 @@
+# Ignore everything
+*
+
+# Allow for folders and files with extensions
+!/**/
+!*.*
+
+# Allow Makefile
+!Makefile
+
+*.o
