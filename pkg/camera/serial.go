@@ -139,6 +139,9 @@ func (sc *SerialCamera) Stream(
 	ctx context.Context,
 	ch chan *image.Gray,
 ) {
+	sc.logger.Debug("SerialCamera.Stream()")
+	defer sc.logger.Debug("SerialCamera.Stream() done")
+
 	sc.mu.Lock()
 	defer sc.mu.Unlock()
 	sc.ch = ch
@@ -155,7 +158,7 @@ func (sc *SerialCamera) Stream(
 			sc.logger.Debug("context done, stopping read")
 			return
 		case <-sc.ctx.Done():
-			sc.logger.Debug("context done, stopping read")
+			sc.logger.Debug("inner context done, stopping read")
 			return
 		case img := <-ch:
 			if img == nil {
@@ -174,6 +177,9 @@ func (sc *SerialCamera) read(
 	errChan chan error,
 	imgCh chan *image.Gray,
 ) (func(), error) {
+	sc.logger.Info("SerialCamera.read()")
+	defer sc.logger.Info("SerialCamera.read() done")
+
 	// Buffer to store image data
 	var buffer bytes.Buffer
 
@@ -183,22 +189,16 @@ func (sc *SerialCamera) read(
 	// Send the start sequence
 	_, err := sc.port.Write(sc.StartSeq)
 	if err != nil {
-		sc.logger.Error("failed to send start sequence", "err", err)
 		return nil, fmt.Errorf("failed to send start sequence: %v", err)
 	}
-	sc.logger.Debug("sent start sequence", "seq", sc.StartSeq)
 	// After sending the start sequence, we should receive a 1-byte acknowledgement
 	bit, err := sc.port.Read(tempBuf)
 	if err != nil {
-		sc.logger.Error("failed to read acknowledgement", "err", err)
 		return nil, fmt.Errorf("failed to read acknowledgement: %v", err)
 	}
-	sc.logger.Debug("received acknowledgement checking if it is one byte", "byte", tempBuf[0])
 	if bit != 1 {
-		sc.logger.Error("unexpected acknowledgement byte len", "byte", tempBuf[0])
 		return nil, fmt.Errorf("unexpected acknowledgement byte: %d", bit)
 	}
-	sc.logger.Debug("received acknowledgement", "byte", tempBuf[0])
 	sc.OnClose = func() {
 		sc.logger.Debug("sending end sequence")
 		_, err := sc.port.Write(sc.EndSeq)
@@ -209,37 +209,36 @@ func (sc *SerialCamera) read(
 
 	return func() {
 		for {
-			sc.mu.Lock()
-			sc.logger.Debug("reading image data")
+			func() {
+				sc.logger.Debug("reading image data")
+				defer sc.logger.Debug("read image data done")
+				sc.mu.Lock()
+				defer sc.mu.Unlock()
 
-			tempBuf := make([]byte, sc.ImageWidth*sc.ImageHeight)
-			_, err := sc.port.Read(tempBuf)
-			if err != nil {
-				sc.logger.Error("error reading from serial port", "err", err)
-				errChan <- fmt.Errorf("error reading from serial port: %v", err)
-			}
+				tempBuf := make([]byte, sc.ImageWidth*sc.ImageHeight)
+				_, err := sc.port.Read(tempBuf)
+				if err != nil {
+					errChan <- fmt.Errorf("error reading from serial port: %v", err)
+				}
 
-			// Safety check for buffer size
-			if buffer.Len() > sc.ImageWidth*sc.ImageHeight {
-				sc.logger.Error("buffer overflow", "size", buffer.Len())
-				errChan <- fmt.Errorf("received data exceeds expected image size")
-			}
+				// Safety check for buffer size
+				if buffer.Len() > sc.ImageWidth*sc.ImageHeight {
+					errChan <- fmt.Errorf("received data exceeds expected image size")
+				}
 
-			img, err := sc.convertRawToImage(tempBuf)
-			if err != nil {
-				sc.logger.Error("failed to convert raw data to image", "err", err)
-				errChan <- fmt.Errorf("failed to convert raw data to image: %v", err)
-			}
-			select {
-			case <-ctx.Done():
-				sc.logger.Debug("context done, stopping read")
-				return
-			case imgCh <- img:
-				sc.logger.Debug("image sent to channel")
-			}
+				img, err := sc.convertRawToImage(tempBuf)
+				if err != nil {
+					errChan <- fmt.Errorf("failed to convert raw data to image: %v", err)
+				}
+				select {
+				case <-ctx.Done():
+					return
+				case imgCh <- img:
+					sc.logger.Debug("image sent to channel")
+				}
 
-			sc.logger.Debug("image data read successfully", "size", buffer.Len())
-			sc.mu.Unlock()
+				sc.logger.Debug("image data read successfully", "size", buffer.Len())
+			}()
 		}
 	}, nil
 }
@@ -250,8 +249,8 @@ func (sc *SerialCamera) convertRawToImage(
 ) (*image.Gray, error) {
 	expectedSize := sc.ImageWidth * sc.ImageHeight
 
-	// Check if we have reasonable data size for grayscale or RGB format
-	if len(data) != expectedSize && len(data) != expectedSize*3 {
+	// Check if we have reasonable data size for grayscale.
+	if len(data) != expectedSize {
 		return nil, fmt.Errorf(
 			"unexpected data size: got %d bytes, expected %d (grayscale) or %d (RGB)",
 			len(data),
@@ -260,24 +259,15 @@ func (sc *SerialCamera) convertRawToImage(
 		)
 	}
 
-	// Create a new RGBA image
 	img := image.NewGray(image.Rect(0, 0, sc.ImageWidth, sc.ImageHeight))
 
-	if len(data) == expectedSize {
-		// Grayscale format (1 byte per pixel)
-		for y := range sc.ImageHeight { // y := 0; y < sc.config.ImageHeight; y++
-			for x := range sc.ImageWidth { // x := 0; x < sc.config.ImageWidth; x++
-				i := y*sc.ImageWidth + x
-				gray := data[i]
-				img.Set(x, y, color.RGBA{gray, gray, gray, 255})
-			}
+	// Grayscale format (1 byte per pixel)
+	for y := range sc.ImageHeight { // y := 0; y < sc.config.ImageHeight; y++
+		for x := range sc.ImageWidth { // x := 0; x < sc.config.ImageWidth; x++
+			i := y*sc.ImageWidth + x
+			gray := data[i]
+			img.Set(x, y, color.RGBA{gray, gray, gray, 255})
 		}
-	} else {
-		return nil, fmt.Errorf(
-			"unexpected data size: got %d bytes, expected %d (grayscale)",
-			len(data),
-			expectedSize,
-		)
 	}
 
 	return img, nil

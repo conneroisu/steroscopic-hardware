@@ -74,6 +74,7 @@ func (b *StreamManager) Unlock() { b.mu.Unlock() }
 
 // Start begins streaming from the camera and broadcasting to clients
 func (b *StreamManager) Start() {
+	b.logger.Info("starting camera stream broadcaster")
 	b.mu.Lock()
 	if b.running {
 		b.mu.Unlock()
