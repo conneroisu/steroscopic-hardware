@@ -203,7 +203,7 @@ func (sc *SerialCamera) read(
 			}
 
 			// Safety check for buffer size
-			if buffer.Len() > sc.ImageWidth*sc.ImageHeight*3 {
+			if buffer.Len() > sc.ImageWidth*sc.ImageHeight {
 				errChan <- fmt.Errorf("received data exceeds expected image size")
 			}
 
