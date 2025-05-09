@@ -204,11 +204,13 @@ func (sc *SerialCamera) read(
 
 			// Safety check for buffer size
 			if buffer.Len() > sc.ImageWidth*sc.ImageHeight {
+				slog.Error("buffer overflow", "size", buffer.Len())
 				errChan <- fmt.Errorf("received data exceeds expected image size")
 			}
 
 			img, err := sc.convertRawToImage(tempBuf)
 			if err != nil {
+				slog.Error("failed to convert raw data to image", "err", err)
 				errChan <- fmt.Errorf("failed to convert raw data to image: %v", err)
 			}
 			select {
