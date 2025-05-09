@@ -15,9 +15,9 @@ import (
 
 var (
 	// DefaultStartSeq is the default start marker for image data
-	DefaultStartSeq = []byte{0xf, 0xd}
+	DefaultStartSeq = []byte{0xff, 0xd8}
 	// DefaultEndSeq is the default end marker for image data
-	DefaultEndSeq = []byte{0xf, 0xd}
+	DefaultEndSeq = []byte{0xff, 0xd9}
 	// DefaultImageWidth is the default expected image width in pixels
 	DefaultImageWidth = 1920
 	// DefaultImageHeight is the default expected image height in pixels
