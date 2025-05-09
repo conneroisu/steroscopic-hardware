@@ -15,9 +15,9 @@ import (
 
 var (
 	// DefaultStartSeq is the default start marker for image data
-	DefaultStartSeq = []byte{0xff, 0xd8}
+	DefaultStartSeq = []byte{0xf, 0xd}
 	// DefaultEndSeq is the default end marker for image data
-	DefaultEndSeq = []byte{0xff, 0xd9}
+	DefaultEndSeq = []byte{0xf, 0xd}
 	// DefaultImageWidth is the default expected image width in pixels
 	DefaultImageWidth = 1920
 	// DefaultImageHeight is the default expected image height in pixels
@@ -68,9 +68,9 @@ func NewSerialCamera(
 		baudRate:       baudRate,
 		useCompression: useCompression,
 	}
-	for _, opt := range opts {
-		opt(&sc)
-	}
+	// for _, opt := range opts {
+	// 	opt(&sc)
+	// }
 
 	// Configure serial port
 	mode := &serial.Mode{
