@@ -132,15 +132,18 @@ func (sc *SerialCamera) Stream(
 	defer sc.logger.Debug("SerialCamera.Stream() done")
 
 	sc.mu.Lock()
-	defer sc.mu.Unlock()
 	sc.ch = ch
 	var errChan = make(chan error, 1)
 	readFn, err := sc.read(ctx, errChan, ch)
 	if err != nil {
 		sc.logger.Error("failed to read image data", "err", err)
+		sc.mu.Unlock()
 		return
 	}
+	sc.mu.Unlock()
+
 	go readFn()
+
 	for {
 		select {
 		case <-ctx.Done():
@@ -149,11 +152,6 @@ func (sc *SerialCamera) Stream(
 		case <-sc.ctx.Done():
 			sc.logger.Debug("inner context done, stopping read")
 			return
-		case img := <-ch:
-			if img == nil {
-				continue
-			}
-			ch <- img
 		case err := <-errChan:
 			sc.logger.Debug("error reading image", "err", err)
 		}
@@ -219,11 +217,13 @@ func (sc *SerialCamera) readFn(
 	_, err := sc.port.Read(tempBuf)
 	if err != nil {
 		errChan <- fmt.Errorf("error reading from serial port: %v", err)
+		return
 	}
 
 	// Safety check for buffer size
 	if len(tempBuf) > sc.ImageWidth*sc.ImageHeight {
 		errChan <- fmt.Errorf("received data exceeds expected image size")
+		return
 	}
 
 	expectedSize := sc.ImageWidth * sc.ImageHeight
@@ -236,6 +236,7 @@ func (sc *SerialCamera) readFn(
 			expectedSize,
 			expectedSize*3,
 		)
+		return
 	}
 
 	img := image.NewGray(image.Rect(0, 0, sc.ImageWidth, sc.ImageHeight))
@@ -245,7 +246,7 @@ func (sc *SerialCamera) readFn(
 		for x := range sc.ImageWidth { // x := 0; x < sc.config.ImageWidth; x++
 			i := y*sc.ImageWidth + x
 			gray := tempBuf[i]
-			img.Set(x, y, color.RGBA{gray, gray, gray, 255})
+			img.SetGray(x, y, color.Gray{Y: gray})
 		}
 	}
 

@@ -42,3 +42,5 @@ node_modules
 .obsidian/canvas.json
 .obsidian/bookmarks.json
 .obsidian/command-palette.json
+
+**/.claude/settings.local.json
