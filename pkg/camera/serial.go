@@ -196,7 +196,7 @@ func (sc *SerialCamera) read(
 			sc.mu.Lock()
 			slog.Debug("reading image data")
 
-			tempBuf := new([]byte)
+			tempBuf := make([]byte, sc.ImageWidth*sc.ImageHeight)
 			_, err := sc.port.Read(tempBuf)
 			if err != nil {
 				errChan <- fmt.Errorf("error reading from serial port: %v", err)
