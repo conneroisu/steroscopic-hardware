@@ -174,6 +174,7 @@ func (sc *SerialCamera) read(
 	if err != nil {
 		return nil, fmt.Errorf("failed to send start sequence: %v", err)
 	}
+	slog.Debug("sent start sequence", "seq", sc.StartSeq)
 	// After sending the start sequence, we should receive a 1-byte acknowledgement
 	bit, err := sc.port.Read(tempBuf)
 	if err != nil {
@@ -182,6 +183,7 @@ func (sc *SerialCamera) read(
 	if bit != 1 {
 		return nil, fmt.Errorf("unexpected acknowledgement byte: %d", bit)
 	}
+	slog.Debug("received acknowledgement", "byte", tempBuf[0])
 	sc.OnClose = func() {
 		_, err := sc.port.Write(sc.EndSeq)
 		if err != nil {
@@ -191,7 +193,9 @@ func (sc *SerialCamera) read(
 
 	return func() {
 		for {
+
 			sc.mu.Lock()
+			slog.Debug("reading image data")
 
 			_, err := sc.port.Read(tempBuf)
 			if err != nil {
@@ -212,7 +216,7 @@ func (sc *SerialCamera) read(
 				return
 			case imgCh <- img:
 			}
-
+			slog.Debug("image data read successfully", "size", buffer.Len())
 			sc.mu.Unlock()
 		}
 	}, nil
