@@ -193,7 +193,6 @@ func (sc *SerialCamera) read(
 
 	return func() {
 		for {
-
 			sc.mu.Lock()
 			slog.Debug("reading image data")
 
