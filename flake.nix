@@ -107,7 +107,7 @@
       devShells.default = pkgs.mkShell {
         shellHook = ''
           export REPO_ROOT=$(git rev-parse --show-toplevel)
-          export CGO_CFLAGS="-O2"
+          export CGO_CFLAGS="-O2" # For debuggers
 
           echo "Available commands:"
           ${pkgs.lib.concatStringsSep "\n" (
