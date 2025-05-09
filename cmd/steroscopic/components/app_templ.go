@@ -520,7 +520,7 @@ func SeqController(
 		var templ_7745c5c3_Var28 string
 		templ_7745c5c3_Var28, templ_7745c5c3_Err = templ.JoinStringErrs(string(typeOf) + "-startSeq")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/steroscopic/components/app.templ`, Line: 292, Col: 36}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/steroscopic/components/app.templ`, Line: 293, Col: 36}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var28))
 		if templ_7745c5c3_Err != nil {
@@ -533,7 +533,7 @@ func SeqController(
 		var templ_7745c5c3_Var29 string
 		templ_7745c5c3_Var29, templ_7745c5c3_Err = templ.JoinStringErrs(web.BytesToHex(camera.DefaultStartSeq))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/steroscopic/components/app.templ`, Line: 294, Col: 49}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/steroscopic/components/app.templ`, Line: 295, Col: 49}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var29))
 		if templ_7745c5c3_Err != nil {
@@ -546,7 +546,7 @@ func SeqController(
 		var templ_7745c5c3_Var30 string
 		templ_7745c5c3_Var30, templ_7745c5c3_Err = templ.JoinStringErrs("input[name='" + string(typeOf) + "-mode']:checked")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/steroscopic/components/app.templ`, Line: 297, Col: 67}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/steroscopic/components/app.templ`, Line: 298, Col: 67}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var30))
 		if templ_7745c5c3_Err != nil {
@@ -559,7 +559,7 @@ func SeqController(
 		var templ_7745c5c3_Var31 string
 		templ_7745c5c3_Var31, templ_7745c5c3_Err = templ.JoinStringErrs("#" + string(typeOf) + "-preview-container")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/steroscopic/components/app.templ`, Line: 298, Col: 58}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/steroscopic/components/app.templ`, Line: 299, Col: 58}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var31))
 		if templ_7745c5c3_Err != nil {
@@ -580,7 +580,7 @@ func SeqController(
 		var templ_7745c5c3_Var32 string
 		templ_7745c5c3_Var32, templ_7745c5c3_Err = templ.JoinStringErrs(string(typeOf) + "-endSeq")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/steroscopic/components/app.templ`, Line: 316, Col: 34}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/steroscopic/components/app.templ`, Line: 317, Col: 34}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var32))
 		if templ_7745c5c3_Err != nil {
@@ -593,7 +593,7 @@ func SeqController(
 		var templ_7745c5c3_Var33 string
 		templ_7745c5c3_Var33, templ_7745c5c3_Err = templ.JoinStringErrs(web.BytesToHex(camera.DefaultEndSeq))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/steroscopic/components/app.templ`, Line: 318, Col: 47}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/steroscopic/components/app.templ`, Line: 319, Col: 47}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var33))
 		if templ_7745c5c3_Err != nil {
@@ -606,7 +606,7 @@ func SeqController(
 		var templ_7745c5c3_Var34 string
 		templ_7745c5c3_Var34, templ_7745c5c3_Err = templ.JoinStringErrs("input[name='" + string(typeOf) + "-mode']:checked")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/steroscopic/components/app.templ`, Line: 321, Col: 67}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/steroscopic/components/app.templ`, Line: 322, Col: 67}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var34))
 		if templ_7745c5c3_Err != nil {
@@ -619,7 +619,7 @@ func SeqController(
 		var templ_7745c5c3_Var35 string
 		templ_7745c5c3_Var35, templ_7745c5c3_Err = templ.JoinStringErrs("#" + string(typeOf) + "-preview-container")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/steroscopic/components/app.templ`, Line: 322, Col: 58}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/steroscopic/components/app.templ`, Line: 323, Col: 58}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var35))
 		if templ_7745c5c3_Err != nil {
@@ -672,7 +672,7 @@ func SeqPreviewContainer(
 		var templ_7745c5c3_Var37 string
 		templ_7745c5c3_Var37, templ_7745c5c3_Err = templ.JoinStringErrs(string(typeOf) + "-preview-container")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/steroscopic/components/app.templ`, Line: 338, Col: 44}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/steroscopic/components/app.templ`, Line: 339, Col: 44}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var37))
 		if templ_7745c5c3_Err != nil {
@@ -693,7 +693,7 @@ func SeqPreviewContainer(
 		var templ_7745c5c3_Var38 string
 		templ_7745c5c3_Var38, templ_7745c5c3_Err = templ.JoinStringErrs(string(typeOf) + "-startPreview")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/steroscopic/components/app.templ`, Line: 354, Col: 41}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/steroscopic/components/app.templ`, Line: 355, Col: 41}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var38))
 		if templ_7745c5c3_Err != nil {
@@ -706,7 +706,7 @@ func SeqPreviewContainer(
 		var templ_7745c5c3_Var39 string
 		templ_7745c5c3_Var39, templ_7745c5c3_Err = templ.JoinStringErrs(startSeqVal)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/steroscopic/components/app.templ`, Line: 356, Col: 17}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/steroscopic/components/app.templ`, Line: 357, Col: 17}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var39))
 		if templ_7745c5c3_Err != nil {
@@ -727,7 +727,7 @@ func SeqPreviewContainer(
 		var templ_7745c5c3_Var40 string
 		templ_7745c5c3_Var40, templ_7745c5c3_Err = templ.JoinStringErrs(string(typeOf) + "-endPreview")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/steroscopic/components/app.templ`, Line: 370, Col: 39}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/steroscopic/components/app.templ`, Line: 371, Col: 39}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var40))
 		if templ_7745c5c3_Err != nil {
@@ -740,7 +740,7 @@ func SeqPreviewContainer(
 		var templ_7745c5c3_Var41 string
 		templ_7745c5c3_Var41, templ_7745c5c3_Err = templ.JoinStringErrs(endSeqVal)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/steroscopic/components/app.templ`, Line: 372, Col: 15}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/steroscopic/components/app.templ`, Line: 373, Col: 15}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var41))
 		if templ_7745c5c3_Err != nil {

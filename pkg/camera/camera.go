@@ -164,12 +164,6 @@ func (b *StreamManager) Configure(config Config) error {
 	var err error
 
 	opts := []SerialCameraOption{}
-	// if config.StartSeq != nil {
-	// 	opts = append(opts, WithStartSeq(config.StartSeq))
-	// }
-	// if config.EndSeq != nil {
-	// 	opts = append(opts, WithEndSeq(config.EndSeq))
-	// }
 	opts = append(opts, WithLogger(b.logger))
 	var camera Camer
 	b.logger.Info(

@@ -28,17 +28,28 @@ func ParametersHandler(logger *logger.Logger, params *despair.Parameters) APIFn 
 		// Convert string values to integers
 		blockSize, err := strconv.Atoi(blockSizeStr)
 		if err != nil {
-			return fmt.Errorf("invalid block size value: %w", err)
+			return fmt.Errorf(
+				"invalid block size value: %w",
+				err,
+			)
 		}
 
 		maxDisparity, err := strconv.Atoi(maxDisparityStr)
 		if err != nil {
-			return fmt.Errorf("invalid max disparity value: %w", err)
+			return fmt.Errorf(
+				"invalid max disparity value: %w",
+				err,
+			)
 		}
 		params.BlockSize = blockSize
 		params.MaxDisparity = maxDisparity
 		logger.Info(
-			"received parameters:", "blocksize", params.BlockSize, "maxdisparity", params.MaxDisparity)
+			"received parameters:",
+			"blocksize",
+			params.BlockSize,
+			"maxdisparity",
+			params.MaxDisparity,
+		)
 		return nil
 	}
 }

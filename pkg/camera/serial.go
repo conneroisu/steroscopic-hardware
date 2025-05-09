@@ -58,6 +58,8 @@ func NewSerialCamera(
 ) (*SerialCamera, error) {
 	ctx, cancel := context.WithCancel(context.Background())
 	lggr := logger.NewLogger()
+	// Open the port
+	var err error
 	sc := SerialCamera{
 		ctx:            ctx,
 		cancel:         cancel,
@@ -85,8 +87,6 @@ func NewSerialCamera(
 		StopBits: serial.OneStopBit,
 	}
 
-	// Open the port
-	var err error
 	sc.logger.Info("opening serial port", "port", portName)
 	sc.port, err = serial.Open(sc.portID, mode)
 	if err != nil {
@@ -260,14 +260,4 @@ func (sc *SerialCamera) readFn(
 // WithLogger sets the logger for the serial camera.
 func WithLogger(logger *logger.Logger) SerialCameraOption {
 	return func(sc *SerialCamera) { sc.logger = logger }
-}
-
-// WithStartSeq sets the start sequence for the serial camera.
-func WithStartSeq(startSeq []byte) SerialCameraOption {
-	return func(sc *SerialCamera) { sc.StartSeq = startSeq }
-}
-
-// WithEndSeq sets the end sequence for the serial camera.
-func WithEndSeq(endSeq []byte) SerialCameraOption {
-	return func(sc *SerialCamera) { sc.EndSeq = endSeq }
 }
