@@ -62,8 +62,11 @@ func ConfigureCamera(
 	isLeft bool,
 ) APIFn {
 	return func(w http.ResponseWriter, r *http.Request) error {
-		var compression int
-		var configureStream *camera.StreamManager
+		var (
+			compression     int
+			baudRate        int
+			configureStream *camera.StreamManager
+		)
 		if isLeft {
 			configureStream = leftStream
 		} else {
@@ -89,11 +92,12 @@ func ConfigureCamera(
 
 		// Configure baud rate if provided
 		if baudStr != "" {
-			config.BaudRate, err = strconv.Atoi(baudStr)
+			baudRate, err = strconv.Atoi(baudStr)
 			if err != nil {
 				return fmt.Errorf("invalid baud value: %w", err)
 			}
 
+			config.BaudRate = baudRate
 			logger.Info("configured camera baud rate", "baud", config.BaudRate)
 		}
 
@@ -103,6 +107,8 @@ func ConfigureCamera(
 			if err != nil {
 				return fmt.Errorf("invalid compression value: %w", err)
 			}
+
+			config.Compression = compression
 			logger.Info("configured camera compression", "compression", compression)
 		}
 
@@ -122,6 +128,7 @@ func ConfigureCamera(
 
 		// After Connection, reconfigure the output camera
 		outputStream.Stop()
+
 		logger.Info("stopped output camera, creating new output camera")
 		outputCamera := camera.NewOutputCamera(
 			logger,
