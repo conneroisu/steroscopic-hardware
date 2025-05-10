@@ -217,7 +217,7 @@ func (sc *SerialCamera) readFn(
 	sc.mu.Lock()
 	defer sc.mu.Unlock()
 
-	_, err := sc.logPort.Read(tempBuf)
+	_, err := sc.port.Read(tempBuf)
 	if err != nil {
 		errChan <- fmt.Errorf("error reading from serial port: %v", err)
 		return
