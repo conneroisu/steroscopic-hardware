@@ -1,22 +1,3 @@
-/*****************************************************************************
- * Joseph Zambreno
- * Phillip Jones
- *
- * Department of Electrical and Computer Engineering
- * Iowa State University
- *****************************************************************************/
-
-/*****************************************************************************
- * xtpg_app.c - Customized macros and routines for the TPG test pattern
- * generator module.
- *
- *
- * NOTES:
- * 02/04/14 by JAZ::Design created.
- *****************************************************************************/
-
-// !!! UNDER CONSTRUCTION: Only use as a high-level structural reference !!!
-
 #include <stdio.h>
 
 // Located in: microblaze_0/include/xparameters.h
@@ -42,8 +23,7 @@ void xTPG_main (int width, int height, int TPG_BASEADDR)
    unsigned int data, mask, data_read;
    int x_offset, y_offset, fstore_address;
    int i, j, num, offset, pass;
-//   int width = 1280;
-//   int height = 720;
+
 
    CurrentBoxColourPreset =0;
 

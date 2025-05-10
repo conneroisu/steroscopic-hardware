@@ -12,8 +12,6 @@
 #include "fmc_ipmi.h"
 #include "fmc_imageon.h"
 #include "onsemi_vita_sw.h"
-//#include "xv_demosaic.h"   // Uncomment when using Demosaic IP core  
-//#include "xvprocss.h"      // Uncomment when using Video Processing Subsystem IP cores
 #include "xvtc.h"
 #include "xaxivdma.h"
 #include "xtpg_app.h"
@@ -107,7 +105,6 @@ struct struct_vres_timing_t {
 	Xuint32 HSyncPolarity;
 }; typedef struct struct_vres_timing_t vres_timing_t;
 
-
 // Function prototypes (camera_app.c)
 void camera_config_init(camera_config_t *config);
 void camera_loop(camera_config_t *config);
@@ -120,8 +117,6 @@ int fmc_imageon_enable_vita(camera_config_t *config);
 int fmc_imageon_enable_ipipe(camera_config_t *config);
 void reset_dcms(camera_config_t *config);
 void enable_ssc(camera_config_t *config);
-
-
 
 // Function prototypes (video_resolution.c)
 char * vres_get_name(Xuint32 resolutionId);
@@ -155,7 +150,5 @@ int vfb_tx_start( XAxiVdma *pAxiVdma );
 int vfb_tx_stop ( XAxiVdma *pAxiVdma );
 int vfb_dump_registers( XAxiVdma *pAxiVdma);
 int vfb_check_errors( XAxiVdma *pAxiVdma, u8 bClearErrors );
-
-
 
 #endif // __CAMERA_APP_H__
