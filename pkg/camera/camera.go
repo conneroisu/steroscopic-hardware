@@ -169,7 +169,7 @@ func (b *StreamManager) Stop() {
 }
 
 // Configure configures the camera owned by this StreamManager.
-func (b *StreamManager) Configure(config Config, cam Camer) error {
+func (b *StreamManager) Configure(config Config) error {
 	var (
 		err    error
 		camera Camer
@@ -177,12 +177,9 @@ func (b *StreamManager) Configure(config Config, cam Camer) error {
 	)
 	b.mu.Lock()
 	defer b.mu.Unlock()
-	if cam.Port() == config.Port {
-		b.logger.Info("camera port already configured closing it to reconfigure")
-		err = cam.Close()
-		if err != nil {
-			return err
-		}
+	if b.camera.Port() == config.Port {
+		b.logger.Info("camera port already configured closing it to reconfigure", "port", config.Port)
+		b.camera.Close()
 	}
 	opts = append(opts, WithLogger(b.logger))
 	b.logger.Info(
