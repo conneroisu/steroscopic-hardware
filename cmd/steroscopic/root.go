@@ -40,6 +40,7 @@ func NewServer(
 	logger *logger.Logger,
 	params *despair.Parameters,
 	leftStream, rightStream, outputStream *camera.StreamManager,
+	cancel context.CancelFunc,
 ) (http.Handler, error) {
 	mux := http.NewServeMux()
 	err := AddRoutes(
@@ -49,6 +50,7 @@ func NewServer(
 		leftStream,
 		rightStream,
 		outputStream,
+		cancel,
 	)
 	if err != nil {
 		return nil, err
@@ -105,6 +107,7 @@ func Run(
 		leftStreamManager,
 		rightStreamManager,
 		outputStreamManager,
+		cancel,
 	)
 	if err != nil {
 		return err

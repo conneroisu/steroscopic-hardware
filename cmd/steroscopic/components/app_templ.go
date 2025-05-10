@@ -107,7 +107,15 @@ func header() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "Report a Bug</a><div class=\"flex space-x-4\"><a hx-get=\"/\" hx-target=\"#app\" hx-push-url=\"true\" class=\"px-4 py-2 rounded-lg transition\" @click=\"index = true\" :class=\"{\n\t\t\t\t\t\t\t&#39;bg-blue-700 hover:bg-gray-600&#39;: index,\n\t\t\t\t\t\t\t&#39;bg-gray-800 hover:bg-blue-300&#39;: !index\n\t\t\t\t\t\t}\">Live Camera System</a> <a hx-get=\"/manual\" hx-target=\"#app\" hx-push-url=\"true\" class=\"px-4 py-2 rounded-lg transition\" @click=\"index = false\" :class=\"{\n\t\t\t\t\t\t\t&#39;bg-blue-700 hover:bg-gray-600&#39;: !index,\n\t\t\t\t\t\t\t&#39;bg-gray-800 hover:bg-blue-300&#39;: index\n\t\t\t\t\t\t}\">Manual Upload</a></div></div></div></nav>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "Report a Bug</a><!-- Exit Button --><a href=\"/exit\" class=\"px-4 py-2 rounded-lg transition inline-flex items-center gap-1 text-gray-300 hover:text-white\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = web.CircleX.Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "Exit</a><div class=\"flex space-x-4\"><a hx-get=\"/\" hx-target=\"#app\" hx-push-url=\"true\" class=\"px-4 py-2 rounded-lg transition\" @click=\"index = true\" :class=\"{\n\t\t\t\t\t\t\t&#39;bg-blue-700 hover:bg-gray-600&#39;: index,\n\t\t\t\t\t\t\t&#39;bg-gray-800 hover:bg-blue-300&#39;: !index\n\t\t\t\t\t\t}\">Live Camera System</a> <a hx-get=\"/manual\" hx-target=\"#app\" hx-push-url=\"true\" class=\"px-4 py-2 rounded-lg transition\" @click=\"index = false\" :class=\"{\n\t\t\t\t\t\t\t&#39;bg-blue-700 hover:bg-gray-600&#39;: !index,\n\t\t\t\t\t\t\t&#39;bg-gray-800 hover:bg-blue-300&#39;: index\n\t\t\t\t\t\t}\">Manual Upload</a></div></div></div></nav>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -138,20 +146,20 @@ func status(
 			templ_7745c5c3_Var4 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<div class=\"lg:col-span-1 space-y-6\" x-data=\"{ open_stats: true }\"><!-- System Status Panel --><div class=\"bg-gray-800 rounded-lg shadow-lg p-4\"><div class=\"flex justify-between items-center cursor-pointer\" @click=\"open_stats = !open_stats\" x-data=\"{ text: &#39;▶&#39; }\" x-on:click=\"open_stats ? text = &#39;▶&#39; : text = &#39;▼&#39;\"><h2 class=\"text-xl font-semibold text-gray-200\">System Status</h2><span x-text=\"text\"></span></div><div class=\"mt-4 space-y-2\" id=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<div class=\"lg:col-span-1 space-y-6\" x-data=\"{ open_stats: true }\"><!-- System Status Panel --><div class=\"bg-gray-800 rounded-lg shadow-lg p-4\"><div class=\"flex justify-between items-center cursor-pointer\" @click=\"open_stats = !open_stats\" x-data=\"{ text: &#39;▶&#39; }\" x-on:click=\"open_stats ? text = &#39;▶&#39; : text = &#39;▼&#39;\"><h2 class=\"text-xl font-semibold text-gray-200\">System Status</h2><span x-text=\"text\"></span></div><div class=\"mt-4 space-y-2\" id=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var5 string
 		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(web.TargetStatusContent.ID)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/steroscopic/components/app.templ`, Line: 119, Col: 35}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/steroscopic/components/app.templ`, Line: 127, Col: 35}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "\" x-show=\"open_stats\" x-collapse>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "\" x-show=\"open_stats\" x-collapse>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -163,7 +171,7 @@ func status(
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "</div></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "</div></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -195,20 +203,20 @@ func cameraStatus(
 			templ_7745c5c3_Var6 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "<div class=\"bg-gray-800 rounded-lg shadow-lg p-4\"><div class=\"flex justify-between items-center\"><span class=\"font-medium\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "<div class=\"bg-gray-800 rounded-lg shadow-lg p-4\"><div class=\"flex justify-between items-center\"><span class=\"font-medium\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var7 string
 		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(typeOf)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/steroscopic/components/app.templ`, Line: 138, Col: 37}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/steroscopic/components/app.templ`, Line: 146, Col: 37}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, " camera:</span><div class=\"flex justify-between items-center cursor-pointer\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, " camera:</span><div class=\"flex justify-between items-center cursor-pointer\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -216,98 +224,98 @@ func cameraStatus(
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "</div></div><!-- spacer --><br><div class=\"space-y-4\"><!-- Camera Configuration --><div class=\"space-y-2\"><h3 class=\"text-sm font-medium text-gray-400\">Configuration</h3><!-- Configuration Form --><form id=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "</div></div><!-- spacer --><br><div class=\"space-y-4\"><!-- Camera Configuration --><div class=\"space-y-2\"><h3 class=\"text-sm font-medium text-gray-400\">Configuration</h3><!-- Configuration Form --><form id=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var8 string
 		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(string(typeOf) + "-config-form")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/steroscopic/components/app.templ`, Line: 152, Col: 46}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/steroscopic/components/app.templ`, Line: 160, Col: 46}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "\" hx-post=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "\" hx-post=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var9 string
 		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs("/" + string(typeOf) + "/configure")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/steroscopic/components/app.templ`, Line: 152, Col: 94}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/steroscopic/components/app.templ`, Line: 160, Col: 94}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "\" hx-target=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "\" hx-target=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var10 string
 		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs("#" + string(typeOf) + "-status")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/steroscopic/components/app.templ`, Line: 152, Col: 141}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/steroscopic/components/app.templ`, Line: 160, Col: 141}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "\"><!-- Port Selection --><div class=\"flex items-center justify-between mb-2\"><label for=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "\"><!-- Port Selection --><div class=\"flex items-center justify-between mb-2\"><label for=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var11 string
 		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(string(typeOf) + "-port")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/steroscopic/components/app.templ`, Line: 155, Col: 43}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/steroscopic/components/app.templ`, Line: 163, Col: 43}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "\" class=\"text-sm text-gray-300\">Port:</label><div class=\"flex items-center gap-2\"><select id=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "\" class=\"text-sm text-gray-300\">Port:</label><div class=\"flex items-center gap-2\"><select id=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var12 string
 		templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(string(typeOf) + "-port")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/steroscopic/components/app.templ`, Line: 158, Col: 37}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/steroscopic/components/app.templ`, Line: 166, Col: 37}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "\" name=\"port\" value=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "\" name=\"port\" value=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var13 string
 		templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(stream.Config().Port)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/steroscopic/components/app.templ`, Line: 160, Col: 36}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/steroscopic/components/app.templ`, Line: 168, Col: 36}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "\" class=\"bg-gray-700 text-gray-200 rounded px-3 py-1 text-sm border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500\"><option value=\"\">Select port</option> <option value=\"/dev/ttyUSB0\">/dev/ttyUSB0</option> <option value=\"/dev/ttyUSB1\">/dev/ttyUSB1</option> <option value=\"/dev/ttyS0\">/dev/ttyS0</option> <option value=\"/dev/ttyS1\">/dev/ttyS1</option></select> <button hx-get=\"/ports\" hx-target=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "\" class=\"bg-gray-700 text-gray-200 rounded px-3 py-1 text-sm border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500\"><option value=\"\">Select port</option> <option value=\"/dev/ttyUSB0\">/dev/ttyUSB0</option> <option value=\"/dev/ttyUSB1\">/dev/ttyUSB1</option> <option value=\"/dev/ttyS0\">/dev/ttyS0</option> <option value=\"/dev/ttyS1\">/dev/ttyS1</option></select> <button hx-get=\"/ports\" hx-target=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var14 string
 		templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs("#" + string(typeOf) + "-port")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/steroscopic/components/app.templ`, Line: 171, Col: 50}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/steroscopic/components/app.templ`, Line: 179, Col: 50}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "\" hx-trigger=\"load, click\" class=\"bg-blue-600 hover:bg-blue-700 text-white rounded p-1\" title=\"Refresh available ports\" type=\"button\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "\" hx-trigger=\"load, click\" class=\"bg-blue-600 hover:bg-blue-700 text-white rounded p-1\" title=\"Refresh available ports\" type=\"button\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -315,85 +323,85 @@ func cameraStatus(
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "</button></div></div><!-- Baud Rate Setting --><div class=\"flex items-center justify-between mb-2\"><label for=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "</button></div></div><!-- Baud Rate Setting --><div class=\"flex items-center justify-between mb-2\"><label for=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var15 string
 		templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(string(typeOf) + "-baud")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/steroscopic/components/app.templ`, Line: 183, Col: 43}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/steroscopic/components/app.templ`, Line: 191, Col: 43}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "\" class=\"text-sm text-gray-300\">Baud Rate:</label><div class=\"flex items-center gap-2\"><input id=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "\" class=\"text-sm text-gray-300\">Baud Rate:</label><div class=\"flex items-center gap-2\"><input id=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var16 string
 		templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(string(typeOf) + "-baud")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/steroscopic/components/app.templ`, Line: 186, Col: 37}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/steroscopic/components/app.templ`, Line: 194, Col: 37}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "\" name=\"baudrate\" type=\"number\" value=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "\" name=\"baudrate\" type=\"number\" value=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var17 string
 		templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(stream.Config().BaudRate)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/steroscopic/components/app.templ`, Line: 189, Col: 40}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/steroscopic/components/app.templ`, Line: 197, Col: 40}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "\" class=\"bg-gray-700 text-gray-200 rounded px-3 py-1 text-sm border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 w-24\"></div></div><!-- Camera Compression --><div class=\"flex items-center justify-between mb-2\"><span class=\"text-sm text-gray-300\">Compression:</span><div class=\"flex items-center gap-2\"><select id=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "\" class=\"bg-gray-700 text-gray-200 rounded px-3 py-1 text-sm border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 w-24\"></div></div><!-- Camera Compression --><div class=\"flex items-center justify-between mb-2\"><span class=\"text-sm text-gray-300\">Compression:</span><div class=\"flex items-center gap-2\"><select id=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var18 string
 		templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(string(typeOf) + "-compression")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/steroscopic/components/app.templ`, Line: 199, Col: 44}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/steroscopic/components/app.templ`, Line: 207, Col: 44}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "\" name=\"compression\" class=\"bg-gray-700 text-gray-200 rounded px-3 py-1 text-sm border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 w-24\" value=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, "\" name=\"compression\" class=\"bg-gray-700 text-gray-200 rounded px-3 py-1 text-sm border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 w-24\" value=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var19 string
 		templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs(stream.Config().Compression)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/steroscopic/components/app.templ`, Line: 202, Col: 43}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/steroscopic/components/app.templ`, Line: 210, Col: 43}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, "\"><option value=\"0\">No</option> <option value=\"1\">Yes</option></select></div></div><!-- Status Indicator --><div class=\"flex items-center justify-between mt-2\"><span class=\"text-sm text-gray-300\">Status:</span><div id=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, "\"><option value=\"0\">No</option> <option value=\"1\">Yes</option></select></div></div><!-- Status Indicator --><div class=\"flex items-center justify-between mt-2\"><span class=\"text-sm text-gray-300\">Status:</span><div id=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var20 string
 		templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinStringErrs(string(typeOf) + "-status")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/steroscopic/components/app.templ`, Line: 213, Col: 38}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/steroscopic/components/app.templ`, Line: 221, Col: 38}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var20))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, "\" class=\"flex items-center gap-2\"><span class=\"inline-block w-3 h-3 bg-red-500 rounded-full\"></span> <span class=\"text-sm\">Disconnected</span></div></div><!-- Connect Button --><div class=\"flex justify-end mt-2\"><button type=\"submit\" class=\"bg-blue-600 hover:bg-blue-700 text-white rounded px-3 py-1 text-sm\">Connect/Configure</button></div></form></div></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, "\" class=\"flex items-center gap-2\"><span class=\"inline-block w-3 h-3 bg-red-500 rounded-full\"></span> <span class=\"text-sm\">Disconnected</span></div></div><!-- Connect Button --><div class=\"flex justify-end mt-2\"><button type=\"submit\" class=\"bg-blue-600 hover:bg-blue-700 text-white rounded px-3 py-1 text-sm\">Connect/Configure</button></div></form></div></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
