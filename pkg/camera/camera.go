@@ -21,17 +21,17 @@ type Config struct {
 	Port        string
 	BaudRate    int
 	Compression int
-	StartSeq    []byte
-	EndSeq      []byte
+}
+
+var defaultConfig = Config{
+	Port:        "/dev/ttyUSB0",
+	BaudRate:    115200,
+	Compression: 0,
 }
 
 // DefaultCameraConfig returns default camera configuration
 func DefaultCameraConfig() Config {
-	return Config{
-		Port:        "/dev/ttyUSB0",
-		BaudRate:    115200,
-		Compression: 0,
-	}
+	return defaultConfig
 }
 
 // StreamManager manages multiple client connections to a single camera stream
@@ -40,6 +40,7 @@ type StreamManager struct {
 	Register   chan chan *image.Gray
 	Unregister chan chan *image.Gray
 	camera     Camer
+	config     *Config
 	frames     chan *image.Gray
 	mu         sync.Mutex
 	ctx        context.Context
@@ -62,6 +63,7 @@ func NewStreamManager(camera Camer, logger *logger.Logger) *StreamManager {
 		logger:     logger,
 		ctx:        ctx,
 		cancel:     cancel,
+		config:     &defaultConfig,
 		running:    false,
 	}
 }
@@ -115,6 +117,10 @@ func (b *StreamManager) Start() {
 				for client := range b.clients {
 					// Non-blocking send - skip clients that are slow
 					select {
+					case <-b.runCtx.Done():
+						continue
+					case <-b.ctx.Done():
+						continue
 					case client <- frame:
 					default:
 						// Client is too slow, drop frame for this client
@@ -136,6 +142,10 @@ func (b *StreamManager) Start() {
 			case <-b.runCtx.Done():
 				// Run context canceled, clean up
 				b.mu.Lock()
+				for client := range b.clients {
+					delete(b.clients, client)
+					close(client)
+				}
 				b.running = false
 				b.mu.Unlock()
 				return
@@ -159,13 +169,15 @@ func (b *StreamManager) Stop() {
 
 // Configure configures the camera owned by this StreamManager.
 func (b *StreamManager) Configure(config Config) error {
+	var (
+		err    error
+		camera Camer
+		opts   = []SerialCameraOption{}
+	)
 	b.mu.Lock()
 	defer b.mu.Unlock()
-	var err error
 
-	opts := []SerialCameraOption{}
 	opts = append(opts, WithLogger(b.logger))
-	var camera Camer
 	b.logger.Info(
 		"opening new camera",
 		"port",
@@ -211,5 +223,13 @@ func (b *StreamManager) Configure(config Config) error {
 		config.Compression == 1,
 	)
 	go b.Start()
+	b.config = &config
 	return nil
+}
+
+// Config returns the current configuration of the camera owned by this StreamManager.
+func (b *StreamManager) Config() *Config {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+	return b.config
 }

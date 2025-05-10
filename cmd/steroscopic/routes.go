@@ -26,16 +26,14 @@ func AddRoutes(
 		"GET /",
 		http.FileServer(http.FS(static)), // adds `/static/*` to path
 	)
-
 	mux.Handle("GET /{$}", handlers.MorphableHandler(
 		components.AppFn(web.LivePageTitle),
-		components.Live(params.BlockSize, params.MaxDisparity),
+		components.Live(params.BlockSize, params.MaxDisparity, leftStream, rightStream),
 	))
 	mux.Handle("GET /manual", handlers.MorphableHandler(
 		components.AppFn(web.ManualPageTitle),
 		components.Manual(params.BlockSize, params.MaxDisparity),
 	))
-
 	mux.HandleFunc(
 		"POST /update-params",
 		handlers.Make(handlers.ParametersHandler(logger, params)),
@@ -56,17 +54,30 @@ func AddRoutes(
 		"POST /manual-calc-depth-map",
 		handlers.Make(handlers.ManualCalcDepthMapHandler(logger)),
 	)
-
 	mux.HandleFunc(
 		"POST /left/configure",
-		handlers.Make(handlers.ConfigureCamera(logger, params, leftStream, rightStream, outputStream, true)),
+		handlers.Make(handlers.ErrorHandler(
+			handlers.ConfigureCamera(
+				logger,
+				params,
+				leftStream,
+				rightStream,
+				outputStream,
+				true,
+			))),
 	)
 	mux.HandleFunc(
 		"POST /right/configure",
-		handlers.Make(handlers.ConfigureCamera(logger, params, leftStream, rightStream, outputStream, false)),
+		handlers.Make(handlers.ErrorHandler(
+			handlers.ConfigureCamera(
+				logger,
+				params,
+				leftStream,
+				rightStream,
+				outputStream,
+				false,
+			))),
 	)
-
 	mux.HandleFunc("GET /ports", handlers.Make(handlers.GetPorts(logger)))
-	mux.HandleFunc("POST /preview-seq", handlers.PreviewSeqHandler)
 	return nil
 }

@@ -96,7 +96,9 @@ templ header() {
 	</nav>
 }
 
-templ status() {
+templ status(
+	leftStream, rightStream *camera.StreamManager,
+) {
 	<div
 		class="lg:col-span-1 space-y-6"
 		x-data="{ open_stats: true }"
@@ -118,14 +120,17 @@ templ status() {
 				x-show="open_stats"
 				x-collapse
 			>
-				@cameraStatus(camera.LeftCameraType)
-				@cameraStatus(camera.RightCameraType)
+				@cameraStatus(camera.LeftCameraType, leftStream)
+				@cameraStatus(camera.RightCameraType, rightStream)
 			</div>
 		</div>
 	</div>
 }
 
-templ cameraStatus(typeOf camera.Type) {
+templ cameraStatus(
+	typeOf camera.Type,
+	stream *camera.StreamManager,
+) {
 	<div
 		class="bg-gray-800 rounded-lg shadow-lg p-4"
 	>
@@ -152,6 +157,7 @@ templ cameraStatus(typeOf camera.Type) {
 							<select
 								id={ string(typeOf) + "-port" }
 								name="port"
+								value={ stream.Config().Port }
 								class="bg-gray-700 text-gray-200 rounded px-3 py-1 text-sm border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
 							>
 								<option value="">Select port</option>
@@ -180,7 +186,7 @@ templ cameraStatus(typeOf camera.Type) {
 								id={ string(typeOf) + "-baud" }
 								name="baudrate"
 								type="number"
-								value="115200"
+								value={ stream.Config().BaudRate }
 								class="bg-gray-700 text-gray-200 rounded px-3 py-1 text-sm border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 w-24"
 							/>
 						</div>
@@ -193,6 +199,7 @@ templ cameraStatus(typeOf camera.Type) {
 								id={ string(typeOf) + "-compression" }
 								name="compression"
 								class="bg-gray-700 text-gray-200 rounded px-3 py-1 text-sm border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 w-24"
+								value={ stream.Config().Compression }
 							>
 								<option value="0">No</option>
 								<option value="1">Yes</option>
@@ -212,165 +219,16 @@ templ cameraStatus(typeOf camera.Type) {
 							</span>
 						</div>
 					</div>
-					<!-- Input Mode Selection -->
-					<div class="mt-4 mb-2">
-						<span class="text-sm text-gray-300">
-							Seq Format:
-						</span>
-						<div class="flex items-center gap-3 mt-1">
-							<label class="flex items-center gap-1">
-								<input
-									type="radio"
-									name={ string(typeOf) + "-mode" }
-									value="hex"
-									checked
-									hx-trigger="change"
-									hx-post="/preview-seq"
-									hx-include={ "#" + string(typeOf) + "-startSeq,#" + string(typeOf) + "-endSeq" }
-									hx-target={ "#" + string(typeOf) + "-preview-container" }
-									class="text-blue-500"
-								/>
-								<span class="text-sm text-gray-300">Hex</span>
-							</label>
-							<label class="flex items-center gap-1">
-								<input
-									type="radio"
-									name={ string(typeOf) + "-mode" }
-									value="decimal"
-									hx-trigger="change"
-									hx-post="/preview-seq"
-									hx-include={ "#" + string(typeOf) + "-startSeq,#" + string(typeOf) + "-endSeq" }
-									hx-target={ "#" + string(typeOf) + "-preview-container" }
-									class="text-blue-500"
-								/>
-								<span class="text-sm text-gray-300">Decimal</span>
-							</label>
-							<label class="flex items-center gap-1">
-								<input
-									type="radio"
-									name={ string(typeOf) + "-mode" }
-									value="text"
-									hx-trigger="change"
-									hx-post="/preview-seq"
-									hx-include={ "#" + string(typeOf) + "-startSeq,#" + string(typeOf) + "-endSeq" }
-									hx-target={ "#" + string(typeOf) + "-preview-container" }
-									class="text-blue-500"
-								/>
-								<span class="text-sm text-gray-300">Text</span>
-							</label>
-						</div>
-					</div>
-					@SeqController(typeOf)
 					<!-- Connect Button -->
 					<div class="flex justify-end mt-2">
 						<button
 							type="submit"
 							class="bg-blue-600 hover:bg-blue-700 text-white rounded px-3 py-1 text-sm"
 						>
-							Connect
+							Connect/Configure
 						</button>
 					</div>
 				</form>
-			</div>
-		</div>
-	</div>
-}
-
-templ SeqController(
-	typeOf camera.Type,
-) {
-	<!-- Start Seq -->
-	<div class="flex flex-col mt-2">
-		<div
-			class="flex flex-row"
-		>
-			<span class="text-sm text-gray-300 mb-1">Start sequence:</span>
-			@web.GreenUp
-		</div>
-		<input
-			type="text"
-			name="startSeq"
-			id={ string(typeOf) + "-startSeq" }
-			class="bg-gray-700 text-gray-200 rounded px-3 py-1 text-sm border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full mb-1"
-			value={ web.BytesToHex(camera.DefaultStartSeq) }
-			hx-post="/preview-seq"
-			hx-trigger="input changed delay:300ms, revealed"
-			hx-include={ "input[name='" + string(typeOf) + "-mode']:checked" }
-			hx-target={ "#" + string(typeOf) + "-preview-container" }
-		/>
-	</div>
-	<!-- End Seq -->
-	<div class="flex flex-col mt-2">
-		<div
-			class="flex flex-row"
-		>
-			<span
-				class="text-sm text-gray-300 mb-1"
-			>
-				End sequence:
-			</span>
-			@web.RedDown
-		</div>
-		<input
-			type="text"
-			name="endSeq"
-			id={ string(typeOf) + "-endSeq" }
-			class="bg-gray-700 text-gray-200 rounded px-3 py-1 text-sm border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full mb-1"
-			value={ web.BytesToHex(camera.DefaultEndSeq) }
-			hx-post="/preview-seq"
-			hx-trigger="input changed delay:300ms, revealed"
-			hx-include={ "input[name='" + string(typeOf) + "-mode']:checked" }
-			hx-target={ "#" + string(typeOf) + "-preview-container" }
-		/>
-	</div>
-	<!-- Preview Container - HTMX will update this -->
-	@SeqPreviewContainer(
-		typeOf,
-		web.FormatBytesForPreview(camera.DefaultStartSeq),
-		web.FormatBytesForPreview(camera.DefaultEndSeq),
-	)
-}
-
-templ SeqPreviewContainer(
-	typeOf camera.Type,
-	startSeqVal, endSeqVal string,
-) {
-	<div
-		id={ string(typeOf) + "-preview-container" }
-		class="mt-2"
-	>
-		<div class="flex flex-col">
-			<div
-				class="flex flex-row"
-			>
-				<span
-					class="text-sm text-gray-300 mb-1"
-				>
-					Start preview:
-				</span>
-				@web.GreenUp
-			</div>
-			<div
-				class="bg-gray-700 text-gray-200 rounded px-3 py-2 text-sm border border-gray-600 min-h-8 font-mono"
-				id={ string(typeOf) + "-startPreview" }
-			>
-				{ startSeqVal }
-			</div>
-		</div>
-		<div class="flex flex-col mt-2">
-			<div
-				class="flex flex-row"
-			>
-				<span class="text-sm text-gray-300 mb-1">
-					End preview:
-				</span>
-				@web.RedDown
-			</div>
-			<div
-				class="bg-gray-700 text-gray-200 rounded px-3 py-2 text-sm border border-gray-600 min-h-8 font-mono"
-				id={ string(typeOf) + "-endPreview" }
-			>
-				{ endSeqVal }
 			</div>
 		</div>
 	</div>

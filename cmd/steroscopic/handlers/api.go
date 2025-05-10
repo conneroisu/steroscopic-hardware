@@ -44,3 +44,21 @@ func MorphableHandler(
 		}
 	}
 }
+
+// ErrorHandler returns a handler that returns an error response.
+func ErrorHandler(
+	fn APIFn,
+) APIFn {
+	return func(w http.ResponseWriter, r *http.Request) error {
+		err := fn(w, r)
+		if err == nil {
+			_, err = w.Write([]byte(`<span class="text-sm text-green-500">Success!</span>`))
+			if err != nil {
+				return fmt.Errorf("failed to write success response: %w", err)
+			}
+		}
+		// Return error response
+		_, err = w.Write([]byte(`<span class="text-sm text-red-500">Failure: ` + err.Error() + `</span>`))
+		return err
+	}
+}
