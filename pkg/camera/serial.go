@@ -231,6 +231,7 @@ func (sc *SerialCamera) readFn(
 		sc.logger.Error("error reading from serial port", "error", err)
 		errChan <- fmt.Errorf("error reading from serial port: %v", err)
 	}
+	sc.logger.Debug("read", "length", length)
 
 	// Safety check for buffer size making sure we read the entire image
 	if length > sc.ImageWidth*sc.ImageHeight {
