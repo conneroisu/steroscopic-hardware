@@ -223,6 +223,8 @@ func (sc *SerialCamera) readFn(
 		tempBuf = make([]byte, sc.ImageWidth*sc.ImageHeight)
 	)
 
+	expectedLength := sc.ImageWidth * sc.ImageHeight
+
 	sc.mu.Lock()
 	defer sc.mu.Unlock()
 
@@ -234,9 +236,9 @@ func (sc *SerialCamera) readFn(
 			sc.logger.Error("error reading from serial port", "error", err)
 			errChan <- fmt.Errorf("error reading from serial port: %v", err)
 		}
-		sc.logger.Debug("read", "length", length, "act", "appending")
 		tempBuf = append(tempBuf, buf...)
 		totalLength += length
+		sc.logger.Debug("read", "length", length, "total", totalLength, "expected", expectedLength)
 		if totalLength >= sc.ImageWidth*sc.ImageHeight {
 			break
 		}
