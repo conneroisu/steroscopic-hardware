@@ -74,7 +74,8 @@ func (b *StreamManager) Unlock() { b.mu.Unlock() }
 
 // Start begins streaming from the camera and broadcasting to clients
 func (b *StreamManager) Start() {
-	b.logger.Info("starting camera stream broadcaster")
+	b.logger.Info("StreamManager.Start()")
+	defer b.logger.Info("StreamManager.Start() done")
 	b.mu.Lock()
 	if b.running {
 		b.mu.Unlock()
@@ -160,7 +161,6 @@ func (b *StreamManager) Stop() {
 func (b *StreamManager) Configure(config Config) error {
 	b.mu.Lock()
 	defer b.mu.Unlock()
-
 	var err error
 
 	opts := []SerialCameraOption{}
