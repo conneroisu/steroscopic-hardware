@@ -42,7 +42,14 @@ func NewServer(
 	leftStream, rightStream, outputStream *camera.StreamManager,
 ) (http.Handler, error) {
 	mux := http.NewServeMux()
-	err := AddRoutes(mux, logger, params, leftStream, rightStream, outputStream)
+	err := AddRoutes(
+		mux,
+		logger,
+		params,
+		leftStream,
+		rightStream,
+		outputStream,
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -139,10 +146,20 @@ func Run(
 		return fmt.Errorf("server error: %w", err)
 	case <-innerCtx.Done(): // Signal received, initiate graceful shutdown
 		slog.Info("shutdown signal received, shutting down server...")
-		return gracefulShutdown(innerCtx, shutdownTimeout, &wg, httpServer)
+		return gracefulShutdown(
+			innerCtx,
+			shutdownTimeout,
+			&wg,
+			httpServer,
+		)
 	case <-ctx.Done(): // Parent context cancelled
 		slog.Info("parent context cancelled, shutting down...")
-		return gracefulShutdown(ctx, shutdownTimeout, &wg, httpServer)
+		return gracefulShutdown(
+			ctx,
+			shutdownTimeout,
+			&wg,
+			httpServer,
+		)
 	}
 }
 

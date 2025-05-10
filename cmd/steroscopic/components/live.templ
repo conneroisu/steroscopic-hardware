@@ -1,8 +1,11 @@
 package components
 
+import "github.com/conneroisu/steroscopic-hardware/pkg/camera"
+
 templ Live(
 	blockSize int,
 	maxDisparity int,
+	leftSream, rightStream *camera.StreamManager,
 ) {
 	<div
 		class="container mx-auto px-4 grid grid-cols-1 lg:grid-cols-4 gap-6"
@@ -78,6 +81,6 @@ templ Live(
 			// Algorithm Controls Panel
 			@Control(blockSize, maxDisparity)
 		</div>
-		@status()
+		@status(leftSream, rightStream)
 	</div>
 }

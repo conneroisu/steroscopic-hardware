@@ -96,7 +96,9 @@ templ header() {
 	</nav>
 }
 
-templ status() {
+templ status(
+	leftStream, rightStream *camera.StreamManager,
+) {
 	<div
 		class="lg:col-span-1 space-y-6"
 		x-data="{ open_stats: true }"
@@ -118,14 +120,17 @@ templ status() {
 				x-show="open_stats"
 				x-collapse
 			>
-				@cameraStatus(camera.LeftCameraType)
-				@cameraStatus(camera.RightCameraType)
+				@cameraStatus(camera.LeftCameraType, leftStream)
+				@cameraStatus(camera.RightCameraType, rightStream)
 			</div>
 		</div>
 	</div>
 }
 
-templ cameraStatus(typeOf camera.Type) {
+templ cameraStatus(
+	typeOf camera.Type,
+	stream *camera.StreamManager,
+) {
 	<div
 		class="bg-gray-800 rounded-lg shadow-lg p-4"
 	>
@@ -152,6 +157,7 @@ templ cameraStatus(typeOf camera.Type) {
 							<select
 								id={ string(typeOf) + "-port" }
 								name="port"
+								value={ stream.Config().Port }
 								class="bg-gray-700 text-gray-200 rounded px-3 py-1 text-sm border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
 							>
 								<option value="">Select port</option>
@@ -180,7 +186,7 @@ templ cameraStatus(typeOf camera.Type) {
 								id={ string(typeOf) + "-baud" }
 								name="baudrate"
 								type="number"
-								value="115200"
+								value={ stream.Config().BaudRate }
 								class="bg-gray-700 text-gray-200 rounded px-3 py-1 text-sm border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 w-24"
 							/>
 						</div>
@@ -193,6 +199,7 @@ templ cameraStatus(typeOf camera.Type) {
 								id={ string(typeOf) + "-compression" }
 								name="compression"
 								class="bg-gray-700 text-gray-200 rounded px-3 py-1 text-sm border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 w-24"
+								value={ stream.Config().Compression }
 							>
 								<option value="0">No</option>
 								<option value="1">Yes</option>
@@ -208,7 +215,7 @@ templ cameraStatus(typeOf camera.Type) {
 						>
 							<span class="inline-block w-3 h-3 bg-red-500 rounded-full"></span>
 							<span class="text-sm">
-								Disconnected
+								Connected
 							</span>
 						</div>
 					</div>
@@ -218,7 +225,7 @@ templ cameraStatus(typeOf camera.Type) {
 							type="submit"
 							class="bg-blue-600 hover:bg-blue-700 text-white rounded px-3 py-1 text-sm"
 						>
-							Connect
+							Connect/Configure
 						</button>
 					</div>
 				</form>

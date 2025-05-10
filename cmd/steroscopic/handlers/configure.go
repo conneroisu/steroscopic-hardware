@@ -61,7 +61,7 @@ func ConfigureCamera(
 	leftStream, rightStream, outputStream *camera.StreamManager,
 	isLeft bool,
 ) APIFn {
-	return func(w http.ResponseWriter, r *http.Request) error {
+	return func(_ http.ResponseWriter, r *http.Request) error {
 		var (
 			compression     int
 			baudRate        int
@@ -91,15 +91,15 @@ func ConfigureCamera(
 		}
 
 		// Configure baud rate if provided
-		if baudStr != "" {
-			baudRate, err = strconv.Atoi(baudStr)
-			if err != nil {
-				return fmt.Errorf("invalid baud value: %w", err)
-			}
-
-			config.BaudRate = baudRate
-			logger.Info("configured camera baud rate", "baud", config.BaudRate)
+		if baudStr == "" {
+			return fmt.Errorf("baud rate not provided")
 		}
+		baudRate, err = strconv.Atoi(baudStr)
+		if err != nil {
+			return fmt.Errorf("invalid baud value: %w", err)
+		}
+		config.BaudRate = baudRate
+		logger.Info("configured camera baud rate", "baud", config.BaudRate)
 
 		// Configure compression if provided
 		if compressionStr != "" {
@@ -113,17 +113,9 @@ func ConfigureCamera(
 		}
 
 		// After configuration, attempt to connect
-		logger.Info("attempting to connect/configure to camera")
 		err = configureStream.Configure(config)
 		if err != nil {
-			// Return error response
-			_, err = w.Write([]byte(`
-				<span class="text-sm text-red-500">Failed to connect: ` + err.Error() + `</span>
-			`))
-			if err != nil {
-				return fmt.Errorf("failed to write error response: %w", err)
-			}
-			return nil // Return nil to avoid additional error response
+			return fmt.Errorf("failed to configure camera: %w", err)
 		}
 
 		// After Connection, reconfigure the output camera
@@ -139,13 +131,6 @@ func ConfigureCamera(
 		logger.Info("reconfigured output camera setting pointer")
 		outputStream = camera.NewStreamManager(outputCamera, logger)
 
-		// Return success response
-		_, err = w.Write([]byte(`
-			<span class="text-sm text-green-500">Successfully connected</span>
-		`))
-		if err != nil {
-			return fmt.Errorf("failed to write success response: %w", err)
-		}
 		return nil
 	}
 }

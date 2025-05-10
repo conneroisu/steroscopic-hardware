@@ -23,13 +23,15 @@ type Config struct {
 	Compression int
 }
 
+var defaultConfig = Config{
+	Port:        "/dev/ttyUSB0",
+	BaudRate:    115200,
+	Compression: 0,
+}
+
 // DefaultCameraConfig returns default camera configuration
 func DefaultCameraConfig() Config {
-	return Config{
-		Port:        "/dev/ttyUSB0",
-		BaudRate:    115200,
-		Compression: 0,
-	}
+	return defaultConfig
 }
 
 // StreamManager manages multiple client connections to a single camera stream
@@ -38,6 +40,7 @@ type StreamManager struct {
 	Register   chan chan *image.Gray
 	Unregister chan chan *image.Gray
 	camera     Camer
+	config     *Config
 	frames     chan *image.Gray
 	mu         sync.Mutex
 	ctx        context.Context
@@ -60,6 +63,7 @@ func NewStreamManager(camera Camer, logger *logger.Logger) *StreamManager {
 		logger:     logger,
 		ctx:        ctx,
 		cancel:     cancel,
+		config:     &defaultConfig,
 		running:    false,
 	}
 }
@@ -219,5 +223,13 @@ func (b *StreamManager) Configure(config Config) error {
 		config.Compression == 1,
 	)
 	go b.Start()
+	b.config = &config
 	return nil
+}
+
+// Config returns the current configuration of the camera owned by this StreamManager.
+func (b *StreamManager) Config() *Config {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+	return b.config
 }
