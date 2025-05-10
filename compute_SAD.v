@@ -60,89 +60,30 @@ module SAD #(
 
 endmodule 
 
-// // Assumes the number of rows loaded into 
-// // design is >= half window + 1.
-// // Performs SAD per row in parallel.
-// module compute_SAD #(
-//     parameter WIN = 15,
-//     parameter WIN_SIZE = WIN * WIN,
-//     // parameter MIN_NUM_ROWS = (WIN / 2) + 1,
-//     parameter DATA_SIZE = 8,
-//     parameter IMG_W = 640,
-//     parameter IMG_H = 480,
-//     parameter MAX_DISP = 64,
-//     // // Max dec from window = window_size * (2^data_size - 1)
-//     // parameter MAX_SIZE_ROW = 640 * ((1 << DATA_SIZE) - 1),
-//     // // Dec to bin for output width
-//     // parameter SAD_SIZE_ROW = $clog2(MAX_SIZE + 1) 
-//     parameter SAD_SIZE = $clog2(WIN_SIZE * ((1 << DATA_SIZE) - 1) + 1)
-// )(
-//     input wire [DATA_SIZE * IMG_W * WIN : 0] input_array,
-//     output wire [DATA_SIZE * IMG_W - 1 : 0] output_row
-// );
-
-// wire [SAD_SIZE : 0] sad_value [0 : IMG_W - 1] [0 : MAX_DISP - 1];
-// reg [DATA_SIZE - 1 : 0] max_value;
-
-// // Makes IMG_W * MAX_DISP SAD engines in parallel
-// // So, 640 * 64 = 40960 engines in this case
-// // Probs need at least 510 LUTs for each engine
-// // 53,200 LUT < 20,889,600 LUTs lmao
-// genvar c, d;
-// generate
-//     for (c = 0; c < IMG_W; c = c + 1) begin : column_loop
-//         max_value = 0;
-//         for (d = 0; d < MAX_DISP; d = d + 1) begin : disparity_loop    
-//             wire [DATA_SIZE*WIN_SIZE-1:0] winL_flat;
-//             wire [DATA_SIZE*WIN_SIZE-1:0] winR_flat;
-
-//             // fill winL_flat and winR_flat from img_block
-//             // based on c, d, and current window
-
-//             SAD #(.WIN(WIN), .DATA_SIZE(DATA_SIZE)) sad_inst (
-//                 .input_a(winL_flat),
-//                 .input_b(winR_flat),
-//                 .sad(sad_value[c][d])
-//             );
-
-//             if (max_value < sad_value[c][d]) begin
-//                 max_value = sad_value[c][d];
-//             end
-
-//         end
-//         output_row[]
-//     end
-// endgenerate
-
-// endmodule
-
-// Compute disparity of a pixel.
-// Serially iterate through row (do one pixel a time).
+// Compute disparity of a pixel
 // Perform SAD computation in parallel
+// MAX_DISP windows must be searched serially - could be chunked later
 module compute_max_disp #(
     parameter WIN = 15,
-    parameter WIN_SIZE = WIN * WIN,
     parameter DATA_SIZE = 8,
     parameter IMG_W = 640,
     parameter MAX_DISP = 64,
-    parameter SAD_SIZE = $clog2(WIN_SIZE * ((1 << DATA_SIZE) - 1) + 1),
-    parameter MAX_DISP_ARR = $clog2(MAX_DISP) - 1,
-    parameter IMG_W_ARR = $clog2(IMG_W) - 1
+    parameter DISP_PARTS = 8,
+    localparam G = MAX_DISP / DISP_PARTS,
+    localparam WIN_SIZE = WIN * WIN,
+    localparam SAD_BITS = $clog2(WIN_SIZE * ((1 << DATA_SIZE) - 1) + 1),
+    // localparam MAX_DISP_ARR = $clog2(MAX_DISP) - 1,
+    localparam DISP_BITS = $clog2(MAX_DISP),
+    localparam CYCLE_BITS = $clog2(G),
+    localparam IMG_W_ARR = $clog2(IMG_W)
 )(
     // Flattened block of WIN rows, each with IMG_W pixels
     input  wire [DATA_SIZE * IMG_W * WIN - 1 : 0] input_array,
     input clk,
     input rst, 
-    // output wire [DATA_SIZE * IMG_W - 1: 0] output_row,
-    output wire [MAX_DISP_ARR : 0] output_disp,
+    output wire [DISP_BITS - 1 : 0] output_disp,
     output reg done
 );
-
-    // Best disparity result per column (to be assigned to output_row)
-    reg [SAD_SIZE - 1 : 0] min_sad; // [0 : IMG_W - 1];
-    reg [MAX_DISP_ARR : 0] best_disp; // [0 : IMG_W - 1];
-    // reg [MAX_DISP_ARR : 0] disp_index; 
-    // reg [MAX_DISP_ARR : 0] disparity;
 
     // Unpack input_array into a 2D image block: img_block[row][col]
     wire [DATA_SIZE - 1 : 0] img_block [0 : WIN - 1][0 : IMG_W - 1];
@@ -160,13 +101,22 @@ module compute_max_disp #(
     endgenerate
 
     // Create window buffers for # of disparities
-    wire [DATA_SIZE * WIN_SIZE - 1 : 0] winL_flat [0 : MAX_DISP - 1];
-    wire [DATA_SIZE * WIN_SIZE - 1 : 0] winR_flat [0 : MAX_DISP - 1];
+    // Partition the windows 
+    wire [DATA_SIZE * WIN_SIZE - 1 : 0] winL_flat [0 : DISP_PARTS - 1][0 : G - 1];
+    wire [DATA_SIZE * WIN_SIZE - 1 : 0] winR_flat [0 : DISP_PARTS - 1][0 : G - 1];
 
     // Flattened SAD outputs
-    // wire [SAD_SIZE:0] sad_value [0:IMG_W-1][0:MAX_DISP-1];
-    wire [SAD_SIZE - 1 : 0] sad_value [0 : MAX_DISP - 1];
+    wire [SAD_SIZE - 1 : 0] sad_value [0 : DISP_PARTS - 1];
 
+    // Indicies and local minima
+    integer i;
+    reg [IMG_W_ARR - 1 : 0] col_index;
+    reg [CYCLE_BITS - 1 : 0] cycle;
+    reg [SAD_BITS - 1 : 0] local_min [0 : DISP_PARTS - 1];
+    reg [DISP_BITS - 1 : 0] local_disp [0 : DISP_PARTS - 1];
+    reg [SAD_BITS - 1 : 0] best_value;
+    reg [DISP_BITS - 1 : 0] best_disp;
+    
     // Instantiate SAD units for each column and disparity
     genvar x, w;
     generate
@@ -174,31 +124,24 @@ module compute_max_disp #(
         // Iterate through disparities for a pixel
         for (x = 0; x < MAX_DISP; x = x + 1) begin : disparity_loop
 
-                // Build 15x15 windows
-                for (w = 0; w < WIN_SIZE; w = w + 1) begin : pack_windows
-                    // Not sure how these synthesize yet
-                    // Determine X, Y coordinates for Window
-                    localparam integer WY = w / WIN;
-                    localparam integer WX = w % WIN;
+            // Build 15x15 windows
+            for (w = 0; w < WIN_SIZE; w = w + 1) begin : pack_windows
+                // Not sure how these synthesize yet
+                // Determine X, Y coordinates for Window
+                localparam integer WY = w / WIN;
+                localparam integer WX = w % WIN;
 
-                    // Find pixel values (and check boundaries)
-                    // col_index + WX >= (WIN >> 1) prevents underflow [pixel beyond left boundary]
-                    // col_index + WX < IMG_W - (WIN >> 1) prevents overflow [pixel beyond right boundary]
-                    wire [DATA_SIZE - 1 : 0] pix_L = ((col_index + WX >= (WIN >> 1)) && (col_index + WX < IMG_W - (WIN >> 1))) ? img_block[WY][col_index + WX - (WIN >> 1)] : 0;
-                    // Right image offset by disparity
-                    wire [DATA_SIZE - 1 : 0] pix_R = ((col_index + WX >= (WIN >> 1) + x) && (col_index + WX < IMG_W - (WIN >> 1))) ? img_block[WY][col_index + WX - (WIN >> 1) - x] : 0;
+                // Find pixel values (and check boundaries)
+                // col_index + WX >= (WIN >> 1) prevents underflow [pixel beyond left boundary]
+                // col_index + WX < IMG_W - (WIN >> 1) prevents overflow [pixel beyond right boundary]
+                wire [DATA_SIZE - 1 : 0] pix_L = ((col_index + WX >= (WIN >> 1)) && (col_index + WX < IMG_W - (WIN >> 1))) ? img_block[WY][col_index + WX - (WIN >> 1)] : 0;
+                // Right image offset by disparity
+                wire [DATA_SIZE - 1 : 0] pix_R = ((col_index + WX >= (WIN >> 1) + x) && (col_index + WX < IMG_W - (WIN >> 1))) ? img_block[WY][col_index + WX - (WIN >> 1) - x] : 0;
 
-                    // Assign to flatten arry to be passed to SAD 
-                    assign winL_flat[x][DATA_SIZE * w +: DATA_SIZE] = pix_L;
-                    assign winR_flat[x][DATA_SIZE * w +: DATA_SIZE] = pix_R;
-                end
-                
-                // Compute and save SAD for all MAX_DISP per pixel
-                SAD #(.WIN(WIN), .DATA_SIZE(DATA_SIZE)) sad_inst (
-                    .input_a(winL_flat[x]),
-                    .input_b(winR_flat[x]),
-                    .sad(sad_value[x])
-                );
+                // Assign to flatten arry to be passed to SAD 
+                assign winL_flat[x][DATA_SIZE * w +: DATA_SIZE] = pix_L;
+                assign winR_flat[x][DATA_SIZE * w +: DATA_SIZE] = pix_R;
+            end
         end
     endgenerate
 
