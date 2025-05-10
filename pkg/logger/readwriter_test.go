@@ -4,6 +4,7 @@ import (
 	"io"
 	"log/slog"
 	"os"
+	"testing"
 )
 
 // Example of a simple in-memory ReadWriter for demonstration
@@ -33,7 +34,8 @@ func (m *MemoryReadWriter) Write(p []byte) (n int, err error) {
 	m.buffer = append(m.buffer, p...)
 	return len(p), nil
 }
-func main() {
+func TestReadWriter(t *testing.T) {
+	t.Log("Testing ReadWriter")
 	// Create a logger
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 
@@ -87,5 +89,9 @@ func main() {
 	)
 
 	// Write using the tee setup
-	teeLoggingWriter.Write([]byte("This goes to file and memory, with logging!"))
+	_, err = teeLoggingWriter.Write([]byte("This goes to file and memory, with logging!"))
+	if err != nil {
+		t.Error("failed to write to tee")
+		return
+	}
 }
