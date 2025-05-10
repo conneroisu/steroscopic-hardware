@@ -1,8 +1,13 @@
 package components
 
 import (
+
 "github.com/conneroisu/steroscopic-hardware/pkg/camera"
 "github.com/conneroisu/steroscopic-hardware/pkg/web"
+	"github.com/conneroisu/steroscopic-hardware/pkg/camera"
+	"github.com/conneroisu/steroscopic-hardware/pkg/web"
+	"runtime/debug"
+
 )
 
 // AppFn returns a function that wraps the given component with the app template.
@@ -37,28 +42,60 @@ templ App(title string, comp templ.Component) {
 }
 
 templ header() {
-<nav class="bg-gray-800 border-b border-gray-700 shadow-md" x-data="{ index: $persist(true) }" id="main-nav">
-	<div class="container mx-auto px-4">
-		<div class="flex justify-between items-center py-3">
-			<div class="flex items-center">
-				<h1 class="text-xl font-bold text-blue-400 mr-6">
-					ZedBoard Stereo Vision
-				</h1>
-			</div>
-			<a href="https://github.com/conneroisu/steroscopic-hardware/issues/new"
-				class="px-4 py-2 rounded-lg transition inline-flex items-center gap-1 text-gray-300 hover:text-white">
-				@web.CircleQuestion
-				Report a Bug
-			</a>
-			<!-- Exit Button -->
-			<a href="/exit"
-				class="px-4 py-2 rounded-lg transition inline-flex items-center gap-1 text-gray-300 hover:text-white">
-				@web.CircleX
-				Exit
-			</a>
-			<div class="flex space-x-4">
-				<a hx-get="/" hx-target="#app" hx-push-url="true" class="px-4 py-2 rounded-lg transition"
-					@click="index = true" :class="{
+	<nav
+		class="bg-gray-800 border-b border-gray-700 shadow-md"
+		x-data="{ index: $persist(true) }"
+		id="main-nav"
+	>
+		<div
+			class="container mx-auto px-4"
+		>
+			<div
+				class="flex justify-between items-center py-3"
+			>
+				<div
+					class="flex items-center"
+				>
+					<h1
+						class="text-xl font-bold text-blue-400 mr-6"
+					>
+						ZedBoard Stereo Vision
+					</h1>
+				</div>
+				<a
+					href="https://github.com/conneroisu/steroscopic-hardware/issues/new"
+					class="px-4 py-2 rounded-lg transition inline-flex items-center gap-1 text-gray-300 hover:text-white"
+				>
+					@web.CircleQuestion
+					Report a Bug
+				</a>
+				<!-- Exit Button -->
+				<a
+					href="/exit"
+					class="px-4 py-2 rounded-lg transition inline-flex items-center gap-1 text-gray-300 hover:text-white"
+				>
+					@web.CircleX
+					Exit
+				</a>
+				<p>
+					{ func() string {
+					info, ok := debug.ReadBuildInfo()
+					if !ok {
+						return "Unknown"
+					}
+					return info.Main.Version
+				}() }
+				</p>
+				<div
+					class="flex space-x-4"
+				>
+					<a
+						hx-get="/"
+						hx-target="#app"
+						hx-push-url="true"
+						class="px-4 py-2 rounded-lg transition"
+						@click="index = true"
+						:class="{
 							'bg-blue-700 hover:bg-gray-600': index,
 							'bg-gray-800 hover:bg-blue-300': !index
 						}">
