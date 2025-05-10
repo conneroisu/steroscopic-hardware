@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/conneroisu/steroscopic-hardware/pkg/logger"
 	"go.bug.st/serial/enumerator"
@@ -26,6 +27,7 @@ func GetPorts(
 					return fmt.Errorf("no serial ports found")
 				}
 				slog.ErrorContext(r.Context(), "no serial ports found", "tries", tries)
+				time.Sleep(time.Second)
 				tries++
 				continue
 			}
