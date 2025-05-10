@@ -226,30 +226,20 @@ func (sc *SerialCamera) readFn(
 	sc.mu.Lock()
 	defer sc.mu.Unlock()
 
-	length, err := sc.port.Read(tempBuf)
-	if err != nil {
-		sc.logger.Error("error reading from serial port", "error", err)
-		errChan <- fmt.Errorf("error reading from serial port: %v", err)
-	}
-	sc.logger.Debug("read", "length", length)
-
-	// Safety check for buffer size making sure we read the entire image
-	if length > sc.ImageWidth*sc.ImageHeight {
-		sc.logger.Error("received data exceeds expected image size")
-		errChan <- fmt.Errorf("received data exceeds expected image size")
-	}
-
-	expectedSize := sc.ImageWidth * sc.ImageHeight
-
-	// Check if we have reasonable data size for grayscale.
-	if len(tempBuf) != expectedSize {
-		sc.logger.Error("unexpected data size", "got", len(tempBuf), "expected", expectedSize)
-		errChan <- fmt.Errorf(
-			"unexpected data size: got %d bytes, expected %d (grayscale) or %d (RGB)",
-			len(tempBuf),
-			expectedSize,
-			expectedSize*3,
-		)
+	var totalLength int
+	for {
+		buf := []byte{}
+		length, err := sc.port.Read(buf)
+		if err != nil {
+			sc.logger.Error("error reading from serial port", "error", err)
+			errChan <- fmt.Errorf("error reading from serial port: %v", err)
+		}
+		sc.logger.Debug("read", "length", length, "act", "appending")
+		tempBuf = append(tempBuf, buf...)
+		totalLength += length
+		if totalLength >= sc.ImageWidth*sc.ImageHeight {
+			break
+		}
 	}
 
 	img := image.NewGray(image.Rect(0, 0, sc.ImageWidth, sc.ImageHeight))
