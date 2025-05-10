@@ -23,8 +23,6 @@ var (
 )
 
 var (
-	// ManualPageTitle is the title of the manual page.
-	ManualPageTitle = "Manual Depth Map Generator"
 	// LivePageTitle is the title of the live page.
 	LivePageTitle = "Live Camera System"
 )
