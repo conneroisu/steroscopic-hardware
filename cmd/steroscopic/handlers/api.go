@@ -52,13 +52,17 @@ func ErrorHandler(
 	return func(w http.ResponseWriter, r *http.Request) error {
 		err := fn(w, r)
 		if err == nil {
-			_, err = w.Write([]byte(`<span class="text-sm text-green-500">Success!</span>`))
+			_, Werr := w.Write([]byte(`<span class="text-sm text-green-500">Success!</span>`))
 			if err != nil {
-				return fmt.Errorf("failed to write success response: %w", err)
+				return fmt.Errorf("failed to write success response: %w", Werr)
 			}
+			return nil
 		}
-		// Return error response
-		_, err = w.Write([]byte(`<span class="text-sm text-red-500">Failure: ` + err.Error() + `</span>`))
-		return err
+		if err != nil {
+			// Return error response
+			_, Werr := w.Write([]byte(`<span class="text-sm text-red-500">Failure: ` + err.Error() + `</span>`))
+			return Werr
+		}
+		return nil
 	}
 }
