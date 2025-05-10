@@ -393,7 +393,7 @@ func cameraStatus(
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, "\" class=\"flex items-center gap-2\"><span class=\"inline-block w-3 h-3 bg-red-500 rounded-full\"></span> <span class=\"text-sm\">Connected</span></div></div><!-- Connect Button --><div class=\"flex justify-end mt-2\"><button type=\"submit\" class=\"bg-blue-600 hover:bg-blue-700 text-white rounded px-3 py-1 text-sm\">Connect/Configure</button></div></form></div></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, "\" class=\"flex items-center gap-2\"><span class=\"inline-block w-3 h-3 bg-red-500 rounded-full\"></span> <span class=\"text-sm\">Disconnected</span></div></div><!-- Connect Button --><div class=\"flex justify-end mt-2\"><button type=\"submit\" class=\"bg-blue-600 hover:bg-blue-700 text-white rounded px-3 py-1 text-sm\">Connect/Configure</button></div></form></div></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
