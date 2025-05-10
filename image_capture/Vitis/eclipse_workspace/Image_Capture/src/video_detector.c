@@ -153,35 +153,11 @@ int vdet_detect(XVtc *pVtc, int bVerbose)
 	// Get Detector
 	XVtc_GetDetector(pVtc, &Signal);
 
-	if ( bVerbose == 2 )
-	{
-		xil_printf("\tVTC Detector Configuration\n\r" );
-		xil_printf("\t\tHorizontal Timing:\n\r" );
-		xil_printf("\t\t\tHFrontPorchStart %d\r\n", Signal.HFrontPorchStart);
-		xil_printf("\t\t\tHSyncStart %d\r\n", Signal.HSyncStart);
-		xil_printf("\t\t\tHBackPorchStart %d\r\n", Signal.HBackPorchStart);
-		xil_printf("\t\t\tHActiveStart = %d\r\n", Signal.HActiveStart);
-		xil_printf("\t\t\tHTotal = %d\r\n", Signal.HTotal);
-		xil_printf("\t\tVertical Timing:\n\r" );
-		xil_printf("\t\t\tV0FrontPorchStart %d\r\n", Signal.V0FrontPorchStart);
-		xil_printf("\t\t\tV0SyncStart %d\r\n", Signal.V0SyncStart);
-		xil_printf("\t\t\tV0BackPorchStart %d\r\n", Signal.V0BackPorchStart);
-		xil_printf("\t\t\tV0ActiveStart %d\r\n", Signal.V0ActiveStart);
-		xil_printf("\t\t\tV0Total %d\r\n", Signal.V0Total);
-	}
-
 	Width = (Signal.HTotal  + 1) - Signal.HActiveStart;
 	Height = (Signal.V0Total + 1) - Signal.V0ActiveStart;
-	if ( bVerbose )
-	{
-		xil_printf( "\tVideo Dimensions = %d x %d\n\r", Width, Height );
-	}
+
 
     ResolutionId = vres_detect( Width, Height );
-    if ( bVerbose )
-    {
-		xil_printf( "\tVideo Resolution = %s\n\r", vres_get_name(ResolutionId) );
-	}
 
 	return ResolutionId;
 }
@@ -209,12 +185,6 @@ int vdet_config(XVtc *pVtc, int ResolutionId, int bVerbose)
 	XVtc_Polarity Polarity;		/* Polarity configuration */
 	XVtc_HoriOffsets HoriOffsets;  /* Horizontal offsets configuration */
     XVtc_SourceSelect SourceSelect;	/* Source Selection configuration */
-
-    if ( bVerbose )
-    {
-		xil_printf( "\tVideo Resolution = %s\n\r", vres_get_name(ResolutionId) );
-	}
-
 	/* Set up Polarity of all outputs */
 
 	memset((void *)&Polarity, 0, sizeof(Polarity));
