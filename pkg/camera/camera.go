@@ -157,13 +157,15 @@ func (b *StreamManager) Stop() {
 
 // Configure configures the camera owned by this StreamManager.
 func (b *StreamManager) Configure(config Config) error {
+	var (
+		err    error
+		camera Camer
+		opts   = []SerialCameraOption{}
+	)
 	b.mu.Lock()
 	defer b.mu.Unlock()
-	var err error
 
-	opts := []SerialCameraOption{}
 	opts = append(opts, WithLogger(b.logger))
-	var camera Camer
 	b.logger.Info(
 		"opening new camera",
 		"port",
