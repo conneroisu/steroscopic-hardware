@@ -26,7 +26,8 @@
         "christian-kohler.path-intellisense",
         "qwtel.sqlite-viewer",
         "danprince.vsnetrw",
-        "eamodio.gitlens"
+        "eamodio.gitlens",
+        "ms-vscode.cpptools-extension-pack"
       ]
     }
   }
