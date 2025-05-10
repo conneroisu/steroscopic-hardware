@@ -3,6 +3,7 @@ package components
 import (
 	"github.com/conneroisu/steroscopic-hardware/pkg/camera"
 	"github.com/conneroisu/steroscopic-hardware/pkg/web"
+	"runtime/debug"
 )
 
 // AppFn returns a function that wraps the given component with the app template.
@@ -69,6 +70,15 @@ templ header() {
 					@web.CircleX
 					Exit
 				</a>
+				<p>
+					{ func() string {
+					info, ok := debug.ReadBuildInfo()
+					if !ok {
+						return "Unknown"
+					}
+					return info.Main.Version
+				}() }
+				</p>
 				<div
 					class="flex space-x-4"
 				>
