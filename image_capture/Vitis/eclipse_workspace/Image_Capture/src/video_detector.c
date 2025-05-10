@@ -60,21 +60,6 @@ static void SignalSetup( XVtc *pVtc, Xuint32 ResolutionId, XVtc_Signal *SignalCf
 
 	/* Populate the VTC Signal config structure. Ignore the Field 1 */
 
-//	SignalCfgPtr->HFrontPorchStart = 0;
-//	SignalCfgPtr->HTotal = HFrontPorch + HSyncWidth + HBackPorch
-//				+ LineWidth - 1;
-//	SignalCfgPtr->HBackPorchStart = HFrontPorch + HSyncWidth;
-//	SignalCfgPtr->HSyncStart = HFrontPorch;
-//	SignalCfgPtr->HActiveStart = HFrontPorch + HSyncWidth + HBackPorch;
-//
-//	SignalCfgPtr->V0FrontPorchStart = 0;
-//	SignalCfgPtr->V0Total = VFrontPorch + VSyncWidth + VBackPorch
-//				+ FrameHeight - 1;
-//	SignalCfgPtr->V0BackPorchStart = VFrontPorch + VSyncWidth;
-//	SignalCfgPtr->V0SyncStart = VFrontPorch;
-//	SignalCfgPtr->V0ChromaStart = VFrontPorch + VSyncWidth + VBackPorch;
-//	SignalCfgPtr->V0ActiveStart = VFrontPorch + VSyncWidth + VBackPorch;
-
 	SignalCfgPtr->HFrontPorchStart = LineWidth;
 	SignalCfgPtr->HTotal = HFrontPorch + HSyncWidth + HBackPorch
 				+ LineWidth;
@@ -111,10 +96,6 @@ int vdet_init(XVtc *pVtc, u16 VtcDeviceID)
 {
 	int Status;
 	XVtc_Config *VtcCfgPtr;
-
-	Xuint32 Width;
-	Xuint32 Height;
-	int ResolutionId;
 
 	/* Look for the device configuration info for the Video Timing
 	 * Controller.
@@ -165,8 +146,6 @@ int vdet_detect(XVtc *pVtc, int bVerbose)
 	int ResolutionId;
 
 	XVtc_Signal Signal;		/* VTC Signal configuration */
-	XVtc_Polarity Polarity;		/* Polarity configuration */
-	XVtc_SourceSelect SourceSelect;	/* Source Selection configuration */
 
 	// Wait 100 msec ...
 	usleep(100000);
@@ -261,23 +240,6 @@ int vdet_config(XVtc *pVtc, int ResolutionId, int bVerbose)
 
 	SignalSetup(pVtc,ResolutionId, &Signal);
 
-	if ( bVerbose == 2 )
-	{
-		xil_printf("\tVTC Generator Configuration\n\r" );
-		xil_printf("\t\tHorizontal Timing:\n\r" );
-		xil_printf("\t\t\tHFrontPorchStart %d\r\n", Signal.HFrontPorchStart);
-		xil_printf("\t\t\tHSyncStart %d\r\n", Signal.HSyncStart);
-		xil_printf("\t\t\tHBackPorchStart %d\r\n", Signal.HBackPorchStart);
-		xil_printf("\t\t\tHActiveStart = %d\r\n", Signal.HActiveStart);
-		xil_printf("\t\t\tHTotal = %d\r\n", Signal.HTotal);
-		xil_printf("\t\tVertical Timing:\n\r" );
-		xil_printf("\t\t\tV0FrontPorchStart %d\r\n", Signal.V0FrontPorchStart);
-		xil_printf("\t\t\tV0SyncStart %d\r\n", Signal.V0SyncStart);
-		xil_printf("\t\t\tV0BackPorchStart %d\r\n", Signal.V0BackPorchStart);
-		xil_printf("\t\t\tV0ActiveStart %d\r\n", Signal.V0ActiveStart);
-		xil_printf("\t\t\tV0Total %d\r\n", Signal.V0Total);
-	}
-
 	XVtc_SetGenerator(pVtc, &Signal);
 
 	/* Set up source select */
@@ -298,10 +260,8 @@ int vdet_config(XVtc *pVtc, int ResolutionId, int bVerbose)
 	XVtc_SetSource(pVtc, &SourceSelect);
 
 	// Enable Synchronization of Generator with Detector
-//	XVtc_EnableSync(pVtc);
 	XVtc_DisableSync(pVtc);
 
-	/* Return success */
 
 	return 0;
 }
