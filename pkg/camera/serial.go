@@ -136,7 +136,7 @@ func (sc *SerialCamera) Stream(
 
 	sc.ch = ch
 	var errChan = make(chan error, 1)
-	readFn, err := sc.read(ctx, errChan, ch)
+	readFn, err := sc.start(ctx, errChan, ch)
 	if err != nil {
 		sc.logger.Error("failed to read image data", "err", err)
 		return
@@ -159,7 +159,7 @@ func (sc *SerialCamera) Stream(
 }
 
 // readImageData reads image data from the serial port
-func (sc *SerialCamera) read(
+func (sc *SerialCamera) start(
 	ctx context.Context,
 	errChan chan error,
 	imgCh chan *image.Gray,
@@ -210,9 +210,6 @@ func (sc *SerialCamera) readFn(
 	errChan chan error,
 	imgCh chan *image.Gray,
 ) {
-	sc.logger.Debug("SerialCamera.readFn()")
-	defer sc.logger.Debug("SerialCamera.readFn() done")
-
 	var (
 		tempBuf = make([]byte, sc.ImageWidth*sc.ImageHeight)
 	)
