@@ -20,8 +20,9 @@ var (
 	// DefaultImageWidth is the default expected image width in pixels
 	DefaultImageWidth = 1920
 	// DefaultImageHeight is the default expected image height in pixels
-	DefaultImageHeight       = 1080
-	_                  Camer = (*SerialCamera)(nil)
+	DefaultImageHeight = 1080
+
+	_ Camer = (*SerialCamera)(nil)
 )
 
 type (
@@ -226,7 +227,7 @@ func (sc *SerialCamera) readFn(
 		tries   int
 	)
 
-	expectedLength := sc.ImageWidth * sc.ImageHeight
+	expectedLength := DefaultImageWidth * DefaultImageHeight
 
 	sc.mu.Lock()
 	defer sc.mu.Unlock()
@@ -235,7 +236,7 @@ func (sc *SerialCamera) readFn(
 	for {
 		tries++
 		sc.logger.Debug("reading image data")
-		buf := []byte{}
+		var buf = make([]byte, DefaultImageWidth*DefaultImageHeight)
 		length, err := sc.port.Read(buf)
 		if err != nil {
 			sc.logger.Error("error reading from serial port", "error", err)
