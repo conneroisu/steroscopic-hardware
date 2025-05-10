@@ -107,7 +107,7 @@ void camera_loop(camera_config_t *config)
 
 	Xuint32 vdma_S2MM_DMACR, vdma_MM2S_DMACR;
 
-	// Read should park on 1, this will stream the greyscale image.
+	// Read should park on 1, this will stream the grey-scale image.
 	// Start write on 1 for now.
 	set_park_frame(&(config->vdma_hdmi), 1, XAXIVDMA_WRITE);
 	set_park_frame(&(config->vdma_hdmi), 1, XAXIVDMA_READ);
@@ -162,7 +162,7 @@ void camera_loop(camera_config_t *config)
 
 				}
 
-				// Send the entire greyscale image over UART.
+				// Send the entire grey-scale image over UART.
 				// If we receive the IMAGE_STOP_STREAM opcode, then stop streaming the image.
 				int bytes_read = 0;
 
