@@ -219,6 +219,8 @@ func (sc *SerialCamera) readFn(
 	errChan chan error,
 	imgCh chan *image.Gray,
 ) {
+	sc.logger.Debug("----------------------------")
+	defer sc.logger.Debug("----------------------------")
 	var (
 		tempBuf = []byte{}
 		tries   int
