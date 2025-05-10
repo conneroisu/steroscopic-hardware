@@ -188,7 +188,6 @@ int fmc_imageon_disable_tpg( camera_config_t *config ) {
 	// Define convenient volatile pointers for accessing TPG registers
    volatile unsigned int *TPG_CR  = config->uBaseAddr_TPG_PatternGenerator + 0;    // TPG Control
 
-   xil_printf("Test Pattern Generator Disable ...\n\r");
    TPG_CR[0]     = 0x00;  // TPG Control Register (Disable TPG)
 
    return 0;
@@ -225,13 +224,6 @@ int fmc_imageon_enable_vita( camera_config_t *config ) {
    vita_height = config->vita_status_t1.cntImageLines;
    vita_rate = config->vita_status_t2.cntFrames - config->vita_status_t1.cntFrames;
    vita_crc = config->vita_status_t2.crcStatus;
-
-
-   if ( config->bVerbose )
-   {
-     onsemi_vita_get_status( &(config->onsemi_vita), &(config->vita_status_t2), 1 );
-   }
-
 
    if ((vita_width != 1920) || (vita_height != 1080) || (vita_rate == 0)) {
 	   return 1;
