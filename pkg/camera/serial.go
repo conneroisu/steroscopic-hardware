@@ -224,6 +224,7 @@ func (sc *SerialCamera) readFn(
 	defer sc.logger.Debug("----------------------------")
 	var (
 		tempBuf = []byte{}
+		total   int
 		tries   int
 	)
 
@@ -236,7 +237,7 @@ func (sc *SerialCamera) readFn(
 	for {
 		tries++
 		sc.logger.Debug("reading image data")
-		var buf = make([]byte, DefaultImageWidth*DefaultImageHeight)
+		var buf = make([]byte, 100)
 		length, err := sc.port.Read(buf)
 		if err != nil {
 			sc.logger.Error("error reading from serial port", "error", err)
@@ -244,8 +245,9 @@ func (sc *SerialCamera) readFn(
 			return
 		}
 		tempBuf = append(tempBuf, buf...)
-		sc.logger.Info("read", "length", length, "total", len(tempBuf), "expected", expectedLength)
-		if len(tempBuf) >= sc.ImageWidth*sc.ImageHeight {
+		total += length
+		sc.logger.Info("read", "length", length, "total", total, "expected", expectedLength)
+		if total >= sc.ImageWidth*sc.ImageHeight {
 			break
 		}
 		if tries > maxTries {
