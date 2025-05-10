@@ -222,12 +222,14 @@ func (sc *SerialCamera) readFn(
 
 	_, err := sc.port.Read(tempBuf)
 	if err != nil {
+		sc.logger.Error("error reading from serial port", "error", err)
 		errChan <- fmt.Errorf("error reading from serial port: %v", err)
 		return
 	}
 
 	// Safety check for buffer size
 	if len(tempBuf) > sc.ImageWidth*sc.ImageHeight {
+		sc.logger.Error("received data exceeds expected image size")
 		errChan <- fmt.Errorf("received data exceeds expected image size")
 		return
 	}
@@ -236,6 +238,7 @@ func (sc *SerialCamera) readFn(
 
 	// Check if we have reasonable data size for grayscale.
 	if len(tempBuf) != expectedSize {
+		sc.logger.Error("unexpected data size", "got", len(tempBuf), "expected", expectedSize)
 		errChan <- fmt.Errorf(
 			"unexpected data size: got %d bytes, expected %d (grayscale) or %d (RGB)",
 			len(tempBuf),
@@ -258,6 +261,7 @@ func (sc *SerialCamera) readFn(
 
 	select {
 	case <-ctx.Done():
+		sc.logger.Debug("context done, stopping read")
 		return
 	case imgCh <- img:
 		sc.logger.Debug("image sent to channel")
