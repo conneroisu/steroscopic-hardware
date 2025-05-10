@@ -131,16 +131,13 @@ func (sc *SerialCamera) Stream(
 	sc.logger.Debug("SerialCamera.Stream()")
 	defer sc.logger.Debug("SerialCamera.Stream() done")
 
-	sc.mu.Lock()
 	sc.ch = ch
 	var errChan = make(chan error, 1)
 	readFn, err := sc.read(ctx, errChan, ch)
 	if err != nil {
 		sc.logger.Error("failed to read image data", "err", err)
-		sc.mu.Unlock()
 		return
 	}
-	sc.mu.Unlock()
 
 	go readFn()
 
@@ -194,7 +191,13 @@ func (sc *SerialCamera) read(
 
 	return func() {
 		for {
-			sc.readFn(ctx, errChan, imgCh)
+			select {
+			case <-ctx.Done():
+				sc.logger.Debug("context done, stopping read")
+				return
+			default:
+				sc.readFn(ctx, errChan, imgCh)
+			}
 		}
 	}, nil
 }
