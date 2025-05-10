@@ -1,11 +1,11 @@
 package camera
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 	"image"
 	"image/color"
+	"io"
 	"log"
 	"sync"
 
@@ -38,6 +38,7 @@ type (
 		ImageWidth     int    // Expected image width in pixels
 		ImageHeight    int    // Expected image height in pixels
 		logger         *logger.Logger
+		logPort        io.ReadWriter
 		baudRate       int
 		useCompression bool
 		OnClose        func()
@@ -57,6 +58,8 @@ func NewSerialCamera(
 ) (*SerialCamera, error) {
 	ctx, cancel := context.WithCancel(context.Background())
 	lggr := logger.NewLogger()
+	// Open the port
+	var err error
 	sc := SerialCamera{
 		ctx:            ctx,
 		cancel:         cancel,
@@ -65,6 +68,7 @@ func NewSerialCamera(
 		ImageWidth:     DefaultImageWidth,
 		ImageHeight:    DefaultImageHeight,
 		port:           nil,
+		logPort:        nil,
 		mu:             sync.Mutex{},
 		portID:         portName,
 		baudRate:       baudRate,
@@ -83,13 +87,13 @@ func NewSerialCamera(
 		StopBits: serial.OneStopBit,
 	}
 
-	// Open the port
-	var err error
 	sc.logger.Info("opening serial port", "port", portName)
 	sc.port, err = serial.Open(sc.portID, mode)
 	if err != nil {
 		return nil, fmt.Errorf("failed to open serial port %s: %v", portName, err)
 	}
+
+	sc.logPort = logger.NewLoggingReadWriter(sc.port, sc.logger.Logger, "serial-port : "+portName)
 
 	// Set read timeout
 	err = sc.port.SetReadTimeout(serial.NoTimeout)
@@ -99,21 +103,6 @@ func NewSerialCamera(
 	}
 
 	return &sc, nil
-}
-
-// WithLogger sets the logger for the serial camera.
-func WithLogger(logger *logger.Logger) SerialCameraOption {
-	return func(sc *SerialCamera) { sc.logger = logger }
-}
-
-// WithStartSeq sets the start sequence for the serial camera.
-func WithStartSeq(startSeq []byte) SerialCameraOption {
-	return func(sc *SerialCamera) { sc.StartSeq = startSeq }
-}
-
-// WithEndSeq sets the end sequence for the serial camera.
-func WithEndSeq(endSeq []byte) SerialCameraOption {
-	return func(sc *SerialCamera) { sc.EndSeq = endSeq }
 }
 
 // Close closes the serial connection
@@ -139,8 +128,9 @@ func (sc *SerialCamera) Stream(
 	ctx context.Context,
 	ch chan *image.Gray,
 ) {
-	sc.mu.Lock()
-	defer sc.mu.Unlock()
+	sc.logger.Debug("SerialCamera.Stream()")
+	defer sc.logger.Debug("SerialCamera.Stream() done")
+
 	sc.ch = ch
 	var errChan = make(chan error, 1)
 	readFn, err := sc.read(ctx, errChan, ch)
@@ -148,20 +138,17 @@ func (sc *SerialCamera) Stream(
 		sc.logger.Error("failed to read image data", "err", err)
 		return
 	}
+
 	go readFn()
+
 	for {
 		select {
 		case <-ctx.Done():
 			sc.logger.Debug("context done, stopping read")
 			return
 		case <-sc.ctx.Done():
-			sc.logger.Debug("context done, stopping read")
+			sc.logger.Debug("inner context done, stopping read")
 			return
-		case img := <-ch:
-			if img == nil {
-				continue
-			}
-			ch <- img
 		case err := <-errChan:
 			sc.logger.Debug("error reading image", "err", err)
 		}
@@ -174,34 +161,29 @@ func (sc *SerialCamera) read(
 	errChan chan error,
 	imgCh chan *image.Gray,
 ) (func(), error) {
-	// Buffer to store image data
-	var buffer bytes.Buffer
+	sc.logger.Info("SerialCamera.read()")
+	defer sc.logger.Info("SerialCamera.read() done")
 
 	// Temporary read buffer
 	tempBuf := make([]byte, 1024)
 
 	// Send the start sequence
-	_, err := sc.port.Write(sc.StartSeq)
+	_, err := sc.logPort.Write(sc.StartSeq)
 	if err != nil {
-		sc.logger.Error("failed to send start sequence", "err", err)
 		return nil, fmt.Errorf("failed to send start sequence: %v", err)
 	}
-	sc.logger.Debug("sent start sequence", "seq", sc.StartSeq)
 	// After sending the start sequence, we should receive a 1-byte acknowledgement
-	bit, err := sc.port.Read(tempBuf)
+	length, err := sc.logPort.Read(tempBuf)
 	if err != nil {
-		sc.logger.Error("failed to read acknowledgement", "err", err)
 		return nil, fmt.Errorf("failed to read acknowledgement: %v", err)
 	}
-	sc.logger.Debug("received acknowledgement checking if it is one byte", "byte", tempBuf[0])
-	if bit != 1 {
-		sc.logger.Error("unexpected acknowledgement byte len", "byte", tempBuf[0])
-		return nil, fmt.Errorf("unexpected acknowledgement byte: %d", bit)
+	if length != 1 {
+		return nil, fmt.Errorf("unexpected acknowledgement byte: %d", length)
 	}
-	sc.logger.Debug("received acknowledgement", "byte", tempBuf[0])
+
 	sc.OnClose = func() {
 		sc.logger.Debug("sending end sequence")
-		_, err := sc.port.Write(sc.EndSeq)
+		_, err := sc.logPort.Write(sc.EndSeq)
 		if err != nil {
 			log.Printf("failed to send end sequence: %v", err)
 		}
@@ -209,76 +191,77 @@ func (sc *SerialCamera) read(
 
 	return func() {
 		for {
-			sc.mu.Lock()
-			sc.logger.Debug("reading image data")
-
-			tempBuf := make([]byte, sc.ImageWidth*sc.ImageHeight)
-			_, err := sc.port.Read(tempBuf)
-			if err != nil {
-				sc.logger.Error("error reading from serial port", "err", err)
-				errChan <- fmt.Errorf("error reading from serial port: %v", err)
-			}
-
-			// Safety check for buffer size
-			if buffer.Len() > sc.ImageWidth*sc.ImageHeight {
-				sc.logger.Error("buffer overflow", "size", buffer.Len())
-				errChan <- fmt.Errorf("received data exceeds expected image size")
-			}
-
-			img, err := sc.convertRawToImage(tempBuf)
-			if err != nil {
-				sc.logger.Error("failed to convert raw data to image", "err", err)
-				errChan <- fmt.Errorf("failed to convert raw data to image: %v", err)
-			}
 			select {
 			case <-ctx.Done():
 				sc.logger.Debug("context done, stopping read")
 				return
-			case imgCh <- img:
-				sc.logger.Debug("image sent to channel")
+			default:
+				sc.readFn(ctx, errChan, imgCh)
 			}
-
-			sc.logger.Debug("image data read successfully", "size", buffer.Len())
-			sc.mu.Unlock()
 		}
 	}, nil
 }
 
-// convertRawToImage converts raw pixel data to an image.Image
-func (sc *SerialCamera) convertRawToImage(
-	data []byte,
-) (*image.Gray, error) {
+func (sc *SerialCamera) readFn(
+	ctx context.Context,
+	errChan chan error,
+	imgCh chan *image.Gray,
+) {
+	sc.logger.Debug("SerialCamera.readFn()")
+	defer sc.logger.Debug("SerialCamera.readFn() done")
+
+	var (
+		tempBuf = make([]byte, sc.ImageWidth*sc.ImageHeight)
+	)
+
+	sc.mu.Lock()
+	defer sc.mu.Unlock()
+
+	_, err := sc.port.Read(tempBuf)
+	if err != nil {
+		errChan <- fmt.Errorf("error reading from serial port: %v", err)
+		return
+	}
+
+	// Safety check for buffer size
+	if len(tempBuf) > sc.ImageWidth*sc.ImageHeight {
+		errChan <- fmt.Errorf("received data exceeds expected image size")
+		return
+	}
+
 	expectedSize := sc.ImageWidth * sc.ImageHeight
 
-	// Check if we have reasonable data size for grayscale or RGB format
-	if len(data) != expectedSize && len(data) != expectedSize*3 {
-		return nil, fmt.Errorf(
+	// Check if we have reasonable data size for grayscale.
+	if len(tempBuf) != expectedSize {
+		errChan <- fmt.Errorf(
 			"unexpected data size: got %d bytes, expected %d (grayscale) or %d (RGB)",
-			len(data),
+			len(tempBuf),
 			expectedSize,
 			expectedSize*3,
 		)
+		return
 	}
 
-	// Create a new RGBA image
 	img := image.NewGray(image.Rect(0, 0, sc.ImageWidth, sc.ImageHeight))
 
-	if len(data) == expectedSize {
-		// Grayscale format (1 byte per pixel)
-		for y := range sc.ImageHeight { // y := 0; y < sc.config.ImageHeight; y++
-			for x := range sc.ImageWidth { // x := 0; x < sc.config.ImageWidth; x++
-				i := y*sc.ImageWidth + x
-				gray := data[i]
-				img.Set(x, y, color.RGBA{gray, gray, gray, 255})
-			}
+	// Grayscale format (1 byte per pixel)
+	for y := range sc.ImageHeight { // y := 0; y < sc.config.ImageHeight; y++
+		for x := range sc.ImageWidth { // x := 0; x < sc.config.ImageWidth; x++
+			i := y*sc.ImageWidth + x
+			gray := tempBuf[i]
+			img.SetGray(x, y, color.Gray{Y: gray})
 		}
-	} else {
-		return nil, fmt.Errorf(
-			"unexpected data size: got %d bytes, expected %d (grayscale)",
-			len(data),
-			expectedSize,
-		)
 	}
 
-	return img, nil
+	select {
+	case <-ctx.Done():
+		return
+	case imgCh <- img:
+		sc.logger.Debug("image sent to channel")
+	}
+}
+
+// WithLogger sets the logger for the serial camera.
+func WithLogger(logger *logger.Logger) SerialCameraOption {
+	return func(sc *SerialCamera) { sc.logger = logger }
 }

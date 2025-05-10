@@ -18,11 +18,10 @@ Package handlers contains functions for handling API requests.
 
 - [func Make\(fn APIFn\) http.HandlerFunc](<#Make>)
 - [func MorphableHandler\(wrapper func\(templ.Component\) templ.Component, morph templ.Component\) http.HandlerFunc](<#MorphableHandler>)
-- [func PreviewDelimiterHandler\(w http.ResponseWriter, r \*http.Request\)](<#PreviewDelimiterHandler>)
+- [func PreviewSeqHandler\(w http.ResponseWriter, r \*http.Request\)](<#PreviewSeqHandler>)
 - [type APIFn](<#APIFn>)
-  - [func ConfigureCamera\(logger \*logger.Logger, stream \*camera.StreamManager\) APIFn](<#ConfigureCamera>)
+  - [func ConfigureCamera\(logger \*logger.Logger, params \*despair.Parameters, leftStream, rightStream, outputStream \*camera.StreamManager, isLeft bool\) APIFn](<#ConfigureCamera>)
   - [func GetPorts\(logger \*logger.Logger\) APIFn](<#GetPorts>)
-  - [func LogHandler\(logger \*logger.Logger\) APIFn](<#LogHandler>)
   - [func ManualCalcDepthMapHandler\(logger \*logger.Logger\) APIFn](<#ManualCalcDepthMapHandler>)
   - [func ParametersHandler\(logger \*logger.Logger, params \*despair.Parameters\) APIFn](<#ParametersHandler>)
   - [func StreamHandlerFn\(manager \*camera.StreamManager\) APIFn](<#StreamHandlerFn>)
@@ -46,14 +45,14 @@ func MorphableHandler(wrapper func(templ.Component) templ.Component, morph templ
 
 MorphableHandler returns a handler that checks for the presence of the hx\-trigger header and serves either the full or morphed view.
 
-<a name="PreviewDelimiterHandler"></a>
-## func [PreviewDelimiterHandler](<https://github.com/conneroisu/steroscopic-hardware/blob/main/cmd/steroscopic/handlers/delim.go#L15>)
+<a name="PreviewSeqHandler"></a>
+## func [PreviewSeqHandler](<https://github.com/conneroisu/steroscopic-hardware/blob/main/cmd/steroscopic/handlers/delim.go#L15>)
 
 ```go
-func PreviewDelimiterHandler(w http.ResponseWriter, r *http.Request)
+func PreviewSeqHandler(w http.ResponseWriter, r *http.Request)
 ```
 
-PreviewDelimiterHandler handles requests to preview delimiters in different formats
+PreviewSeqHandler handles requests to preview sequences in different formats
 
 <a name="APIFn"></a>
 ## type [APIFn](<https://github.com/conneroisu/steroscopic-hardware/blob/main/cmd/steroscopic/handlers/api.go#L12>)
@@ -65,10 +64,10 @@ type APIFn func(w http.ResponseWriter, r *http.Request) error
 ```
 
 <a name="ConfigureCamera"></a>
-### func [ConfigureCamera](<https://github.com/conneroisu/steroscopic-hardware/blob/main/cmd/steroscopic/handlers/configure.go#L47-L50>)
+### func [ConfigureCamera](<https://github.com/conneroisu/steroscopic-hardware/blob/main/cmd/steroscopic/handlers/configure.go#L58-L63>)
 
 ```go
-func ConfigureCamera(logger *logger.Logger, stream *camera.StreamManager) APIFn
+func ConfigureCamera(logger *logger.Logger, params *despair.Parameters, leftStream, rightStream, outputStream *camera.StreamManager, isLeft bool) APIFn
 ```
 
 ConfigureCamera handles client requests to configure all camera parameters at once.
@@ -81,15 +80,6 @@ func GetPorts(logger *logger.Logger) APIFn
 ```
 
 GetPorts handles client requests to configure the camera.
-
-<a name="LogHandler"></a>
-### func [LogHandler](<https://github.com/conneroisu/steroscopic-hardware/blob/main/cmd/steroscopic/handlers/stream.go#L111-L113>)
-
-```go
-func LogHandler(logger *logger.Logger) APIFn
-```
-
-LogHandler returns a handler for streaming logs to the browser console
 
 <a name="ManualCalcDepthMapHandler"></a>
 ### func [ManualCalcDepthMapHandler](<https://github.com/conneroisu/steroscopic-hardware/blob/main/cmd/steroscopic/handlers/manual.go#L10-L12>)
@@ -110,7 +100,7 @@ func ParametersHandler(logger *logger.Logger, params *despair.Parameters) APIFn
 ParametersHandler handles client requests to change the parameters of the desparity map generator.
 
 <a name="StreamHandlerFn"></a>
-### func [StreamHandlerFn](<https://github.com/conneroisu/steroscopic-hardware/blob/main/cmd/steroscopic/handlers/stream.go#L19>)
+### func [StreamHandlerFn](<https://github.com/conneroisu/steroscopic-hardware/blob/main/cmd/steroscopic/handlers/stream.go#L17>)
 
 ```go
 func StreamHandlerFn(manager *camera.StreamManager) APIFn

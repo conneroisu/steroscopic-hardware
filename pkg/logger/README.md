@@ -33,6 +33,10 @@ Allowing for the logging of console messages both to the console and to the brow
 - [type Logger](<#Logger>)
   - [func NewLogger\(\) Logger](<#NewLogger>)
   - [func \(l \*Logger\) Channel\(\) chan LogEntry](<#Logger.Channel>)
+- [type LoggingReadWriter](<#LoggingReadWriter>)
+  - [func NewLoggingReadWriter\(wrapped io.ReadWriter, logger \*slog.Logger, prefix string\) \*LoggingReadWriter](<#NewLoggingReadWriter>)
+  - [func \(l \*LoggingReadWriter\) Read\(p \[\]byte\) \(n int, err error\)](<#LoggingReadWriter.Read>)
+  - [func \(l \*LoggingReadWriter\) Write\(p \[\]byte\) \(n int, err error\)](<#LoggingReadWriter.Write>)
 - [type MultiHandler](<#MultiHandler>)
   - [func NewMultiHandler\(handlers ...slog.Handler\) \*MultiHandler](<#NewMultiHandler>)
   - [func \(h \*MultiHandler\) Enabled\(ctx context.Context, level slog.Level\) bool](<#MultiHandler.Enabled>)
@@ -117,7 +121,7 @@ func (h *ChannelHandler) WithGroup(name string) slog.Handler
 WithGroup implements slog.Handler.WithGroup
 
 <a name="LogEntry"></a>
-## type [LogEntry](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/logger/logger.go#L48-L53>)
+## type [LogEntry](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/logger/logger.go#L43-L48>)
 
 LogEntry represents a structured log entry
 
@@ -159,6 +163,44 @@ func (l *Logger) Channel() chan LogEntry
 ```
 
 Channel returns the channel to which logs are sent to the browser.
+
+<a name="LoggingReadWriter"></a>
+## type [LoggingReadWriter](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/logger/readwriter.go#L10-L14>)
+
+LoggingReadWriter wraps an io.ReadWriter and logs all Read/Write operations
+
+```go
+type LoggingReadWriter struct {
+    // contains filtered or unexported fields
+}
+```
+
+<a name="NewLoggingReadWriter"></a>
+### func [NewLoggingReadWriter](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/logger/readwriter.go#L17-L21>)
+
+```go
+func NewLoggingReadWriter(wrapped io.ReadWriter, logger *slog.Logger, prefix string) *LoggingReadWriter
+```
+
+NewLoggingReadWriter creates a new LoggingReadWriter
+
+<a name="LoggingReadWriter.Read"></a>
+### func \(\*LoggingReadWriter\) [Read](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/logger/readwriter.go#L30>)
+
+```go
+func (l *LoggingReadWriter) Read(p []byte) (n int, err error)
+```
+
+Read implements io.Reader
+
+<a name="LoggingReadWriter.Write"></a>
+### func \(\*LoggingReadWriter\) [Write](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/logger/readwriter.go#L46>)
+
+```go
+func (l *LoggingReadWriter) Write(p []byte) (n int, err error)
+```
+
+Write implements io.Writer
 
 <a name="MultiHandler"></a>
 ## type [MultiHandler](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/logger/multi.go#L10-L13>)

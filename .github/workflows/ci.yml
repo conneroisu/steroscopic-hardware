@@ -24,12 +24,12 @@ jobs:
           nix run .\#build-go
       - name: Test
         run: |
-          echo "Testing Go project..."
-          nix run .\#test-go
+          echo "Testing project..."
+          nix run .\#tests
       - name: Lint
         run: |
-          echo "Linting Go project..."
-          nix run .\#lint-go
+          echo "Linting project..."
+          nix run .\#lint
       - name: Check
         run: |
           echo "Checking Nix project..."
