@@ -220,8 +220,8 @@ func (sc *SerialCamera) readFn(
 	imgCh chan *image.Gray,
 ) {
 	var (
-		tempBuf     = []byte{}
-		totalLength int
+		tempBuf = []byte{}
+		tries   int
 	)
 
 	expectedLength := sc.ImageWidth * sc.ImageHeight
@@ -229,18 +229,26 @@ func (sc *SerialCamera) readFn(
 	sc.mu.Lock()
 	defer sc.mu.Unlock()
 
+	maxTries := expectedLength / 20
 	for {
+		tries++
+		sc.logger.Debug("reading image data")
 		buf := []byte{}
 		length, err := sc.port.Read(buf)
 		if err != nil {
 			sc.logger.Error("error reading from serial port", "error", err)
 			errChan <- fmt.Errorf("error reading from serial port: %v", err)
+			return
 		}
 		tempBuf = append(tempBuf, buf...)
-		totalLength += length
-		sc.logger.Info("read", "length", length, "total", totalLength, "expected", expectedLength)
-		if totalLength >= sc.ImageWidth*sc.ImageHeight {
+		sc.logger.Info("read", "length", length, "total", len(tempBuf), "expected", expectedLength)
+		if len(tempBuf) >= sc.ImageWidth*sc.ImageHeight {
 			break
+		}
+		if tries > maxTries {
+			sc.logger.Error("reached max tries", "tries", tries, "maxTries", maxTries)
+			errChan <- fmt.Errorf("reached max tries: %d", tries)
+			return
 		}
 	}
 
