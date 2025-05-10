@@ -28,7 +28,11 @@ func AddRoutes(
 		"GET /",
 		http.FileServer(http.FS(static)), // adds `/static/*` to path
 	)
-	mux.HandleFunc("GET /exit", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("GET /exit", func(w http.ResponseWriter, _ *http.Request) {
+		_, err := w.Write(logger.Bytes())
+		if err != nil {
+			logger.Error("failed to write log", "err", err)
+		}
 		cancel()
 	})
 

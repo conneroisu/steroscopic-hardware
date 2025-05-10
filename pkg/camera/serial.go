@@ -57,7 +57,7 @@ func NewSerialCamera(
 	opts ...SerialCameraOption,
 ) (*SerialCamera, error) {
 	ctx, cancel := context.WithCancel(context.Background())
-	lggr := logger.NewLogger()
+	defaultLogger := logger.NewLogger() // Overridden by WithLogger option
 	// Open the port
 	var err error
 	sc := SerialCamera{
@@ -73,7 +73,7 @@ func NewSerialCamera(
 		portID:         portName,
 		baudRate:       baudRate,
 		useCompression: useCompression,
-		logger:         &lggr,
+		logger:         &defaultLogger,
 	}
 	for _, opt := range opts {
 		opt(&sc)
@@ -181,7 +181,7 @@ func (sc *SerialCamera) read(
 		return nil, fmt.Errorf("failed to read acknowledgement: %v", err)
 	}
 	if length != 1 {
-		return nil, fmt.Errorf("unexpected acknowledgement byte: %d", length)
+		return nil, fmt.Errorf("unexpected acknowledgement length: %d", length)
 	}
 
 	sc.OnClose = func() {
