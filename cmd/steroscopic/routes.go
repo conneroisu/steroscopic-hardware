@@ -59,11 +59,11 @@ func AddRoutes(
 
 	mux.HandleFunc(
 		"POST /left/configure",
-		handlers.Make(handlers.ConfigureCamera(logger, leftStream)),
+		handlers.Make(handlers.ConfigureCamera(logger, params, leftStream, rightStream, outputStream, true)),
 	)
 	mux.HandleFunc(
 		"POST /right/configure",
-		handlers.Make(handlers.ConfigureCamera(logger, rightStream)),
+		handlers.Make(handlers.ConfigureCamera(logger, params, leftStream, rightStream, outputStream, false)),
 	)
 
 	mux.HandleFunc("GET /ports", handlers.Make(handlers.GetPorts(logger)))

@@ -57,10 +57,19 @@ func ParametersHandler(logger *logger.Logger, params *despair.Parameters) APIFn 
 // ConfigureCamera handles client requests to configure all camera parameters at once.
 func ConfigureCamera(
 	logger *logger.Logger,
-	stream *camera.StreamManager,
+	params *despair.Parameters,
+	leftStream, rightStream, outputStream *camera.StreamManager,
+	isLeft bool,
 ) APIFn {
 	return func(w http.ResponseWriter, r *http.Request) error {
 		var compression int
+		var configureStream *camera.StreamManager
+		if isLeft {
+			configureStream = leftStream
+		} else {
+			configureStream = rightStream
+		}
+
 		// Parse form data
 		err := r.ParseForm()
 		if err != nil {
@@ -101,7 +110,7 @@ func ConfigureCamera(
 
 		// After configuration, attempt to connect
 		logger.Info("attempting to connect/configure to camera")
-		err = stream.Configure(config)
+		err = configureStream.Configure(config)
 		if err != nil {
 			// Return error response
 			_, err = w.Write([]byte(`
@@ -112,6 +121,18 @@ func ConfigureCamera(
 			}
 			return nil // Return nil to avoid additional error response
 		}
+
+		// After Connection, reconfigure the output camera
+		outputStream.Stop()
+		logger.Info("stopped output camera, creating new output camera")
+		outputCamera := camera.NewOutputCamera(
+			logger,
+			params,
+			leftStream,
+			rightStream,
+		)
+		logger.Info("reconfigured output camera setting pointer")
+		outputStream = camera.NewStreamManager(outputCamera, logger)
 
 		// Return success response
 		_, err = w.Write([]byte(`
