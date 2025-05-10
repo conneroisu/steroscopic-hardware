@@ -15,7 +15,7 @@ type Logger struct {
 	buffer *bytes.Buffer
 }
 
-// Buf returns the current buffer content.
+// Bytes returns the buffered log.
 func (l Logger) Bytes() []byte {
 	return l.buffer.Bytes()
 }
@@ -49,6 +49,9 @@ func NewLogWriter(w io.Writer) slog.Handler {
 		AddSource: true,
 		Level:     slog.LevelDebug,
 		ReplaceAttr: func(_ []string, a slog.Attr) slog.Attr {
+			if a.Key == "timestamp" {
+				return slog.Attr{}
+			}
 			if a.Key == "time" {
 				return slog.Attr{}
 			}
@@ -56,6 +59,7 @@ func NewLogWriter(w io.Writer) slog.Handler {
 				return slog.Attr{}
 			}
 			if a.Key == slog.SourceKey {
+				a.Key = "src"
 				str := a.Value.String()
 				split := strings.Split(str, "/")
 				if len(split) > 2 {
