@@ -164,45 +164,60 @@ func (sc *SerialCamera) start(
 	errChan chan error,
 	imgCh chan *image.Gray,
 ) (func(), error) {
-	sc.logger.Info("SerialCamera.read()")
-	defer sc.logger.Info("SerialCamera.read() done")
+	var tries = 0
+	for {
+		sc.logger.Info("SerialCamera.read()")
+		defer sc.logger.Info("SerialCamera.read() done")
 
-	// Temporary read buffer
-	tempBuf := make([]byte, 1024)
+		// Temporary read buffer
+		tempBuf := make([]byte, 1024)
 
-	// Send the start sequence
-	_, err := sc.logPort.Write(sc.StartSeq)
-	if err != nil {
-		return nil, fmt.Errorf("failed to send start sequence: %v", err)
-	}
-	// After sending the start sequence, we should receive a 1-byte acknowledgement
-	length, err := sc.logPort.Read(tempBuf)
-	if err != nil {
-		return nil, fmt.Errorf("failed to read acknowledgement: %v", err)
-	}
-	if length != 1 {
-		return nil, fmt.Errorf("unexpected acknowledgement length: %d", length)
-	}
-
-	sc.OnClose = func() {
-		sc.logger.Debug("sending end sequence")
-		_, err := sc.logPort.Write(sc.EndSeq)
+		// Send the start sequence
+		_, err := sc.logPort.Write(sc.StartSeq)
 		if err != nil {
-			log.Printf("failed to send end sequence: %v", err)
+			return nil, fmt.Errorf("failed to send start sequence: %v", err)
 		}
-	}
+		// After sending the start sequence, we should receive a 1-byte acknowledgement
+		length, err := sc.logPort.Read(tempBuf)
+		if err != nil {
+			return nil, fmt.Errorf("failed to read acknowledgement: %v", err)
+		}
+		if length != 1 {
+			// If we didn't receive a byte, try again by first sending the end sequence
+			tries++
+			if tries > 4 {
+				return nil, fmt.Errorf("unexpected acknowledgement length: %d", length)
+			}
+			n, err := sc.logPort.Write(sc.EndSeq)
+			if err != nil {
+				return nil, fmt.Errorf("failed to send end sequence: %v", err)
+			}
+			if n != len(sc.EndSeq) {
+				return nil, fmt.Errorf("failed to send end sequence: sent %d bytes, expected %d", n, len(sc.EndSeq))
+			}
+			continue
+		}
 
-	return func() {
-		for {
-			select {
-			case <-ctx.Done():
-				sc.logger.Debug("context done, stopping read")
-				return
-			default:
-				sc.readFn(ctx, errChan, imgCh)
+		sc.OnClose = func() {
+			sc.logger.Debug("sending end sequence")
+			_, err := sc.logPort.Write(sc.EndSeq)
+			if err != nil {
+				log.Printf("failed to send end sequence: %v", err)
 			}
 		}
-	}, nil
+
+		return func() {
+			for {
+				select {
+				case <-ctx.Done():
+					sc.logger.Debug("context done, stopping read")
+					return
+				default:
+					sc.readFn(ctx, errChan, imgCh)
+				}
+			}
+		}, nil
+	}
 }
 
 func (sc *SerialCamera) readFn(
