@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"image"
 	"image/color"
-	"io"
 	"log"
 	"sync"
 
@@ -38,7 +37,6 @@ type (
 		ImageWidth     int    // Expected image width in pixels
 		ImageHeight    int    // Expected image height in pixels
 		logger         *logger.Logger
-		logPort        io.ReadWriter
 		baudRate       int
 		useCompression bool
 		OnClose        func()
@@ -68,7 +66,6 @@ func NewSerialCamera(
 		ImageWidth:     DefaultImageWidth,
 		ImageHeight:    DefaultImageHeight,
 		port:           nil,
-		logPort:        nil,
 		mu:             sync.Mutex{},
 		portID:         portName,
 		baudRate:       baudRate,
@@ -92,9 +89,6 @@ func NewSerialCamera(
 	if err != nil {
 		return nil, fmt.Errorf("failed to open serial port %s: %v", portName, err)
 	}
-
-	sc.logPort = logger.NewLoggingReadWriter(sc.port, sc.logger.Logger, "serial-port : "+portName)
-
 	// Set read timeout
 	err = sc.port.SetReadTimeout(serial.NoTimeout)
 	if err != nil {
@@ -173,12 +167,12 @@ func (sc *SerialCamera) start(
 		tempBuf := make([]byte, 1024)
 
 		// Send the start sequence
-		_, err := sc.logPort.Write(sc.StartSeq)
+		_, err := sc.port.Write(sc.StartSeq)
 		if err != nil {
 			return nil, fmt.Errorf("failed to send start sequence: %v", err)
 		}
 		// After sending the start sequence, we should receive a 1-byte acknowledgement
-		length, err := sc.logPort.Read(tempBuf)
+		length, err := sc.port.Read(tempBuf)
 		if err != nil {
 			return nil, fmt.Errorf("failed to read acknowledgement: %v", err)
 		}
@@ -188,7 +182,7 @@ func (sc *SerialCamera) start(
 			if tries > 4 {
 				return nil, fmt.Errorf("unexpected acknowledgement length: %d", length)
 			}
-			n, err := sc.logPort.Write(sc.EndSeq)
+			n, err := sc.port.Write(sc.EndSeq)
 			if err != nil {
 				return nil, fmt.Errorf("failed to send end sequence: %v", err)
 			}
@@ -200,7 +194,7 @@ func (sc *SerialCamera) start(
 
 		sc.OnClose = func() {
 			sc.logger.Debug("sending end sequence")
-			_, err := sc.logPort.Write(sc.EndSeq)
+			_, err := sc.port.Write(sc.EndSeq)
 			if err != nil {
 				log.Printf("failed to send end sequence: %v", err)
 			}
@@ -232,7 +226,7 @@ func (sc *SerialCamera) readFn(
 	sc.mu.Lock()
 	defer sc.mu.Unlock()
 
-	length, err := sc.logPort.Read(tempBuf)
+	length, err := sc.port.Read(tempBuf)
 	if err != nil {
 		sc.logger.Error("error reading from serial port", "error", err)
 		errChan <- fmt.Errorf("error reading from serial port: %v", err)
