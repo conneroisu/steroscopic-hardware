@@ -101,6 +101,9 @@ func Run(
 		rightStreamManager,
 	)
 	outputStreamManager := camera.NewStreamManager(outputCamera, &logger)
+	defer outputStreamManager.Stop()
+	defer leftStreamManager.Stop()
+	defer rightStreamManager.Stop()
 	handler, err := NewServer(
 		&logger,
 		&defaultParams,
