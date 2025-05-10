@@ -22,6 +22,9 @@ var greenUp string
 //go:embed red-down.svg
 var redDown string
 
+//go:embed circle-x.svg
+var circleX string
+
 // CircleQuestion is a template for the SVG circle-question icon.
 var CircleQuestion = templ.Raw(circleQuestion)
 
@@ -36,3 +39,6 @@ var GreenUp = templ.Raw(greenUp)
 
 // RedDown is a template for the SVG red-down icon.
 var RedDown = templ.Raw(redDown)
+
+// CircleX is a template for the SVG circle-x icon.
+var CircleX = templ.Raw(circleX)

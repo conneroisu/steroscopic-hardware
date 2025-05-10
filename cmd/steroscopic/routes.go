@@ -1,6 +1,7 @@
 package steroscopic
 
 import (
+	"context"
 	"embed"
 	"net/http"
 
@@ -21,11 +22,16 @@ func AddRoutes(
 	logger *logger.Logger,
 	params *despair.Parameters,
 	leftStream, rightStream, outputStream *camera.StreamManager,
+	cancel context.CancelFunc,
 ) error {
 	mux.Handle(
 		"GET /",
 		http.FileServer(http.FS(static)), // adds `/static/*` to path
 	)
+	mux.HandleFunc("GET /exit", func(w http.ResponseWriter, r *http.Request) {
+		cancel()
+	})
+
 	mux.Handle("GET /{$}", handlers.MorphableHandler(
 		components.AppFn(web.LivePageTitle),
 		components.Live(params.BlockSize, params.MaxDisparity, leftStream, rightStream),
