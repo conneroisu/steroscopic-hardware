@@ -53,16 +53,13 @@ func ErrorHandler(
 		err := fn(w, r)
 		if err == nil {
 			_, Werr := w.Write([]byte(`<span class="text-sm text-green-500">Success!</span>`))
-			if err != nil {
+			if Werr != nil {
 				return fmt.Errorf("failed to write success response: %w", Werr)
 			}
 			return nil
 		}
-		if err != nil {
-			// Return error response
-			_, Werr := w.Write([]byte(`<span class="text-sm text-red-500">Failure: ` + err.Error() + `</span>`))
-			return Werr
-		}
-		return nil
+		// Return error response
+		_, Werr := w.Write([]byte(`<span class="text-sm text-red-500">Failure: ` + err.Error() + `</span>`))
+		return Werr
 	}
 }
