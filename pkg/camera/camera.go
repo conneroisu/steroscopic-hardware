@@ -113,6 +113,10 @@ func (b *StreamManager) Start() {
 				for client := range b.clients {
 					// Non-blocking send - skip clients that are slow
 					select {
+					case <-b.runCtx.Done():
+						continue
+					case <-b.ctx.Done():
+						continue
 					case client <- frame:
 					default:
 						// Client is too slow, drop frame for this client
