@@ -79,6 +79,9 @@ func (o *OutputCamera) Stream(
 	}
 }
 
+// Port returns the serial port name
+func (o *OutputCamera) Port() string { return "" }
+
 func (o *OutputCamera) read(_ chan error) <-chan *image.Gray {
 	o.Params.Lock()
 	defer o.Params.Unlock()

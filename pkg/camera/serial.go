@@ -105,6 +105,9 @@ func NewSerialCamera(
 	return &sc, nil
 }
 
+// Port returns the serial port name
+func (sc *SerialCamera) Port() string { return sc.portID }
+
 // Close closes the serial connection
 func (sc *SerialCamera) Close() error {
 	sc.mu.Lock()

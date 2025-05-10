@@ -14,6 +14,7 @@ import (
 type Camer interface {
 	Stream(context.Context, chan *image.Gray)
 	Close() error
+	Port() string
 }
 
 // Config represents all configurable camera parameters
@@ -168,7 +169,7 @@ func (b *StreamManager) Stop() {
 }
 
 // Configure configures the camera owned by this StreamManager.
-func (b *StreamManager) Configure(config Config) error {
+func (b *StreamManager) Configure(config Config, cam Camer) error {
 	var (
 		err    error
 		camera Camer
@@ -176,7 +177,13 @@ func (b *StreamManager) Configure(config Config) error {
 	)
 	b.mu.Lock()
 	defer b.mu.Unlock()
-
+	if cam.Port() == config.Port {
+		b.logger.Info("camera port already configured closing it to reconfigure")
+		err = cam.Close()
+		if err != nil {
+			return err
+		}
+	}
 	opts = append(opts, WithLogger(b.logger))
 	b.logger.Info(
 		"opening new camera",

@@ -46,6 +46,9 @@ func (z *StaticCamera) Stream(ctx context.Context, outCh chan *image.Gray) {
 	}
 }
 
+// Port returns the serial port name
+func (z *StaticCamera) Port() string { return "" }
+
 func (z *StaticCamera) read(errChan chan error) <-chan *image.Gray {
 	mkdCh := make(chan *image.Gray, 1)
 	img, err := z.getImage()
