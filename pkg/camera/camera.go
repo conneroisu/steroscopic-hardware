@@ -138,6 +138,10 @@ func (b *StreamManager) Start() {
 			case <-b.runCtx.Done():
 				// Run context canceled, clean up
 				b.mu.Lock()
+				for client := range b.clients {
+					delete(b.clients, client)
+					close(client)
+				}
 				b.running = false
 				b.mu.Unlock()
 				return
