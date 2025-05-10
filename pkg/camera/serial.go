@@ -238,7 +238,7 @@ func (sc *SerialCamera) readFn(
 		}
 		tempBuf = append(tempBuf, buf...)
 		totalLength += length
-		sc.logger.Debug("read", "length", length, "total", totalLength, "expected", expectedLength)
+		sc.logger.Info("read", "length", length, "total", totalLength, "expected", expectedLength)
 		if totalLength >= sc.ImageWidth*sc.ImageHeight {
 			break
 		}
