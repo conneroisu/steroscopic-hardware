@@ -236,7 +236,6 @@ func (sc *SerialCamera) readFn(
 	maxTries := expectedLength / 20
 	for {
 		tries++
-		sc.logger.Debug("reading image data")
 		var buf = make([]byte, 100)
 		length, err := sc.port.Read(buf)
 		if err != nil {
