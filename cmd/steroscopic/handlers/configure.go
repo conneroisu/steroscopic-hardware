@@ -81,8 +81,6 @@ func ConfigureCamera(
 		config.Port = r.FormValue("port")
 		baudStr := r.FormValue("baudrate")
 		compressionStr := r.FormValue("compression")
-		config.StartSeq = []byte(r.FormValue("startSeq"))
-		config.EndSeq = []byte(r.FormValue("endSeq"))
 
 		// Configure port if provided
 		if config.Port != "" {

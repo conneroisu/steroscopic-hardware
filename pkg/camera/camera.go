@@ -21,8 +21,6 @@ type Config struct {
 	Port        string
 	BaudRate    int
 	Compression int
-	StartSeq    []byte
-	EndSeq      []byte
 }
 
 // DefaultCameraConfig returns default camera configuration

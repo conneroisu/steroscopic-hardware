@@ -67,6 +67,5 @@ func AddRoutes(
 	)
 
 	mux.HandleFunc("GET /ports", handlers.Make(handlers.GetPorts(logger)))
-	mux.HandleFunc("POST /preview-seq", handlers.PreviewSeqHandler)
 	return nil
 }
