@@ -40,10 +40,6 @@ func AddRoutes(
 		components.AppFn(web.LivePageTitle),
 		components.Live(params.BlockSize, params.MaxDisparity, leftStream, rightStream),
 	))
-	mux.Handle("GET /manual", handlers.MorphableHandler(
-		components.AppFn(web.ManualPageTitle),
-		components.Manual(params.BlockSize, params.MaxDisparity),
-	))
 	mux.HandleFunc(
 		"POST /update-params",
 		handlers.Make(handlers.ParametersHandler(logger, params)),
@@ -59,10 +55,6 @@ func AddRoutes(
 	mux.HandleFunc(
 		"GET /stream/out", // Depth Map
 		handlers.Make(handlers.StreamHandlerFn(outputStream)),
-	)
-	mux.HandleFunc(
-		"POST /manual-calc-depth-map",
-		handlers.Make(handlers.ManualCalcDepthMapHandler(logger)),
 	)
 	mux.HandleFunc(
 		"POST /left/configure",

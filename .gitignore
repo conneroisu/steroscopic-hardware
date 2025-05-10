@@ -42,5 +42,5 @@ node_modules
 .obsidian/canvas.json
 .obsidian/bookmarks.json
 .obsidian/command-palette.json
-
+steroscopic-hardware
 **/.claude/settings.local.json

@@ -1,37 +1,44 @@
 package components
 
 import (
+
+"github.com/conneroisu/steroscopic-hardware/pkg/camera"
+"github.com/conneroisu/steroscopic-hardware/pkg/web"
 	"github.com/conneroisu/steroscopic-hardware/pkg/camera"
 	"github.com/conneroisu/steroscopic-hardware/pkg/web"
 	"runtime/debug"
+
 )
 
 // AppFn returns a function that wraps the given component with the app template.
 func AppFn(title string) func(templ.Component) templ.Component {
-	return func(c templ.Component) templ.Component {
-		return App(title, c)
-	}
+return func(c templ.Component) templ.Component {
+return App(title, c)
+}
 }
 
 templ App(title string, comp templ.Component) {
-	<!DOCTYPE html>
-	<html>
-		<head>
-			<title>{ title }</title>
-			<script defer src="/static/index.js"></script>
-			<script type="module" src="/static/tw.js"></script>
-			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-			<meta name="description" content="ZedBoard Stereo Vision"/>
-			<link rel="icon" href="/static/favicon.ico" type="image/x-icon"/>
-			<link rel="shortcut icon" href="/static/favicon.ico" type="image/x-icon"/>
-		</head>
-		<body class="bg-gray-900 text-gray-200 min-h-screen">
-			@header()
-			<div id="app" class="pt-4">
-				@comp
-			</div>
-		</body>
-	</html>
+<!DOCTYPE html>
+<html>
+
+<head>
+	<title>{ title }</title>
+	<script defer src="/static/index.js"></script>
+	<script type="module" src="/static/tw.js"></script>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<meta name="description" content="ZedBoard Stereo Vision" />
+	<link rel="icon" href="/static/favicon.ico" type="image/x-icon" />
+	<link rel="shortcut icon" href="/static/favicon.ico" type="image/x-icon" />
+</head>
+
+<body class="bg-gray-900 text-gray-200 min-h-screen">
+	@header()
+	<div id="app" class="pt-4">
+		@comp
+	</div>
+</body>
+
+</html>
 }
 
 templ header() {
@@ -91,163 +98,112 @@ templ header() {
 						:class="{
 							'bg-blue-700 hover:bg-gray-600': index,
 							'bg-gray-800 hover:bg-blue-300': !index
-						}"
-					>
-						Live Camera System
-					</a>
-					<a
-						hx-get="/manual"
-						hx-target="#app"
-						hx-push-url="true"
-						class="px-4 py-2 rounded-lg transition"
-						@click="index = false"
-						:class="{
-							'bg-blue-700 hover:bg-gray-600': !index,
-							'bg-gray-800 hover:bg-blue-300': index
-						}"
-					>
-						Manual Upload
-					</a>
-				</div>
+						}">
+					Live Camera System
+				</a>
 			</div>
 		</div>
-	</nav>
+	</div>
+</nav>
 }
 
 templ status(
-	leftStream, rightStream *camera.StreamManager,
+leftStream, rightStream *camera.StreamManager,
 ) {
-	<div
-		class="lg:col-span-1 space-y-6"
-		x-data="{ open_stats: true }"
-	>
-		<!-- System Status Panel -->
-		<div class="bg-gray-800 rounded-lg shadow-lg p-4">
-			<div
-				class="flex justify-between items-center cursor-pointer"
-				@click="open_stats = !open_stats"
-				x-data="{ text: '▶' }"
-				x-on:click="open_stats ? text = '▶' : text = '▼'"
-			>
-				<h2 class="text-xl font-semibold text-gray-200">System Status</h2>
-				<span x-text="text"></span>
-			</div>
-			<div
-				class="mt-4 space-y-2"
-				id={ web.TargetStatusContent.ID }
-				x-show="open_stats"
-				x-collapse
-			>
-				@cameraStatus(camera.LeftCameraType, leftStream)
-				@cameraStatus(camera.RightCameraType, rightStream)
-			</div>
+<div class="lg:col-span-1 space-y-6" x-data="{ open_stats: true }">
+	<!-- System Status Panel -->
+	<div class="bg-gray-800 rounded-lg shadow-lg p-4">
+		<div class="flex justify-between items-center cursor-pointer" @click="open_stats = !open_stats"
+			x-data="{ text: '▶' }" x-on:click="open_stats ? text = '▶' : text = '▼'">
+			<h2 class="text-xl font-semibold text-gray-200">System Status</h2>
+			<span x-text="text"></span>
+		</div>
+		<div class="mt-4 space-y-2" id={ web.TargetStatusContent.ID } x-show="open_stats" x-collapse>
+			@cameraStatus(camera.LeftCameraType, leftStream)
+			@cameraStatus(camera.RightCameraType, rightStream)
 		</div>
 	</div>
+</div>
 }
 
 templ cameraStatus(
-	typeOf camera.Type,
-	stream *camera.StreamManager,
+typeOf camera.Type,
+stream *camera.StreamManager,
 ) {
-	<div
-		class="bg-gray-800 rounded-lg shadow-lg p-4"
-	>
-		<div class="flex justify-between items-center">
-			<span class="font-medium">{ typeOf } camera:</span>
-			<div
-				class="flex justify-between items-center cursor-pointer"
-			>
-				@web.SettingsGear
-			</div>
-		</div>
-		<!-- spacer -->
-		<br/>
-		<div class="space-y-4">
-			<!-- Camera Configuration -->
-			<div class="space-y-2">
-				<h3 class="text-sm font-medium text-gray-400">Configuration</h3>
-				<!-- Configuration Form -->
-				<form id={ string(typeOf) + "-config-form" } hx-post={ "/" + string(typeOf) + "/configure" } hx-target={ "#" + string(typeOf) + "-status" }>
-					<!-- Port Selection -->
-					<div class="flex items-center justify-between mb-2">
-						<label for={ string(typeOf) + "-port" } class="text-sm text-gray-300">Port:</label>
-						<div class="flex items-center gap-2">
-							<select
-								id={ string(typeOf) + "-port" }
-								name="port"
-								value={ stream.Config().Port }
-								class="bg-gray-700 text-gray-200 rounded px-3 py-1 text-sm border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-							>
-								<option value="">Select port</option>
-								<option value="/dev/ttyUSB0">/dev/ttyUSB0</option>
-								<option value="/dev/ttyUSB1">/dev/ttyUSB1</option>
-								<option value="/dev/ttyS0">/dev/ttyS0</option>
-								<option value="/dev/ttyS1">/dev/ttyS1</option>
-							</select>
-							<button
-								hx-get="/ports"
-								hx-target={ "#" + string(typeOf) + "-port" }
-								hx-trigger="load, click"
-								class="bg-blue-600 hover:bg-blue-700 text-white rounded p-1"
-								title="Refresh available ports"
-								type="button"
-							>
-								@web.RefreshCw
-							</button>
-						</div>
-					</div>
-					<!-- Baud Rate Setting -->
-					<div class="flex items-center justify-between mb-2">
-						<label for={ string(typeOf) + "-baud" } class="text-sm text-gray-300">Baud Rate:</label>
-						<div class="flex items-center gap-2">
-							<input
-								id={ string(typeOf) + "-baud" }
-								name="baudrate"
-								type="number"
-								value={ stream.Config().BaudRate }
-								class="bg-gray-700 text-gray-200 rounded px-3 py-1 text-sm border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 w-24"
-							/>
-						</div>
-					</div>
-					<!-- Camera Compression -->
-					<div class="flex items-center justify-between mb-2">
-						<span class="text-sm text-gray-300">Compression:</span>
-						<div class="flex items-center gap-2">
-							<select
-								id={ string(typeOf) + "-compression" }
-								name="compression"
-								class="bg-gray-700 text-gray-200 rounded px-3 py-1 text-sm border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 w-24"
-								value={ stream.Config().Compression }
-							>
-								<option value="0">No</option>
-								<option value="1">Yes</option>
-							</select>
-						</div>
-					</div>
-					<!-- Status Indicator -->
-					<div class="flex items-center justify-between mt-2">
-						<span class="text-sm text-gray-300">Status:</span>
-						<div
-							id={ string(typeOf) + "-status" }
-							class="flex items-center gap-2"
-						>
-							<span class="inline-block w-3 h-3 bg-red-500 rounded-full"></span>
-							<span class="text-sm">
-								Disconnected
-							</span>
-						</div>
-					</div>
-					<!-- Connect Button -->
-					<div class="flex justify-end mt-2">
-						<button
-							type="submit"
-							class="bg-blue-600 hover:bg-blue-700 text-white rounded px-3 py-1 text-sm"
-						>
-							Connect/Configure
-						</button>
-					</div>
-				</form>
-			</div>
+<div class="bg-gray-800 rounded-lg shadow-lg p-4">
+	<div class="flex justify-between items-center">
+		<span class="font-medium">{ typeOf } camera:</span>
+		<div class="flex justify-between items-center cursor-pointer">
+			@web.SettingsGear
 		</div>
 	</div>
+	<!-- spacer -->
+	<br />
+	<div class="space-y-4">
+		<!-- Camera Configuration -->
+		<div class="space-y-2">
+			<h3 class="text-sm font-medium text-gray-400">Configuration</h3>
+			<!-- Configuration Form -->
+			<form id={ string(typeOf) + "-config-form" } hx-post={ "/" + string(typeOf) + "/configure" } hx-target={ "#"
+				+ string(typeOf) + "-status" }>
+				<!-- Port Selection -->
+				<div class="flex items-center justify-between mb-2">
+					<label for={ string(typeOf) + "-port" } class="text-sm text-gray-300">Port:</label>
+					<div class="flex items-center gap-2">
+						<select id={ string(typeOf) + "-port" } name="port" value={ stream.Config().Port }
+							class="bg-gray-700 text-gray-200 rounded px-3 py-1 text-sm border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
+							<option value="">Select port</option>
+							<option value="/dev/ttyUSB0">/dev/ttyUSB0</option>
+							<option value="/dev/ttyUSB1">/dev/ttyUSB1</option>
+							<option value="/dev/ttyS0">/dev/ttyS0</option>
+							<option value="/dev/ttyS1">/dev/ttyS1</option>
+						</select>
+						<button hx-get="/ports" hx-target={ "#" + string(typeOf) + "-port" } hx-trigger="load, click"
+							class="bg-blue-600 hover:bg-blue-700 text-white rounded p-1" title="Refresh available ports"
+							type="button">
+							@web.RefreshCw
+						</button>
+					</div>
+				</div>
+				<!-- Baud Rate Setting -->
+				<div class="flex items-center justify-between mb-2">
+					<label for={ string(typeOf) + "-baud" } class="text-sm text-gray-300">Baud Rate:</label>
+					<div class="flex items-center gap-2">
+						<input id={ string(typeOf) + "-baud" } name="baudrate" type="number" value={
+							stream.Config().BaudRate }
+							class="bg-gray-700 text-gray-200 rounded px-3 py-1 text-sm border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 w-24" />
+					</div>
+				</div>
+				<!-- Camera Compression -->
+				<div class="flex items-center justify-between mb-2">
+					<span class="text-sm text-gray-300">Compression:</span>
+					<div class="flex items-center gap-2">
+						<select id={ string(typeOf) + "-compression" } name="compression"
+							class="bg-gray-700 text-gray-200 rounded px-3 py-1 text-sm border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 w-24"
+							value={ stream.Config().Compression }>
+							<option value="0">No</option>
+							<option value="1">Yes</option>
+						</select>
+					</div>
+				</div>
+				<!-- Status Indicator -->
+				<div class="flex items-center justify-between mt-2">
+					<span class="text-sm text-gray-300">Status:</span>
+					<div id={ string(typeOf) + "-status" } class="flex items-center gap-2">
+						<span class="inline-block w-3 h-3 bg-red-500 rounded-full"></span>
+						<span class="text-sm">
+							Disconnected
+						</span>
+					</div>
+				</div>
+				<!-- Connect Button -->
+				<div class="flex justify-end mt-2">
+					<button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white rounded px-3 py-1 text-sm">
+						Connect/Configure
+					</button>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
 }
