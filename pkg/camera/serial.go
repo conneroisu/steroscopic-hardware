@@ -232,18 +232,16 @@ func (sc *SerialCamera) readFn(
 	sc.mu.Lock()
 	defer sc.mu.Unlock()
 
-	length, err := sc.port.Read(tempBuf)
+	length, err := sc.logPort.Read(tempBuf)
 	if err != nil {
 		sc.logger.Error("error reading from serial port", "error", err)
 		errChan <- fmt.Errorf("error reading from serial port: %v", err)
-		return
 	}
 
 	// Safety check for buffer size making sure we read the entire image
 	if length > sc.ImageWidth*sc.ImageHeight {
 		sc.logger.Error("received data exceeds expected image size")
 		errChan <- fmt.Errorf("received data exceeds expected image size")
-		return
 	}
 
 	expectedSize := sc.ImageWidth * sc.ImageHeight
@@ -257,7 +255,6 @@ func (sc *SerialCamera) readFn(
 			expectedSize,
 			expectedSize*3,
 		)
-		return
 	}
 
 	img := image.NewGray(image.Rect(0, 0, sc.ImageWidth, sc.ImageHeight))
