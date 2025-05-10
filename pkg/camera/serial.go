@@ -220,7 +220,8 @@ func (sc *SerialCamera) readFn(
 	imgCh chan *image.Gray,
 ) {
 	var (
-		tempBuf = make([]byte, sc.ImageWidth*sc.ImageHeight)
+		tempBuf     = []byte{}
+		totalLength int
 	)
 
 	expectedLength := sc.ImageWidth * sc.ImageHeight
@@ -228,7 +229,6 @@ func (sc *SerialCamera) readFn(
 	sc.mu.Lock()
 	defer sc.mu.Unlock()
 
-	var totalLength int
 	for {
 		buf := []byte{}
 		length, err := sc.port.Read(buf)
