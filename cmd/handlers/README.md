@@ -14,7 +14,9 @@ import "github.com/conneroisu/steroscopic-hardware/cmd/handlers"
 
 Package handlers contains functions for handling API requests.
 
-This Go package \`handlers\` is part of a stereoscopic hardware system project that manages HTTP requests for a web UI controlling stereo cameras \(for 3D vision\). It handles the communication between the web interface and the physical camera hardware.
+This Go package \`handlers\` is part of a stereoscopic hardware system project that manages HTTP requests for a web UI controlling stereo cameras.
+
+It handles the communication between the web interface and the physical camera hardware.
 
 \#\# Core Components
 
