@@ -49,6 +49,18 @@ templ App(title string, comp templ.Component) {
 			>
 				@comp
 			</div>
+			<div id="connection-indicator" class="hidden fixed top-0 right-0 m-4">
+				<div class="spinner border-t-4 border-blue-500 rounded-full w-6 h-6 animate-spin"></div>
+			</div>
+			<script>
+				document.addEventListener('htmx:configRequest', function() {
+					document.getElementById('connection-indicator').classList.remove('hidden');
+				});
+
+				document.addEventListener('htmx:afterRequest', function() {
+					document.getElementById('connection-indicator').classList.add('hidden');
+				});
+			</script>
 		</body>
 	</html>
 }
