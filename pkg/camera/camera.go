@@ -284,3 +284,44 @@ func (b *StreamManager) Config() *Config {
 	defer b.mu.Unlock()
 	return b.config
 }
+
+// GetCameraPort returns the port name of the camera owned by this StreamManager.
+func (b *StreamManager) GetCameraPort() string {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+	if b.camera == nil {
+		return ""
+	}
+	return b.camera.Port()
+}
+
+// GetCamera returns the camera owned by this StreamManager.
+func (b *StreamManager) GetCamera() Camer {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+	return b.camera
+}
+
+// SetTestCamera allows setting a camera directly for testing purposes.
+// This bypasses the normal configuration process to support testing.
+func (b *StreamManager) SetTestCamera(camera Camer) {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+
+	// Close existing camera if there is one
+	if b.camera != nil {
+		_ = b.camera.Close() // Ignore errors during testing
+	}
+
+	// Set the new camera
+	b.camera = camera
+
+	// Restart the stream with the new camera
+	if b.running {
+		b.runCancel()
+		b.runCtx, b.runCancel = context.WithCancel(b.ctx)
+	}
+
+	// Start streaming from the new camera
+	go b.Start()
+}
