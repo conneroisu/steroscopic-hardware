@@ -46,53 +46,6 @@ var (
 	}
 )
 
-// NewServer creates a new web-ui server with all necessary routes and handlers configured.
-//
-// It sets up the HTTP server with routes for camera streaming, configuration, and depth map generation.
-// The server includes logging middleware that captures request information.
-//
-// Parameters:
-//   - logger: The application logger for recording events and errors
-//   - params: Stereoscopic algorithm parameters (block size, max disparity)
-//   - leftStream: Stream manager for the left camera
-//   - rightStream: Stream manager for the right camera
-//   - outputStream: Stream manager for the generated depth map output
-//   - cancel: CancelFunc to gracefully shut down the application
-//
-// Returns an http.Handler and any error encountered during setup.
-func NewServer(
-	logger *logger.Logger,
-	params *despair.Parameters,
-	leftStream, rightStream, outputStream *camera.StreamManager,
-	cancel context.CancelFunc,
-) (http.Handler, error) {
-	mux := http.NewServeMux()
-	err := AddRoutes(
-		mux,
-		logger,
-		params,
-		leftStream,
-		rightStream,
-		outputStream,
-		cancel,
-	)
-	if err != nil {
-		return nil, err
-	}
-	slogLogHandler := http.HandlerFunc(
-		func(w http.ResponseWriter, r *http.Request) {
-			logger.Info(
-				"request",
-				slog.String("method", r.Method),
-				slog.String("url", r.URL.String()),
-			)
-
-			mux.ServeHTTP(w, r)
-		})
-	var handler http.Handler = slogLogHandler
-	return handler, nil
-}
-
 // Run is the entry point for the application that starts the HTTP server and manages its lifecycle.
 //
 // This function:
@@ -204,6 +157,53 @@ func Run(
 			httpServer,
 		)
 	}
+}
+
+// NewServer creates a new web-ui server with all necessary routes and handlers configured.
+//
+// It sets up the HTTP server with routes for camera streaming, configuration, and depth map generation.
+// The server includes logging middleware that captures request information.
+//
+// Parameters:
+//   - logger: The application logger for recording events and errors
+//   - params: Stereoscopic algorithm parameters (block size, max disparity)
+//   - leftStream: Stream manager for the left camera
+//   - rightStream: Stream manager for the right camera
+//   - outputStream: Stream manager for the generated depth map output
+//   - cancel: CancelFunc to gracefully shut down the application
+//
+// Returns an http.Handler and any error encountered during setup.
+func NewServer(
+	logger *logger.Logger,
+	params *despair.Parameters,
+	leftStream, rightStream, outputStream *camera.StreamManager,
+	cancel context.CancelFunc,
+) (http.Handler, error) {
+	mux := http.NewServeMux()
+	err := AddRoutes(
+		mux,
+		logger,
+		params,
+		leftStream,
+		rightStream,
+		outputStream,
+		cancel,
+	)
+	if err != nil {
+		return nil, err
+	}
+	slogLogHandler := http.HandlerFunc(
+		func(w http.ResponseWriter, r *http.Request) {
+			logger.Info(
+				"request",
+				slog.String("method", r.Method),
+				slog.String("url", r.URL.String()),
+			)
+
+			mux.ServeHTTP(w, r)
+		})
+	var handler http.Handler = slogLogHandler
+	return handler, nil
 }
 
 // gracefulShutdown manages the orderly shutdown of the HTTP server.
