@@ -18,20 +18,33 @@ func GetPorts(
 		var (
 			strBuilder strings.Builder
 			tries      int
+			port       *enumerator.PortDetails
+			ports      []*enumerator.PortDetails
+			err        error
 		)
 		for {
-			ports, err := enumerator.GetDetailedPortsList()
+			ports, err = enumerator.GetDetailedPortsList()
 			if err != nil || len(ports) == 0 {
 				if tries > 10 {
 					return fmt.Errorf("no serial ports found")
 				}
-				logger.ErrorContext(r.Context(), "no serial ports found", "tries", tries)
+				logger.ErrorContext(
+					r.Context(),
+					"no serial ports found",
+					"tries",
+					tries,
+				)
 				time.Sleep(time.Second)
 				tries++
 				continue
 			}
-			logger.Info("Found serial ports", "ports", ports, "len", len(ports))
-			for _, port := range ports {
+			logger.InfoContext(
+				r.Context(),
+				"Found serial ports",
+				"# of ports",
+				len(ports),
+			)
+			for _, port = range ports {
 				strBuilder.WriteString(
 					fmt.Sprintf("<option value=\"%s\">%s</option>\n",
 						port.Name,
