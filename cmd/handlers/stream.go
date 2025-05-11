@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"image"
 	"image/jpeg"
+	"io"
 	"log"
 	"net/http"
 	"sync"
@@ -32,8 +33,8 @@ func StreamHandlerFn(manager *camera.StreamManager) APIFn {
 
 		clientChan := make(chan *image.Gray, 10) // Buffer a few frames
 
+		// Register client and defer unregistering
 		manager.Register <- clientChan
-
 		defer func() {
 			manager.Unregister <- clientChan
 			// Drain the channel to prevent goroutine leaks
@@ -42,6 +43,7 @@ func StreamHandlerFn(manager *camera.StreamManager) APIFn {
 				print("")
 			}
 		}()
+
 		// Set a reasonable timeout for the connection
 		timeout := time.After(30 * time.Minute)
 
@@ -58,7 +60,6 @@ func StreamHandlerFn(manager *camera.StreamManager) APIFn {
 				return nil
 			case <-r.Context().Done():
 				return nil
-
 			case <-ticker.C:
 				// Only process on tick to control frame rate
 				select {
@@ -66,41 +67,65 @@ func StreamHandlerFn(manager *camera.StreamManager) APIFn {
 					if !ok {
 						return nil // Channel closed
 					}
-
-					// Clear buffer and reuse
-					buffer.Reset()
-
-					// Get encoder options from pool
-					opts := jpegPool.Get().(*jpeg.Options)
-
-					// Write frame boundary to buffer
-					fmt.Fprintf(buffer, "--frame\r\nContent-Type: image/jpeg\r\n\r\n")
-
-					// Encode image to buffer - consider using a worker pool for this
-					if err := jpeg.Encode(buffer, img, opts); err != nil {
-						jpegPool.Put(opts)
-						log.Printf("Error encoding JPEG: %v", err)
-						continue // Skip this frame instead of failing
+					err := processImg(
+						img,
+						buffer,
+						&jpegPool,
+						w,
+					)
+					if err != nil {
+						return err
 					}
-
-					// Return options to pool
-					jpegPool.Put(opts)
-
-					// Write the entire frame at once instead of in chunks
-					if _, err := w.Write(buffer.Bytes()); err != nil {
-						log.Printf("Error writing to client: %v", err)
-						return fmt.Errorf("error writing to client: %v", err)
-					}
-
-					// Flush after writing complete frame
-					if f, ok := w.(http.Flusher); ok {
-						f.Flush()
-					}
-
 				default:
 					// No new frame available, continue
 				}
 			}
 		}
 	}
+}
+
+func processImg(
+	img *image.Gray,
+	buffer *bytes.Buffer,
+	jpegPool *sync.Pool,
+	w io.Writer,
+) error {
+	// Clear buffer and reuse
+	buffer.Reset()
+
+	// Get encoder options from pool
+	opts := jpegPool.Get().(*jpeg.Options)
+
+	// Write frame boundary to buffer
+	_, err := fmt.Fprintf(buffer, "--frame\r\nContent-Type: image/jpeg\r\n\r\n")
+	if err != nil {
+		return err
+	}
+
+	// Encode image to buffer - consider using a worker pool for this
+	err = jpeg.Encode(buffer, img, opts)
+	if err != nil {
+		jpegPool.Put(opts)
+		log.Printf("Error encoding JPEG: %v", err)
+		// Skip this frame instead of failing
+		return nil
+	}
+
+	// Return options to pool
+	jpegPool.Put(opts)
+
+	// Write the entire frame at once instead of in chunks
+	_, err = w.Write(buffer.Bytes())
+	if err != nil {
+		log.Printf("Error writing to client: %v", err)
+		return fmt.Errorf("error writing to client: %v", err)
+	}
+
+	// Flush after writing complete frame
+	f, ok := w.(http.Flusher)
+	if ok {
+		f.Flush()
+	}
+
+	return nil
 }
