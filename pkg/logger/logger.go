@@ -49,9 +49,7 @@ func NewLogWriter(w io.Writer) slog.Handler {
 		AddSource: true,
 		Level:     slog.LevelDebug,
 		ReplaceAttr: func(_ []string, a slog.Attr) slog.Attr {
-			if a.Key == "timestamp" {
-				return slog.Attr{}
-			}
+		
 			if a.Key == "time" {
 				return slog.Attr{}
 			}
