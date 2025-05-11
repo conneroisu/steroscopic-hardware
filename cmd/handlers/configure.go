@@ -44,14 +44,13 @@ func ConfigureCamera(
 		baudStr = r.FormValue("baudrate")
 		compressionStr = r.FormValue("compression")
 
-		// Configure port if provided
+		// CONFIGURE port if provided
 		if portStr == "" {
 			return fmt.Errorf("port not provided")
 		}
 		config.Port = portStr
-		logger.Info("configured camera port", "port", config.Port)
 
-		// Configure baud rate if provided
+		// CONFIGURE baud rate if provided
 		if baudStr == "" {
 			return fmt.Errorf("baud rate not provided")
 		}
@@ -60,9 +59,8 @@ func ConfigureCamera(
 			return fmt.Errorf("invalid baud value: %w", err)
 		}
 		config.BaudRate = baudRate
-		logger.Info("configured camera baud rate", "baud", config.BaudRate)
 
-		// Configure compression if provided
+		// CONFIGURE compression if provided
 		if compressionStr == "" {
 			return fmt.Errorf("compression not provided")
 		}
@@ -71,26 +69,34 @@ func ConfigureCamera(
 			return fmt.Errorf("invalid compression value: %w", err)
 		}
 		config.Compression = compression
-		logger.Info("configured camera compression", "compression", config.Compression)
 
+		// Log Configuration
+		logger.InfoContext(
+			r.Context(),
+			"configured camera",
+			"port",
+			config.Port,
+			"baud",
+			config.BaudRate,
+			"compression",
+			config.Compression,
+		)
 		// After configuration, attempt to connect
 		err = configureStream.Configure(config)
 		if err != nil {
 			return fmt.Errorf("failed to configure camera: %w", err)
 		}
 
-		// After Connection, reconfigure the output camera
-		outputStream.Stop()
-
-		logger.Info("stopped output camera, creating new output camera")
-		outputCamera := camera.NewOutputCamera(
+		outputStream = camera.NewStreamManager(
+			nil,
 			logger,
-			params,
-			leftStream,
-			rightStream,
+			camera.WithReplace(
+				outputStream,
+				params,
+				leftStream,
+				rightStream,
+			),
 		)
-		logger.Info("reconfigured output camera setting pointer")
-		outputStream = camera.NewStreamManager(outputCamera, logger)
 
 		return nil
 	}
