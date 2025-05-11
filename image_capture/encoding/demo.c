@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <errno.h>
 
-#define TEST_MODE 1
+#define TEST_MODE 0
 
 #define SIZE 2073600U
 int main()
@@ -29,7 +29,7 @@ int main()
         return errno;
     }
 
-    size_t result = range_code(data, coded, SIZE, 32);
+    size_t result = range_code(data, coded, SIZE, 1024);
 
     if(!result)
     {
@@ -63,12 +63,7 @@ int main()
 
     memset(coded, 0, 10);
 
-    for(int i = 0; i < 10; ++i)
-    {
-        data[i] = i;
-    }
-
-    size_t result = range_code(data, coded, 10, 32);
+    size_t result = range_code(data, coded, 10, 2);
 
     printf("Result: %ld\n", result);
 #endif
