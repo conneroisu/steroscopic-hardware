@@ -107,7 +107,7 @@ func (o *OutputCamera) read(_ chan error) <-chan *image.Gray {
 	}
 	got := despair.AssembleDisparityMap(o.OutputCh, leftImg.Rect, numChunks)
 	end := time.Now()
-	o.logger.Debug("Elapsed time", "elapsed", end.Sub(start))
+	o.logger.Debug("Elapsed time", "took", end.Sub(start))
 	mkdCh <- got
 	return mkdCh
 }
