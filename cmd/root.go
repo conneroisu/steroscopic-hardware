@@ -38,28 +38,33 @@ const (
 
 var (
 	// defaultParams defines the initial stereoscopic algorithm parameters
-	// BlockSize: Size of comparison blocks used in the stereo matching algorithm
-	// MaxDisparity: Maximum pixel displacement between corresponding points in the stereo pair
+	// BlockSize: Size of comparison blocks used in the stereo matching
+	// algorithm.
+	// MaxDisparity: Maximum pixel displacement between corresponding points
+	// in the stereo pair
 	defaultParams = despair.Parameters{
 		BlockSize:    8,
 		MaxDisparity: 64,
 	}
 )
 
-// Run is the entry point for the application that starts the HTTP server and manages its lifecycle.
+// Run is the entry point for the application that starts the HTTP server and
+// manages its lifecycle.
 //
-// This function:
-// 1. Sets up signal handling for graceful shutdown
-// 2. Initializes the logger and camera stream managers
-// 3. Creates and configures the HTTP server with appropriate timeouts
-// 4. Starts the server and monitors for shutdown signals
-// 5. Performs graceful shutdown when terminated
+// Process:
+//  1. Sets up signal handling for graceful shutdown
+//  2. Initializes the logger and camera stream managers
+//  3. Creates and configures the HTTP server with appropriate timeouts
+//  4. Starts the server and monitors for shutdown signals
+//  5. Performs graceful shutdown when terminated
 //
 // Parameters:
 //   - ctx: Parent context for controlling the application lifecycle
-//   - onStart: Callback function executed after server initialization but before accepting connections
+//   - onStart: Callback function executed after server initialization but
 //
-// Returns any error encountered during server startup or shutdown.
+// before accepting connections
+//
+// It returns any unexpected error encountered during server startup or shutdown.
 func Run(
 	ctx context.Context,
 	onStart func(),
