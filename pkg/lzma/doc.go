@@ -38,13 +38,18 @@
 //	// the os.Stdout would be an io.Writer used to write uncompressed data to
 //	io.Copy(os.Stdout, r)
 //
-// LZMA compressed file format
+// # LZMA compressed file format
+//
 // ---------------------------
 //
 // | Offset | Size | Description |
+//
 // |--------|------|-------------|
+//
 // | 0      | 1    | Special LZMA properties (lc,lp, pb in encoded form) |
+//
 // | 1      | 4    | Dictionary size (little endian) |
+//
 // | 5      | 8    | Uncompressed size (little endian). Size -1 stands for unknown size |
 package lzma
 
