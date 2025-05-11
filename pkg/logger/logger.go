@@ -7,6 +7,8 @@ import (
 	"os"
 	"strings"
 	"time"
+
+	slogmulti "github.com/samber/slog-multi"
 )
 
 // Logger is a slog.Logger that sends logs to a channel and also to the console.
@@ -23,10 +25,12 @@ func (l Logger) Bytes() []byte {
 // NewLogger creates a new Logger.
 func NewLogger() Logger {
 	var buffer bytes.Buffer
-	multiHandler := NewMultiHandler(
-		NewLogWriter(&buffer),
-		NewLogWriter(os.Stdout))
-	logger := slog.New(multiHandler)
+	logger := slog.New(
+		slogmulti.Fanout(
+			NewLogWriter(&buffer),
+			NewLogWriter(os.Stdout),
+		),
+	)
 	slog.SetDefault(logger)
 	return Logger{
 		buffer: &buffer,
