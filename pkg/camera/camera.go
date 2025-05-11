@@ -173,7 +173,6 @@ func (b *StreamManager) Configure(config Config) error {
 	var (
 		err    error
 		camera Camer
-		opts   = []SerialCameraOption{}
 	)
 	b.mu.Lock()
 	defer b.mu.Unlock()
@@ -181,7 +180,6 @@ func (b *StreamManager) Configure(config Config) error {
 		b.logger.Info("camera port already configured closing it to reconfigure", "port", config.Port)
 		b.camera.Close()
 	}
-	opts = append(opts, WithLogger(b.logger))
 	b.logger.Info(
 		"opening new camera",
 		"port",
@@ -195,7 +193,7 @@ func (b *StreamManager) Configure(config Config) error {
 		config.Port,
 		config.BaudRate,
 		config.Compression == 1,
-		opts...,
+		WithLogger(b.logger),
 	)
 	if err != nil {
 		return err
