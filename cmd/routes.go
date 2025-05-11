@@ -12,11 +12,32 @@ import (
 	"github.com/conneroisu/steroscopic-hardware/pkg/logger"
 	"github.com/conneroisu/steroscopic-hardware/pkg/web"
 )
-
+// static contains embedded static web assets served by the HTTP server.
+// This includes CSS, JavaScript, and icon files needed by the web UI.
 //go:embed static/*
 var static embed.FS
 
-// AddRoutes adds the routes/handlers to the mux.
+// AddRoutes configures all HTTP routes and handlers for the application.
+//
+// This function registers the following endpoints:
+//   - GET /: Static file server for web assets
+//   - GET /exit: Endpoint to request server shutdown (returns logs)
+//   - GET /{$}: Main UI page with live camera streams and controls
+//   - POST /update-params: Update stereoscopic algorithm parameters
+//   - GET /stream/{left,right,out}: Live MJPEG streams for both cameras and depth map
+//   - POST /{left,right}/configure: Configure camera devices and parameters
+//   - GET /ports: List available serial ports for camera connections
+//
+// Parameters:
+//   - mux: The HTTP server mux to register routes on
+//   - logger: Application logger for recording events
+//   - params: Stereoscopic algorithm parameters
+//   - leftStream: Stream manager for the left camera
+//   - rightStream: Stream manager for the right camera
+//   - outputStream: Stream manager for the generated depth map
+//   - cancel: CancelFunc to trigger application shutdown
+//
+// Returns any error encountered during route configuration.
 func AddRoutes(
 	mux *http.ServeMux,
 	logger *logger.Logger,

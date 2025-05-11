@@ -19,23 +19,47 @@ import (
 )
 
 const (
-	defaultHost       = "0.0.0.0"
-	defaultPort       = "8080"
-	shutdownTimeout   = 10 * time.Second
-	readTimeout       = 15 * time.Second
-	writeTimeout      = 999 * time.Second
-	idleTimeout       = 60 * time.Second
+	// defaultHost is the IP address the server binds to (0.0.0.0 = all interfaces)
+	defaultHost = "0.0.0.0"
+	// defaultPort is the TCP port the server listens on
+	defaultPort = "8080"
+	// shutdownTimeout is the maximum time allowed for the server to complete a graceful shutdown
+	shutdownTimeout = 10 * time.Second
+	// readTimeout is the maximum duration for reading the entire request
+	readTimeout = 15 * time.Second
+	// writeTimeout is the maximum duration before timing out writes of the response
+	// Set very high to accommodate long-running stream connections
+	writeTimeout = 999 * time.Second
+	// idleTimeout is the maximum amount of time to wait for the next request
+	idleTimeout = 60 * time.Second
+	// readHeaderTimeout is the amount of time allowed to read request headers
 	readHeaderTimeout = 5 * time.Second
 )
 
 var (
+	// defaultParams defines the initial stereoscopic algorithm parameters
+	// BlockSize: Size of comparison blocks used in the stereo matching algorithm
+	// MaxDisparity: Maximum pixel displacement between corresponding points in the stereo pair
 	defaultParams = despair.Parameters{
 		BlockSize:    8,
 		MaxDisparity: 64,
 	}
 )
 
-// NewServer creates a new web-ui server
+// NewServer creates a new web-ui server with all necessary routes and handlers configured.
+//
+// It sets up the HTTP server with routes for camera streaming, configuration, and depth map generation.
+// The server includes logging middleware that captures request information.
+//
+// Parameters:
+//   - logger: The application logger for recording events and errors
+//   - params: Stereoscopic algorithm parameters (block size, max disparity)
+//   - leftStream: Stream manager for the left camera
+//   - rightStream: Stream manager for the right camera
+//   - outputStream: Stream manager for the generated depth map output
+//   - cancel: CancelFunc to gracefully shut down the application
+//
+// Returns an http.Handler and any error encountered during setup.
 func NewServer(
 	logger *logger.Logger,
 	params *despair.Parameters,
@@ -69,7 +93,20 @@ func NewServer(
 	return handler, nil
 }
 
-// Run is the entry point for the application.
+// Run is the entry point for the application that starts the HTTP server and manages its lifecycle.
+//
+// This function:
+// 1. Sets up signal handling for graceful shutdown
+// 2. Initializes the logger and camera stream managers
+// 3. Creates and configures the HTTP server with appropriate timeouts
+// 4. Starts the server and monitors for shutdown signals
+// 5. Performs graceful shutdown when terminated
+//
+// Parameters:
+//   - ctx: Parent context for controlling the application lifecycle
+//   - onStart: Callback function executed after server initialization but before accepting connections
+//
+// Returns any error encountered during server startup or shutdown.
 func Run(
 	ctx context.Context,
 	onStart func(),
@@ -169,6 +206,18 @@ func Run(
 	}
 }
 
+// gracefulShutdown manages the orderly shutdown of the HTTP server.
+//
+// It creates a timeout context for the shutdown operation, attempts to close all active
+// connections, and waits for all background goroutines to complete before returning.
+//
+// Parameters:
+//   - ctx: Context that may be canceled to abort the shutdown
+//   - shutdownTimeout: Maximum duration to wait for connections to close
+//   - wg: WaitGroup tracking background goroutines
+//   - server: The HTTP server to shut down
+//
+// Returns an error if the server fails to shut down cleanly within the timeout period.
 func gracefulShutdown(
 	ctx context.Context,
 	shutdownTimeout time.Duration,
