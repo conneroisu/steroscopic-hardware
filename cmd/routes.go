@@ -3,6 +3,7 @@ package cmd
 import (
 	"context"
 	"embed"
+	"log"
 	"net/http"
 
 	"github.com/conneroisu/steroscopic-hardware/cmd/components"
@@ -15,6 +16,7 @@ import (
 
 // static contains embedded static web assets served by the HTTP server.
 // This includes CSS, JavaScript, and icon files needed by the web UI.
+//
 //go:embed static/*
 var static embed.FS
 
@@ -53,11 +55,10 @@ func AddRoutes(
 	mux.HandleFunc("GET /exit", func(w http.ResponseWriter, _ *http.Request) {
 		_, err := w.Write(logger.Bytes())
 		if err != nil {
-			logger.Error("failed to write log", "err", err)
+			log.Fatal("failed to write log", "err", err)
 		}
 		cancel()
 	})
-
 	mux.Handle("GET /{$}", handlers.MorphableHandler(
 		components.AppFn(web.LivePageTitle),
 		components.Live(params.BlockSize, params.MaxDisparity, leftStream, rightStream),
