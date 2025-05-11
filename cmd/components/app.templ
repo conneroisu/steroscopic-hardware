@@ -158,6 +158,9 @@ templ cameraStatus(
 			class="flex justify-between items-center"
 		>
 			<span
+				hx-get="/ports"
+				hx-target={ "#" + string(typeOf) + "-port" }
+				hx-trigger="load"
 				class="font-medium"
 			>
 				{ typeOf } camera:
@@ -187,6 +190,7 @@ templ cameraStatus(
 					id={ string(typeOf) + "-config-form" }
 					hx-post={ "/" + string(typeOf) + "/configure" }
 					hx-target={ "#" + string(typeOf) + "-status" }
+					hx-indicator={ "#" + string(typeOf) + "-loading-indicator" }
 				>
 					<!-- Port Selection -->
 					<div class="flex items-center justify-between mb-2">
@@ -207,7 +211,7 @@ templ cameraStatus(
 							<button
 								hx-get="/ports"
 								hx-target={ "#" + string(typeOf) + "-port" }
-								hx-trigger="load, click"
+								hx-trigger="click"
 								class="bg-blue-600 hover:bg-blue-700 text-white rounded p-1"
 								title="Refresh available ports"
 								type="button"
@@ -270,10 +274,20 @@ templ cameraStatus(
 							</span>
 						</div>
 					</div>
-					<!-- Connect Button -->
+					<!-- Connect Button with Loading Indicator -->
 					<div
-						class="flex justify-end mt-2"
+						class="flex justify-end mt-2 items-center"
 					>
+						<div
+							id={ string(typeOf) + "-loading-indicator" }
+							class="htmx-indicator mr-2 flex items-center"
+						>
+							<svg class="animate-spin h-4 w-4 text-blue-400 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+								<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+								<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+							</svg>
+							<span class="text-xs text-blue-400">Connecting...</span>
+						</div>
 						<button
 							type="submit"
 							class="bg-blue-600 hover:bg-blue-700 text-white rounded px-3 py-1 text-sm"
