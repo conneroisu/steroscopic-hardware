@@ -102,7 +102,7 @@ func main() {
 			exit(fmt.Sprintf("file %s not found", inFilePath))
 		}
 		if f.IsDir() {
-			exit(inFilePath + "is not a file, but a directory")
+			exit(inFilePath + " is not a file, but a directory")
 		}
 
 		if !*stdout { // parse args: write to file
