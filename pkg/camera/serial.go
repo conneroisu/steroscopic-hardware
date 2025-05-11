@@ -225,7 +225,6 @@ func (sc *SerialCamera) readFn(
 	var (
 		tempBuf = []byte{}
 		total   int
-		tries   int
 	)
 
 	expectedLength := DefaultImageWidth * DefaultImageHeight
@@ -233,9 +232,7 @@ func (sc *SerialCamera) readFn(
 	sc.mu.Lock()
 	defer sc.mu.Unlock()
 
-	maxTries := expectedLength / 20
 	for {
-		tries++
 		var buf = make([]byte, 100)
 		length, err := sc.port.Read(buf)
 		if err != nil {
@@ -248,11 +245,6 @@ func (sc *SerialCamera) readFn(
 		sc.logger.Info("read", "length", length, "total", total, "expected", expectedLength)
 		if total >= sc.ImageWidth*sc.ImageHeight {
 			break
-		}
-		if tries > maxTries {
-			sc.logger.Error("reached max tries", "tries", tries, "maxTries", maxTries)
-			errChan <- fmt.Errorf("reached max tries: %d", tries)
-			return
 		}
 	}
 
