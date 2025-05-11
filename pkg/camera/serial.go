@@ -13,20 +13,20 @@ import (
 )
 
 var (
-	// DefaultStartSeq is the default start marker for image data
+	// DefaultStartSeq is the default start marker for image data.
 	DefaultStartSeq = []byte{0xff, 0xd8}
-	// DefaultEndSeq is the default end marker for image data
+	// DefaultEndSeq is the default end marker for image data.
 	DefaultEndSeq = []byte{0xff, 0xd9}
-	// DefaultImageWidth is the default expected image width in pixels
+	// DefaultImageWidth is the default expected image width in pixels.
 	DefaultImageWidth = 1920
-	// DefaultImageHeight is the default expected image height in pixels
+	// DefaultImageHeight is the default expected image height in pixels.
 	DefaultImageHeight = 1080
 
 	_ Camer = (*SerialCamera)(nil)
 )
 
 type (
-	// SerialCamera represents a camera connected via serial port
+	// SerialCamera represents a camera connected via serial port.
 	SerialCamera struct {
 		mu             sync.Mutex
 		ctx            context.Context
@@ -45,7 +45,7 @@ type (
 	}
 )
 
-// NewSerialCamera creates a new SerialCamera instance
+// NewSerialCamera creates a new SerialCamera instance.
 func NewSerialCamera(
 	portName string,
 	baudRate int,
@@ -92,10 +92,10 @@ func NewSerialCamera(
 	return &sc, nil
 }
 
-// Port returns the serial port name
+// Port returns the serial port name.
 func (sc *SerialCamera) Port() string { return sc.portID }
 
-// Close closes the serial connection
+// Close closes the serial connection.
 func (sc *SerialCamera) Close() error {
 	sc.mu.Lock()
 	defer sc.mu.Unlock()
@@ -111,7 +111,7 @@ func (sc *SerialCamera) Close() error {
 	return nil
 }
 
-// Stream reads images from the camera and sends them to the channel
+// Stream reads images from the camera and sends them to the channel.
 func (sc *SerialCamera) Stream(
 	ctx context.Context,
 	ch chan *image.Gray,
@@ -143,7 +143,7 @@ func (sc *SerialCamera) Stream(
 	}
 }
 
-// readImageData reads image data from the serial port
+// readImageData reads image data from the serial port.
 func (sc *SerialCamera) start(
 	ctx context.Context,
 	errChan chan error,

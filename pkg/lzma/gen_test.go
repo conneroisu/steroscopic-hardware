@@ -14,7 +14,6 @@ import (
 
 const testDir = "lzma_test_files"
 
-// generatedTest represents a test case for LZMA codec
 type generatedTest struct {
 	name        string
 	rawFilePath string
@@ -22,7 +21,6 @@ type generatedTest struct {
 	lzmaPath    string
 }
 
-// TestGeneratedFiles tests the LZMA encoder and decoder with a variety of generated files
 func TestGeneratedFiles(t *testing.T) {
 	// Skip if the test files directory doesn't exist
 	if _, err := os.Stat(testDir); os.IsNotExist(err) {
@@ -101,7 +99,6 @@ func TestGeneratedFiles(t *testing.T) {
 	})
 }
 
-// testDecoder tests LZMA decoder by decoding a pre-compressed file and verifying the output
 func testDecoder(t *testing.T, tt generatedTest) {
 	// Read the expected raw data
 	rawData, err := os.ReadFile(tt.rawFilePath)
@@ -145,7 +142,7 @@ func testDecoder(t *testing.T, tt generatedTest) {
 	}
 }
 
-// testEncoder tests LZMA encoder by encoding raw data and verifying it can be decoded correctly
+// testEncoder tests LZMA encoder by encoding raw data and verifying it can be decoded correctly.
 func testEncoder(t *testing.T, tt generatedTest) {
 	// Read the raw data
 	rawData, err := os.ReadFile(tt.rawFilePath)
@@ -211,7 +208,6 @@ func testEncoder(t *testing.T, tt generatedTest) {
 	}
 }
 
-// testRoundTrip tests the full round-trip: compress with our encoder, decompress with our decoder
 func testRoundTrip(t *testing.T, tt generatedTest) {
 	// Read the raw data
 	rawData, err := os.ReadFile(tt.rawFilePath)
@@ -270,8 +266,9 @@ func testRoundTrip(t *testing.T, tt generatedTest) {
 	}
 }
 
-// TestGeneratedFilesParallel runs the same tests as TestGeneratedFiles but in parallel
-// This helps detect race conditions and other concurrency issues
+// TestGeneratedFilesParallel runs the same tests as TestGeneratedFiles but in parallel.
+//
+// This helps detect race conditions and other concurrency issues.
 func TestGeneratedFilesParallel(t *testing.T) {
 	// Skip if the test files directory doesn't exist
 	if _, err := os.Stat(testDir); os.IsNotExist(err) {
@@ -342,7 +339,7 @@ func TestGeneratedFilesParallel(t *testing.T) {
 	})
 }
 
-// BenchmarkEncode benchmarks the encoder with various file sizes
+// BenchmarkEncode benchmarks the encoder with various file sizes.
 func BenchmarkEncode(b *testing.B) {
 	// Skip if the test files directory doesn't exist
 	testDir := "lzma_test_files"
@@ -395,7 +392,7 @@ func BenchmarkEncode(b *testing.B) {
 	}
 }
 
-// benchmarkFileGroup benchmarks encoding for a group of files
+// benchmarkFileGroup benchmarks encoding for a group of files.
 func benchmarkFileGroup(b *testing.B, name string, files []string) {
 	b.Run(name, func(b *testing.B) {
 		// Use the first file from the group for benchmarking
@@ -432,7 +429,7 @@ func benchmarkFileGroup(b *testing.B, name string, files []string) {
 	})
 }
 
-// BenchmarkDecode benchmarks the decoder with various file sizes
+// BenchmarkDecode benchmarks the decoder with various file sizes.
 func BenchmarkDecode(b *testing.B) {
 	// Skip if the test files directory doesn't exist
 	testDir := "lzma_test_files"
@@ -490,7 +487,6 @@ func BenchmarkDecode(b *testing.B) {
 	}
 }
 
-// benchmarkDecodeGroup benchmarks decoding for a group of files
 func benchmarkDecodeGroup(b *testing.B, name string, files []string, testDir string) {
 	b.Run(name, func(b *testing.B) {
 		// Use the first file from the group for benchmarking
@@ -528,7 +524,6 @@ func benchmarkDecodeGroup(b *testing.B, name string, files []string, testDir str
 	})
 }
 
-// TestMain does setup and teardown for the tests
 func TestMain(m *testing.M) {
 	// Run the tests
 	exitCode := m.Run()

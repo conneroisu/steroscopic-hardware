@@ -13,12 +13,10 @@ import (
 	"go.bug.st/serial"
 )
 
-// Mock serial port errors
 var (
 	ErrPortClosed = errors.New("port closed")
 )
 
-// MockSerialPort is a mock implementation for testing
 type MockSerialPort struct {
 	mu          sync.Mutex
 	readData    []byte
@@ -79,7 +77,7 @@ func (m *MockSerialPort) Close() error {
 	return nil
 }
 
-// Additional methods to implement serial.Port interface
+// Additional methods to implement serial.Port interface.
 func (m *MockSerialPort) SetMode(_ *serial.Mode) error {
 	return nil
 }
@@ -104,7 +102,7 @@ func (m *MockSerialPort) GetModemStatusBits() (*serial.ModemStatusBits, error) {
 	return &serial.ModemStatusBits{}, nil
 }
 
-// Simple tests for SerialCamera initialization
+// Simple tests for SerialCamera initialization.
 func TestSerialCamera_BasicInitialization(t *testing.T) {
 	t.Run("Test initialization defaults", func(t *testing.T) {
 		// Verify default constants
@@ -123,7 +121,7 @@ func TestSerialCamera_BasicInitialization(t *testing.T) {
 	})
 }
 
-// TestSerialCamera_ReadFnError tests the readFn function with a controlled mock port
+// TestSerialCamera_ReadFnError tests the readFn function with a controlled mock port.
 func TestSerialCamera_ReadFnError(t *testing.T) {
 	// Create error channel and image channel
 	errChan := make(chan error, 1)
@@ -163,7 +161,7 @@ func TestSerialCamera_ReadFnError(t *testing.T) {
 	}
 }
 
-// MockReadWriter is a mock implementation of io.ReadWriter that works with our tests
+// MockReadWriter is a mock implementation of io.ReadWriter that works with our tests.
 type MockReadWriter struct {
 	*MockSerialPort
 	ackByte     []byte // Just the acknowledgment byte
@@ -171,6 +169,7 @@ type MockReadWriter struct {
 	currentRead int    // 0 = ack, 1 = image data
 }
 
+// NewMockReadWriter creates a new MockReadWriter.
 func NewMockReadWriter(ackByte byte, imageData []byte) *MockReadWriter {
 	return &MockReadWriter{
 		MockSerialPort: NewMockSerialPort([]byte{ackByte}),
@@ -180,6 +179,7 @@ func NewMockReadWriter(ackByte byte, imageData []byte) *MockReadWriter {
 	}
 }
 
+// Read implements io.ReadWriter.
 func (m *MockReadWriter) Read(p []byte) (int, error) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
@@ -208,7 +208,7 @@ func (m *MockReadWriter) Read(p []byte) (int, error) {
 	return n, nil
 }
 
-// TestSerialCamera_Stream tests the Stream functionality
+// TestSerialCamera_Stream tests the Stream functionality.
 func TestSerialCamera_Stream(t *testing.T) {
 	// Define a small test image size for easier testing
 	width, height := 3, 2
@@ -344,7 +344,7 @@ func TestSerialCamera_Stream(t *testing.T) {
 	}
 }
 
-// TestSerialCamera_Close tests that the Close method properly closes resources
+// TestSerialCamera_Close tests that the Close method properly closes resources.
 func TestSerialCamera_Close(t *testing.T) {
 	// Create a context that will be used in the test
 	ctx, cancel := context.WithCancel(context.Background())

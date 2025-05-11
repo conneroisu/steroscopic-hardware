@@ -8,19 +8,20 @@ import (
 	"sync"
 )
 
-// InputChunk represents a portion of the image to process
+// InputChunk represents a portion of the image to process.
 type InputChunk struct {
 	Left, Right *image.Gray
 	Region      image.Rectangle
 }
 
-// OutputChunk represents the processed disparity data for a region
+// OutputChunk represents the processed disparity data for a region.
 type OutputChunk struct {
 	DisparityData []uint8
 	Region        image.Rectangle
 }
 
-// SetupConcurrentSAD sets up a concurrent SAD processing pipeline
+// SetupConcurrentSAD sets up a concurrent SAD processing pipeline.
+//
 // It returns an input channel to feed image chunks into and an
 // output channel to receive results from.
 //
@@ -63,7 +64,7 @@ func SetupConcurrentSAD(
 								continue
 							}
 
-							sad := sumAbsoluteDifferences(
+							sad := SumAbsoluteDifferences(
 								chunk.Left,
 								chunk.Right,
 								chunk.Region.Min.X+x,
@@ -164,7 +165,7 @@ func RunSad(
 	return AssembleDisparityMap(outputChan, left.Rect, len(chunks))
 }
 
-// AssembleDisparityMap assembles the disparity map from output chunks
+// AssembleDisparityMap assembles the disparity map from output chunks.
 func AssembleDisparityMap(
 	outputChan <-chan OutputChunk,
 	dimensions image.Rectangle,
@@ -197,8 +198,8 @@ func AssembleDisparityMap(
 	return disparityMap
 }
 
-// sumAbsoluteDifferences calculates SAD directly on image data
-func sumAbsoluteDifferences(
+// SumAbsoluteDifferences calculates SAD directly on image data.
+func SumAbsoluteDifferences(
 	left, right *image.Gray,
 	leftX, leftY, rightX, rightY, blockSize int,
 ) int {

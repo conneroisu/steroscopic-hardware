@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -47,13 +48,13 @@ func ConfigureCamera(
 
 		// CONFIGURE port if provided
 		if portStr == "" {
-			return fmt.Errorf("port not provided")
+			return errors.New("port not provided")
 		}
 		presetConfig.Port = portStr
 
 		// CONFIGURE baud rate if provided
 		if baudStr == "" {
-			return fmt.Errorf("baud rate not provided")
+			return errors.New("baud rate not provided")
 		}
 		baudRate, err = strconv.Atoi(baudStr)
 		if err != nil {
@@ -63,7 +64,7 @@ func ConfigureCamera(
 
 		// CONFIGURE compression if provided
 		if compressionStr == "" {
-			return fmt.Errorf("compression not provided")
+			return errors.New("compression not provided")
 		}
 		compression, err = strconv.Atoi(compressionStr)
 		if err != nil {

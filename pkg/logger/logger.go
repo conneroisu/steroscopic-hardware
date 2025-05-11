@@ -38,7 +38,7 @@ func NewLogger() Logger {
 	}
 }
 
-// LogEntry represents a structured log entry
+// LogEntry represents a structured log entry.
 type LogEntry struct {
 	Level   slog.Level
 	Time    time.Time

@@ -26,7 +26,7 @@ var _ Camer = (*OutputCamera)(nil)
 
 const defaultNumWorkers = 32
 
-// NewOutputCamera creates a new OutputCamera
+// NewOutputCamera creates a new OutputCamera.
 func NewOutputCamera(
 	logger *logger.Logger,
 	params *despair.Parameters,
@@ -79,7 +79,7 @@ func (o *OutputCamera) Stream(
 	}
 }
 
-// Port returns the serial port name
+// Port returns the serial port name.
 func (o *OutputCamera) Port() string { return "" }
 
 func (o *OutputCamera) read(_ chan error) <-chan *image.Gray {

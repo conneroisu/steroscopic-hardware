@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"fmt"
+	"errors"
 	"net/http"
 	"strings"
 	"time"
@@ -26,7 +26,7 @@ func GetPorts(
 			ports, err = enumerator.GetDetailedPortsList()
 			if err != nil || len(ports) == 0 {
 				if tries > 10 {
-					return fmt.Errorf("no serial ports found")
+					return errors.New("no serial ports found")
 				}
 				logger.ErrorContext(
 					r.Context(),
@@ -45,11 +45,11 @@ func GetPorts(
 				len(ports),
 			)
 			for _, port = range ports {
-				strBuilder.WriteString(
-					fmt.Sprintf("<option value=\"%s\">%s</option>\n",
-						port.Name,
-						port.Name,
-					))
+				strBuilder.WriteString("<option value=\"")
+				strBuilder.WriteString(port.Name)
+				strBuilder.WriteString("\">")
+				strBuilder.WriteString(port.Name)
+				strBuilder.WriteString("</option>\n")
 			}
 			_, err = w.Write([]byte(strBuilder.String()))
 			if err != nil {

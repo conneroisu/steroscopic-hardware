@@ -2,9 +2,8 @@ package lzma_test
 
 import (
 	"bytes"
-	"fmt"
 	"io"
-	"log"
+	"strconv"
 	"testing"
 
 	_ "embed"
@@ -55,7 +54,7 @@ func pipe(
 func TestWriterSizeLevelEmpty(t *testing.T) {
 	cases := []bool{true, false}
 	for _, sizeIsKnown := range cases {
-		t.Run("TestWriterSizeLevelEmpty - "+fmt.Sprintf("%t", sizeIsKnown), func(t *testing.T) {
+		t.Run("TestWriterSizeLevelEmpty - "+strconv.FormatBool(sizeIsKnown), func(t *testing.T) {
 			size := int64(-1)
 			if sizeIsKnown == true {
 				size = 0
@@ -79,7 +78,7 @@ func TestWriterSizeLevelEmpty(t *testing.T) {
 func TestWriterSizeLevel(t *testing.T) {
 	cases := []bool{true, false}
 	for _, sizeIsKnown := range cases {
-		t.Run("TestWriterSizeLevel - "+fmt.Sprintf("%t", sizeIsKnown), func(t *testing.T) {
+		t.Run("TestWriterSizeLevel - "+strconv.FormatBool(sizeIsKnown), func(t *testing.T) {
 			size := int64(-1)
 			payload := []byte("connerohnesorge")
 			if sizeIsKnown == true {
@@ -446,7 +445,7 @@ func BenchmarkEncoder(b *testing.B) {
 			start <- true
 			n, err := io.Copy(w, in)
 			if err != nil {
-				log.Fatalf("%v", err)
+				return
 			}
 			b.SetBytes(n)
 		}()
@@ -456,11 +455,11 @@ func BenchmarkEncoder(b *testing.B) {
 		_, err := io.Copy(buf, pr)
 		b.StopTimer()
 		if err != nil {
-			log.Fatalf("%v", err)
+			pr.Close() // Close the pipe reader before exiting
 		}
 	}
 	if bytes.Equal(buf.Bytes(), bench.lzma) == false { // check only once, not at every iteration
-		log.Fatalf(
+		b.Fatalf(
 			"%s: got %d-byte %q, want %d-byte %q",
 			bench.descr,
 			len(buf.Bytes()),

@@ -2,7 +2,7 @@ package handlers
 
 import (
 	"context"
-	"fmt"
+	"errors"
 	"image"
 	"image/color"
 	"net/http"
@@ -21,7 +21,7 @@ import (
 	"github.com/conneroisu/steroscopic-hardware/pkg/logger"
 )
 
-// mockCamera is a simplified camera implementation for testing with socat
+// mockCamera is a simplified camera implementation for testing with socat.
 type mockCamera struct {
 	mu            sync.Mutex
 	portValue     string
@@ -94,10 +94,10 @@ func (m *mockCamera) Port() string {
 	return m.portValue
 }
 
-// Ensure mockCamera implements camera.Camer
+// Ensure mockCamera implements camera.Camer.
 var _ camera.Camer = (*mockCamera)(nil)
 
-// testConfigureCamera is a test implementation of the handler for use in tests
+// testConfigureCamera is a test implementation of the handler for use in tests.
 func testConfigureCamera(
 	logger *logger.Logger,
 	_ *despair.Parameters,
@@ -127,13 +127,13 @@ func testConfigureCamera(
 
 		// CONFIGURE port if provided
 		if portStr == "" {
-			return fmt.Errorf("port not provided")
+			return errors.New("port not provided")
 		}
 		presetConfig.Port = portStr
 
 		// CONFIGURE baud rate if provided
 		if baudStr == "" {
-			return fmt.Errorf("baud rate not provided")
+			return errors.New("baud rate not provided")
 		}
 		baudRate, err = strconv.Atoi(baudStr)
 		if err != nil {
@@ -143,7 +143,7 @@ func testConfigureCamera(
 
 		// CONFIGURE compression if provided
 		if compressionStr == "" {
-			return fmt.Errorf("compression not provided")
+			return errors.New("compression not provided")
 		}
 		compression, err = strconv.Atoi(compressionStr)
 		if err != nil {
@@ -178,7 +178,7 @@ func testConfigureCamera(
 	}
 }
 
-// TestWithSocat tests the configure handler using socat to create virtual serial ports
+// TestWithSocat tests the configure handler using socat to create virtual serial ports.
 func TestWithSocat(t *testing.T) {
 	// Skip this test if not in an environment with socat
 	if _, err := exec.LookPath("socat"); err != nil {
@@ -319,14 +319,20 @@ func TestWithSocat(t *testing.T) {
 	t.Log("Test completed")
 }
 
-// testLeftCamera tests configuration of the left camera
-func testLeftCamera(t *testing.T, log *logger.Logger, params *despair.Parameters,
-	leftStream, rightStream, outputStream *camera.Stream) {
-	// Create test request with form values for left camera
+// testCameraConfiguration is a helper function to test camera configuration.
+func testCameraConfiguration(
+	t *testing.T,
+	log *logger.Logger,
+	params *despair.Parameters,
+	leftStream, rightStream, outputStream *camera.Stream,
+	isLeft bool,
+	port, baudrate, compression string,
+) {
+	// Create test request with form values
 	form := url.Values{}
-	form.Add("port", "/tmp/ttyV0")
-	form.Add("baudrate", "9600")
-	form.Add("compression", "0")
+	form.Add("port", port)
+	form.Add("baudrate", baudrate)
+	form.Add("compression", compression)
 
 	body := strings.NewReader(form.Encode())
 	req := httptest.NewRequest(http.MethodPost, "/api/configure", body)
@@ -335,13 +341,13 @@ func testLeftCamera(t *testing.T, log *logger.Logger, params *despair.Parameters
 
 	w := httptest.NewRecorder()
 
-	// Create and execute handler for left camera
-	handler := testConfigureCamera(log, params, leftStream, rightStream, outputStream, true)
+	// Create and execute handler
+	handler := testConfigureCamera(log, params, leftStream, rightStream, outputStream, isLeft)
 
 	// Execute the handler
 	err := handler(w, req)
 	if err != nil {
-		t.Fatalf("Error configuring left camera: %v", err)
+		t.Fatalf("Error configuring camera: %v", err)
 	}
 
 	// Verify response
@@ -353,48 +359,36 @@ func testLeftCamera(t *testing.T, log *logger.Logger, params *despair.Parameters
 	}
 
 	// Verify the stream was configured with the right port
-	if leftStream.GetCameraPort() != "/tmp/ttyV0" {
-		t.Errorf("Expected port to be /tmp/ttyV0, got %s", leftStream.GetCameraPort())
+	var cameraPort string
+	if isLeft {
+		cameraPort = leftStream.GetCameraPort()
+		if cameraPort != port {
+			t.Errorf("Expected port to be %s, got %s", port, cameraPort)
+		}
+	} else {
+		cameraPort = rightStream.GetCameraPort()
+		if cameraPort != port {
+			t.Errorf("Expected port to be %s, got %s", port, cameraPort)
+		}
 	}
 }
 
-// testRightCamera tests configuration of the right camera
+// testLeftCamera tests configuration of the left camera.
+func testLeftCamera(t *testing.T, log *logger.Logger, params *despair.Parameters,
+	leftStream, rightStream, outputStream *camera.Stream) {
+	testCameraConfiguration(
+		t, log, params, leftStream, rightStream, outputStream,
+		true, "/tmp/ttyV0", "9600", "0",
+	)
+}
+
+// testRightCamera tests configuration of the right camera.
 func testRightCamera(t *testing.T, log *logger.Logger, params *despair.Parameters,
 	leftStream, rightStream, outputStream *camera.Stream) {
-	// Create test request with form values for right camera
-	form := url.Values{}
-	form.Add("port", "/tmp/ttyV2")
-	form.Add("baudrate", "115200")
-	form.Add("compression", "1")
-
-	body := strings.NewReader(form.Encode())
-	req := httptest.NewRequest(http.MethodPost, "/api/configure", body)
-	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-	req = req.WithContext(context.Background())
-
-	w := httptest.NewRecorder()
-
-	// Create and execute handler for right camera
-	handler := testConfigureCamera(log, params, leftStream, rightStream, outputStream, false)
-
-	// Execute the handler
-	err := handler(w, req)
-	if err != nil {
-		t.Fatalf("Error configuring right camera: %v", err)
-	}
-
-	// Verify response
-	resp := w.Result()
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		t.Errorf("Expected status OK, got %v", resp.Status)
-	}
-
-	// Verify the stream was configured with the right port
-	if rightStream.GetCameraPort() != "/tmp/ttyV2" {
-		t.Errorf("Expected port to be /tmp/ttyV2, got %s", rightStream.GetCameraPort())
-	}
+	testCameraConfiguration(
+		t, log, params, leftStream, rightStream, outputStream,
+		false, "/tmp/ttyV2", "115200", "1",
+	)
 }
 
 // simulateCameraOnPort simulates a camera on the given port.

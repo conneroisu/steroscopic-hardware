@@ -363,7 +363,7 @@ func (bt *binTree) skip(num uint32) error {
 	return nil
 }
 
-// should be called in the encoder's constructor
+// should be called in the encoder's constructor.
 func initCrcTable() {
 	var i uint32
 	for ; i < 256; i++ {

@@ -1,7 +1,6 @@
 package camera
 
 // Type is a type for cameras.
-// string
 type Type string
 
 const (

@@ -26,16 +26,16 @@ The main packages are:
 
 ## Index
 
-- [func AddRoutes\(mux \*http.ServeMux, logger \*logger.Logger, params \*despair.Parameters, leftStream, rightStream, outputStream \*camera.StreamManager, cancel context.CancelFunc\) error](<#AddRoutes>)
-- [func NewServer\(logger \*logger.Logger, params \*despair.Parameters, leftStream, rightStream, outputStream \*camera.StreamManager, cancel context.CancelFunc\) \(http.Handler, error\)](<#NewServer>)
+- [func AddRoutes\(mux \*http.ServeMux, logger \*logger.Logger, params \*despair.Parameters, leftStream, rightStream, outputStream \*camera.Stream, cancel context.CancelFunc\) error](<#AddRoutes>)
+- [func NewServer\(logger \*logger.Logger, params \*despair.Parameters, leftStream, rightStream, outputStream \*camera.Stream, cancel context.CancelFunc\) \(http.Handler, error\)](<#NewServer>)
 - [func Run\(ctx context.Context, onStart func\(\)\) error](<#Run>)
 
 
 <a name="AddRoutes"></a>
-## func [AddRoutes](<https://github.com/conneroisu/steroscopic-hardware/blob/main/cmd/routes.go#L42-L48>)
+## func [AddRoutes](<https://github.com/conneroisu/steroscopic-hardware/blob/main/cmd/routes.go#L44-L50>)
 
 ```go
-func AddRoutes(mux *http.ServeMux, logger *logger.Logger, params *despair.Parameters, leftStream, rightStream, outputStream *camera.StreamManager, cancel context.CancelFunc) error
+func AddRoutes(mux *http.ServeMux, logger *logger.Logger, params *despair.Parameters, leftStream, rightStream, outputStream *camera.Stream, cancel context.CancelFunc) error
 ```
 
 AddRoutes configures all HTTP routes and handlers for the application.
@@ -66,7 +66,7 @@ Returns any error encountered during route configuration.
 ## func [NewServer](<https://github.com/conneroisu/steroscopic-hardware/blob/main/cmd/root.go#L181-L186>)
 
 ```go
-func NewServer(logger *logger.Logger, params *despair.Parameters, leftStream, rightStream, outputStream *camera.StreamManager, cancel context.CancelFunc) (http.Handler, error)
+func NewServer(logger *logger.Logger, params *despair.Parameters, leftStream, rightStream, outputStream *camera.Stream, cancel context.CancelFunc) (http.Handler, error)
 ```
 
 NewServer creates a new web\-ui server with all necessary routes and handlers configured.

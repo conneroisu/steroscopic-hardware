@@ -18,7 +18,7 @@ type Camer interface {
 	Port() string
 }
 
-// Config represents all configurable camera parameters
+// Config represents all configurable camera parameters.
 type Config struct {
 	Port        string
 	BaudRate    int
@@ -31,10 +31,10 @@ var defaultConfig = Config{
 	Compression: 0,
 }
 
-// DefaultCameraConfig returns default camera configuration
+// DefaultCameraConfig returns default camera configuration.
 func DefaultCameraConfig() Config { return defaultConfig }
 
-// Stream manages multiple client connections to a single camera stream
+// Stream manages multiple client connections to a single camera stream.
 type Stream struct {
 	clients    map[chan *image.Gray]bool
 	Register   chan chan *image.Gray
@@ -78,7 +78,7 @@ func WithReplace(
 	}
 }
 
-// NewStreamManager creates a new broadcaster for the given camera
+// NewStreamManager creates a new broadcaster for the given camera.
 func NewStreamManager(
 	camera Camer,
 	logger *logger.Logger,
@@ -103,13 +103,13 @@ func NewStreamManager(
 	return sm
 }
 
-// Lock locks the mutex
+// Lock locks the mutex.
 func (b *Stream) Lock() { b.mu.Lock() }
 
-// Unlock unlocks the mutex
+// Unlock unlocks the mutex.
 func (b *Stream) Unlock() { b.mu.Unlock() }
 
-// Start begins streaming from the camera and broadcasting to clients
+// Start begins streaming from the camera and broadcasting to clients.
 func (b *Stream) Start() {
 	b.logger.Info("StreamManager.Start()")
 	defer b.logger.Info("StreamManager.Start() done")
@@ -197,7 +197,7 @@ func (b *Stream) Start() {
 	}()
 }
 
-// Stop stops the broadcaster and disconnects all clients
+// Stop stops the broadcaster and disconnects all clients.
 func (b *Stream) Stop() {
 	b.mu.Lock()
 	defer b.mu.Unlock()
