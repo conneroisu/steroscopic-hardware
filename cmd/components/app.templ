@@ -20,14 +20,33 @@ templ App(title string, comp templ.Component) {
 			<title>{ title }</title>
 			<script defer src="/static/index.js"></script>
 			<script type="module" src="/static/tw.js"></script>
-			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-			<meta name="description" content="ZedBoard Stereo Vision"/>
-			<link rel="icon" href="/static/favicon.ico" type="image/x-icon"/>
-			<link rel="shortcut icon" href="/static/favicon.ico" type="image/x-icon"/>
+			<meta
+				name="viewport"
+				content="width=device-width, initial-scale=1.0"
+			/>
+			<meta
+				name="description"
+				content="ZedBoard Stereo Vision"
+			/>
+			<link
+				rel="icon"
+				href="/static/favicon.ico"
+				type="image/x-icon"
+			/>
+			<link
+				rel="shortcut icon"
+				href="/static/favicon.ico"
+				type="image/x-icon"
+			/>
 		</head>
-		<body class="bg-gray-900 text-gray-200 min-h-screen">
+		<body
+			class="bg-gray-900 text-gray-200 min-h-screen"
+		>
 			@header()
-			<div id="app" class="pt-4">
+			<div
+				id="app"
+				class="pt-4"
+			>
 				@comp
 			</div>
 		</body>
@@ -37,7 +56,6 @@ templ App(title string, comp templ.Component) {
 templ header() {
 	<nav
 		class="bg-gray-800 border-b border-gray-700 shadow-md"
-		x-data="{ index: $persist(true) }"
 		id="main-nav"
 	>
 		<div
@@ -86,12 +104,7 @@ templ header() {
 						hx-get="/"
 						hx-target="#app"
 						hx-push-url="true"
-						class="px-4 py-2 rounded-lg transition"
-						@click="index = true"
-						:class="{
-							'bg-blue-700 hover:bg-gray-600': index,
-							'bg-gray-800 hover:bg-blue-300': !index
-						}"
+						class="px-4 py-2 rounded-lg transition bg-blue-700 hover:bg-gray-600"
 					>
 						Live Camera System
 					</a>
