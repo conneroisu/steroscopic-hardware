@@ -144,7 +144,7 @@ func header() templ.Component {
 }
 
 func status(
-	leftStream, rightStream *camera.StreamManager,
+	leftStream, rightStream camera.Streamer,
 ) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
@@ -201,7 +201,7 @@ func status(
 
 func cameraStatus(
 	typeOf camera.Type,
-	stream *camera.StreamManager,
+	stream camera.Streamer,
 ) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context

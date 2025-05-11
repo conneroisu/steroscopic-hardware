@@ -6,7 +6,7 @@ import (
 	"os"
 )
 
-// LoadPNG loads a PNG image and converts it to grayscale with optimizations
+// LoadPNG loads a PNG image and converts it to grayscale with optimizations.
 func LoadPNG(filename string) (*image.Gray, error) {
 	file, err := os.Open(filename)
 	if err != nil {

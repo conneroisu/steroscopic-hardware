@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -15,7 +16,7 @@ import (
 func ConfigureCamera(
 	logger *logger.Logger,
 	params *despair.Parameters,
-	leftStream, rightStream, outputStream *camera.StreamManager,
+	leftStream, rightStream, outputStream *camera.Stream,
 	isLeft bool,
 ) APIFn {
 	return func(_ http.ResponseWriter, r *http.Request) error {
@@ -25,7 +26,7 @@ func ConfigureCamera(
 			portStr         string
 			baudStr         string
 			compressionStr  string
-			configureStream *camera.StreamManager
+			configureStream *camera.Stream
 			presetConfig    = camera.DefaultCameraConfig()
 		)
 		if isLeft {
@@ -47,13 +48,13 @@ func ConfigureCamera(
 
 		// CONFIGURE port if provided
 		if portStr == "" {
-			return fmt.Errorf("port not provided")
+			return errors.New("port not provided")
 		}
 		presetConfig.Port = portStr
 
 		// CONFIGURE baud rate if provided
 		if baudStr == "" {
-			return fmt.Errorf("baud rate not provided")
+			return errors.New("baud rate not provided")
 		}
 		baudRate, err = strconv.Atoi(baudStr)
 		if err != nil {
@@ -63,7 +64,7 @@ func ConfigureCamera(
 
 		// CONFIGURE compression if provided
 		if compressionStr == "" {
-			return fmt.Errorf("compression not provided")
+			return errors.New("compression not provided")
 		}
 		compression, err = strconv.Atoi(compressionStr)
 		if err != nil {

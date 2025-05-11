@@ -82,6 +82,7 @@ despair.MustSavePNG("depth_map.png", disparityMap)
 - [func RunSad\(left, right \*image.Gray, blockSize, maxDisparity int\) \*image.Gray](<#RunSad>)
 - [func SavePNG\(filename string, img image.Image\) error](<#SavePNG>)
 - [func SetupConcurrentSAD\(params \*Parameters, numWorkers int\) \(chan\<\- InputChunk, \<\-chan OutputChunk\)](<#SetupConcurrentSAD>)
+- [func SumAbsoluteDifferences\(left, right \*image.Gray, leftX, leftY, rightX, rightY, blockSize int\) int](<#SumAbsoluteDifferences>)
 - [type InputChunk](<#InputChunk>)
 - [type OutputChunk](<#OutputChunk>)
 - [type Parameters](<#Parameters>)
@@ -90,13 +91,13 @@ despair.MustSavePNG("depth_map.png", disparityMap)
 
 
 <a name="AssembleDisparityMap"></a>
-## func [AssembleDisparityMap](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/despair/sad.go#L168-L172>)
+## func [AssembleDisparityMap](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/despair/sad.go#L169-L173>)
 
 ```go
 func AssembleDisparityMap(outputChan <-chan OutputChunk, dimensions image.Rectangle, chunks int) *image.Gray
 ```
 
-AssembleDisparityMap assembles the disparity map from output chunks
+AssembleDisparityMap assembles the disparity map from output chunks.
 
 <a name="LoadPNG"></a>
 ## func [LoadPNG](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/despair/png.go#L10>)
@@ -105,7 +106,7 @@ AssembleDisparityMap assembles the disparity map from output chunks
 func LoadPNG(filename string) (*image.Gray, error)
 ```
 
-LoadPNG loads a PNG image and converts it to grayscale with optimizations
+LoadPNG loads a PNG image and converts it to grayscale with optimizations.
 
 <a name="MustLoadPNG"></a>
 ## func [MustLoadPNG](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/despair/png.go#L44>)
@@ -126,7 +127,7 @@ func MustSavePNG(filename string, img image.Image)
 MustSavePNG saves a PNG image with optimizations to the given filename and panics if an error occurs.
 
 <a name="RunSad"></a>
-## func [RunSad](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/despair/sad.go#L116-L119>)
+## func [RunSad](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/despair/sad.go#L117-L120>)
 
 ```go
 func RunSad(left, right *image.Gray, blockSize, maxDisparity int) *image.Gray
@@ -146,20 +147,31 @@ func SavePNG(filename string, img image.Image) error
 SavePNG saves a PNG image with optimizations to the given filename and returns an error if one occurs.
 
 <a name="SetupConcurrentSAD"></a>
-## func [SetupConcurrentSAD](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/despair/sad.go#L28-L31>)
+## func [SetupConcurrentSAD](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/despair/sad.go#L29-L32>)
 
 ```go
 func SetupConcurrentSAD(params *Parameters, numWorkers int) (chan<- InputChunk, <-chan OutputChunk)
 ```
 
-SetupConcurrentSAD sets up a concurrent SAD processing pipeline It returns an input channel to feed image chunks into and an output channel to receive results from.
+SetupConcurrentSAD sets up a concurrent SAD processing pipeline.
+
+It returns an input channel to feed image chunks into and an output channel to receive results from.
 
 If the input channel is closed, the processing pipeline will stop.
+
+<a name="SumAbsoluteDifferences"></a>
+## func [SumAbsoluteDifferences](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/despair/sad.go#L202-L205>)
+
+```go
+func SumAbsoluteDifferences(left, right *image.Gray, leftX, leftY, rightX, rightY, blockSize int) int
+```
+
+SumAbsoluteDifferences calculates SAD directly on image data.
 
 <a name="InputChunk"></a>
 ## type [InputChunk](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/despair/sad.go#L12-L15>)
 
-InputChunk represents a portion of the image to process
+InputChunk represents a portion of the image to process.
 
 ```go
 type InputChunk struct {
@@ -171,7 +183,7 @@ type InputChunk struct {
 <a name="OutputChunk"></a>
 ## type [OutputChunk](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/despair/sad.go#L18-L21>)
 
-OutputChunk represents the processed disparity data for a region
+OutputChunk represents the processed disparity data for a region.
 
 ```go
 type OutputChunk struct {

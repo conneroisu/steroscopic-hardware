@@ -14,8 +14,12 @@ import (
 	"github.com/conneroisu/steroscopic-hardware/pkg/camera"
 )
 
-// StreamHandlerFn returns a handler for streaming camera images to multiple clients
-func StreamHandlerFn(manager *camera.StreamManager) APIFn {
+// StreamHandlerFn returns a handler for streaming camera images to multiple clients.
+//
+// It uses a buffered channel to send images to clients, and a ticker to control frame rate.
+//
+// As input, it expects a camera.Stream struct, which is used to manage the camera stream.
+func StreamHandlerFn(manager *camera.Stream) APIFn {
 	// Make sure manager is running
 	manager.Start()
 	var jpegPool = sync.Pool{

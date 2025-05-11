@@ -11,12 +11,12 @@ func init() {
 	}
 }
 
-// convertGrayToGray directly copies gray image data
+// convertGrayToGray directly copies gray image data.
 func convertGrayToGray(src *image.Gray, grayPix []uint8) {
 	copy(grayPix, src.Pix)
 }
 
-// convertRGBAToGray converts RGBA image to grayscale
+// convertRGBAToGray converts RGBA image to grayscale.
 func convertRGBAToGray(
 	src *image.RGBA,
 	grayPix []uint8,
@@ -39,7 +39,7 @@ func convertRGBAToGray(
 	}
 }
 
-// convertGenericToGray converts any image to grayscale
+// convertGenericToGray converts any image to grayscale.
 func convertGenericToGray(
 	src image.Image,
 	grayPix []uint8,

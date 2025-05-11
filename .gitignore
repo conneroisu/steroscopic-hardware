@@ -44,3 +44,4 @@ node_modules
 .obsidian/command-palette.json
 steroscopic-hardware
 **/.claude/settings.local.json
+**/CLAUDE.local.md

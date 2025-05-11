@@ -63,10 +63,15 @@ io.Copy(os.Stdout, r)
 ### LZMA compressed file format
 
 \-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
+
 | Offset | Size | Description |
+
 |\-\-\-\-\-\-\-\-|\-\-\-\-\-\-|\-\-\-\-\-\-\-\-\-\-\-\-\-|
+
 | 0 | 1 | Special LZMA properties \(lc,lp, pb in encoded form\) |
+
 | 1 | 4 | Dictionary size \(little endian\) |
+
 | 5 | 8 | Uncompressed size \(little endian\). Size \-1 stands for unknown size |
 
 ## Index
@@ -238,7 +243,7 @@ func (e *NWriteError) Error() string
 Error returns the error message and implements the error interface on the NWriteError type.
 
 <a name="Reader"></a>
-## type [Reader](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/lzma/range.go#L25-L28>)
+## type [Reader](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/lzma/range.go#L24-L27>)
 
 Reader is the actual read interface needed by \[NewDecoder\].
 
@@ -272,7 +277,7 @@ func (e *StreamError) Error() string
 Error returns the error message and implements the error interface on the StreamError type.
 
 <a name="Writer"></a>
-## type [Writer](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/lzma/range.go#L134-L138>)
+## type [Writer](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/lzma/range.go#L133-L137>)
 
 Writer is the actual write interface needed by \[NewEncoder\].
 

@@ -115,7 +115,7 @@ templ header() {
 }
 
 templ status(
-	leftStream, rightStream *camera.StreamManager,
+	leftStream, rightStream camera.Streamer,
 ) {
 	<div
 		class="lg:col-span-1 space-y-6"
@@ -149,7 +149,7 @@ templ status(
 
 templ cameraStatus(
 	typeOf camera.Type,
-	stream *camera.StreamManager,
+	stream camera.Streamer,
 ) {
 	<div
 		class="bg-gray-800 rounded-lg shadow-lg p-4"

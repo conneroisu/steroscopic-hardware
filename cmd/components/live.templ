@@ -5,7 +5,7 @@ import "github.com/conneroisu/steroscopic-hardware/pkg/camera"
 templ Live(
 	blockSize int,
 	maxDisparity int,
-	leftSream, rightStream *camera.StreamManager,
+	leftSream, rightStream camera.Streamer,
 ) {
 	<div
 		class="container mx-auto px-4 grid grid-cols-1 lg:grid-cols-4 gap-6"

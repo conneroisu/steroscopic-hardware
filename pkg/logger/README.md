@@ -40,7 +40,7 @@ NewLogWriter returns a slog.Handler that writes to a buffer.
 <a name="LogEntry"></a>
 ## type [LogEntry](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/logger/logger.go#L42-L47>)
 
-LogEntry represents a structured log entry
+LogEntry represents a structured log entry.
 
 ```go
 type LogEntry struct {

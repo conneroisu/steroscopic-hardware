@@ -10,6 +10,16 @@
       "asasalint",
       "bidichk",
       "bodyclose",
+      "dupl",
+      "gocritic",
+      "godot",
+      "errname",
+      "copyloopvar",
+      "goconst",
+      "iface",
+      "intrange",
+      "perfsprint",
+      "usestdlibvars",
       "gocheckcompilerdirectives",
       "staticcheck",
       "intrange",
@@ -31,6 +41,10 @@
         "common-false-positives",
         "legacy",
         "std-error-handling"
+      ],
+      "linters": [
+        "gocognit",
+        "nestif"
       ]
     },
     "settings": {

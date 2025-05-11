@@ -10,7 +10,7 @@ type HeaderError struct {
 // Error returns the error message and implements the error interface
 // on the HeaderError type.
 func (e HeaderError) Error() string {
-	return fmt.Sprintf("header error: %s", e.msg)
+	return "header error: " + e.msg
 }
 
 // StreamError is returned when the stream is corrupt.
@@ -21,7 +21,7 @@ type StreamError struct {
 // Error returns the error message and implements the error interface
 // on the StreamError type.
 func (e *StreamError) Error() string {
-	return fmt.Sprintf("stream error: %s", e.msg)
+	return "stream error: " + e.msg
 }
 
 // NWriteError is returned when the number of bytes returned by Writer.Write() didn't meet expectances.
@@ -32,7 +32,7 @@ type NWriteError struct {
 // Error returns the error message and implements the error interface
 // on the NWriteError type.
 func (e *NWriteError) Error() string {
-	return fmt.Sprintf("number of bytes returned by Writer.Write() didn't meet expectances: %s", e.msg)
+	return "number of bytes returned by Writer.Write() didn't meet expectances: " + e.msg
 }
 
 // An ArgumentValueError reports an error encountered while parsing user provided arguments.

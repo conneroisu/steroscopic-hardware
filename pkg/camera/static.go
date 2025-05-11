@@ -12,12 +12,12 @@ import (
 	"github.com/conneroisu/steroscopic-hardware/pkg/despair"
 )
 
-// StaticCamera represents a ZedBoard camera
+// StaticCamera represents a ZedBoard camera.
 type StaticCamera struct {
 	Path string
 }
 
-// NewStaticCamera creates a new ZedBoard camera
+// NewStaticCamera creates a new ZedBoard camera.
 func NewStaticCamera(path string) *StaticCamera {
 	return &StaticCamera{
 		Path: path,
@@ -26,7 +26,7 @@ func NewStaticCamera(path string) *StaticCamera {
 
 var _ Camer = (*StaticCamera)(nil)
 
-// Stream streams the camera
+// Stream streams the camera images to the given channel.
 func (z *StaticCamera) Stream(ctx context.Context, outCh chan *image.Gray) {
 	var errChan = make(chan error, 1)
 	for {
@@ -46,7 +46,7 @@ func (z *StaticCamera) Stream(ctx context.Context, outCh chan *image.Gray) {
 	}
 }
 
-// Port returns the serial port name
+// Port returns the serial port name.
 func (z *StaticCamera) Port() string { return "" }
 
 func (z *StaticCamera) read(errChan chan error) <-chan *image.Gray {
@@ -99,7 +99,7 @@ func (z *StaticCamera) getImage() (*image.Gray, error) {
 	return grayImg, nil
 }
 
-// Close closes the camera
+// Close closes the camera.
 func (z *StaticCamera) Close() error {
 	return nil
 }

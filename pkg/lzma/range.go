@@ -15,7 +15,6 @@ const (
 	kNumBitPriceShiftBits = 6
 )
 
-// len(probPrices) = 512
 var probPrices = make([]uint32, kBitModelTotal>>kNumMoveReducingBits)
 
 // Reader is the actual read interface needed by [NewDecoder].

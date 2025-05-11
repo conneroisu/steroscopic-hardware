@@ -17,8 +17,8 @@ type OutputCamera struct {
 	RightClientCh chan *image.Gray
 	InputCh       chan<- despair.InputChunk  // InputCh sends input chunks to sad.
 	OutputCh      <-chan despair.OutputChunk // OutputCh receives output chunks from sad algo.
-	Left          *StreamManager
-	Right         *StreamManager
+	Left          *Stream
+	Right         *Stream
 	logger        *logger.Logger
 }
 
@@ -26,11 +26,11 @@ var _ Camer = (*OutputCamera)(nil)
 
 const defaultNumWorkers = 32
 
-// NewOutputCamera creates a new OutputCamera
+// NewOutputCamera creates a new OutputCamera.
 func NewOutputCamera(
 	logger *logger.Logger,
 	params *despair.Parameters,
-	left, right *StreamManager,
+	left, right *Stream,
 ) *OutputCamera {
 	oC := &OutputCamera{
 		Left:   left,
@@ -79,7 +79,7 @@ func (o *OutputCamera) Stream(
 	}
 }
 
-// Port returns the serial port name
+// Port returns the serial port name.
 func (o *OutputCamera) Port() string { return "" }
 
 func (o *OutputCamera) read(_ chan error) <-chan *image.Gray {

@@ -153,6 +153,7 @@
             harper
             htmx-lsp
             openssl.dev
+            socat
             yaml-language-server
           ]
           ++ builtins.attrValues scriptPackages;
