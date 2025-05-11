@@ -10,7 +10,8 @@ import (
 	"github.com/conneroisu/steroscopic-hardware/pkg/logger"
 )
 
-// ConfigureCamera handles client requests to configure all camera parameters at once.
+// ConfigureCamera handles client requests to configure all camera parameters
+// at once.
 func ConfigureCamera(
 	logger *logger.Logger,
 	params *despair.Parameters,
@@ -25,6 +26,7 @@ func ConfigureCamera(
 			baudStr         string
 			compressionStr  string
 			configureStream *camera.StreamManager
+			presetConfig    = camera.DefaultCameraConfig()
 		)
 		if isLeft {
 			configureStream = leftStream
@@ -37,7 +39,6 @@ func ConfigureCamera(
 		if err != nil {
 			return fmt.Errorf("failed to parse form data: %w", err)
 		}
-		config := camera.DefaultCameraConfig()
 
 		// Get all camera parameters
 		portStr = r.FormValue("port")
@@ -48,7 +49,7 @@ func ConfigureCamera(
 		if portStr == "" {
 			return fmt.Errorf("port not provided")
 		}
-		config.Port = portStr
+		presetConfig.Port = portStr
 
 		// CONFIGURE baud rate if provided
 		if baudStr == "" {
@@ -58,7 +59,7 @@ func ConfigureCamera(
 		if err != nil {
 			return fmt.Errorf("invalid baud value: %w", err)
 		}
-		config.BaudRate = baudRate
+		presetConfig.BaudRate = baudRate
 
 		// CONFIGURE compression if provided
 		if compressionStr == "" {
@@ -68,23 +69,30 @@ func ConfigureCamera(
 		if err != nil {
 			return fmt.Errorf("invalid compression value: %w", err)
 		}
-		config.Compression = compression
+		presetConfig.Compression = compression
 
 		// Log Configuration
 		logger.InfoContext(
 			r.Context(),
-			"configured camera",
+			"setting",
+			"stream",
+			func() string { // inlined
+				if isLeft {
+					return "left"
+				}
+				return "right"
+			}(),
 			"port",
-			config.Port,
+			presetConfig.Port,
 			"baud",
-			config.BaudRate,
+			presetConfig.BaudRate,
 			"compression",
-			config.Compression,
+			presetConfig.Compression,
 		)
 		// After configuration, attempt to connect
-		err = configureStream.Configure(config)
+		err = configureStream.Configure(presetConfig)
 		if err != nil {
-			return fmt.Errorf("failed to configure camera: %w", err)
+			return fmt.Errorf("failed to configure stream: %w", err)
 		}
 
 		outputStream = camera.NewStreamManager(
