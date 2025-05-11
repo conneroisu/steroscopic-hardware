@@ -1,5 +1,5 @@
 // Package logger provides a multi faceted logger that
-// can be used to log to the console, a file, or a channel.
+// can be used to log to the console and a buffer.
 //
 // It's intended to be used as a default logger for the application.
 //

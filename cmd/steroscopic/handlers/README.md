@@ -18,11 +18,10 @@ Package handlers contains functions for handling API requests.
 
 - [func Make\(fn APIFn\) http.HandlerFunc](<#Make>)
 - [func MorphableHandler\(wrapper func\(templ.Component\) templ.Component, morph templ.Component\) http.HandlerFunc](<#MorphableHandler>)
-- [func PreviewSeqHandler\(w http.ResponseWriter, r \*http.Request\)](<#PreviewSeqHandler>)
 - [type APIFn](<#APIFn>)
   - [func ConfigureCamera\(logger \*logger.Logger, params \*despair.Parameters, leftStream, rightStream, outputStream \*camera.StreamManager, isLeft bool\) APIFn](<#ConfigureCamera>)
+  - [func ErrorHandler\(fn APIFn\) APIFn](<#ErrorHandler>)
   - [func GetPorts\(logger \*logger.Logger\) APIFn](<#GetPorts>)
-  - [func ManualCalcDepthMapHandler\(logger \*logger.Logger\) APIFn](<#ManualCalcDepthMapHandler>)
   - [func ParametersHandler\(logger \*logger.Logger, params \*despair.Parameters\) APIFn](<#ParametersHandler>)
   - [func StreamHandlerFn\(manager \*camera.StreamManager\) APIFn](<#StreamHandlerFn>)
 
@@ -45,15 +44,6 @@ func MorphableHandler(wrapper func(templ.Component) templ.Component, morph templ
 
 MorphableHandler returns a handler that checks for the presence of the hx\-trigger header and serves either the full or morphed view.
 
-<a name="PreviewSeqHandler"></a>
-## func [PreviewSeqHandler](<https://github.com/conneroisu/steroscopic-hardware/blob/main/cmd/steroscopic/handlers/delim.go#L15>)
-
-```go
-func PreviewSeqHandler(w http.ResponseWriter, r *http.Request)
-```
-
-PreviewSeqHandler handles requests to preview sequences in different formats
-
 <a name="APIFn"></a>
 ## type [APIFn](<https://github.com/conneroisu/steroscopic-hardware/blob/main/cmd/steroscopic/handlers/api.go#L12>)
 
@@ -72,23 +62,23 @@ func ConfigureCamera(logger *logger.Logger, params *despair.Parameters, leftStre
 
 ConfigureCamera handles client requests to configure all camera parameters at once.
 
+<a name="ErrorHandler"></a>
+### func [ErrorHandler](<https://github.com/conneroisu/steroscopic-hardware/blob/main/cmd/steroscopic/handlers/api.go#L49-L51>)
+
+```go
+func ErrorHandler(fn APIFn) APIFn
+```
+
+ErrorHandler returns a handler that returns an error response.
+
 <a name="GetPorts"></a>
-### func [GetPorts](<https://github.com/conneroisu/steroscopic-hardware/blob/main/cmd/steroscopic/handlers/targets.go#L14-L16>)
+### func [GetPorts](<https://github.com/conneroisu/steroscopic-hardware/blob/main/cmd/steroscopic/handlers/ports.go#L15-L17>)
 
 ```go
 func GetPorts(logger *logger.Logger) APIFn
 ```
 
 GetPorts handles client requests to configure the camera.
-
-<a name="ManualCalcDepthMapHandler"></a>
-### func [ManualCalcDepthMapHandler](<https://github.com/conneroisu/steroscopic-hardware/blob/main/cmd/steroscopic/handlers/manual.go#L10-L12>)
-
-```go
-func ManualCalcDepthMapHandler(logger *logger.Logger) APIFn
-```
-
-ManualCalcDepthMapHandler is a handler for the manual depth map calculation endpoint.
 
 <a name="ParametersHandler"></a>
 ### func [ParametersHandler](<https://github.com/conneroisu/steroscopic-hardware/blob/main/cmd/steroscopic/handlers/configure.go#L15>)

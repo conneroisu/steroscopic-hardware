@@ -16,31 +16,31 @@ Package steroscopic contains the command line interface for the application.
 
 ## Index
 
-- [func AddRoutes\(mux \*http.ServeMux, logger \*logger.Logger, params \*despair.Parameters, leftStream, rightStream, outputStream \*camera.StreamManager\) error](<#AddRoutes>)
-- [func NewServer\(logger \*logger.Logger, params \*despair.Parameters, leftStream, rightStream, outputStream \*camera.StreamManager\) \(http.Handler, error\)](<#NewServer>)
+- [func AddRoutes\(mux \*http.ServeMux, logger \*logger.Logger, params \*despair.Parameters, leftStream, rightStream, outputStream \*camera.StreamManager, cancel context.CancelFunc\) error](<#AddRoutes>)
+- [func NewServer\(logger \*logger.Logger, params \*despair.Parameters, leftStream, rightStream, outputStream \*camera.StreamManager, cancel context.CancelFunc\) \(http.Handler, error\)](<#NewServer>)
 - [func Run\(ctx context.Context, onStart func\(\)\) error](<#Run>)
 
 
 <a name="AddRoutes"></a>
-## func [AddRoutes](<https://github.com/conneroisu/steroscopic-hardware/blob/main/cmd/steroscopic/routes.go#L19-L24>)
+## func [AddRoutes](<https://github.com/conneroisu/steroscopic-hardware/blob/main/cmd/steroscopic/routes.go#L20-L26>)
 
 ```go
-func AddRoutes(mux *http.ServeMux, logger *logger.Logger, params *despair.Parameters, leftStream, rightStream, outputStream *camera.StreamManager) error
+func AddRoutes(mux *http.ServeMux, logger *logger.Logger, params *despair.Parameters, leftStream, rightStream, outputStream *camera.StreamManager, cancel context.CancelFunc) error
 ```
 
 AddRoutes adds the routes/handlers to the mux.
 
 <a name="NewServer"></a>
-## func [NewServer](<https://github.com/conneroisu/steroscopic-hardware/blob/main/cmd/steroscopic/root.go#L39-L43>)
+## func [NewServer](<https://github.com/conneroisu/steroscopic-hardware/blob/main/cmd/steroscopic/root.go#L39-L44>)
 
 ```go
-func NewServer(logger *logger.Logger, params *despair.Parameters, leftStream, rightStream, outputStream *camera.StreamManager) (http.Handler, error)
+func NewServer(logger *logger.Logger, params *despair.Parameters, leftStream, rightStream, outputStream *camera.StreamManager, cancel context.CancelFunc) (http.Handler, error)
 ```
 
 NewServer creates a new web\-ui server
 
 <a name="Run"></a>
-## func [Run](<https://github.com/conneroisu/steroscopic-hardware/blob/main/cmd/steroscopic/root.go#L64-L67>)
+## func [Run](<https://github.com/conneroisu/steroscopic-hardware/blob/main/cmd/steroscopic/root.go#L73-L76>)
 
 ```go
 func Run(ctx context.Context, onStart func()) error

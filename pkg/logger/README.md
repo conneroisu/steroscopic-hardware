@@ -13,7 +13,7 @@ can be used to log to the console, a file, or a channel.
 import "github.com/conneroisu/steroscopic-hardware/pkg/logger"
 ```
 
-Package logger provides a multi faceted logger that can be used to log to the console, a file, or a channel.
+Package logger provides a multi faceted logger that can be used to log to the console and a buffer.
 
 It's intended to be used as a default logger for the application.
 
@@ -21,107 +21,24 @@ Allowing for the logging of console messages both to the console and to the brow
 
 ## Index
 
-- [func SetLogger\(\) chan LogEntry](<#SetLogger>)
-- [type ChannelHandler](<#ChannelHandler>)
-  - [func NewChannelHandler\(logChan chan LogEntry, level slog.Level\) \*ChannelHandler](<#NewChannelHandler>)
-  - [func \(h \*ChannelHandler\) Enabled\(\_ context.Context, level slog.Level\) bool](<#ChannelHandler.Enabled>)
-  - [func \(h \*ChannelHandler\) Handle\(ctx context.Context, r slog.Record\) error](<#ChannelHandler.Handle>)
-  - [func \(h \*ChannelHandler\) SetLevel\(level slog.Level\)](<#ChannelHandler.SetLevel>)
-  - [func \(h \*ChannelHandler\) WithAttrs\(attrs \[\]slog.Attr\) slog.Handler](<#ChannelHandler.WithAttrs>)
-  - [func \(h \*ChannelHandler\) WithGroup\(name string\) slog.Handler](<#ChannelHandler.WithGroup>)
+- [func NewLogWriter\(w io.Writer\) slog.Handler](<#NewLogWriter>)
 - [type LogEntry](<#LogEntry>)
 - [type Logger](<#Logger>)
   - [func NewLogger\(\) Logger](<#NewLogger>)
-  - [func \(l \*Logger\) Channel\(\) chan LogEntry](<#Logger.Channel>)
-- [type LoggingReadWriter](<#LoggingReadWriter>)
-  - [func NewLoggingReadWriter\(wrapped io.ReadWriter, logger \*slog.Logger, prefix string\) \*LoggingReadWriter](<#NewLoggingReadWriter>)
-  - [func \(l \*LoggingReadWriter\) Read\(p \[\]byte\) \(n int, err error\)](<#LoggingReadWriter.Read>)
-  - [func \(l \*LoggingReadWriter\) Write\(p \[\]byte\) \(n int, err error\)](<#LoggingReadWriter.Write>)
-- [type MultiHandler](<#MultiHandler>)
-  - [func NewMultiHandler\(handlers ...slog.Handler\) \*MultiHandler](<#NewMultiHandler>)
-  - [func \(h \*MultiHandler\) Enabled\(ctx context.Context, level slog.Level\) bool](<#MultiHandler.Enabled>)
-  - [func \(h \*MultiHandler\) Handle\(ctx context.Context, r slog.Record\) error](<#MultiHandler.Handle>)
-  - [func \(h \*MultiHandler\) SetLevel\(level slog.Level\)](<#MultiHandler.SetLevel>)
-  - [func \(h \*MultiHandler\) WithAttrs\(attrs \[\]slog.Attr\) slog.Handler](<#MultiHandler.WithAttrs>)
-  - [func \(h \*MultiHandler\) WithGroup\(name string\) slog.Handler](<#MultiHandler.WithGroup>)
+  - [func \(l Logger\) Bytes\(\) \[\]byte](<#Logger.Bytes>)
 
 
-<a name="SetLogger"></a>
-## func [SetLogger](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/logger/logger.go#L22>)
+<a name="NewLogWriter"></a>
+## func [NewLogWriter](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/logger/logger.go#L50>)
 
 ```go
-func SetLogger() chan LogEntry
+func NewLogWriter(w io.Writer) slog.Handler
 ```
 
-SetLogger sets the default logger to a slog.Logger.
-
-<a name="ChannelHandler"></a>
-## type [ChannelHandler](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/logger/channel.go#L10-L16>)
-
-ChannelHandler implements slog.Handler and sends logs to a channel
-
-```go
-type ChannelHandler struct {
-    // contains filtered or unexported fields
-}
-```
-
-<a name="NewChannelHandler"></a>
-### func [NewChannelHandler](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/logger/channel.go#L19>)
-
-```go
-func NewChannelHandler(logChan chan LogEntry, level slog.Level) *ChannelHandler
-```
-
-NewChannelHandler creates a new ChannelHandler
-
-<a name="ChannelHandler.Enabled"></a>
-### func \(\*ChannelHandler\) [Enabled](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/logger/channel.go#L27>)
-
-```go
-func (h *ChannelHandler) Enabled(_ context.Context, level slog.Level) bool
-```
-
-Enabled implements slog.Handler.Enabled
-
-<a name="ChannelHandler.Handle"></a>
-### func \(\*ChannelHandler\) [Handle](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/logger/channel.go#L32>)
-
-```go
-func (h *ChannelHandler) Handle(ctx context.Context, r slog.Record) error
-```
-
-Handle implements slog.Handler.Handle
-
-<a name="ChannelHandler.SetLevel"></a>
-### func \(\*ChannelHandler\) [SetLevel](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/logger/channel.go#L99>)
-
-```go
-func (h *ChannelHandler) SetLevel(level slog.Level)
-```
-
-SetLevel sets the minimum level for logging
-
-<a name="ChannelHandler.WithAttrs"></a>
-### func \(\*ChannelHandler\) [WithAttrs](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/logger/channel.go#L64>)
-
-```go
-func (h *ChannelHandler) WithAttrs(attrs []slog.Attr) slog.Handler
-```
-
-WithAttrs implements slog.Handler.WithAttrs
-
-<a name="ChannelHandler.WithGroup"></a>
-### func \(\*ChannelHandler\) [WithGroup](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/logger/channel.go#L82>)
-
-```go
-func (h *ChannelHandler) WithGroup(name string) slog.Handler
-```
-
-WithGroup implements slog.Handler.WithGroup
+NewLogWriter returns a slog.Handler that writes to a buffer.
 
 <a name="LogEntry"></a>
-## type [LogEntry](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/logger/logger.go#L43-L48>)
+## type [LogEntry](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/logger/logger.go#L42-L47>)
 
 LogEntry represents a structured log entry
 
@@ -135,7 +52,7 @@ type LogEntry struct {
 ```
 
 <a name="Logger"></a>
-## type [Logger](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/logger/logger.go#L11-L14>)
+## type [Logger](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/logger/logger.go#L15-L18>)
 
 Logger is a slog.Logger that sends logs to a channel and also to the console.
 
@@ -147,7 +64,7 @@ type Logger struct {
 ```
 
 <a name="NewLogger"></a>
-### func [NewLogger](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/logger/logger.go#L34>)
+### func [NewLogger](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/logger/logger.go#L26>)
 
 ```go
 func NewLogger() Logger
@@ -155,117 +72,14 @@ func NewLogger() Logger
 
 NewLogger creates a new Logger.
 
-<a name="Logger.Channel"></a>
-### func \(\*Logger\) [Channel](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/logger/logger.go#L17>)
+<a name="Logger.Bytes"></a>
+### func \(Logger\) [Bytes](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/logger/logger.go#L21>)
 
 ```go
-func (l *Logger) Channel() chan LogEntry
+func (l Logger) Bytes() []byte
 ```
 
-Channel returns the channel to which logs are sent to the browser.
-
-<a name="LoggingReadWriter"></a>
-## type [LoggingReadWriter](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/logger/readwriter.go#L10-L14>)
-
-LoggingReadWriter wraps an io.ReadWriter and logs all Read/Write operations
-
-```go
-type LoggingReadWriter struct {
-    // contains filtered or unexported fields
-}
-```
-
-<a name="NewLoggingReadWriter"></a>
-### func [NewLoggingReadWriter](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/logger/readwriter.go#L17-L21>)
-
-```go
-func NewLoggingReadWriter(wrapped io.ReadWriter, logger *slog.Logger, prefix string) *LoggingReadWriter
-```
-
-NewLoggingReadWriter creates a new LoggingReadWriter
-
-<a name="LoggingReadWriter.Read"></a>
-### func \(\*LoggingReadWriter\) [Read](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/logger/readwriter.go#L30>)
-
-```go
-func (l *LoggingReadWriter) Read(p []byte) (n int, err error)
-```
-
-Read implements io.Reader
-
-<a name="LoggingReadWriter.Write"></a>
-### func \(\*LoggingReadWriter\) [Write](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/logger/readwriter.go#L46>)
-
-```go
-func (l *LoggingReadWriter) Write(p []byte) (n int, err error)
-```
-
-Write implements io.Writer
-
-<a name="MultiHandler"></a>
-## type [MultiHandler](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/logger/multi.go#L10-L13>)
-
-MultiHandler combines multiple slog.Handler instances
-
-```go
-type MultiHandler struct {
-    // contains filtered or unexported fields
-}
-```
-
-<a name="NewMultiHandler"></a>
-### func [NewMultiHandler](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/logger/multi.go#L16>)
-
-```go
-func NewMultiHandler(handlers ...slog.Handler) *MultiHandler
-```
-
-NewMultiHandler creates a new MultiHandler
-
-<a name="MultiHandler.Enabled"></a>
-### func \(\*MultiHandler\) [Enabled](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/logger/multi.go#L21>)
-
-```go
-func (h *MultiHandler) Enabled(ctx context.Context, level slog.Level) bool
-```
-
-Enabled implements slog.Handler.Enabled
-
-<a name="MultiHandler.Handle"></a>
-### func \(\*MultiHandler\) [Handle](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/logger/multi.go#L31>)
-
-```go
-func (h *MultiHandler) Handle(ctx context.Context, r slog.Record) error
-```
-
-Handle implements slog.Handler.Handle
-
-<a name="MultiHandler.SetLevel"></a>
-### func \(\*MultiHandler\) [SetLevel](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/logger/multi.go#L58>)
-
-```go
-func (h *MultiHandler) SetLevel(level slog.Level)
-```
-
-SetLevel sets the minimum level for all handlers that support it
-
-<a name="MultiHandler.WithAttrs"></a>
-### func \(\*MultiHandler\) [WithAttrs](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/logger/multi.go#L40>)
-
-```go
-func (h *MultiHandler) WithAttrs(attrs []slog.Attr) slog.Handler
-```
-
-WithAttrs implements slog.Handler.WithAttrs
-
-<a name="MultiHandler.WithGroup"></a>
-### func \(\*MultiHandler\) [WithGroup](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/logger/multi.go#L49>)
-
-```go
-func (h *MultiHandler) WithGroup(name string) slog.Handler
-```
-
-WithGroup implements slog.Handler.WithGroup
+Bytes returns the buffered log.
 
 Generated by [gomarkdoc](<https://github.com/princjef/gomarkdoc>)
 
