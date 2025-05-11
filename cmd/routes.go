@@ -12,6 +12,7 @@ import (
 	"github.com/conneroisu/steroscopic-hardware/pkg/logger"
 	"github.com/conneroisu/steroscopic-hardware/pkg/web"
 )
+
 // static contains embedded static web assets served by the HTTP server.
 // This includes CSS, JavaScript, and icon files needed by the web UI.
 //go:embed static/*
