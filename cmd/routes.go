@@ -1,12 +1,12 @@
-package steroscopic
+package cmd
 
 import (
 	"context"
 	"embed"
 	"net/http"
 
-	"github.com/conneroisu/steroscopic-hardware/cmd/steroscopic/components"
-	"github.com/conneroisu/steroscopic-hardware/cmd/steroscopic/handlers"
+	"github.com/conneroisu/steroscopic-hardware/cmd/components"
+	"github.com/conneroisu/steroscopic-hardware/cmd/handlers"
 	"github.com/conneroisu/steroscopic-hardware/pkg/camera"
 	"github.com/conneroisu/steroscopic-hardware/pkg/despair"
 	"github.com/conneroisu/steroscopic-hardware/pkg/logger"

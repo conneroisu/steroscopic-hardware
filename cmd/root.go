@@ -1,4 +1,4 @@
-package steroscopic
+package cmd
 
 import (
 	"context"

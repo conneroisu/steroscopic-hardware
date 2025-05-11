@@ -39,7 +39,7 @@
                 --minify-syntax \
                 --minify-whitespace  \
                 --minify-identifiers \
-                --outdir $REPO_ROOT/cmd/steroscopic/static/
+                --outdir $REPO_ROOT/cmd/static/
           '';
           description = "Generate JS files";
         };
