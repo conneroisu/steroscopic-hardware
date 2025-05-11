@@ -49,7 +49,7 @@ func StreamHandlerFn(manager *camera.StreamManager) APIFn {
 
 		// Create a buffer to avoid reallocating for each frame
 		buffer := new(bytes.Buffer)
-		buffer.Grow(1024 * 1024) // Pre-allocate 1MB
+		buffer.Grow(camera.DefaultImageHeight * camera.DefaultImageWidth) // Pre-allocate 1MB
 		// Control frame rate - don't send more than X frames per second
 		ticker := time.NewTicker(time.Second / 10) // 10 FPS max
 		defer ticker.Stop()
