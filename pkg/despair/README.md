@@ -90,7 +90,7 @@ despair.MustSavePNG("depth_map.png", disparityMap)
 
 
 <a name="AssembleDisparityMap"></a>
-## func [AssembleDisparityMap](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/despair/main.go#L168-L172>)
+## func [AssembleDisparityMap](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/despair/sad.go#L168-L172>)
 
 ```go
 func AssembleDisparityMap(outputChan <-chan OutputChunk, dimensions image.Rectangle, chunks int) *image.Gray
@@ -126,7 +126,7 @@ func MustSavePNG(filename string, img image.Image)
 MustSavePNG saves a PNG image with optimizations to the given filename and panics if an error occurs.
 
 <a name="RunSad"></a>
-## func [RunSad](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/despair/main.go#L116-L119>)
+## func [RunSad](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/despair/sad.go#L116-L119>)
 
 ```go
 func RunSad(left, right *image.Gray, blockSize, maxDisparity int) *image.Gray
@@ -146,7 +146,7 @@ func SavePNG(filename string, img image.Image) error
 SavePNG saves a PNG image with optimizations to the given filename and returns an error if one occurs.
 
 <a name="SetupConcurrentSAD"></a>
-## func [SetupConcurrentSAD](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/despair/main.go#L28-L31>)
+## func [SetupConcurrentSAD](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/despair/sad.go#L28-L31>)
 
 ```go
 func SetupConcurrentSAD(params *Parameters, numWorkers int) (chan<- InputChunk, <-chan OutputChunk)
@@ -157,7 +157,7 @@ SetupConcurrentSAD sets up a concurrent SAD processing pipeline It returns an in
 If the input channel is closed, the processing pipeline will stop.
 
 <a name="InputChunk"></a>
-## type [InputChunk](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/despair/main.go#L12-L15>)
+## type [InputChunk](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/despair/sad.go#L12-L15>)
 
 InputChunk represents a portion of the image to process
 
@@ -169,7 +169,7 @@ type InputChunk struct {
 ```
 
 <a name="OutputChunk"></a>
-## type [OutputChunk](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/despair/main.go#L18-L21>)
+## type [OutputChunk](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/despair/sad.go#L18-L21>)
 
 OutputChunk represents the processed disparity data for a region
 
