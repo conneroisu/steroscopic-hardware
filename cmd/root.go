@@ -203,6 +203,7 @@ func NewServer(
 				"request",
 				slog.String("method", r.Method),
 				slog.String("url", r.URL.String()),
+				slog.String("pattern", r.Pattern),
 			)
 
 			mux.ServeHTTP(w, r)
