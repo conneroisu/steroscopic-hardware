@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"fmt"
-	"log/slog"
 	"net/http"
 	"strings"
 	"time"
@@ -26,7 +25,7 @@ func GetPorts(
 				if tries > 10 {
 					return fmt.Errorf("no serial ports found")
 				}
-				slog.ErrorContext(r.Context(), "no serial ports found", "tries", tries)
+				logger.ErrorContext(r.Context(), "no serial ports found", "tries", tries)
 				time.Sleep(time.Second)
 				tries++
 				continue
