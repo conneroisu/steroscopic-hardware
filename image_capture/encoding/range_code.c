@@ -1,6 +1,7 @@
 #include "range_code.h"
 #define MAX_RANGE UINT32_MAX
 #define SYMBOL_COUNT 256
+#include <stdio.h>
 
 typedef struct
 {
@@ -13,20 +14,6 @@ typedef struct
     uint32_t low;
     uint32_t high;
 } range_t;
-
-// Gets either byte 0, 1, 2, or 3
-int find_set_msb(uint32_t value)
-{
-    for(int i = 3; i >= 0; --i)
-    {
-        if(value & 0xFF << (i * 8))
-        {
-            return i;
-        }
-    }
-
-    return 0;
-}
 
 
 /* 
@@ -79,12 +66,16 @@ size_t range_code(uint8_t* uncoded, uint8_t* coded, size_t size)
         byte_counts[i].previous_count_sum = byte_counts[i - 1].previous_count_sum + byte_counts[i - 1].current_count;
     }
 
-    // Iterate through all blocks.
     for(size_t i = 0; i < size; ++i)
     {
         
         // Calculate the next range
         size_t prev_range_size = range.high - range.low;
+
+        if(prev_range_size < 1024)
+        {
+            printf("Oh no!!!\n");
+        }
 
         range.low += (uint32_t) ((byte_counts[*next_uncoded].previous_count_sum * prev_range_size) / size);
         range.high = ((uint32_t) ((byte_counts[*next_uncoded].current_count * prev_range_size) / size)) + range.low;
@@ -96,20 +87,28 @@ size_t range_code(uint8_t* uncoded, uint8_t* coded, size_t size)
         for(int j = 0; j < 3; ++j)
         {
 
-            // See if we can shift off bytes.
-            int low_set_msb_loc = find_set_msb(range.low);
-            int high_set_msb_loc = find_set_msb(range.high);
-            uint32_t low_byte_value = range.low & (0xFF << (low_set_msb_loc * 8));
-            uint32_t high_byte_value = range.high & (0xFF << (low_set_msb_loc * 8));
-
-            if(low_byte_value > prev_range_size && low_set_msb_loc == high_set_msb_loc && low_byte_value == high_byte_value)
+            // See if the upper byte is all zeros, if so, shift it off BUT DON'T RECORD THE ZERO!
+            // This is just to expand our range whenever we can!
+            if(!(range.low & 0xFF000000) && !(range.high & 0xFF000000))
             {
-                *next_coded = (uint8_t) (low_byte_value >> (low_set_msb_loc * 8));
-                next_coded++;
-                result += 8;
-
                 range.low = range.low << 8;
                 range.high = range.high << 8;
+            }
+            else
+            {
+                // See if we can shift off bytes.
+                uint32_t low_byte_value = range.low & 0xFF000000;
+                uint32_t high_byte_value = range.high & 0xFF000000;
+
+                if(low_byte_value > prev_range_size && low_byte_value == high_byte_value)
+                {
+                    *next_coded = (uint8_t) (low_byte_value >> 24);
+                    next_coded++;
+                    result += 8;
+
+                    range.low = range.low << 8;
+                    range.high = range.high << 8;
+                }
             }
         }
 
