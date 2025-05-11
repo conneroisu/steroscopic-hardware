@@ -29,7 +29,12 @@ int main()
         return errno;
     }
 
-    size_t result = range_code(data, coded, SIZE);
+    size_t result = range_code(data, coded, SIZE, 32);
+
+    if(!result)
+    {
+        printf("Error: Adjustment factor of %d is too small!\n", 32);
+    }
 
     free(data);
     free(coded);
@@ -46,14 +51,14 @@ int main()
         data[i] = i;
     }
 
-    size_t result = range_code(data, coded, 1000);
+    size_t result = range_code(data, coded, 1000, 32);
 
     free(data);
     free(coded);
     printf("Result: %ld\n", result);
-    
+
 #else
-    uint8_t data[10] = {130, 55, 39, 55, 130, 72, 72, 9, 72, 8};
+    uint8_t data[10] = { 130, 55, 39, 55, 130, 72, 72, 9, 72, 8 };
     uint8_t coded[10];
 
     memset(coded, 0, 10);
@@ -63,7 +68,7 @@ int main()
         data[i] = i;
     }
 
-    size_t result = range_code(data, coded, 10);
+    size_t result = range_code(data, coded, 10, 32);
 
     printf("Result: %ld\n", result);
 #endif
