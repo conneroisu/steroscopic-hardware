@@ -123,9 +123,6 @@ void camera_loop(camera_config_t *config)
 	// Each sensor reading is 16 bits.
 	volatile Xuint16 *snapshot = (Xuint16 *)XAxiVdma_ReadReg(config->vdma_hdmi.BaseAddr, XAXIVDMA_S2MM_ADDR_OFFSET+XAXIVDMA_START_ADDR_OFFSET);
 
-	// Clear out the UART RX FIFO
-	empty_uart_fifo();
-
 	// Main loop
 	while(1)
 	{
@@ -138,63 +135,61 @@ void camera_loop(camera_config_t *config)
 		// Send image
 		if(op == IMAGE_STREAM_START)
 		{
+			empty_uart_fifo();
+
 			// Reply with a 0x1 to indicate we read the command.
 			outbyte(0x1);
-			int terminate_send = 0;
-			while(!terminate_send)
+
+			// Save a snapshot to frame 0.
+			set_park_frame(&(config->vdma_hdmi), 0, XAXIVDMA_WRITE);
+
+			// Wait until frame zero is being written to.
+			while(get_current_frame_pointer(&(config->vdma_hdmi), XAXIVDMA_WRITE))
 			{
-				empty_uart_fifo();
 
-				// Save a snapshot to frame 0.
-				set_park_frame(&(config->vdma_hdmi), 0, XAXIVDMA_WRITE);
+			}
 
-				// Wait until frame zero is being written to.
-				while(get_current_frame_pointer(&(config->vdma_hdmi), XAXIVDMA_WRITE))
+			set_park_frame(&(config->vdma_hdmi), 1, XAXIVDMA_WRITE);
+
+			// Wait until frame one is being written to.
+			while(!get_current_frame_pointer(&(config->vdma_hdmi), XAXIVDMA_WRITE))
+			{
+
+			}
+
+			// Send the entire greyscale image over UART.
+			// If we receive the IMAGE_STOP_STREAM opcode, then stop streaming the image.
+			int bytes_read = 0;
+
+			// Only check op when two bytes have been read
+			int terminate_send = 0;
+			for(int i = 0; i < (IMAGE_WIDTH * IMAGE_HEIGHT) && !terminate_send; i++)
+			{
+				outbyte((char) (snapshot[i] & 0xFF));
+
+				if(XUartPs_IsReceiveData(STDIN_BASEADDRESS))
 				{
-
-				}
-
-				set_park_frame(&(config->vdma_hdmi), 1, XAXIVDMA_WRITE);
-
-				// Wait until frame one is being written to.
-				while(!get_current_frame_pointer(&(config->vdma_hdmi), XAXIVDMA_WRITE))
-				{
-
-				}
-
-				// Send the entire greyscale image over UART.
-				// If we receive the IMAGE_STOP_STREAM opcode, then stop streaming the image.
-				int bytes_read = 0;
-
-				// Only check op when two bytes have been read
-				for(int i = 0; i < (IMAGE_WIDTH * IMAGE_HEIGHT) && !terminate_send; i++)
-				{
-					outbyte((char) (snapshot[i] & 0xFF));
-
-					if(XUartPs_IsReceiveData(STDIN_BASEADDRESS))
+					if(!bytes_read)
 					{
-						if(!bytes_read)
-						{
-							msb = inbyte();
-						}
-						else
-						{
-							lsb = inbyte();
+						msb = inbyte();
+					}
+					else
+					{
+						lsb = inbyte();
 
-							uint16_t op = (((uint16_t) msb) << 8) | lsb;
+						uint16_t op = (((uint16_t) msb) << 8) | lsb;
 
-							// Check opcode.
-							if(op == IMAGE_STREAM_STOP)
-							{
-								empty_uart_fifo();
-								terminate_send = 1;
-							}
+						// Check opcode.
+						if(op == IMAGE_STREAM_STOP)
+						{
+							empty_uart_fifo();
+							terminate_send = 1;
 						}
 					}
 				}
-
-				empty_uart_fifo();
 			}
+
+			empty_uart_fifo();
 		}
 		else
 		{
