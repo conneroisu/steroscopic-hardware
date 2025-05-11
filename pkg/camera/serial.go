@@ -240,7 +240,7 @@ func (sc *SerialCamera) readFn(
 			errChan <- fmt.Errorf("error reading from serial port: %v", err)
 			return
 		}
-		tempBuf = append(tempBuf, buf[:length-1]...)
+		tempBuf = append(tempBuf, buf[:length]...)
 		total += length
 		sc.logger.Info("read", "length", length, "total", total, "expected", expectedLength)
 		if total >= sc.ImageWidth*sc.ImageHeight {
