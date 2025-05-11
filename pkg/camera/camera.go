@@ -32,12 +32,10 @@ var defaultConfig = Config{
 }
 
 // DefaultCameraConfig returns default camera configuration
-func DefaultCameraConfig() Config {
-	return defaultConfig
-}
+func DefaultCameraConfig() Config { return defaultConfig }
 
-// StreamManager manages multiple client connections to a single camera stream
-type StreamManager struct {
+// Stream manages multiple client connections to a single camera stream
+type Stream struct {
 	clients    map[chan *image.Gray]bool
 	Register   chan chan *image.Gray
 	Unregister chan chan *image.Gray
@@ -54,15 +52,15 @@ type StreamManager struct {
 }
 
 // Option is a function that configures a StreamManager.
-type Option func(*StreamManager)
+type Option func(*Stream)
 
 // WithReplace sets the StreamManager to replace the given StreamManager.
 func WithReplace(
-	replace *StreamManager,
+	replace *Stream,
 	params *despair.Parameters,
-	leftStream, rightStream *StreamManager,
+	leftStream, rightStream *Stream,
 ) Option {
-	return func(sm *StreamManager) {
+	return func(sm *Stream) {
 		outputCamera := NewOutputCamera(
 			sm.logger,
 			params,
@@ -85,9 +83,9 @@ func NewStreamManager(
 	camera Camer,
 	logger *logger.Logger,
 	opts ...Option,
-) *StreamManager {
+) *Stream {
 	ctx, cancel := context.WithCancel(context.Background())
-	sm := &StreamManager{
+	sm := &Stream{
 		clients:    make(map[chan *image.Gray]bool),
 		Register:   make(chan chan *image.Gray),
 		Unregister: make(chan chan *image.Gray),
@@ -106,13 +104,13 @@ func NewStreamManager(
 }
 
 // Lock locks the mutex
-func (b *StreamManager) Lock() { b.mu.Lock() }
+func (b *Stream) Lock() { b.mu.Lock() }
 
 // Unlock unlocks the mutex
-func (b *StreamManager) Unlock() { b.mu.Unlock() }
+func (b *Stream) Unlock() { b.mu.Unlock() }
 
 // Start begins streaming from the camera and broadcasting to clients
-func (b *StreamManager) Start() {
+func (b *Stream) Start() {
 	b.logger.Info("StreamManager.Start()")
 	defer b.logger.Info("StreamManager.Start() done")
 	b.mu.Lock()
@@ -200,7 +198,7 @@ func (b *StreamManager) Start() {
 }
 
 // Stop stops the broadcaster and disconnects all clients
-func (b *StreamManager) Stop() {
+func (b *Stream) Stop() {
 	b.mu.Lock()
 	defer b.mu.Unlock()
 
@@ -213,7 +211,7 @@ func (b *StreamManager) Stop() {
 }
 
 // Configure configures the camera owned by this StreamManager.
-func (b *StreamManager) Configure(config Config) error {
+func (b *Stream) Configure(config Config) error {
 	var (
 		err    error
 		camera Camer
@@ -279,14 +277,14 @@ func (b *StreamManager) Configure(config Config) error {
 }
 
 // Config returns the current configuration of the camera owned by this StreamManager.
-func (b *StreamManager) Config() *Config {
+func (b *Stream) Config() *Config {
 	b.mu.Lock()
 	defer b.mu.Unlock()
 	return b.config
 }
 
 // GetCameraPort returns the port name of the camera owned by this StreamManager.
-func (b *StreamManager) GetCameraPort() string {
+func (b *Stream) GetCameraPort() string {
 	b.mu.Lock()
 	defer b.mu.Unlock()
 	if b.camera == nil {
@@ -296,7 +294,7 @@ func (b *StreamManager) GetCameraPort() string {
 }
 
 // GetCamera returns the camera owned by this StreamManager.
-func (b *StreamManager) GetCamera() Camer {
+func (b *Stream) GetCamera() Camer {
 	b.mu.Lock()
 	defer b.mu.Unlock()
 	return b.camera
@@ -304,7 +302,7 @@ func (b *StreamManager) GetCamera() Camer {
 
 // SetTestCamera allows setting a camera directly for testing purposes.
 // This bypasses the normal configuration process to support testing.
-func (b *StreamManager) SetTestCamera(camera Camer) {
+func (b *Stream) SetTestCamera(camera Camer) {
 	b.mu.Lock()
 	defer b.mu.Unlock()
 

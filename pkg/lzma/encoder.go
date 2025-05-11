@@ -89,7 +89,7 @@ func NewWriter(w io.Writer) (io.WriteCloser, error) {
 	return NewWriterSizeLevel(w, -1, DefaultCompression)
 }
 
-// levels is intended to be constant, but there is no way to enforce this constraint
+// levels is intended to be constant, but there is no way to enforce this constraint.
 var levels = []compressionLevel{
 	{},                        // 0
 	{16, 64, 3, 0, 2, "bt4"},  // 1
@@ -122,11 +122,9 @@ type compressionLevel struct {
 	litPosStateBits uint32 // lp (not used)
 	posStateBits    uint32 // pb
 	matchFinder     string // mf
-	//compressionMode uint32 // a
-	//matchCycles     uint32 // mc
 }
 
-// should be called in the encoder's contructor
+// should be called in the encoder's contructor.
 func initGFastPos() {
 	kFastSlots := 22
 	c := 2
@@ -1161,7 +1159,7 @@ func (z *encoder) encoder(
 }
 
 // local error wrapper so we can distinguish between error we want
-// to return as errors from genuine panics
+// to return as errors from genuine panics.
 type osError struct{ error }
 
 // Report error and stop executing. Wraps error an osError for handlePanics() to

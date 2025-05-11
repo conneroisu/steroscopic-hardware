@@ -19,20 +19,20 @@ import (
 )
 
 const (
-	// defaultHost is the IP address the server binds to (0.0.0.0 = all interfaces)
+	// defaultHost is the IP address the server binds to (0.0.0.0 = all interfaces).
 	defaultHost = "0.0.0.0"
-	// defaultPort is the TCP port the server listens on
+	// defaultPort is the TCP port the server listens on.
 	defaultPort = "8080"
-	// shutdownTimeout is the maximum time allowed for the server to complete a graceful shutdown
+	// shutdownTimeout is the maximum time allowed for the server to complete a graceful shutdown.
 	shutdownTimeout = 10 * time.Second
-	// readTimeout is the maximum duration for reading the entire request
+	// readTimeout is the maximum duration for reading the entire request.
 	readTimeout = 15 * time.Second
-	// writeTimeout is the maximum duration before timing out writes of the response
-	// Set very high to accommodate long-running stream connections
+	// writeTimeout is the maximum duration before timing out writes of the response.
+	// Set very high to accommodate long-running stream connections (Like our streams).
 	writeTimeout = 999 * time.Second
-	// idleTimeout is the maximum amount of time to wait for the next request
+	// idleTimeout is the maximum amount of time to wait for the next request.
 	idleTimeout = 60 * time.Second
-	// readHeaderTimeout is the amount of time allowed to read request headers
+	// readHeaderTimeout is the amount of time allowed to read request headers.
 	readHeaderTimeout = 5 * time.Second
 )
 
@@ -41,7 +41,7 @@ var (
 	// BlockSize: Size of comparison blocks used in the stereo matching
 	// algorithm.
 	// MaxDisparity: Maximum pixel displacement between corresponding points
-	// in the stereo pair
+	// in the stereo pair.
 	defaultParams = despair.Parameters{
 		BlockSize:    8,
 		MaxDisparity: 64,
@@ -181,7 +181,7 @@ func Run(
 func NewServer(
 	logger *logger.Logger,
 	params *despair.Parameters,
-	leftStream, rightStream, outputStream *camera.StreamManager,
+	leftStream, rightStream, outputStream *camera.Stream,
 	cancel context.CancelFunc,
 ) (http.Handler, error) {
 	mux := http.NewServeMux()

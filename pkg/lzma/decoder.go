@@ -89,7 +89,7 @@ type decoder struct {
 // | 1      | 4    | Dictionary size (little endian) |
 // | 5      | 8    | Uncompressed size (little endian). Size -1 stands for unknown size |
 
-// lzma properties
+// lzma properties (lc,lp, pb in encoded form).
 type props struct {
 	litContextBits, // lc
 	litPosStateBits, // lp
@@ -321,7 +321,7 @@ func (z *decoder) decoder(r io.Reader, w io.Writer) (err error) {
 	z.unpackSize = 0
 	for i := range 8 {
 		b := header[propSize+i]
-		z.unpackSize = z.unpackSize | int64(b)<<uint64(8*i)
+		z.unpackSize |= int64(b) << uint64(8*i)
 	}
 
 	// do not move before r.Read(header)

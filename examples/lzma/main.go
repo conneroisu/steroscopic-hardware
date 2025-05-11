@@ -58,7 +58,6 @@ func main() {
 		usage()
 		log.Fatal(0)
 	}
-	//if *stdout == true && *suffix != "lzma" {
 	if *stdout && setByUser("s") {
 		exit("stdout set, suffix not used")
 	}
@@ -89,7 +88,6 @@ func main() {
 		if !*stdout {
 			exit("reading from stdin, can write only to stdout")
 		}
-		//if *suffix != "lzma" {
 		if setByUser("s") {
 			exit("reading from stdin, suffix not needed")
 		}
@@ -149,8 +147,6 @@ func main() {
 	}
 
 	pr, pw := io.Pipe()
-	//defer pr.Close()
-	//defer pw.Close()
 
 	if *decompress {
 		// read from inFile into pw
@@ -187,12 +183,12 @@ func main() {
 		}
 		defer outFile.Close()
 		if err != nil {
-			log.Fatal(err.Error())
+			exit(err.Error())
 		}
 
 		_, err = io.Copy(outFile, z)
 		if err != nil {
-			log.Fatal(err.Error())
+			exit(err.Error())
 		}
 	} else {
 		// read from inFile into z
@@ -244,19 +240,19 @@ func main() {
 		}
 		defer outFile.Close()
 		if err != nil {
-			log.Fatal(err.Error())
+			exit(err.Error())
 		}
 
 		_, err = io.Copy(outFile, pr)
 		if err != nil {
-			log.Fatal(err.Error())
+			exit(err.Error())
 		}
 	}
 
 	if !*stdout && !*keep {
 		err := os.Remove(inFilePath)
 		if err != nil {
-			log.Fatal(err.Error())
+			exit(err.Error())
 		}
 	}
 }

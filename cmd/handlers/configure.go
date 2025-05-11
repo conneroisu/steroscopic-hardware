@@ -15,7 +15,7 @@ import (
 func ConfigureCamera(
 	logger *logger.Logger,
 	params *despair.Parameters,
-	leftStream, rightStream, outputStream *camera.StreamManager,
+	leftStream, rightStream, outputStream *camera.Stream,
 	isLeft bool,
 ) APIFn {
 	return func(_ http.ResponseWriter, r *http.Request) error {
@@ -25,7 +25,7 @@ func ConfigureCamera(
 			portStr         string
 			baudStr         string
 			compressionStr  string
-			configureStream *camera.StreamManager
+			configureStream *camera.Stream
 			presetConfig    = camera.DefaultCameraConfig()
 		)
 		if isLeft {

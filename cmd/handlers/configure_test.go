@@ -32,7 +32,7 @@ type mockCamera struct {
 	frameSize     image.Rectangle
 }
 
-// newMockCamera creates a new mock camera for testing with socat
+// newMockCamera creates a new mock camera for testing with socat.
 func newMockCamera(port string) *mockCamera {
 	return &mockCamera{
 		portValue:     port,
@@ -41,7 +41,7 @@ func newMockCamera(port string) *mockCamera {
 	}
 }
 
-// Stream simulates streaming from a camera
+// Stream simulates streaming from a camera.
 func (m *mockCamera) Stream(ctx context.Context, ch chan *image.Gray) {
 	m.mu.Lock()
 	m.streamCalled = true
@@ -78,7 +78,7 @@ func (m *mockCamera) Stream(ctx context.Context, ch chan *image.Gray) {
 	}
 }
 
-// Close simulates closing the camera
+// Close simulates closing the camera.
 func (m *mockCamera) Close() error {
 	m.mu.Lock()
 	defer m.mu.Unlock()
@@ -87,7 +87,7 @@ func (m *mockCamera) Close() error {
 	return m.closeErr
 }
 
-// Port returns the port name
+// Port returns the port name.
 func (m *mockCamera) Port() string {
 	m.mu.Lock()
 	defer m.mu.Unlock()
@@ -101,7 +101,7 @@ var _ camera.Camer = (*mockCamera)(nil)
 func testConfigureCamera(
 	logger *logger.Logger,
 	_ *despair.Parameters,
-	leftStream, rightStream, outputStream *camera.StreamManager,
+	leftStream, rightStream, outputStream *camera.Stream,
 	isLeft bool,
 ) APIFn {
 	return func(w http.ResponseWriter, r *http.Request) error {
@@ -321,7 +321,7 @@ func TestWithSocat(t *testing.T) {
 
 // testLeftCamera tests configuration of the left camera
 func testLeftCamera(t *testing.T, log *logger.Logger, params *despair.Parameters,
-	leftStream, rightStream, outputStream *camera.StreamManager) {
+	leftStream, rightStream, outputStream *camera.Stream) {
 	// Create test request with form values for left camera
 	form := url.Values{}
 	form.Add("port", "/tmp/ttyV0")
@@ -360,7 +360,7 @@ func testLeftCamera(t *testing.T, log *logger.Logger, params *despair.Parameters
 
 // testRightCamera tests configuration of the right camera
 func testRightCamera(t *testing.T, log *logger.Logger, params *despair.Parameters,
-	leftStream, rightStream, outputStream *camera.StreamManager) {
+	leftStream, rightStream, outputStream *camera.Stream) {
 	// Create test request with form values for right camera
 	form := url.Values{}
 	form.Add("port", "/tmp/ttyV2")
@@ -397,8 +397,8 @@ func testRightCamera(t *testing.T, log *logger.Logger, params *despair.Parameter
 	}
 }
 
-// simulateCameraOnPort simulates a camera on the given port
-// It implements a simplified version of the camera protocol
+// simulateCameraOnPort simulates a camera on the given port.
+// It implements a simplified version of the camera protocol.
 func simulateCameraOnPort(t *testing.T, portPath string) {
 	// Open the virtual port with 0666 permissions
 	port, err := os.OpenFile(portPath, os.O_RDWR, 0666)

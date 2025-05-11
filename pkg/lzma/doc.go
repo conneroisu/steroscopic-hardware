@@ -52,3 +52,5 @@
 //
 // | 5      | 8    | Uncompressed size (little endian). Size -1 stands for unknown size |
 package lzma
+
+//go:generate gomarkdoc -o README.md -e .

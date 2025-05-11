@@ -17,8 +17,8 @@ type OutputCamera struct {
 	RightClientCh chan *image.Gray
 	InputCh       chan<- despair.InputChunk  // InputCh sends input chunks to sad.
 	OutputCh      <-chan despair.OutputChunk // OutputCh receives output chunks from sad algo.
-	Left          *StreamManager
-	Right         *StreamManager
+	Left          *Stream
+	Right         *Stream
 	logger        *logger.Logger
 }
 
@@ -30,7 +30,7 @@ const defaultNumWorkers = 32
 func NewOutputCamera(
 	logger *logger.Logger,
 	params *despair.Parameters,
-	left, right *StreamManager,
+	left, right *Stream,
 ) *OutputCamera {
 	oC := &OutputCamera{
 		Left:   left,

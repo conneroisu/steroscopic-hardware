@@ -12,6 +12,8 @@ import (
 	"github.com/conneroisu/steroscopic-hardware/pkg/lzma"
 )
 
+const testDir = "lzma_test_files"
+
 // generatedTest represents a test case for LZMA codec
 type generatedTest struct {
 	name        string
@@ -23,7 +25,6 @@ type generatedTest struct {
 // TestGeneratedFiles tests the LZMA encoder and decoder with a variety of generated files
 func TestGeneratedFiles(t *testing.T) {
 	// Skip if the test files directory doesn't exist
-	testDir := "lzma_test_files"
 	if _, err := os.Stat(testDir); os.IsNotExist(err) {
 		t.Skip("Test files directory not found. Run generate_testfiles.sh first")
 	}
@@ -273,7 +274,6 @@ func testRoundTrip(t *testing.T, tt generatedTest) {
 // This helps detect race conditions and other concurrency issues
 func TestGeneratedFilesParallel(t *testing.T) {
 	// Skip if the test files directory doesn't exist
-	testDir := "lzma_test_files"
 	if _, err := os.Stat(testDir); os.IsNotExist(err) {
 		t.Skip("Test files directory not found. Run generate_testfiles.sh first")
 	}
@@ -314,7 +314,6 @@ func TestGeneratedFilesParallel(t *testing.T) {
 	// Run encoder tests in parallel
 	t.Run("ParallelEncoder", func(t *testing.T) {
 		for _, tt := range tests {
-			tt := tt // Capture the range variable
 			t.Run(tt.name, func(t *testing.T) {
 				t.Parallel()
 				testEncoder(t, tt)
@@ -325,7 +324,6 @@ func TestGeneratedFilesParallel(t *testing.T) {
 	// Run decoder tests in parallel
 	t.Run("ParallelDecoder", func(t *testing.T) {
 		for _, tt := range tests {
-			tt := tt // Capture the range variable
 			t.Run(tt.name, func(t *testing.T) {
 				t.Parallel()
 				testDecoder(t, tt)
@@ -336,7 +334,6 @@ func TestGeneratedFilesParallel(t *testing.T) {
 	// Run round-trip tests in parallel
 	t.Run("ParallelRoundTrip", func(t *testing.T) {
 		for _, tt := range tests {
-			tt := tt // Capture the range variable
 			t.Run(tt.name, func(t *testing.T) {
 				t.Parallel()
 				testRoundTrip(t, tt)
@@ -372,11 +369,12 @@ func BenchmarkEncode(b *testing.B) {
 		}
 
 		size := info.Size()
-		if size < 1000 {
+		switch {
+		case size < 1000:
 			smallFiles = append(smallFiles, file)
-		} else if size < 10000 {
+		case size < 10000:
 			mediumFiles = append(mediumFiles, file)
-		} else {
+		default:
 			largeFiles = append(largeFiles, file)
 		}
 	}
@@ -466,11 +464,12 @@ func BenchmarkDecode(b *testing.B) {
 		}
 
 		size := info.Size()
-		if size < 1000 {
+		switch {
+		case size < 1000:
 			smallFiles = append(smallFiles, file)
-		} else if size < 10000 {
+		case size < 10000:
 			mediumFiles = append(mediumFiles, file)
-		} else {
+		default:
 			largeFiles = append(largeFiles, file)
 		}
 	}
