@@ -10,50 +10,6 @@ import (
 	"github.com/conneroisu/steroscopic-hardware/pkg/logger"
 )
 
-// ParametersHandler handles client requests to change the parameters of the
-// desparity map generator.
-func ParametersHandler(logger *logger.Logger, params *despair.Parameters) APIFn {
-	return func(_ http.ResponseWriter, r *http.Request) error {
-		params.Lock()
-		defer params.Unlock()
-		// Parse form data
-		if err := r.ParseForm(); err != nil {
-			return fmt.Errorf("failed to parse form data: %w", err)
-		}
-
-		// For application/x-www-form-urlencoded or multipart/form-data
-		blockSizeStr := r.FormValue("blockSize")
-		maxDisparityStr := r.FormValue("maxDisparity")
-
-		// Convert string values to integers
-		blockSize, err := strconv.Atoi(blockSizeStr)
-		if err != nil {
-			return fmt.Errorf(
-				"invalid block size value: %w",
-				err,
-			)
-		}
-
-		maxDisparity, err := strconv.Atoi(maxDisparityStr)
-		if err != nil {
-			return fmt.Errorf(
-				"invalid max disparity value: %w",
-				err,
-			)
-		}
-		params.BlockSize = blockSize
-		params.MaxDisparity = maxDisparity
-		logger.Info(
-			"received parameters:",
-			"blocksize",
-			params.BlockSize,
-			"maxdisparity",
-			params.MaxDisparity,
-		)
-		return nil
-	}
-}
-
 // ConfigureCamera handles client requests to configure all camera parameters at once.
 func ConfigureCamera(
 	logger *logger.Logger,
@@ -65,6 +21,9 @@ func ConfigureCamera(
 		var (
 			compression     int
 			baudRate        int
+			portStr         string
+			baudStr         string
+			compressionStr  string
 			configureStream *camera.StreamManager
 		)
 		if isLeft {
@@ -81,14 +40,16 @@ func ConfigureCamera(
 		config := camera.DefaultCameraConfig()
 
 		// Get all camera parameters
-		config.Port = r.FormValue("port")
-		baudStr := r.FormValue("baudrate")
-		compressionStr := r.FormValue("compression")
+		portStr = r.FormValue("port")
+		baudStr = r.FormValue("baudrate")
+		compressionStr = r.FormValue("compression")
 
 		// Configure port if provided
-		if config.Port != "" {
-			logger.Info("configured camera port", "port", config.Port)
+		if portStr == "" {
+			return fmt.Errorf("port not provided")
 		}
+		config.Port = portStr
+		logger.Info("configured camera port", "port", config.Port)
 
 		// Configure baud rate if provided
 		if baudStr == "" {
@@ -102,15 +63,15 @@ func ConfigureCamera(
 		logger.Info("configured camera baud rate", "baud", config.BaudRate)
 
 		// Configure compression if provided
-		if compressionStr != "" {
-			compression, err = strconv.Atoi(compressionStr)
-			if err != nil {
-				return fmt.Errorf("invalid compression value: %w", err)
-			}
-
-			config.Compression = compression
-			logger.Info("configured camera compression", "compression", compression)
+		if compressionStr == "" {
+			return fmt.Errorf("compression not provided")
 		}
+		compression, err = strconv.Atoi(compressionStr)
+		if err != nil {
+			return fmt.Errorf("invalid compression value: %w", err)
+		}
+		config.Compression = compression
+		logger.Info("configured camera compression", "compression", config.Compression)
 
 		// After configuration, attempt to connect
 		err = configureStream.Configure(config)
