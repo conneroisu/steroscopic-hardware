@@ -123,30 +123,6 @@ func TestSerialCamera_BasicInitialization(t *testing.T) {
 	})
 }
 
-// TestOptionWithLogger tests the WithLogger option function
-func TestOptionWithLogger(t *testing.T) {
-	// Create a SerialCamera without initialization
-	sc := &SerialCamera{}
-
-	// Initial logger should be nil
-	if sc.logger != nil {
-		t.Error("Expected initial logger to be nil")
-	}
-
-	// Create a mock logger
-	lggr := logger.NewLogger()
-	mockLogger := &lggr
-
-	// Apply the WithLogger option
-	opt := WithLogger(mockLogger)
-	opt(sc)
-
-	// The logger should now be set
-	if sc.logger != mockLogger {
-		t.Error("Expected logger to be set to mockLogger")
-	}
-}
-
 // TestSerialCamera_ReadFnError tests the readFn function with a controlled mock port
 func TestSerialCamera_ReadFnError(t *testing.T) {
 	// Create error channel and image channel

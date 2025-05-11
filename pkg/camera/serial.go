@@ -43,9 +43,6 @@ type (
 		OnClose        func()
 		ch             chan *image.Gray
 	}
-
-	// SerialCameraOption is a function that configures a SerialCamera.
-	SerialCameraOption func(*SerialCamera)
 )
 
 // NewSerialCamera creates a new SerialCamera instance
@@ -53,10 +50,9 @@ func NewSerialCamera(
 	portName string,
 	baudRate int,
 	useCompression bool,
-	opts ...SerialCameraOption,
+	logger *logger.Logger,
 ) (*SerialCamera, error) {
 	ctx, cancel := context.WithCancel(context.Background())
-	defaultLogger := logger.NewLogger() // Overridden by WithLogger option
 	// Open the port
 	var err error
 	sc := SerialCamera{
@@ -71,12 +67,8 @@ func NewSerialCamera(
 		portID:         portName,
 		baudRate:       baudRate,
 		useCompression: useCompression,
-		logger:         &defaultLogger,
+		logger:         logger,
 	}
-	for _, opt := range opts {
-		opt(&sc)
-	}
-
 	// Configure serial port
 	mode := &serial.Mode{
 		BaudRate: baudRate,
@@ -115,9 +107,7 @@ func (sc *SerialCamera) Close() error {
 	if err != nil {
 		return err
 	}
-
 	sc.cancel()
-
 	return nil
 }
 
@@ -266,9 +256,4 @@ func (sc *SerialCamera) readFn(
 	case imgCh <- img:
 		sc.logger.Debug("image sent to channel")
 	}
-}
-
-// WithLogger sets the logger for the serial camera.
-func WithLogger(logger *logger.Logger) SerialCameraOption {
-	return func(sc *SerialCamera) { sc.logger = logger }
 }

@@ -7,6 +7,7 @@ import (
 	"log/slog"
 	"sync"
 
+	"github.com/conneroisu/steroscopic-hardware/pkg/despair"
 	"github.com/conneroisu/steroscopic-hardware/pkg/logger"
 )
 
@@ -52,10 +53,41 @@ type StreamManager struct {
 	running    bool
 }
 
+// Option is a function that configures a StreamManager.
+type Option func(*StreamManager)
+
+// WithReplace sets the StreamManager to replace the given StreamManager.
+func WithReplace(
+	replace *StreamManager,
+	params *despair.Parameters,
+	leftStream, rightStream *StreamManager,
+) Option {
+	return func(sm *StreamManager) {
+		outputCamera := NewOutputCamera(
+			sm.logger,
+			params,
+			leftStream,
+			rightStream,
+		)
+		sm.camera = outputCamera
+		for client := range replace.clients {
+			sm.clients[client] = true
+		}
+		// After Connection, stop the old manager
+		replace.Stop()
+		// Make sure the new manager is running
+		sm.Start()
+	}
+}
+
 // NewStreamManager creates a new broadcaster for the given camera
-func NewStreamManager(camera Camer, logger *logger.Logger) *StreamManager {
+func NewStreamManager(
+	camera Camer,
+	logger *logger.Logger,
+	opts ...Option,
+) *StreamManager {
 	ctx, cancel := context.WithCancel(context.Background())
-	return &StreamManager{
+	sm := &StreamManager{
 		clients:    make(map[chan *image.Gray]bool),
 		Register:   make(chan chan *image.Gray),
 		Unregister: make(chan chan *image.Gray),
@@ -67,6 +99,10 @@ func NewStreamManager(camera Camer, logger *logger.Logger) *StreamManager {
 		config:     &defaultConfig,
 		running:    false,
 	}
+	for _, opt := range opts {
+		opt(sm)
+	}
+	return sm
 }
 
 // Lock locks the mutex
@@ -100,7 +136,11 @@ func (b *StreamManager) Start() {
 			case client := <-b.Register:
 				b.mu.Lock()
 				b.clients[client] = true
-				slog.Debug("client registered", "total", len(b.clients))
+				slog.Debug(
+					"client registered",
+					"total",
+					len(b.clients),
+				)
 				b.mu.Unlock()
 
 			case client := <-b.Unregister:
@@ -108,7 +148,11 @@ func (b *StreamManager) Start() {
 				if _, ok := b.clients[client]; ok {
 					delete(b.clients, client)
 					close(client)
-					slog.Debug("client unregistered", "total", len(b.clients))
+					slog.Debug(
+						"client unregistered",
+						"total",
+						len(b.clients),
+					)
 				}
 				b.mu.Unlock()
 
@@ -176,8 +220,13 @@ func (b *StreamManager) Configure(config Config) error {
 	)
 	b.mu.Lock()
 	defer b.mu.Unlock()
+
 	if b.camera.Port() == config.Port {
-		b.logger.Info("camera port already configured closing it to reconfigure", "port", config.Port)
+		b.logger.Info(
+			"camera port already configured closing to reconfigure",
+			"port",
+			config.Port,
+		)
 		b.camera.Close()
 	}
 	b.logger.Info(
@@ -193,7 +242,7 @@ func (b *StreamManager) Configure(config Config) error {
 		config.Port,
 		config.BaudRate,
 		config.Compression == 1,
-		WithLogger(b.logger),
+		b.logger,
 	)
 	if err != nil {
 		return err

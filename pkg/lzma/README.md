@@ -60,9 +60,14 @@ defer r.Close()
 io.Copy(os.Stdout, r)
 ```
 
-LZMA compressed file format \-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
+### LZMA compressed file format
 
-| Offset | Size | Description | |\-\-\-\-\-\-\-\-|\-\-\-\-\-\-|\-\-\-\-\-\-\-\-\-\-\-\-\-| | 0 | 1 | Special LZMA properties \(lc,lp, pb in encoded form\) | | 1 | 4 | Dictionary size \(little endian\) | | 5 | 8 | Uncompressed size \(little endian\). Size \-1 stands for unknown size |
+\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
+| Offset | Size | Description |
+|\-\-\-\-\-\-\-\-|\-\-\-\-\-\-|\-\-\-\-\-\-\-\-\-\-\-\-\-|
+| 0 | 1 | Special LZMA properties \(lc,lp, pb in encoded form\) |
+| 1 | 4 | Dictionary size \(little endian\) |
+| 5 | 8 | Uncompressed size \(little endian\). Size \-1 stands for unknown size |
 
 ## Index
 

@@ -16,7 +16,15 @@ func Make(fn APIFn) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		err := fn(w, r)
 		if err != nil {
-			slog.Error(fmt.Sprintf("API error: %s", err.Error()))
+			slog.Error(
+				"api error",
+				"err",
+				err,
+				"url",
+				r.URL,
+				"method",
+				r.Method,
+			)
 			http.Error(
 				w,
 				fmt.Sprintf(
