@@ -78,7 +78,7 @@ int main()
 
     memset(coded, 0, 10);
 
-    size_t result = range_code(data, coded, 10, 32);
+    size_t result = range_code(data, coded, 10, 32768);
 
     printf("Result: %ld\n", result);
 #endif

@@ -1,7 +1,7 @@
 #include "range_code.h"
 #define MAX_RANGE UINT32_MAX
-#define SYMBOL_SIZE ((uint8_t) 16)
-#define BITS_PER_SYMBOL ((uint8_t) 4)
+#define SYMBOL_SIZE ((uint8_t) 4)
+#define BITS_PER_SYMBOL ((uint8_t) 2)
 
 typedef struct
 {
@@ -97,7 +97,7 @@ size_t range_code(uint8_t* uncoded, uint8_t* coded, size_t size, int adjustment_
             uint8_t byte = uncoded[i];
             int symbol = (byte & ((SYMBOL_SIZE - 1) << (BITS_PER_SYMBOL * j))) >> (BITS_PER_SYMBOL * j);
             symbol_counts[symbol].current_count++;
-            symbol_counts[symbol].symbol = uncoded[i];
+            symbol_counts[symbol].symbol = symbol;
         }
     }
 
@@ -145,8 +145,10 @@ size_t range_code(uint8_t* uncoded, uint8_t* coded, size_t size, int adjustment_
             range.high = ((uint32_t) ((count.current_count * range_size) / size)) + range.low;
 
             range_size = range.high - range.low;
+        }
+        next_uncoded++;
 
-            // Emit digits. Max of 3.
+                    // Emit digits. Max of 3.
             for(int k = 0; k < 3; ++k)
             {
 
@@ -188,8 +190,6 @@ size_t range_code(uint8_t* uncoded, uint8_t* coded, size_t size, int adjustment_
             {
                 return 0;
             }
-        }
-        next_uncoded++;
 
     }
 
