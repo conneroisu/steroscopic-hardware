@@ -1,3 +1,4 @@
+// pkg/camera/camera.go
 // Package camera provides interfaces and implementations for cameras.
 package camera
 
@@ -40,20 +41,27 @@ var (
 	defaultRightOutputCh = atomic.Pointer[chan *image.Gray]{}
 	defaultOutputCamera  = atomic.Pointer[Camera]{}
 	defaultOutputCh      = atomic.Pointer[chan *image.Gray]{}
-
-	defaultConfig = Config{
+	defaultConfig        = Config{
 		Port:        "/dev/ttyUSB0",
 		BaudRate:    115200,
 		Compression: 0,
 	}
 )
 
+// Buffer size for camera channels. Adjust as needed.
+const channelBufferSize = 5
+
 func init() {
-	defaultLeftCh.Store(new(chan *image.Gray))
-	defaultLeftOutputCh.Store(new(chan *image.Gray))
-	defaultRightCh.Store(new(chan *image.Gray))
-	defaultRightOutputCh.Store(new(chan *image.Gray))
-	defaultOutputCh.Store(new(chan *image.Gray))
+	leftCh := make(chan *image.Gray, channelBufferSize)
+	leftOutputCh := make(chan *image.Gray, channelBufferSize) // Still potentially problematic logic, but usable
+	rightCh := make(chan *image.Gray, channelBufferSize)
+	rightOutputCh := make(chan *image.Gray, channelBufferSize) // Still potentially problematic logic, but usable
+	outputCh := make(chan *image.Gray, channelBufferSize)
+	defaultLeftCh.Store(&leftCh)
+	defaultLeftOutputCh.Store(&leftOutputCh)
+	defaultRightCh.Store(&rightCh)
+	defaultRightOutputCh.Store(&rightOutputCh)
+	defaultOutputCh.Store(&outputCh)
 }
 
 // LeftCh returns the left camera channel.
