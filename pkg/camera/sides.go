@@ -8,4 +8,6 @@ const (
 	LeftCameraType Type = "left"
 	// RightCameraType is the type for the right camera.
 	RightCameraType Type = "right"
+	// OutputCameraType is the type for the output camera.
+	OutputCameraType Type = "output"
 )

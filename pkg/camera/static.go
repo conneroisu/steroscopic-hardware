@@ -14,14 +14,21 @@ import (
 
 // StaticCamera represents a ZedBoard camera.
 type StaticCamera struct {
-	Path string
+	Path   string
+	ctx    context.Context
+	cancel context.CancelFunc
 }
 
 // NewStaticCamera creates a new ZedBoard camera.
-func NewStaticCamera(path string) *StaticCamera {
-	return &StaticCamera{
-		Path: path,
+func NewStaticCamera(path string, ch chan *image.Gray) *StaticCamera {
+	ctx, cancel := context.WithCancel(context.Background())
+	sc := &StaticCamera{
+		Path:   path,
+		ctx:    ctx,
+		cancel: cancel,
 	}
+	go sc.Stream(sc.ctx, ch)
+	return sc
 }
 
 var _ Camer = (*StaticCamera)(nil)
@@ -46,8 +53,8 @@ func (z *StaticCamera) Stream(ctx context.Context, outCh chan *image.Gray) {
 	}
 }
 
-// Port returns the serial port name.
-func (z *StaticCamera) Port() string { return "" }
+// Config returns the current configuration of the camera.
+func (z *StaticCamera) Config() *Config { return &Config{} }
 
 func (z *StaticCamera) read(errChan chan error) <-chan *image.Gray {
 	mkdCh := make(chan *image.Gray, 1)

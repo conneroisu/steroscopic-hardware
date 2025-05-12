@@ -4,6 +4,7 @@ import (
 	"github.com/conneroisu/steroscopic-hardware/pkg/camera"
 	"github.com/conneroisu/steroscopic-hardware/pkg/web"
 	"runtime/debug"
+	"strconv"
 )
 
 // AppFn returns a function that wraps the given component with the app template.
@@ -142,9 +143,7 @@ templ header() {
 	</nav>
 }
 
-templ status(
-	leftStream, rightStream **camera.Stream,
-) {
+templ status() {
 	<div
 		class="lg:col-span-1 space-y-6"
 		x-data="{ open_stats: true }"
@@ -168,8 +167,8 @@ templ status(
 				x-show="open_stats"
 				x-collapse
 			>
-				@cameraStatus(camera.LeftCameraType, leftStream)
-				@cameraStatus(camera.RightCameraType, rightStream)
+				@cameraStatus(camera.LeftCameraType, camera.Left())
+				@cameraStatus(camera.RightCameraType, camera.Right())
 			</div>
 		</div>
 	</div>
@@ -177,7 +176,7 @@ templ status(
 
 templ cameraStatus(
 	typeOf camera.Type,
-	stream **camera.Stream,
+	cam camera.Camer,
 ) {
 	<div
 		class="bg-gray-800 rounded-lg shadow-lg p-4"
@@ -227,7 +226,7 @@ templ cameraStatus(
 							<select
 								id={ string(typeOf) + "-port" }
 								name="port"
-								value={ (**stream).Config().Port }
+								value={ cam.Config().Port }
 								class="bg-gray-700 text-gray-200 rounded px-3 py-1 text-sm border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
 							>
 								<option value="">Select port</option>
@@ -261,7 +260,7 @@ templ cameraStatus(
 								id={ string(typeOf) + "-baud" }
 								name="baudrate"
 								type="number"
-								value={ (**stream).Config().BaudRate }
+								value={ strconv.Itoa(cam.Config().BaudRate) }
 								class="bg-gray-700 text-gray-200 rounded px-3 py-1 text-sm border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 w-24"
 							/>
 						</div>
@@ -274,7 +273,7 @@ templ cameraStatus(
 								id={ string(typeOf) + "-compression" }
 								name="compression"
 								class="bg-gray-700 text-gray-200 rounded px-3 py-1 text-sm border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 w-24"
-								value={ (**stream).Config().Compression }
+								value={ strconv.Itoa(cam.Config().Compression) }
 							>
 								<option value="0">No</option>
 								<option value="1">Yes</option>

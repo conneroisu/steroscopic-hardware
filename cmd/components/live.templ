@@ -1,12 +1,8 @@
 package components
 
-import "github.com/conneroisu/steroscopic-hardware/pkg/camera"
+import "github.com/conneroisu/steroscopic-hardware/pkg/despair"
 
-templ Live(
-	blockSize int,
-	maxDisparity int,
-	leftSream, rightStream **camera.Stream,
-) {
+templ Live() {
 	<div
 		class="container mx-auto px-4 grid grid-cols-1 lg:grid-cols-4 gap-6"
 	>
@@ -79,8 +75,11 @@ templ Live(
 				</div>
 			</div>
 			// Algorithm Controls Panel
-			@Control(blockSize, maxDisparity)
+			@Control(
+				despair.DefaultParams().BlockSize,
+				despair.DefaultParams().MaxDisparity,
+			)
 		</div>
-		@status(leftSream, rightStream)
+		@status()
 	</div>
 }

@@ -12,6 +12,7 @@ import (
 	"github.com/conneroisu/steroscopic-hardware/pkg/camera"
 	"github.com/conneroisu/steroscopic-hardware/pkg/web"
 	"runtime/debug"
+	"strconv"
 )
 
 // AppFn returns a function that wraps the given component with the app template.
@@ -49,7 +50,7 @@ func App(title string, comp templ.Component) templ.Component {
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/components/app.templ`, Line: 20, Col: 17}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/components/app.templ`, Line: 21, Col: 17}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
@@ -129,13 +130,13 @@ func header() templ.Component {
 			return info.Main.Version
 		}())
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/components/app.templ`, Line: 98, Col: 7}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/components/app.templ`, Line: 99, Col: 7}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "</p><!-- Checkhealth Button (pings /checkhealth every 10 seconds) --><span id=\"checkhealth\">Healthy</span><script>\n\t\t\t\t\tsetInterval(function() {\n\t\t\t\t\t\tfetch(\"/checkhealth\")\n\t\t\t\t\t\t\t.then(function(response) {\n\t\t\t\t\t\t\t\t\tconst now = new Date();\n\t\t\t\t\t\t\t\t\tconst t = now.toLocaleTimeString();\n\t\t\t\t\t\t\t\t\tconst hours = now.getHours();\n\t\t\t\t\t\t\t\t\tconst minutes = now.getMinutes();\n\t\t\t\t\t\t\t\t\tconst seconds = now.getSeconds();\n\t\t\t\t\t\t\t\t\tconst formattedTime = `${hours}:${minutes}:${seconds}`;\n\t\t\t\t\t\t\t\tif (response.status == 200) {\n\n\t\t\t\t\t\t\t\t\tdocument.getElementById(\"checkhealth\").innerHTML = \"Healthy\" + formattedTime;\n\t\t\t\t\t\t\t\t} else {\n\t\t\t\t\t\t\t\t\tdocument.getElementById(\"checkhealth\").innerHTML = \"Unhealthy\" + formattedTime;\n\t\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\t})\n\t\t\t\t\t\t\t.catch(function(err) {\n\t\t\t\t\t\t\t\tconsole.error(\"Error:\", err);\n\t\t\t\t\t\t\t\tdocument.getElementById(\"checkhealth\").innerHTML = \"Unhealthy\";\n\t\t\t\t\t\t\t});\n\t\t\t\t\t}, 1000);\n\t\t\t\t</script><div class=\"flex space-x-4\"><a hx-get=\"/\" hx-target=\"#app\" hx-push-url=\"true\" class=\"px-4 py-2 rounded-lg transition bg-blue-700 hover:bg-gray-600\">Live Camera System</a></div></div></div></nav>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "</p><!-- Checkhealth Button (pings /checkhealth every 10 seconds) --><span id=\"checkhealth\">Healthy</span><script>\n\t\t\t\t\tsetInterval(function() {\n\t\t\t\t\t\tfetch(\"/checkhealth\")\n\t\t\t\t\t\t\t.then(function(response) {\n\t\t\t\t\t\t\t\t\tconst now = new Date();\n\t\t\t\t\t\t\t\t\tconst t = now.toLocaleTimeString();\n\t\t\t\t\t\t\t\t\tconst hours = now.getHours();\n\t\t\t\t\t\t\t\t\tconst minutes = now.getMinutes();\n\t\t\t\t\t\t\t\t\tconst seconds = now.getSeconds();\n\t\t\t\t\t\t\t\t\tconst formattedTime = `${hours}:${minutes}:${seconds}`;\n\t\t\t\t\t\t\t\tif (response.status == 200) {\n\t\t\t\t\t\t\t\t\tdocument.getElementById(\"checkhealth\").innerHTML = \"Healthy@\" + formattedTime;\n\t\t\t\t\t\t\t\t} else {\n\t\t\t\t\t\t\t\t\tdocument.getElementById(\"checkhealth\").innerHTML = \"Unhealthy@\" + formattedTime;\n\t\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\t})\n\t\t\t\t\t\t\t.catch(function(err) {\n\t\t\t\t\t\t\t\tconsole.error(\"Error:\", err);\n\t\t\t\t\t\t\t\tdocument.getElementById(\"checkhealth\").innerHTML = \"Unhealthy\";\n\t\t\t\t\t\t\t});\n\t\t\t\t\t}, 1000);\n\t\t\t\t</script><div class=\"flex space-x-4\"><a hx-get=\"/\" hx-target=\"#app\" hx-push-url=\"true\" class=\"px-4 py-2 rounded-lg transition bg-blue-700 hover:bg-gray-600\">Live Camera System</a></div></div></div></nav>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -143,9 +144,7 @@ func header() templ.Component {
 	})
 }
 
-func status(
-	leftStream, rightStream **camera.Stream,
-) templ.Component {
+func status() templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -173,7 +172,7 @@ func status(
 		var templ_7745c5c3_Var6 string
 		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(web.TargetStatusContent.ID)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/components/app.templ`, Line: 168, Col: 35}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/components/app.templ`, Line: 166, Col: 35}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 		if templ_7745c5c3_Err != nil {
@@ -183,11 +182,11 @@ func status(
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = cameraStatus(camera.LeftCameraType, leftStream).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = cameraStatus(camera.LeftCameraType, camera.Left()).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = cameraStatus(camera.RightCameraType, rightStream).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = cameraStatus(camera.RightCameraType, camera.Right()).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -201,7 +200,7 @@ func status(
 
 func cameraStatus(
 	typeOf camera.Type,
-	stream **camera.Stream,
+	cam camera.Camer,
 ) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
@@ -230,7 +229,7 @@ func cameraStatus(
 		var templ_7745c5c3_Var8 string
 		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs("#" + string(typeOf) + "-port")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/components/app.templ`, Line: 191, Col: 46}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/components/app.templ`, Line: 189, Col: 46}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 		if templ_7745c5c3_Err != nil {
@@ -243,7 +242,7 @@ func cameraStatus(
 		var templ_7745c5c3_Var9 string
 		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(typeOf)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/components/app.templ`, Line: 195, Col: 12}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/components/app.templ`, Line: 193, Col: 12}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 		if templ_7745c5c3_Err != nil {
@@ -264,7 +263,7 @@ func cameraStatus(
 		var templ_7745c5c3_Var10 string
 		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(string(typeOf) + "-config-form")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/components/app.templ`, Line: 219, Col: 41}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/components/app.templ`, Line: 217, Col: 41}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 		if templ_7745c5c3_Err != nil {
@@ -277,7 +276,7 @@ func cameraStatus(
 		var templ_7745c5c3_Var11 string
 		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs("/" + string(typeOf) + "/configure")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/components/app.templ`, Line: 220, Col: 50}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/components/app.templ`, Line: 218, Col: 50}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 		if templ_7745c5c3_Err != nil {
@@ -290,7 +289,7 @@ func cameraStatus(
 		var templ_7745c5c3_Var12 string
 		templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs("#" + string(typeOf) + "-status")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/components/app.templ`, Line: 221, Col: 49}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/components/app.templ`, Line: 219, Col: 49}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 		if templ_7745c5c3_Err != nil {
@@ -303,7 +302,7 @@ func cameraStatus(
 		var templ_7745c5c3_Var13 string
 		templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs("#" + string(typeOf) + "-loading-indicator")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/components/app.templ`, Line: 222, Col: 63}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/components/app.templ`, Line: 220, Col: 63}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 		if templ_7745c5c3_Err != nil {
@@ -316,7 +315,7 @@ func cameraStatus(
 		var templ_7745c5c3_Var14 string
 		templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(string(typeOf) + "-port")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/components/app.templ`, Line: 226, Col: 43}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/components/app.templ`, Line: 224, Col: 43}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 		if templ_7745c5c3_Err != nil {
@@ -329,7 +328,7 @@ func cameraStatus(
 		var templ_7745c5c3_Var15 string
 		templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(string(typeOf) + "-port")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/components/app.templ`, Line: 229, Col: 37}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/components/app.templ`, Line: 227, Col: 37}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 		if templ_7745c5c3_Err != nil {
@@ -340,9 +339,9 @@ func cameraStatus(
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var16 string
-		templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs((**stream).Config().Port)
+		templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(cam.Config().Port)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/components/app.templ`, Line: 231, Col: 40}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/components/app.templ`, Line: 229, Col: 33}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
 		if templ_7745c5c3_Err != nil {
@@ -355,7 +354,7 @@ func cameraStatus(
 		var templ_7745c5c3_Var17 string
 		templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs("#" + string(typeOf) + "-port")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/components/app.templ`, Line: 242, Col: 50}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/components/app.templ`, Line: 240, Col: 50}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 		if templ_7745c5c3_Err != nil {
@@ -376,7 +375,7 @@ func cameraStatus(
 		var templ_7745c5c3_Var18 string
 		templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(string(typeOf) + "-baud")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/components/app.templ`, Line: 255, Col: 37}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/components/app.templ`, Line: 253, Col: 37}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 		if templ_7745c5c3_Err != nil {
@@ -389,7 +388,7 @@ func cameraStatus(
 		var templ_7745c5c3_Var19 string
 		templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs(string(typeOf) + "-baud")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/components/app.templ`, Line: 262, Col: 37}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/components/app.templ`, Line: 260, Col: 37}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
 		if templ_7745c5c3_Err != nil {
@@ -400,9 +399,9 @@ func cameraStatus(
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var20 string
-		templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinStringErrs((**stream).Config().BaudRate)
+		templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(cam.Config().BaudRate))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/components/app.templ`, Line: 265, Col: 44}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/components/app.templ`, Line: 263, Col: 51}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var20))
 		if templ_7745c5c3_Err != nil {
@@ -415,7 +414,7 @@ func cameraStatus(
 		var templ_7745c5c3_Var21 string
 		templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinStringErrs(string(typeOf) + "-compression")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/components/app.templ`, Line: 275, Col: 44}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/components/app.templ`, Line: 273, Col: 44}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var21))
 		if templ_7745c5c3_Err != nil {
@@ -426,9 +425,9 @@ func cameraStatus(
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var22 string
-		templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinStringErrs((**stream).Config().Compression)
+		templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(cam.Config().Compression))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/components/app.templ`, Line: 278, Col: 47}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/components/app.templ`, Line: 276, Col: 54}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var22))
 		if templ_7745c5c3_Err != nil {
@@ -441,7 +440,7 @@ func cameraStatus(
 		var templ_7745c5c3_Var23 string
 		templ_7745c5c3_Var23, templ_7745c5c3_Err = templ.JoinStringErrs(string(typeOf) + "-status")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/components/app.templ`, Line: 293, Col: 38}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/components/app.templ`, Line: 291, Col: 38}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var23))
 		if templ_7745c5c3_Err != nil {
@@ -454,7 +453,7 @@ func cameraStatus(
 		var templ_7745c5c3_Var24 string
 		templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.JoinStringErrs(string(typeOf) + "-loading-indicator")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/components/app.templ`, Line: 311, Col: 49}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/components/app.templ`, Line: 309, Col: 49}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var24))
 		if templ_7745c5c3_Err != nil {

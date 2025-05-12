@@ -20,10 +20,21 @@ import (
 //
 // As input, it expects a camera.Stream struct, which is used to manage the camera stream.
 func StreamHandlerFn(
-	stream **camera.Stream,
+	typ camera.Type,
 ) APIFn {
-	// Make sure manager is running
-	(*stream).Start()
+	var getStream func() chan *image.Gray
+	var putStream func() chan *image.Gray
+
+	switch typ {
+	case camera.LeftCameraType:
+		getStream = camera.LeftCh
+		putStream = camera.LeftOutputCh
+	case camera.RightCameraType:
+		getStream = camera.RightCh
+		putStream = camera.RightOutputCh
+	case camera.OutputCameraType:
+		getStream = camera.OutputCh
+	}
 	var jpegPool = sync.Pool{
 		New: func() any {
 			return &jpeg.Options{Quality: 75} // Lower quality for faster encoding
@@ -36,19 +47,6 @@ func StreamHandlerFn(
 		w.Header().Set("Cache-Control", "no-cache")
 		w.Header().Set("Connection", "close")
 		w.Header().Set("Pragma", "no-cache")
-
-		clientChan := make(chan *image.Gray, 10) // Buffer a few frames
-
-		// Register client and defer unregistering
-		(*stream).Register <- clientChan
-		defer func() {
-			(*stream).Unregister <- clientChan
-			// Drain the channel to prevent goroutine leaks
-			for range clientChan {
-				// Just drain
-				print("")
-			}
-		}()
 
 		// Set a reasonable timeout for the connection
 		timeout := time.After(30 * time.Minute)
@@ -69,7 +67,7 @@ func StreamHandlerFn(
 			case <-ticker.C:
 				// Only process on tick to control frame rate
 				select {
-				case img, ok := <-clientChan:
+				case img, ok := <-getStream():
 					if !ok {
 						return nil // Channel closed
 					}
@@ -81,6 +79,13 @@ func StreamHandlerFn(
 					)
 					if err != nil {
 						return err
+					}
+					if putStream != nil {
+						select {
+						case putStream() <- img:
+						default:
+							// No new frame available, continue
+						}
 					}
 				default:
 					// No new frame available, continue

@@ -6,11 +6,11 @@ import (
 	"image"
 	"image/color"
 	"log"
+	"log/slog"
 	"sync"
 	"time"
 
 	"github.com/conneroisu/steroscopic-hardware/pkg/homedir"
-	"github.com/conneroisu/steroscopic-hardware/pkg/logger"
 	"go.bug.st/serial"
 )
 
@@ -30,46 +30,58 @@ var (
 type (
 	// SerialCamera represents a camera connected via serial port.
 	SerialCamera struct {
-		mu             sync.Mutex
-		ctx            context.Context
-		cancel         context.CancelFunc
-		port           serial.Port
-		portID         string
-		StartSeq       []byte // Byte sequence indicating start of image data
-		EndSeq         []byte // Byte sequence indicating end of image data
-		ImageWidth     int    // Expected image width in pixels
-		ImageHeight    int    // Expected image height in pixels
-		logger         *logger.Logger
-		baudRate       int
-		useCompression bool
-		OnClose        func()
-		ch             chan *image.Gray
+		mu          sync.Mutex
+		ctx         context.Context
+		cancel      context.CancelFunc
+		port        serial.Port
+		StartSeq    []byte // Byte sequence indicating start of image data
+		EndSeq      []byte // Byte sequence indicating end of image data
+		ImageWidth  int    // Expected image width in pixels
+		ImageHeight int    // Expected image height in pixels
+		logger      *slog.Logger
+		config      Config
+		OnClose     func()
+		ch          chan *image.Gray
 	}
 )
 
 // NewSerialCamera creates a new SerialCamera instance.
 func NewSerialCamera(
+	typ Type,
 	portName string,
 	baudRate int,
-	useCompression bool,
-	logger *logger.Logger,
+	compression int,
 ) (*SerialCamera, error) {
+	var err error
+	switch typ {
+	case LeftCameraType:
+		err = Left().Close()
+		if err != nil {
+			return nil, err
+		}
+	case RightCameraType:
+		err = Right().Close()
+		if err != nil {
+			return nil, err
+		}
+	}
 	ctx, cancel := context.WithCancel(context.Background())
 	// Open the port
-	var err error
 	sc := SerialCamera{
-		ctx:            ctx,
-		cancel:         cancel,
-		StartSeq:       DefaultStartSeq,
-		EndSeq:         DefaultEndSeq,
-		ImageWidth:     DefaultImageWidth,
-		ImageHeight:    DefaultImageHeight,
-		port:           nil,
-		mu:             sync.Mutex{},
-		portID:         portName,
-		baudRate:       baudRate,
-		useCompression: useCompression,
-		logger:         logger,
+		ctx:         ctx,
+		cancel:      cancel,
+		StartSeq:    DefaultStartSeq,
+		EndSeq:      DefaultEndSeq,
+		ImageWidth:  DefaultImageWidth,
+		ImageHeight: DefaultImageHeight,
+		port:        nil,
+		mu:          sync.Mutex{},
+		config: Config{
+			Port:        portName,
+			BaudRate:    baudRate,
+			Compression: compression,
+		},
+		logger: slog.Default().WithGroup("serial-port-" + string(typ)),
 	}
 	// Configure serial port
 	mode := &serial.Mode{
@@ -80,7 +92,7 @@ func NewSerialCamera(
 	}
 
 	sc.logger.Info("opening serial port", "port", portName)
-	sc.port, err = serial.Open(sc.portID, mode)
+	sc.port, err = serial.Open(sc.config.Port, mode)
 	if err != nil {
 		return nil, fmt.Errorf("failed to open serial port %s: %v", portName, err)
 	}
@@ -90,12 +102,13 @@ func NewSerialCamera(
 		sc.port.Close()
 		return nil, fmt.Errorf("failed to set read timeout: %v", err)
 	}
+	go sc.Stream(sc.ctx, sc.ch)
 
 	return &sc, nil
 }
 
-// Port returns the serial port name.
-func (sc *SerialCamera) Port() string { return sc.portID }
+// Config returns the current configuration of the camera.
+func (sc *SerialCamera) Config() *Config { return &sc.config }
 
 // Close closes the serial connection.
 func (sc *SerialCamera) Close() error {
@@ -105,11 +118,11 @@ func (sc *SerialCamera) Close() error {
 	if sc.OnClose != nil {
 		sc.OnClose()
 	}
+	sc.cancel()
 	err := sc.port.Close()
 	if err != nil {
 		return err
 	}
-	sc.cancel()
 	return nil
 }
 

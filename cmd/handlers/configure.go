@@ -1,39 +1,32 @@
 package handlers
 
 import (
+	"context"
 	"errors"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"strconv"
 
 	"github.com/conneroisu/steroscopic-hardware/pkg/camera"
-	"github.com/conneroisu/steroscopic-hardware/pkg/despair"
-	"github.com/conneroisu/steroscopic-hardware/pkg/logger"
 )
 
 // ConfigureCamera handles client requests to configure all camera parameters
 // at once.
 func ConfigureCamera(
-	logger *logger.Logger,
-	params *despair.Parameters,
-	leftStream, rightStream, outputStream **camera.Stream,
-	isLeft bool,
+	ctx context.Context,
+	typ camera.Type,
 ) APIFn {
+	var logger = slog.Default().WithGroup("configure-camera")
 	return func(_ http.ResponseWriter, r *http.Request) error {
 		var (
-			compression     int
-			baudRate        int
-			portStr         string
-			baudStr         string
-			compressionStr  string
-			configureStream *camera.Stream
-			presetConfig    = camera.DefaultCameraConfig()
+			compression    int
+			baudRate       int
+			portStr        string
+			baudStr        string
+			compressionStr string
+			config         camera.Config
 		)
-		if isLeft {
-			configureStream = *leftStream
-		} else {
-			configureStream = *rightStream
-		}
 
 		// Parse form data
 		err := r.ParseForm()
@@ -50,7 +43,7 @@ func ConfigureCamera(
 		if portStr == "" {
 			return errors.New("port not provided")
 		}
-		presetConfig.Port = portStr
+		config.Port = portStr
 
 		// CONFIGURE baud rate if provided
 		if baudStr == "" {
@@ -60,7 +53,7 @@ func ConfigureCamera(
 		if err != nil {
 			return fmt.Errorf("invalid baud value: %w", err)
 		}
-		presetConfig.BaudRate = baudRate
+		config.BaudRate = baudRate
 
 		// CONFIGURE compression if provided
 		if compressionStr == "" {
@@ -70,42 +63,35 @@ func ConfigureCamera(
 		if err != nil {
 			return fmt.Errorf("invalid compression value: %w", err)
 		}
-		presetConfig.Compression = compression
+		config.Compression = compression
 
 		// Log Configuration
 		logger.Info(
 			"setting",
 			"stream",
-			func() string { // inlined
-				if isLeft {
-					return "left"
-				}
-				return "right"
-			}(),
+			string(typ),
 			"port",
-			presetConfig.Port,
+			config.Port,
 			"baud",
-			presetConfig.BaudRate,
+			config.BaudRate,
 			"compression",
-			presetConfig.Compression,
+			config.Compression,
 		)
-		// After configuration, attempt to connect
-		err = configureStream.Configure(presetConfig)
-		if err != nil {
-			return fmt.Errorf("failed to configure stream: %w", err)
+
+		switch typ {
+		case camera.LeftCameraType:
+			cam, err := camera.NewSerialCamera(typ, portStr, baudRate, compression)
+			if err != nil {
+				return err
+			}
+			camera.SetLeftCamera(ctx, cam)
+		case camera.RightCameraType:
+			cam, err := camera.NewSerialCamera(typ, portStr, baudRate, compression)
+			if err != nil {
+				return err
+			}
+			camera.SetRightCamera(ctx, cam)
 		}
-
-		*outputStream = camera.NewStreamManager(
-			nil,
-			logger,
-			camera.WithReplace(
-				*outputStream,
-				params,
-				*leftStream,
-				*rightStream,
-			),
-		)
-
 		return nil
 	}
 }

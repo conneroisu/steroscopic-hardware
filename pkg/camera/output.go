@@ -7,50 +7,28 @@ import (
 	"time"
 
 	"github.com/conneroisu/steroscopic-hardware/pkg/despair"
-	"github.com/conneroisu/steroscopic-hardware/pkg/logger"
 )
-
-// OutputCamera represents a the camera output of a sad output.
-type OutputCamera struct {
-	Params        *despair.Parameters
-	LeftClientCh  chan *image.Gray
-	RightClientCh chan *image.Gray
-	InputCh       chan<- despair.InputChunk  // InputCh sends input chunks to sad.
-	OutputCh      <-chan despair.OutputChunk // OutputCh receives output chunks from sad algo.
-	Left          *Stream
-	Right         *Stream
-	logger        *logger.Logger
-}
 
 var _ Camer = (*OutputCamera)(nil)
 
 const defaultNumWorkers = 32
 
-// NewOutputCamera creates a new OutputCamera.
-func NewOutputCamera(
-	logger *logger.Logger,
-	params *despair.Parameters,
-	left, right *Stream,
-) *OutputCamera {
-	oC := &OutputCamera{
-		Left:   left,
-		Right:  right,
-		Params: params,
-		logger: logger,
-	}
-	// ensure both streams are started
-	left.Start()
-	right.Start()
-	oC.LeftClientCh = make(chan *image.Gray, 10)  // Buffer a few frames
-	oC.RightClientCh = make(chan *image.Gray, 10) // Buffer a few frames
+// OutputCamera represents a the camera output of a sad output.
+type OutputCamera struct {
+	Params   *despair.Parameters
+	InputCh  chan<- despair.InputChunk  // InputCh sends input chunks to sad.
+	OutputCh <-chan despair.OutputChunk // OutputCh receives output chunks from sad algo.
+	logger   *slog.Logger
+}
 
-	// Register this client
-	left.Register <- oC.LeftClientCh
-	right.Register <- oC.RightClientCh
+// NewOutputCamera creates a new OutputCamera.
+func NewOutputCamera(params *despair.Parameters) *OutputCamera {
+	oC := &OutputCamera{
+		logger: slog.Default().WithGroup("output-camera"),
+	}
 	oC.InputCh, oC.OutputCh = despair.SetupConcurrentSAD(
 		params, defaultNumWorkers,
 	)
-
 	return oC
 }
 
@@ -61,16 +39,12 @@ func (o *OutputCamera) Stream(
 	ctx context.Context,
 	outCh chan *image.Gray,
 ) {
-	var errChan = make(chan error, 1)
 	for {
 		select {
 		case <-ctx.Done():
 			slog.Debug("stopping stream")
 			return
-		case err := <-errChan:
-			slog.Error("Error reading image", "err", err)
-			return
-		case img := <-o.read(errChan):
+		case img := <-o.read():
 			if img == nil {
 				continue
 			}
@@ -79,15 +53,15 @@ func (o *OutputCamera) Stream(
 	}
 }
 
-// Port returns the serial port name.
-func (o *OutputCamera) Port() string { return "" }
+// Config returns the current configuration of the output camera.
+//
+// It is not used, but is required by the Camer interface.
+func (o *OutputCamera) Config() *Config { return &Config{} }
 
-func (o *OutputCamera) read(_ chan error) <-chan *image.Gray {
-	o.Params.Lock()
-	defer o.Params.Unlock()
+func (o *OutputCamera) read() <-chan *image.Gray {
 	mkdCh := make(chan *image.Gray, 1)
-	leftImg := <-o.LeftClientCh
-	rightImg := <-o.RightClientCh
+	leftImg := <-LeftOutputCh()
+	rightImg := <-RightOutputCh()
 
 	chunkSize := max(1, leftImg.Rect.Dy()/(defaultNumWorkers*4))
 	numChunks := (leftImg.Rect.Dy() + chunkSize - 1) / chunkSize
@@ -115,24 +89,5 @@ func (o *OutputCamera) read(_ chan error) <-chan *image.Gray {
 // Close closes the output camera.
 func (o *OutputCamera) Close() error {
 	close(o.InputCh)
-
-	o.logger.Debug("closing left camera")
-	o.Left.mu.Lock()
-	o.logger.Debug("canceling left camera")
-	o.Left.cancel()
-	o.logger.Debug("stopping left camera")
-	o.Left.Stop()
-	o.logger.Debug("unlocking left camera")
-	o.Left.mu.Unlock()
-
-	o.logger.Debug("closing right camera")
-	o.Right.mu.Lock()
-	o.logger.Debug("canceling right camera")
-	o.Right.cancel()
-	o.logger.Debug("stopping right camera")
-	o.Right.Stop()
-	o.logger.Debug("unlocking right camera")
-	o.Right.mu.Unlock()
-
 	return nil
 }
