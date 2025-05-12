@@ -7,6 +7,7 @@ import (
 	"image/jpeg"
 	"io"
 	"log"
+	"log/slog"
 	"net/http"
 	"sync"
 	"time"
@@ -65,9 +66,11 @@ func StreamHandlerFn(
 			case <-r.Context().Done():
 				return nil
 			case <-ticker.C:
+				slog.Debug("StreamHandlerFn", "tick", "tick")
 				// Only process on tick to control frame rate
 				select {
 				case img, ok := <-getStream():
+					slog.Debug("StreamHandlerFn", "tick", "got image")
 					if !ok {
 						return nil // Channel closed
 					}
@@ -81,14 +84,12 @@ func StreamHandlerFn(
 						return err
 					}
 					if putStream != nil {
-						select {
-						case putStream() <- img:
-						default:
-							// No new frame available, continue
-						}
+						putStream() <- img
 					}
-				default:
-					// No new frame available, continue
+				case <-timeout:
+					return nil
+				case <-r.Context().Done():
+					return nil
 				}
 			}
 		}
@@ -101,6 +102,7 @@ func processImg(
 	jpegPool *sync.Pool,
 	w io.Writer,
 ) error {
+	slog.Debug("processImg", "tick", "got image")
 	// Clear buffer and reuse
 	buffer.Reset()
 

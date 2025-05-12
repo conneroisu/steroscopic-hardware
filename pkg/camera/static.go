@@ -45,9 +45,11 @@ func (z *StaticCamera) Stream(ctx context.Context, outCh chan *image.Gray) {
 			slog.Error("Error reading image", "err", err)
 			return
 		case img := <-z.read(errChan):
+			slog.Debug("read image")
 			if img == nil {
 				continue
 			}
+			slog.Debug("sending image")
 			outCh <- img
 		}
 	}
@@ -57,9 +59,11 @@ func (z *StaticCamera) Stream(ctx context.Context, outCh chan *image.Gray) {
 func (z *StaticCamera) Config() *Config { return &Config{} }
 
 func (z *StaticCamera) read(errChan chan error) <-chan *image.Gray {
+	slog.Debug("reading image: " + z.Path)
 	mkdCh := make(chan *image.Gray, 1)
 	img, err := z.getImage()
 	if err != nil {
+		slog.Error("failed to get image", "err", err)
 		errChan <- fmt.Errorf("failed to get image: %v", err)
 		return nil
 	}
@@ -68,6 +72,7 @@ func (z *StaticCamera) read(errChan chan error) <-chan *image.Gray {
 }
 
 func (z *StaticCamera) getImage() (*image.Gray, error) {
+	slog.Debug("getting image: " + z.Path)
 	// Open the image file
 	file, err := os.Open(z.Path)
 	if err != nil {

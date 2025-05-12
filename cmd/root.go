@@ -88,15 +88,11 @@ func Run(
 		if CloseErr != nil {
 			fmt.Println("Failed to close left camera" + CloseErr.Error())
 		}
-	}()
-	defer func() {
-		CloseErr := camera.Right().Close()
+		CloseErr = camera.Right().Close()
 		if CloseErr != nil {
 			fmt.Println("Failed to close right camera" + CloseErr.Error())
 		}
-	}()
-	defer func() {
-		CloseErr := camera.Output().Close()
+		CloseErr = camera.Output().Close()
 		if CloseErr != nil {
 			fmt.Println("Failed to close output camera" + CloseErr.Error())
 		}

@@ -57,11 +57,11 @@ This package serves as the interface layer between the web UI and the underlying
 - [func Make\(fn APIFn\) http.HandlerFunc](<#Make>)
 - [func MorphableHandler\(wrapper func\(templ.Component\) templ.Component, morph templ.Component\) http.HandlerFunc](<#MorphableHandler>)
 - [type APIFn](<#APIFn>)
-  - [func ConfigureCamera\(logger \*logger.Logger, params \*despair.Parameters, leftStream, rightStream, outputStream \*camera.Stream, isLeft bool\) APIFn](<#ConfigureCamera>)
+  - [func ConfigureCamera\(ctx context.Context, typ camera.Type\) APIFn](<#ConfigureCamera>)
   - [func ErrorHandler\(fn APIFn\) APIFn](<#ErrorHandler>)
   - [func GetPorts\(logger \*logger.Logger\) APIFn](<#GetPorts>)
-  - [func ParametersHandler\(logger \*logger.Logger, params \*despair.Parameters\) APIFn](<#ParametersHandler>)
-  - [func StreamHandlerFn\(manager \*camera.Stream\) APIFn](<#StreamHandlerFn>)
+  - [func ParametersHandler\(\) APIFn](<#ParametersHandler>)
+  - [func StreamHandlerFn\(typ camera.Type\) APIFn](<#StreamHandlerFn>)
 
 
 <a name="Make"></a>
@@ -74,7 +74,7 @@ func Make(fn APIFn) http.HandlerFunc
 Make returns a function that can be used as an http.HandlerFunc.
 
 <a name="MorphableHandler"></a>
-## func [MorphableHandler](<https://github.com/conneroisu/steroscopic-hardware/blob/main/cmd/handlers/api.go#L42-L45>)
+## func [MorphableHandler](<https://github.com/conneroisu/steroscopic-hardware/blob/main/cmd/handlers/api.go#L48-L51>)
 
 ```go
 func MorphableHandler(wrapper func(templ.Component) templ.Component, morph templ.Component) http.HandlerFunc
@@ -92,16 +92,16 @@ type APIFn func(w http.ResponseWriter, r *http.Request) error
 ```
 
 <a name="ConfigureCamera"></a>
-### func [ConfigureCamera](<https://github.com/conneroisu/steroscopic-hardware/blob/main/cmd/handlers/configure.go#L16-L21>)
+### func [ConfigureCamera](<https://github.com/conneroisu/steroscopic-hardware/blob/main/cmd/handlers/configure.go#L16-L19>)
 
 ```go
-func ConfigureCamera(logger *logger.Logger, params *despair.Parameters, leftStream, rightStream, outputStream *camera.Stream, isLeft bool) APIFn
+func ConfigureCamera(ctx context.Context, typ camera.Type) APIFn
 ```
 
 ConfigureCamera handles client requests to configure all camera parameters at once.
 
 <a name="ErrorHandler"></a>
-### func [ErrorHandler](<https://github.com/conneroisu/steroscopic-hardware/blob/main/cmd/handlers/api.go#L57-L59>)
+### func [ErrorHandler](<https://github.com/conneroisu/steroscopic-hardware/blob/main/cmd/handlers/api.go#L63-L65>)
 
 ```go
 func ErrorHandler(fn APIFn) APIFn
@@ -119,19 +119,19 @@ func GetPorts(logger *logger.Logger) APIFn
 GetPorts handles client requests to configure the camera.
 
 <a name="ParametersHandler"></a>
-### func [ParametersHandler](<https://github.com/conneroisu/steroscopic-hardware/blob/main/cmd/handlers/params.go#L14-L17>)
+### func [ParametersHandler](<https://github.com/conneroisu/steroscopic-hardware/blob/main/cmd/handlers/params.go#L14>)
 
 ```go
-func ParametersHandler(logger *logger.Logger, params *despair.Parameters) APIFn
+func ParametersHandler() APIFn
 ```
 
 ParametersHandler handles client requests to change the parameters of the desparity map generator.
 
 <a name="StreamHandlerFn"></a>
-### func [StreamHandlerFn](<https://github.com/conneroisu/steroscopic-hardware/blob/main/cmd/handlers/stream.go#L22>)
+### func [StreamHandlerFn](<https://github.com/conneroisu/steroscopic-hardware/blob/main/cmd/handlers/stream.go#L23-L25>)
 
 ```go
-func StreamHandlerFn(manager *camera.Stream) APIFn
+func StreamHandlerFn(typ camera.Type) APIFn
 ```
 
 StreamHandlerFn returns a handler for streaming camera images to multiple clients.
