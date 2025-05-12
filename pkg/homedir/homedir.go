@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"errors"
 	"image"
+	"image/png"
+	"log/slog"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -11,6 +13,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"time"
 )
 
 // DisableCache will disable caching of the home directory. Caching is enabled
@@ -167,11 +170,36 @@ func dirWindows() (string, error) {
 	return home, nil
 }
 
+var deleteOnce sync.Once
+
 // SaveImage saves an image to the home directory.
+// schema: stero-image-<timestamp>.png
 func SaveImage(img *image.Gray) error {
 	dir, err := Dir()
 	if err != nil {
 		return err
 	}
-	return os.WriteFile(filepath.Join(dir, "image.png"), img.Pix, 0644)
+
+	deleteOnce.Do(func() {
+		// remove the old images
+		ls, err := os.ReadDir(dir)
+		if err != nil {
+			slog.Error("error reading dir", "err", err)
+		}
+		for _, f := range ls {
+			if strings.HasPrefix(f.Name(), "stero-image-") {
+				err := os.Remove(filepath.Join(dir, f.Name()))
+				if err != nil {
+					slog.Error("error removing image", "err", err)
+				}
+			}
+		}
+	})
+	f, err := os.Create(filepath.Join(dir, "stero-image-"+time.Now().Format("2006-01-02-15-04-05")+".png"))
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	return png.Encode(f, img)
 }
