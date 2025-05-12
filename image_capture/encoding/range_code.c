@@ -16,20 +16,6 @@ typedef struct
     uint32_t high;
 } range_t;
 
-counts_t find_count(counts_t* counts, int symbol)
-{
-    for(int i = 0; i < SYMBOL_SIZE; ++i)
-    {
-        if(counts[i].symbol == symbol)
-        {
-            return counts[i];
-        }
-    }
-
-    // Should never get here.
-    return counts[0];
-}
-
 
 /*
     Basic Description:
@@ -117,6 +103,23 @@ size_t range_code(uint8_t* uncoded, uint8_t* coded, size_t size, int adjustment_
         symbol_counts[i].previous_count_sum = symbol_counts[i - 1].previous_count_sum + symbol_counts[i - 1].current_count;
     }
 
+    // Sort the byte counts by symbol value, this allows us to use the symbol as the index for O(1) access
+    for(int i = 0; i < SYMBOL_SIZE - 1; ++i)
+    {
+        int smallest_index = i;
+        for(int j = i + 1; j < SYMBOL_SIZE; ++j)
+        {
+            if(symbol_counts[j].symbol < symbol_counts[smallest_index].symbol)
+            {
+                smallest_index = j;
+            }
+        }
+
+        counts_t temp = symbol_counts[i];
+        symbol_counts[i] = symbol_counts[smallest_index];
+        symbol_counts[smallest_index] = temp;
+    }
+
     // Iterate through all bytes
     for(size_t i = 0; i < size; ++i)
     {
@@ -130,7 +133,7 @@ size_t range_code(uint8_t* uncoded, uint8_t* coded, size_t size, int adjustment_
 
             int symbol = (*next_uncoded & ((SYMBOL_SIZE - 1) << (BITS_PER_SYMBOL * j))) >> (BITS_PER_SYMBOL * j);
 
-            counts_t count = find_count(symbol_counts, symbol);
+            counts_t count = symbol_counts[symbol];
 
             range.low += (uint32_t) ((count.previous_count_sum * range_size) / total_symbol_count);
             range.high = ((uint32_t) ((count.current_count * range_size) / total_symbol_count)) + range.low;
