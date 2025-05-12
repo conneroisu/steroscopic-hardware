@@ -91,6 +91,8 @@ func ConfigureCamera(
 				return err
 			}
 			camera.SetRightCamera(ctx, cam)
+		default:
+			return fmt.Errorf("unsupported camera type: %v", typ)
 		}
 		return nil
 	}
