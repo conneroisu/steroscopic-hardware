@@ -1,7 +1,7 @@
 #include "range_code.h"
 #define MAX_RANGE UINT32_MAX
-#define SYMBOL_SIZE ((uint8_t) 4)
-#define BITS_PER_SYMBOL ((uint8_t) 2)
+#define SYMBOL_SIZE ((uint8_t) 16)
+#define BITS_PER_SYMBOL ((uint8_t) 4)
 
 typedef struct
 {
