@@ -7,7 +7,9 @@ import (
 	"image/color"
 	"log"
 	"sync"
+	"time"
 
+	"github.com/conneroisu/steroscopic-hardware/pkg/homedir"
 	"github.com/conneroisu/steroscopic-hardware/pkg/logger"
 	"go.bug.st/serial"
 )
@@ -222,6 +224,23 @@ func (sc *SerialCamera) readFn(
 	sc.mu.Lock()
 	defer sc.mu.Unlock()
 
+	doneCh := make(chan struct{})
+	go func() {
+		start := time.Now()
+		for {
+			select {
+			case <-time.After(time.Second * 30):
+				// note to self that we are still working
+				sc.logger.Info("still working", "time", time.Since(start))
+			case <-ctx.Done():
+				sc.logger.Debug("context done, stopping read")
+				return
+			case <-doneCh:
+				return
+			}
+		}
+	}()
+
 	for {
 		var buf = make([]byte, 100)
 		length, err := sc.port.Read(buf)
@@ -232,11 +251,12 @@ func (sc *SerialCamera) readFn(
 		}
 		tempBuf = append(tempBuf, buf[:length]...)
 		total += length
-		sc.logger.Info("read", "length", length, "total", total, "expected", expectedLength)
 		if total >= sc.ImageWidth*sc.ImageHeight {
 			break
 		}
 	}
+	doneCh <- struct{}{}
+	sc.logger.Info("read", "total", total, "expected", expectedLength)
 
 	img := image.NewGray(image.Rect(0, 0, sc.ImageWidth, sc.ImageHeight))
 
@@ -247,6 +267,12 @@ func (sc *SerialCamera) readFn(
 			gray := tempBuf[i]
 			img.SetGray(x, y, color.Gray{Y: gray})
 		}
+	}
+
+	// save image to homedir using pkg.homedir
+	err := homedir.SaveImage(img)
+	if err != nil {
+		sc.logger.Error("failed to save image", "err", err)
 	}
 
 	select {
