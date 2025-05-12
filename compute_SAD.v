@@ -68,7 +68,7 @@ endmodule
 module compute_max_disp #(
     parameter WIN = 15,             // Window size/block size; Win * Win
     parameter DATA_SIZE = 8,        // Data size in bits
-    parameter IMG_W = 640,          // Imwage resolution width
+    parameter IMG_W = 64,          // Imwage resolution width
     parameter MAX_DISP = 64,        // Max disparity for each pixel
     parameter DISP_THREADS = 16,    // Number of disparities in parallel (MAX_DISP has to be divisible by this)
     // Calculated parameters \\
@@ -81,9 +81,9 @@ module compute_max_disp #(
 )(
     input wire [DATA_SIZE * IMG_W * WIN - 1 : 0] input_array_L,
     input wire [DATA_SIZE * IMG_W * WIN - 1 : 0] input_array_R,
-    input clk,
-    input rst, 
-    // input col_index_L,
+    input wire clk,
+    input wire rst, 
+    input reg col_index, 
     output reg [DISP_BITS - 1 : 0] output_disp,
     output reg done
 );
@@ -105,10 +105,7 @@ module compute_max_disp #(
             end
         end
     endgenerate
-
-    // Column pointer
-    reg [IMG_W_ARR - 1 : 0] col_index;
-
+    
     // Flatten refence (left in our case) window buffer
     wire [DATA_SIZE * WIN_SIZE - 1 : 0] winL_flat; 
     
@@ -131,7 +128,7 @@ module compute_max_disp #(
         for (d = 0; d < DISP_THREADS; d = d + 1) begin : winR_flatten
             for (r = 0; r < WIN; r = r + 1) begin : winR_row_unpack
                 for (c = 0; c < WIN; c = c + 1) begin : winR_col_unpack
-                    assign winR_flat[DATA_SIZE * (r * WIN + c) +: DATA_SIZE] = 
+                    assign winR_flat[d][DATA_SIZE * (r * WIN + c) +: DATA_SIZE] = 
                         img_block_R[r][col_index + c + base_disp + d];
                 end
             end   

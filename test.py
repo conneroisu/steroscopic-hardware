@@ -21,37 +21,63 @@
 # plt.show()
 
 
-# ChatGPT generated for .mem files 
+#!/usr/bin/env python3
+"""
+Generate .mem files for compute_max_disp_tb with TEST_CASES=1.
+
+Produces:
+  • left_image.mem   – WIN × IMG_W values of left window
+  • right_image.mem  – WIN × IMG_W values of right window,
+                       shifted by a random true_disp (0 ≤ true_disp < MAX_DISP)
+  • exp_disp.mem     – single-line containing the true_disp
+
+All values are 8-bit hex, one per line, ready for $readmemh().
+"""
 import random
 
-def generate_mem(filename, size, pattern='increment', base=0):
-    values = []
+# parameters (must match your TB)
+WIN       = 15
+IMG_W     = 64
+MAX_DISP  = 64
+DATA_MAX  = (1 << 8) - 1  # 8-bit pixels
+TEST_CASES = 1             # fixed to 1
 
-    for i in range(size):
-        if pattern == 'increment':
-            val = (base + i) % 256
-        elif pattern == 'constant':
-            val = base
-        elif pattern == 'random':
-            val = random.randint(0, 255)
-        elif pattern == 'checker':
-            val = 255 if (i % 2 == 0) else 0
+# pick a random “true” disparity
+true_disp = random.randint(0, MAX_DISP - 1)
+
+# build left image block
+left = [
+    [random.randint(0, DATA_MAX) for _ in range(IMG_W)]
+    for _ in range(WIN)
+]
+
+# build right image block by shifting left → right by true_disp
+right = []
+for r in range(WIN):
+    row = []
+    for c in range(IMG_W):
+        if c >= true_disp:
+            # alignment: right pixel at c came from left at c - true_disp
+            row.append(left[r][c - true_disp])
         else:
-            raise ValueError("Unknown pattern")
+            # fill the “underflow” with random noise
+            row.append(random.randint(0, DATA_MAX))
+    right.append(row)
 
-        values.append(f"{val:02X}")
+# helper to flatten and write a .mem file
+def write_mem(filename, data_2d):
+    with open(filename, "w") as f:
+        for row in data_2d:
+            for val in row:
+                f.write(f"{val:02X}\n")
 
-    with open(filename, 'w') as f:
-        for v in values:
-            f.write(v + '\n')
+# write left_image.mem and right_image.mem
+write_mem("left_image.mem",  left)
+write_mem("right_image.mem", right)
 
-    print(f"[+] Generated {size} values in {filename} using '{pattern}' pattern.")
+# write exp_disp.mem (one line)
+with open("exp_disp.mem", "w") as f:
+    f.write(f"{true_disp}\n")
 
-if __name__ == "__main__":
-    IMG_W = 64
-    WIN = 15
-    ROWS = WIN
-
-    total_pixels = IMG_W * ROWS
-
-    generate_mem("compute_SAD.mem", total_pixels, pattern='increment', base=0)
+print(f"Generated left_image.mem, right_image.mem (each {WIN*IMG_W} lines) ")
+print(f"and exp_disp.mem with true_disp = {true_disp}")
