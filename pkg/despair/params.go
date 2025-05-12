@@ -8,6 +8,13 @@ var (
 	defaultParams = atomic.Pointer[Parameters]{}
 )
 
+func init() {
+	SetDefaultParams(Parameters{
+		BlockSize:    16,
+		MaxDisparity: 64,
+	})
+}
+
 // SetDefaultParams sets the default stereoscopic algorithm parameters.
 func SetDefaultParams(params Parameters) {
 	defaultParams.Store(&params)
