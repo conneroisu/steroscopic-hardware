@@ -152,8 +152,7 @@ func testConfigureCamera(
 		presetConfig.Compression = compression
 
 		// Log configuration details
-		logger.InfoContext(
-			r.Context(),
+		logger.Info(
 			"testing configuration",
 			"stream", isLeft,
 			"port", portStr,

@@ -73,8 +73,7 @@ func ConfigureCamera(
 		presetConfig.Compression = compression
 
 		// Log Configuration
-		logger.InfoContext(
-			r.Context(),
+		logger.Info(
 			"setting",
 			"stream",
 			func() string { // inlined

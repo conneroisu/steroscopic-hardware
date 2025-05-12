@@ -49,8 +49,7 @@ func ParametersHandler(
 		}
 		params.BlockSize = blockSize
 		params.MaxDisparity = maxDisparity
-		logger.InfoContext(
-			r.Context(),
+		logger.Info(
 			"received parameters:",
 			"blocksize",
 			params.BlockSize,

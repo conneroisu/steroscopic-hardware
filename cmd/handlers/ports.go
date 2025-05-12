@@ -28,8 +28,7 @@ func GetPorts(
 				if tries > 10 {
 					return errors.New("no serial ports found")
 				}
-				logger.ErrorContext(
-					r.Context(),
+				logger.Error(
 					"no serial ports found",
 					"tries",
 					tries,
@@ -38,8 +37,7 @@ func GetPorts(
 				tries++
 				continue
 			}
-			logger.InfoContext(
-				r.Context(),
+			logger.Info(
 				"Found serial ports",
 				"# of ports",
 				len(ports),
