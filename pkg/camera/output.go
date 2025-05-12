@@ -116,14 +116,22 @@ func (o *OutputCamera) read(_ chan error) <-chan *image.Gray {
 func (o *OutputCamera) Close() error {
 	close(o.InputCh)
 
+	o.logger.Debug("closing left camera")
 	o.Left.mu.Lock()
+	o.logger.Debug("canceling left camera")
 	o.Left.cancel()
+	o.logger.Debug("stopping left camera")
 	o.Left.Stop()
+	o.logger.Debug("unlocking left camera")
 	o.Left.mu.Unlock()
 
+	o.logger.Debug("closing right camera")
 	o.Right.mu.Lock()
+	o.logger.Debug("canceling right camera")
 	o.Right.cancel()
+	o.logger.Debug("stopping right camera")
 	o.Right.Stop()
+	o.logger.Debug("unlocking right camera")
 	o.Right.mu.Unlock()
 
 	return nil
