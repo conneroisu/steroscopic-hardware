@@ -149,7 +149,7 @@ size_t range_code(uint8_t* uncoded, uint8_t* coded, size_t size, int adjustment_
 
             /*
                 Edge Case:
-                If the range is less than (SYMBOL_COUNT * 32) and the SET low and high MSBs don't match, we need
+                If the range is less than (SYMBOL_COUNT * adjustment_factor) and the SET low and high MSBs don't match, we need
                 to shift the range such that they do match. Otherwise, we run out of range to get the resolution we need.
                 This is done by shifting BOTH low and high until high is the last possible number with the MSB equal to low's MSB.
             */
