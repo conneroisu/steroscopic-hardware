@@ -36,18 +36,6 @@ const (
 	readHeaderTimeout = 5 * time.Second
 )
 
-var (
-	// defaultParams defines the initial stereoscopic algorithm parameters
-	// BlockSize: Size of comparison blocks used in the stereo matching
-	// algorithm.
-	// MaxDisparity: Maximum pixel displacement between corresponding points
-	// in the stereo pair.
-	defaultParams = despair.Parameters{
-		BlockSize:    8,
-		MaxDisparity: 64,
-	}
-)
-
 // Run is the entry point for the application that starts the HTTP server and
 // manages its lifecycle.
 //
@@ -85,26 +73,33 @@ func Run(
 
 	logger := logger.NewLogger()
 
-	leftCamera := camera.NewStaticCamera("./testdata/L_00001.png")
-	rightCamera := camera.NewStaticCamera("./testdata/R_00001.png")
-	leftStreamManager := camera.NewStreamManager(leftCamera, &logger)
-	rightStreamManager := camera.NewStreamManager(rightCamera, &logger)
-	outputCamera := camera.NewOutputCamera(
-		&logger,
-		&defaultParams,
-		leftStreamManager,
-		rightStreamManager,
-	)
-	outputStreamManager := camera.NewStreamManager(outputCamera, &logger)
-	defer outputStreamManager.Stop()
-	defer leftStreamManager.Stop()
-	defer rightStreamManager.Stop()
+	camera.SetLeftCamera(ctx,
+		&camera.Camera{
+			Camer: camera.NewStaticCamera("./testdata/L_00001.png", camera.LeftCh()),
+		})
+	camera.SetRightCamera(ctx,
+		&camera.Camera{
+			Camer: camera.NewStaticCamera("./testdata/R_00001.png", camera.RightCh()),
+		})
+	camera.SetOutputCamera(ctx,
+		camera.NewOutputCamera(despair.DefaultParams()))
+	defer func() {
+		CloseErr := camera.Left().Close()
+		if CloseErr != nil {
+			fmt.Println("Failed to close left camera" + CloseErr.Error())
+		}
+		CloseErr = camera.Right().Close()
+		if CloseErr != nil {
+			fmt.Println("Failed to close right camera" + CloseErr.Error())
+		}
+		CloseErr = camera.Output().Close()
+		if CloseErr != nil {
+			fmt.Println("Failed to close output camera" + CloseErr.Error())
+		}
+	}()
 	handler, err := NewServer(
+		ctx,
 		&logger,
-		&defaultParams,
-		leftStreamManager,
-		rightStreamManager,
-		outputStreamManager,
 		cancel,
 	)
 	if err != nil {
@@ -179,19 +174,15 @@ func Run(
 //
 // Returns an http.Handler and any error encountered during setup.
 func NewServer(
+	ctx context.Context,
 	logger *logger.Logger,
-	params *despair.Parameters,
-	leftStream, rightStream, outputStream *camera.Stream,
 	cancel context.CancelFunc,
 ) (http.Handler, error) {
 	mux := http.NewServeMux()
 	err := AddRoutes(
+		ctx,
 		mux,
 		logger,
-		params,
-		&leftStream,
-		&rightStream,
-		&outputStream,
 		cancel,
 	)
 	if err != nil {

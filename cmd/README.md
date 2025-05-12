@@ -26,16 +26,16 @@ The main packages are:
 
 ## Index
 
-- [func AddRoutes\(mux \*http.ServeMux, logger \*logger.Logger, params \*despair.Parameters, leftStream, rightStream, outputStream \*camera.Stream, cancel context.CancelFunc\) error](<#AddRoutes>)
-- [func NewServer\(logger \*logger.Logger, params \*despair.Parameters, leftStream, rightStream, outputStream \*camera.Stream, cancel context.CancelFunc\) \(http.Handler, error\)](<#NewServer>)
+- [func AddRoutes\(ctx context.Context, mux \*http.ServeMux, logger \*logger.Logger, cancel context.CancelFunc\) error](<#AddRoutes>)
+- [func NewServer\(ctx context.Context, logger \*logger.Logger, cancel context.CancelFunc\) \(http.Handler, error\)](<#NewServer>)
 - [func Run\(ctx context.Context, onStart func\(\)\) error](<#Run>)
 
 
 <a name="AddRoutes"></a>
-## func [AddRoutes](<https://github.com/conneroisu/steroscopic-hardware/blob/main/cmd/routes.go#L44-L50>)
+## func [AddRoutes](<https://github.com/conneroisu/steroscopic-hardware/blob/main/cmd/routes.go#L43-L48>)
 
 ```go
-func AddRoutes(mux *http.ServeMux, logger *logger.Logger, params *despair.Parameters, leftStream, rightStream, outputStream *camera.Stream, cancel context.CancelFunc) error
+func AddRoutes(ctx context.Context, mux *http.ServeMux, logger *logger.Logger, cancel context.CancelFunc) error
 ```
 
 AddRoutes configures all HTTP routes and handlers for the application.
@@ -63,10 +63,10 @@ Parameters:
 Returns any error encountered during route configuration.
 
 <a name="NewServer"></a>
-## func [NewServer](<https://github.com/conneroisu/steroscopic-hardware/blob/main/cmd/root.go#L181-L186>)
+## func [NewServer](<https://github.com/conneroisu/steroscopic-hardware/blob/main/cmd/root.go#L176-L180>)
 
 ```go
-func NewServer(logger *logger.Logger, params *despair.Parameters, leftStream, rightStream, outputStream *camera.Stream, cancel context.CancelFunc) (http.Handler, error)
+func NewServer(ctx context.Context, logger *logger.Logger, cancel context.CancelFunc) (http.Handler, error)
 ```
 
 NewServer creates a new web\-ui server with all necessary routes and handlers configured.
@@ -85,7 +85,7 @@ Parameters:
 Returns an http.Handler and any error encountered during setup.
 
 <a name="Run"></a>
-## func [Run](<https://github.com/conneroisu/steroscopic-hardware/blob/main/cmd/root.go#L68-L71>)
+## func [Run](<https://github.com/conneroisu/steroscopic-hardware/blob/main/cmd/root.go#L56-L59>)
 
 ```go
 func Run(ctx context.Context, onStart func()) error

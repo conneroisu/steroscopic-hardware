@@ -9,7 +9,6 @@ import (
 	"github.com/conneroisu/steroscopic-hardware/cmd/components"
 	"github.com/conneroisu/steroscopic-hardware/cmd/handlers"
 	"github.com/conneroisu/steroscopic-hardware/pkg/camera"
-	"github.com/conneroisu/steroscopic-hardware/pkg/despair"
 	"github.com/conneroisu/steroscopic-hardware/pkg/logger"
 	"github.com/conneroisu/steroscopic-hardware/pkg/web"
 )
@@ -42,10 +41,9 @@ var static embed.FS
 //
 // Returns any error encountered during route configuration.
 func AddRoutes(
+	ctx context.Context,
 	mux *http.ServeMux,
 	logger *logger.Logger,
-	params *despair.Parameters,
-	leftStream, rightStream, outputStream **camera.Stream,
 	cancel context.CancelFunc,
 ) error {
 	mux.HandleFunc("GET /checkhealth", func(_ http.ResponseWriter, _ *http.Request) {})
@@ -62,48 +60,32 @@ func AddRoutes(
 	})
 	mux.Handle("GET /{$}", handlers.MorphableHandler(
 		components.AppFn(web.LivePageTitle),
-		components.Live(params.BlockSize, params.MaxDisparity, leftStream, rightStream),
+		components.Live(),
 	))
 	mux.HandleFunc(
 		"POST /update-params",
-		handlers.Make(handlers.ParametersHandler(logger, params)),
+		handlers.Make(handlers.ParametersHandler()),
 	)
 	mux.HandleFunc(
 		"GET /stream/left", // Left Camera
-		handlers.Make(handlers.StreamHandlerFn(leftStream)),
+		handlers.Make(handlers.StreamHandlerFn(camera.LeftCameraType)),
 	)
 	mux.HandleFunc(
 		"GET /stream/right", // Right Camera
-		handlers.Make(handlers.StreamHandlerFn(rightStream)),
+		handlers.Make(handlers.StreamHandlerFn(camera.RightCameraType)),
 	)
 	mux.HandleFunc(
 		"GET /stream/out", // Depth Map
-		handlers.Make(handlers.StreamHandlerFn(outputStream)),
+		handlers.Make(handlers.StreamHandlerFn(camera.OutputCameraType)),
 	)
 	mux.HandleFunc(
 		"POST /left/configure",
 		handlers.Make(handlers.ErrorHandler(
-			handlers.ConfigureCamera(
-				logger,
-				params,
-				leftStream,
-				rightStream,
-				outputStream,
-				true,
-			))),
-	)
+			handlers.ConfigureCamera(ctx, camera.LeftCameraType))))
 	mux.HandleFunc(
 		"POST /right/configure",
 		handlers.Make(handlers.ErrorHandler(
-			handlers.ConfigureCamera(
-				logger,
-				params,
-				leftStream,
-				rightStream,
-				outputStream,
-				false,
-			))),
-	)
+			handlers.ConfigureCamera(ctx, camera.RightCameraType))))
 	mux.HandleFunc("GET /ports", handlers.Make(handlers.GetPorts(logger)))
 	return nil
 }
