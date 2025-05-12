@@ -5,7 +5,7 @@
 #define TEST_MODE 1
 
 #define SIZE 2073600U
-#define CHUNK_SIZE 64800U
+#define CHUNK_SIZE 32400U
 
 int main()
 {
@@ -67,7 +67,7 @@ int main()
         data[i] = i;
     }
 
-    size_t result = range_code(data, coded, 1000, 32);
+    size_t result = range_code(data, coded, 1000, 64);
 
     free(data);
     free(coded);

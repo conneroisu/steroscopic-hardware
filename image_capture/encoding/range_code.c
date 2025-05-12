@@ -30,19 +30,6 @@ counts_t find_count(counts_t* counts, int symbol)
     return counts[0];
 }
 
-// Gets either byte 0, 1, 2, or 3
-int find_set_msb(uint32_t value)
-{
-    for(int i = 3; i >= 0; --i)
-    {
-        if(value & 0xFF << (i * 8))
-        {
-            return i;
-        }
-    }
-
-    return 0;
-}
 
 /*
     Basic Description:
@@ -75,6 +62,12 @@ int find_set_msb(uint32_t value)
 */
 size_t range_code(uint8_t* uncoded, uint8_t* coded, size_t size, int adjustment_threshold)
 {
+    // Size is in byte, calculate the number of symbols using size.
+    size_t total_symbol_count = (8 / BITS_PER_SYMBOL) * size;
+
+    // Don't record byte if it is a part of the leading zeros.
+    int leading_zeros = 1;
+
     size_t result = 0;
     uint8_t* next_coded = coded;
     uint8_t* next_uncoded = uncoded;
@@ -124,8 +117,6 @@ size_t range_code(uint8_t* uncoded, uint8_t* coded, size_t size, int adjustment_
         symbol_counts[i].previous_count_sum = symbol_counts[i - 1].previous_count_sum + symbol_counts[i - 1].current_count;
     }
 
-    size_t total_symbol_count = symbol_counts[SYMBOL_SIZE - 1].previous_count_sum + symbol_counts[SYMBOL_SIZE - 1].current_count;
-
     // Iterate through all bytes
     for(size_t i = 0; i < size; ++i)
     {
@@ -141,22 +132,18 @@ size_t range_code(uint8_t* uncoded, uint8_t* coded, size_t size, int adjustment_
 
             counts_t count = find_count(symbol_counts, symbol);
 
-            range.low += (uint32_t) ((count.previous_count_sum * range_size) / size);
-            range.high = ((uint32_t) ((count.current_count * range_size) / size)) + range.low;
+            range.low += (uint32_t) ((count.previous_count_sum * range_size) / total_symbol_count);
+            range.high = ((uint32_t) ((count.current_count * range_size) / total_symbol_count)) + range.low;
 
             range_size = range.high - range.low;
-        }
-        next_uncoded++;
 
-                    // Emit digits. Max of 3.
+            // Emit digits. Max of 3.
             for(int k = 0; k < 3; ++k)
             {
 
                 // See if we can shift off bytes.
-                int low_set_msb_loc = find_set_msb(range.low);
-                int high_set_msb_loc = find_set_msb(range.high);
-                uint32_t low_byte_value = range.low & (0xFF << (low_set_msb_loc * 8));
-                uint32_t high_byte_value = range.high & (0xFF << (high_set_msb_loc * 8));
+                uint32_t low_byte_value = range.low & 0xFF000000;
+                uint32_t high_byte_value = range.high & 0xFF000000;
 
                 /*
                     Edge Case:
@@ -167,20 +154,31 @@ size_t range_code(uint8_t* uncoded, uint8_t* coded, size_t size, int adjustment_
                 range_size = range.high - range.low;
                 if(range_size < adjustment_threshold && low_byte_value != high_byte_value)
                 {
-                    uint32_t new_high = (low_byte_value + (1 << (8 * low_set_msb_loc))) - 1;
+                    uint32_t new_high = (low_byte_value + (1 << 24)) - 1;
                     uint32_t delta = range.high - new_high;
                     range.low -= delta;
                     range.high = new_high;
                 }
 
-                if(low_byte_value > range_size && low_set_msb_loc == high_set_msb_loc && low_byte_value == high_byte_value)
+                if(low_byte_value == high_byte_value)
                 {
-                    *next_coded = (uint8_t) (low_byte_value >> (low_set_msb_loc * 8));
-                    next_coded++;
-                    result += 8;
+                    uint8_t result_byte = (uint8_t) (low_byte_value >> 24);
 
-                    range.low = range.low << ((4 - low_set_msb_loc) * 8);
-                    range.high = range.high << ((4 - low_set_msb_loc) * 8);
+                    if(leading_zeros && result_byte)
+                    {
+                        leading_zeros = 0;
+                    }
+
+                    *next_coded = result_byte;
+                    next_coded++;
+
+                    if(!leading_zeros)
+                    {
+                        result += 8;
+
+                        range.low = range.low << 24;
+                        range.high = range.high << 24;
+                    }
                 }
             }
 
@@ -190,6 +188,8 @@ size_t range_code(uint8_t* uncoded, uint8_t* coded, size_t size, int adjustment_
             {
                 return 0;
             }
+        }
+        next_uncoded++;
 
     }
 
