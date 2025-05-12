@@ -97,6 +97,34 @@ templ header() {
 					return info.Main.Version
 				}() }
 				</p>
+				<!-- Checkhealth Button (pings /checkhealth every 10 seconds) -->
+				<span
+					id="checkhealth"
+				>
+					Healthy
+				</span>
+				<script>
+					setInterval(function() {
+						fetch("/checkhealth")
+							.then(function(response) {
+									const now = new Date();
+									const t = now.toLocaleTimeString();
+									const hours = now.getHours();
+									const minutes = now.getMinutes();
+									const seconds = now.getSeconds();
+									const formattedTime = `${hours}:${minutes}:${seconds}`;
+								if (response.status == 200) {
+									document.getElementById("checkhealth").innerHTML = "Healthy@" + formattedTime;
+								} else {
+									document.getElementById("checkhealth").innerHTML = "Unhealthy@" + formattedTime;
+								}
+							})
+							.catch(function(err) {
+								console.error("Error:", err);
+								document.getElementById("checkhealth").innerHTML = "Unhealthy";
+							});
+					}, 1000);
+				</script>
 				<div
 					class="flex space-x-4"
 				>

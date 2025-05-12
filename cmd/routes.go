@@ -48,6 +48,7 @@ func AddRoutes(
 	leftStream, rightStream, outputStream **camera.Stream,
 	cancel context.CancelFunc,
 ) error {
+	mux.HandleFunc("GET /checkhealth", func(_ http.ResponseWriter, _ *http.Request) {})
 	mux.Handle(
 		"GET /",
 		http.FileServer(http.FS(static)), // adds `/static/*` to path
