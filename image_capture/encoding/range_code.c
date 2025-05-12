@@ -1,9 +1,11 @@
 #include "range_code.h"
 #define MAX_RANGE UINT32_MAX
-#define SYMBOL_COUNT 256
+#define SYMBOL_SIZE ((uint8_t) 16)
+#define BITS_PER_SYMBOL ((uint8_t) 4)
 
 typedef struct
 {
+    int symbol;
     size_t current_count;
     size_t previous_count_sum;
 } counts_t;
@@ -13,6 +15,20 @@ typedef struct
     uint32_t low;
     uint32_t high;
 } range_t;
+
+counts_t find_count(counts_t* counts, int symbol)
+{
+    for(int i = 0; i < SYMBOL_SIZE; ++i)
+    {
+        if(counts[i].symbol == symbol)
+        {
+            return counts[i];
+        }
+    }
+
+    // Should never get here.
+    return counts[0];
+}
 
 // Gets either byte 0, 1, 2, or 3
 int find_set_msb(uint32_t value)
@@ -52,12 +68,12 @@ int find_set_msb(uint32_t value)
     and work in blocks of that size, shifting off known digits of the final range values.
 
     The range will be adjusted such that a byte can be shifted off if the range is less
-    than (SYMBOL_COUNT * adjustment_factor). This makes it so our range is sufficiently large
+    than (SYMBOL_SIZE * adjustment_threshold). This makes it so our range is sufficiently large
     so we don't run out of resolution when doing the probability calculations. adjustement_factor
     scales with the data size and is determined experimentally. Setting a large value (>= 32) never
     hurts, however, the larger the value, the more bytes you encode. DECODER MUST USE THE SAME VALUE!!!
 */
-size_t range_code(uint8_t* uncoded, uint8_t* coded, size_t size, int adjustment_factor)
+size_t range_code(uint8_t* uncoded, uint8_t* coded, size_t size, int adjustment_threshold)
 {
     size_t result = 0;
     uint8_t* next_coded = coded;
@@ -67,78 +83,113 @@ size_t range_code(uint8_t* uncoded, uint8_t* coded, size_t size, int adjustment_
 
     // Store byte counts
     // This will be used to calculate probabilities without storing them as floating point.
-    counts_t byte_counts[SYMBOL_COUNT];
+    counts_t symbol_counts[SYMBOL_SIZE];
 
     // Zeroize the counts
-    memset(byte_counts, 0, sizeof(counts_t) * SYMBOL_COUNT);
+    memset(symbol_counts, 0, sizeof(counts_t) * SYMBOL_SIZE);
 
     // Count the bytes
     for(size_t i = 0; i < size; ++i)
     {
-        byte_counts[uncoded[i]].current_count++;
+        // Split byte up into symbols.
+        for(int j = 0; j < (8 / BITS_PER_SYMBOL); ++j)
+        {
+            uint8_t byte = uncoded[i];
+            int symbol = (byte & ((SYMBOL_SIZE - 1) << (BITS_PER_SYMBOL * j))) >> (BITS_PER_SYMBOL * j);
+            symbol_counts[symbol].current_count++;
+            symbol_counts[symbol].symbol = uncoded[i];
+        }
+    }
+
+    // Sort the byte counts. Use insertion sort for now for simplicity.
+    for(int i = 0; i < SYMBOL_SIZE - 1; ++i)
+    {
+        int largest_index = i;
+        for(int j = i + 1; j < SYMBOL_SIZE; ++j)
+        {
+            if(symbol_counts[j].current_count > symbol_counts[largest_index].current_count)
+            {
+                largest_index = j;
+            }
+        }
+
+        counts_t temp = symbol_counts[i];
+        symbol_counts[i] = symbol_counts[largest_index];
+        symbol_counts[largest_index] = temp;
     }
 
     // Calculate the previous counts
-    for(int i = 1; i < SYMBOL_COUNT; ++i)
+    for(int i = 1; i < SYMBOL_SIZE; ++i)
     {
-        byte_counts[i].previous_count_sum = byte_counts[i - 1].previous_count_sum + byte_counts[i - 1].current_count;
+        symbol_counts[i].previous_count_sum = symbol_counts[i - 1].previous_count_sum + symbol_counts[i - 1].current_count;
     }
 
-    // Iterate through all blocks.
+    size_t total_symbol_count = symbol_counts[SYMBOL_SIZE - 1].previous_count_sum + symbol_counts[SYMBOL_SIZE - 1].current_count;
+
+    // Iterate through all bytes
     for(size_t i = 0; i < size; ++i)
     {
 
-        // Calculate the next range
         size_t range_size = range.high - range.low;
-
-
-        range.low += (uint32_t) ((byte_counts[*next_uncoded].previous_count_sum * range_size) / size);
-        range.high = ((uint32_t) ((byte_counts[*next_uncoded].current_count * range_size) / size)) + range.low;
-        next_uncoded++;
-
-        // If the ranges ever equal, we did not have enough resolution!
-        // The adjustment factor must be increased!
-        if(range.high == range.low)
+        // Iterate through each symbol in the byte.
+        for(int j = 0; j < (8 / BITS_PER_SYMBOL); ++j)
         {
-            return 0;
-        }
-
-        // Emit digits. Max of 3.
-        for(int j = 0; j < 3; ++j)
-        {
-
-            // See if we can shift off bytes.
-            int low_set_msb_loc = find_set_msb(range.low);
-            int high_set_msb_loc = find_set_msb(range.high);
-            uint32_t low_byte_value = range.low & (0xFF << (low_set_msb_loc * 8));
-            uint32_t high_byte_value = range.high & (0xFF << (high_set_msb_loc * 8));
-
-            /*
-                Edge Case:
-                If the range is less than (SYMBOL_COUNT * adjustment_factor) and the SET low and high MSBs don't match, we need
-                to shift the range such that they do match. Otherwise, we run out of range to get the resolution we need.
-                This is done by shifting BOTH low and high until high is the last possible number with the MSB equal to low's MSB.
-            */
+            // Calculate the next range
             range_size = range.high - range.low;
-            if(range_size < (SYMBOL_COUNT * adjustment_factor) && low_byte_value != high_byte_value)
+
+            int symbol = (*next_uncoded & ((SYMBOL_SIZE - 1) << (BITS_PER_SYMBOL * j))) >> (BITS_PER_SYMBOL * j);
+
+            counts_t count = find_count(symbol_counts, symbol);
+
+            range.low += (uint32_t) ((count.previous_count_sum * range_size) / size);
+            range.high = ((uint32_t) ((count.current_count * range_size) / size)) + range.low;
+
+            range_size = range.high - range.low;
+
+            // Emit digits. Max of 3.
+            for(int k = 0; k < 3; ++k)
             {
-                uint32_t new_high = (low_byte_value + (1 << (8 * low_set_msb_loc))) - 1;
-                uint32_t delta = range.high - new_high;
-                range.low -= delta;
-                range.high = new_high;
+
+                // See if we can shift off bytes.
+                int low_set_msb_loc = find_set_msb(range.low);
+                int high_set_msb_loc = find_set_msb(range.high);
+                uint32_t low_byte_value = range.low & (0xFF << (low_set_msb_loc * 8));
+                uint32_t high_byte_value = range.high & (0xFF << (high_set_msb_loc * 8));
+
+                /*
+                    Edge Case:
+                    If the range is less than adjustment_threshold and the SET low and high MSBs don't match, we need
+                    to shift the range such that they do match. Otherwise, we run out of range to get the resolution we need.
+                    This is done by shifting BOTH low and high until high is the last possible number with the MSB equal to low's MSB.
+                */
+                range_size = range.high - range.low;
+                if(range_size < adjustment_threshold && low_byte_value != high_byte_value)
+                {
+                    uint32_t new_high = (low_byte_value + (1 << (8 * low_set_msb_loc))) - 1;
+                    uint32_t delta = range.high - new_high;
+                    range.low -= delta;
+                    range.high = new_high;
+                }
+
+                if(low_byte_value > range_size && low_set_msb_loc == high_set_msb_loc && low_byte_value == high_byte_value)
+                {
+                    *next_coded = (uint8_t) (low_byte_value >> (low_set_msb_loc * 8));
+                    next_coded++;
+                    result += 8;
+
+                    range.low = range.low << ((4 - low_set_msb_loc) * 8);
+                    range.high = range.high << ((4 - low_set_msb_loc) * 8);
+                }
             }
 
-            if(low_byte_value > range_size && low_set_msb_loc == high_set_msb_loc && low_byte_value == high_byte_value)
+            // If the ranges ever equal, we did not have enough resolution!
+            // The adjustment factor must be increased!
+            if(range.high == range.low)
             {
-                *next_coded = (uint8_t) (low_byte_value >> (low_set_msb_loc * 8));
-                next_coded++;
-                result += 8;
-
-                range.low = range.low << ((4 - low_set_msb_loc) * 8);
-                range.high = range.high << ((4 - low_set_msb_loc) * 8);
+                return 0;
             }
         }
-
+        next_uncoded++;
 
     }
 

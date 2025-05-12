@@ -5,12 +5,15 @@
 #define TEST_MODE 1
 
 #define SIZE 2073600U
+#define CHUNK_SIZE 32768U
 int main()
 {
 
 #if TEST_MODE == 1
     uint8_t* data = calloc(SIZE, sizeof(uint8_t));
     uint8_t* coded = calloc(SIZE, sizeof(uint8_t));
+
+    size_t result = 0;
 
     // Load the image.
     FILE* image = fopen("image.bin", "r");
@@ -28,13 +31,25 @@ int main()
         perror("Could not close image file!");
         return errno;
     }
+    
+    uint8_t* current_data = data;
+    uint8_t* current_coded = coded;
 
-    size_t result = range_code(data, coded, SIZE, 32);
-
-    if(!result)
+    for(int i = 0; i < (SIZE / CHUNK_SIZE); ++i)
     {
-        printf("Error: Adjustment factor of %d is too small!\n", 32);
+        size_t new_result = range_code(current_data, current_coded, CHUNK_SIZE, CHUNK_SIZE);
+        current_coded += (new_result / 8);
+        current_data += CHUNK_SIZE;
+
+        if(!new_result)
+        {
+            printf("Error: Adjustment factor of %d is too small!\n", CHUNK_SIZE);
+        }
+
+        result += new_result;
     }
+
+
 
     free(data);
     free(coded);
@@ -62,11 +77,6 @@ int main()
     uint8_t coded[10];
 
     memset(coded, 0, 10);
-
-    for(int i = 0; i < 10; ++i)
-    {
-        data[i] = i;
-    }
 
     size_t result = range_code(data, coded, 10, 32);
 
