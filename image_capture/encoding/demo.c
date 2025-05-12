@@ -29,7 +29,7 @@ int main()
         return errno;
     }
 
-    size_t result = range_code(data, coded, SIZE, 128);
+    size_t result = range_code(data, coded, SIZE, 32);
 
     if(!result)
     {
@@ -62,6 +62,11 @@ int main()
     uint8_t coded[10];
 
     memset(coded, 0, 10);
+
+    for(int i = 0; i < 10; ++i)
+    {
+        data[i] = i;
+    }
 
     size_t result = range_code(data, coded, 10, 32);
 

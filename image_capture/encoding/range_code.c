@@ -4,7 +4,6 @@
 
 typedef struct
 {
-    int symbol;
     size_t current_count;
     size_t previous_count_sum;
 } counts_t;
@@ -27,20 +26,6 @@ int find_set_msb(uint32_t value)
     }
 
     return 0;
-}
-
-counts_t find_count(counts_t* counts, int symbol)
-{
-    for(int i = 0; i < SYMBOL_COUNT; ++i)
-    {
-        if(counts[i].symbol == symbol)
-        {
-            return counts[i];
-        }
-    }
-
-    // Should never get here.
-    return counts[0];
 }
 
 /*
@@ -91,24 +76,6 @@ size_t range_code(uint8_t* uncoded, uint8_t* coded, size_t size, int adjustment_
     for(size_t i = 0; i < size; ++i)
     {
         byte_counts[uncoded[i]].current_count++;
-        byte_counts[uncoded[i]].symbol = uncoded[i];
-    }
-
-    // Sort the byte counts. Use insertion sort for now for simplicity.
-    for(int i = 0; i < SYMBOL_COUNT - 1; ++i)
-    {
-        int largest_index = i;
-        for(int j = i + 1; j < SYMBOL_COUNT; ++j)
-        {
-            if(byte_counts[j].current_count > byte_counts[largest_index].current_count)
-            {
-                largest_index = j;
-            }
-        }
-
-        counts_t temp = byte_counts[i];
-        byte_counts[i] = byte_counts[largest_index];
-        byte_counts[largest_index] = temp;
     }
 
     // Calculate the previous counts
@@ -124,10 +91,9 @@ size_t range_code(uint8_t* uncoded, uint8_t* coded, size_t size, int adjustment_
         // Calculate the next range
         size_t range_size = range.high - range.low;
 
-        counts_t count = find_count(byte_counts, *next_uncoded);
 
-        range.low += (uint32_t) ((count.previous_count_sum * range_size) / size);
-        range.high = ((uint32_t) ((count.current_count * range_size) / size)) + range.low;
+        range.low += (uint32_t) ((byte_counts[*next_uncoded].previous_count_sum * range_size) / size);
+        range.high = ((uint32_t) ((byte_counts[*next_uncoded].current_count * range_size) / size)) + range.low;
         next_uncoded++;
 
         // If the ranges ever equal, we did not have enough resolution!
