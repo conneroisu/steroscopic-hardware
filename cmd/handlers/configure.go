@@ -16,7 +16,7 @@ import (
 func ConfigureCamera(
 	logger *logger.Logger,
 	params *despair.Parameters,
-	leftStream, rightStream, outputStream *camera.Stream,
+	leftStream, rightStream, outputStream **camera.Stream,
 	isLeft bool,
 ) APIFn {
 	return func(_ http.ResponseWriter, r *http.Request) error {
@@ -30,9 +30,9 @@ func ConfigureCamera(
 			presetConfig    = camera.DefaultCameraConfig()
 		)
 		if isLeft {
-			configureStream = leftStream
+			configureStream = *leftStream
 		} else {
-			configureStream = rightStream
+			configureStream = *rightStream
 		}
 
 		// Parse form data
@@ -95,14 +95,14 @@ func ConfigureCamera(
 			return fmt.Errorf("failed to configure stream: %w", err)
 		}
 
-		outputStream = camera.NewStreamManager(
+		*outputStream = camera.NewStreamManager(
 			nil,
 			logger,
 			camera.WithReplace(
-				outputStream,
+				*outputStream,
 				params,
-				leftStream,
-				rightStream,
+				*leftStream,
+				*rightStream,
 			),
 		)
 

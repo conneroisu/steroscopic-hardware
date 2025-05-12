@@ -115,7 +115,7 @@ templ header() {
 }
 
 templ status(
-	leftStream, rightStream camera.Streamer,
+	leftStream, rightStream **camera.Stream,
 ) {
 	<div
 		class="lg:col-span-1 space-y-6"
@@ -149,7 +149,7 @@ templ status(
 
 templ cameraStatus(
 	typeOf camera.Type,
-	stream camera.Streamer,
+	stream **camera.Stream,
 ) {
 	<div
 		class="bg-gray-800 rounded-lg shadow-lg p-4"
@@ -199,7 +199,7 @@ templ cameraStatus(
 							<select
 								id={ string(typeOf) + "-port" }
 								name="port"
-								value={ stream.Config().Port }
+								value={ (**stream).Config().Port }
 								class="bg-gray-700 text-gray-200 rounded px-3 py-1 text-sm border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
 							>
 								<option value="">Select port</option>
@@ -233,7 +233,7 @@ templ cameraStatus(
 								id={ string(typeOf) + "-baud" }
 								name="baudrate"
 								type="number"
-								value={ stream.Config().BaudRate }
+								value={ (**stream).Config().BaudRate }
 								class="bg-gray-700 text-gray-200 rounded px-3 py-1 text-sm border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 w-24"
 							/>
 						</div>
@@ -246,7 +246,7 @@ templ cameraStatus(
 								id={ string(typeOf) + "-compression" }
 								name="compression"
 								class="bg-gray-700 text-gray-200 rounded px-3 py-1 text-sm border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 w-24"
-								value={ stream.Config().Compression }
+								value={ (**stream).Config().Compression }
 							>
 								<option value="0">No</option>
 								<option value="1">Yes</option>

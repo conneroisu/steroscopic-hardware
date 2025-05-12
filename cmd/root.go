@@ -189,9 +189,9 @@ func NewServer(
 		mux,
 		logger,
 		params,
-		leftStream,
-		rightStream,
-		outputStream,
+		&leftStream,
+		&rightStream,
+		&outputStream,
 		cancel,
 	)
 	if err != nil {

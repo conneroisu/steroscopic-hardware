@@ -19,9 +19,11 @@ import (
 // It uses a buffered channel to send images to clients, and a ticker to control frame rate.
 //
 // As input, it expects a camera.Stream struct, which is used to manage the camera stream.
-func StreamHandlerFn(manager *camera.Stream) APIFn {
+func StreamHandlerFn(
+	stream **camera.Stream,
+) APIFn {
 	// Make sure manager is running
-	manager.Start()
+	(*stream).Start()
 	var jpegPool = sync.Pool{
 		New: func() any {
 			return &jpeg.Options{Quality: 75} // Lower quality for faster encoding
@@ -38,9 +40,9 @@ func StreamHandlerFn(manager *camera.Stream) APIFn {
 		clientChan := make(chan *image.Gray, 10) // Buffer a few frames
 
 		// Register client and defer unregistering
-		manager.Register <- clientChan
+		(*stream).Register <- clientChan
 		defer func() {
-			manager.Unregister <- clientChan
+			(*stream).Unregister <- clientChan
 			// Drain the channel to prevent goroutine leaks
 			for range clientChan {
 				// Just drain

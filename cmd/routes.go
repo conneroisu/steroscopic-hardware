@@ -45,7 +45,7 @@ func AddRoutes(
 	mux *http.ServeMux,
 	logger *logger.Logger,
 	params *despair.Parameters,
-	leftStream, rightStream, outputStream *camera.Stream,
+	leftStream, rightStream, outputStream **camera.Stream,
 	cancel context.CancelFunc,
 ) error {
 	mux.Handle(

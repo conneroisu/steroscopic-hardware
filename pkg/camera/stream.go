@@ -10,12 +10,6 @@ import (
 	"github.com/conneroisu/steroscopic-hardware/pkg/logger"
 )
 
-// Streamer is an interface for a camera streamer.
-type Streamer interface {
-	Config() *Config
-	Stop()
-}
-
 // Stream manages multiple client connections to a single camera stream.
 type Stream struct {
 	clients    map[chan *image.Gray]bool
