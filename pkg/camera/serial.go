@@ -30,7 +30,7 @@ var (
 
 // SerialCamera represents a camera connected via serial port.
 type SerialCamera struct {
-	BaseCamera
+	*BaseCamera
 	port        serial.Port
 	startSeq    []byte
 	endSeq      []byte
@@ -53,7 +53,7 @@ func NewSerialCamera(typ Type, portName string, baudRate int, compression int) (
 	})
 
 	sc := &SerialCamera{
-		BaseCamera:  base,
+		BaseCamera:  &base,
 		startSeq:    DefaultStartSeq,
 		endSeq:      DefaultEndSeq,
 		imageWidth:  DefaultImageWidth,
