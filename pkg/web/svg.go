@@ -24,6 +24,9 @@ var redDown string
 //go:embed circle-x.svg
 var circleX string
 
+//go:embed file-icon.svg
+var fileIcon string
+
 // CircleQuestion is a template for the SVG circle-question icon.
 var CircleQuestion = templ.Raw(circleQuestion)
 
@@ -41,3 +44,6 @@ var RedDown = templ.Raw(redDown)
 
 // CircleX is a template for the SVG circle-x icon.
 var CircleX = templ.Raw(circleX)
+
+// FileIcon is a template for the SVG file-icon icon.
+var FileIcon = templ.Raw(fileIcon)

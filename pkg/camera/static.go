@@ -8,100 +8,113 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/conneroisu/steroscopic-hardware/pkg/despair"
+	"github.com/conneroisu/steroscopic-hardware/pkg/homedir"
 )
 
-// StaticCamera represents a ZedBoard camera.
+// StaticCamera represents a camera that loads images from files.
 type StaticCamera struct {
-	Path   string
-	ctx    context.Context
-	cancel context.CancelFunc
+	BaseCamera
+	path   string
+	logger *slog.Logger
 }
 
-// NewStaticCamera creates a new ZedBoard camera.
-func NewStaticCamera(
-	path string,
-	ch chan *image.Gray,
-) *StaticCamera {
-	slog.Debug("NewStaticCamera", "path", path)
-	ctx, cancel := context.WithCancel(context.Background())
-	sc := &StaticCamera{
-		Path:   path,
-		ctx:    ctx,
-		cancel: cancel,
+// NewStaticCamera creates a new static camera that reads from the specified file path.
+func NewStaticCamera(path string, typ Type) *StaticCamera {
+	return &StaticCamera{
+		BaseCamera: NewBaseCamera(typ),
+		path:       path,
+		logger:     slog.Default().WithGroup(fmt.Sprintf("static-camera-%s", typ)),
 	}
-	go sc.Stream(sc.ctx, ch)
-	return sc
 }
 
-var _ Camer = (*StaticCamera)(nil)
+// Stream continuously reads the static image and sends it to the output channel.
+func (sc *StaticCamera) Stream(ctx context.Context, outCh ImageChannel) {
+	sc.logger.Info("starting static camera stream", "path", sc.path)
+	defer sc.logger.Info("static camera stream stopped")
 
-// Stream streams the camera images to the given channel.
-func (z *StaticCamera) Stream(ctx context.Context, outCh chan *image.Gray) {
-	var errChan = make(chan error, 1)
+	// Create error channel for internal communication
+	errChan := make(chan error, 1)
+
+	// Set up ticker for a reasonable frame rate
+	ticker := time.NewTicker(100 * time.Millisecond)
+	defer ticker.Stop()
+
 	for {
 		select {
 		case <-ctx.Done():
-			z.cancel()
 			return
-		case <-z.ctx.Done():
+		case <-sc.Context().Done():
 			return
 		case err := <-errChan:
-			slog.Error("Error reading image", "err", err)
-			return
-		case img := <-z.read(errChan):
-			slog.Debug("read image")
-			if img == nil {
+			sc.logger.Error("error in static camera", "err", err)
+			time.Sleep(1 * time.Second) // Delay before retry
+		case <-ticker.C:
+			if sc.IsPaused() {
 				continue
 			}
-			outCh <- img
+
+			// Load image file
+			img, err := sc.loadImage()
+			if err != nil {
+				select {
+				case errChan <- err:
+				default:
+					sc.logger.Error("error loading image", "err", err)
+				}
+				continue
+			}
+
+			// Send image to output channel
+			select {
+			case outCh <- img:
+				sc.logger.Debug("image sent to channel")
+			case <-ctx.Done():
+				return
+			case <-sc.Context().Done():
+				return
+			}
 		}
 	}
 }
 
-// Config returns the current configuration of the camera.
-func (z *StaticCamera) Config() *Config { return &Config{} }
-
-func (z *StaticCamera) read(errChan chan error) <-chan *image.Gray {
-	mkdCh := make(chan *image.Gray, 1)
-	img, err := z.getImage()
-	if err != nil {
-		slog.Error("failed to get image", "err", err)
-		errChan <- fmt.Errorf("failed to get image: %v", err)
-		return nil
+// loadImage reads and processes the image file.
+func (sc *StaticCamera) loadImage() (*image.Gray, error) {
+	// Check if file exists
+	if _, err := os.Stat(sc.path); os.IsNotExist(err) {
+		return nil, fmt.Errorf("image file not found: %s", sc.path)
 	}
-	mkdCh <- img
-	return mkdCh
-}
 
-func (z *StaticCamera) getImage() (*image.Gray, error) {
-	// Open the image file
-	file, err := os.Open(z.Path)
-	if err != nil {
-		return nil, fmt.Errorf("error opening image file: %w", err)
-	}
-	defer file.Close()
-
+	// Determine image format based on extension
+	ext := filepath.Ext(sc.path)
 	var grayImg *image.Gray
-	ext := filepath.Ext(z.Path)
+	var err error
+
 	switch ext {
 	case ".png":
-		grayImg, err = despair.LoadPNG(z.Path)
+		grayImg, err = despair.LoadPNG(sc.path)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("error loading PNG: %w", err)
 		}
 	case ".jpg", ".jpeg":
+		// Open the file
+		file, err := os.Open(sc.path)
+		if err != nil {
+			return nil, fmt.Errorf("error opening image file: %w", err)
+		}
+		defer file.Close()
+
 		// Decode the image
 		img, _, err := image.Decode(file)
 		if err != nil {
-			return nil, fmt.Errorf("error decoding image (%s): %w", z.Path, err)
+			return nil, fmt.Errorf("error decoding image: %w", err)
 		}
-		// Create a new grayscale image with the same dimensions
-		bounds := img.Bounds()
-		grayImg = image.NewGray(bounds)
 
 		// Convert to grayscale
+		bounds := img.Bounds()
+		grayImg = image.NewGray(bounds)
 		for y := bounds.Min.Y; y < bounds.Max.Y; y++ {
 			for x := bounds.Min.X; x < bounds.Max.X; x++ {
 				grayImg.Set(x, y, color.GrayModel.Convert(img.At(x, y)))
@@ -111,11 +124,18 @@ func (z *StaticCamera) getImage() (*image.Gray, error) {
 		return nil, fmt.Errorf("unsupported image format: %s", ext)
 	}
 
+	// Save a copy for debugging
+	err = homedir.SaveImage(grayImg)
+	if err != nil {
+		sc.logger.Error("failed to save debug image", "err", err)
+	}
+
 	return grayImg, nil
 }
 
-// Close closes the camera.
-func (z *StaticCamera) Close() error {
-	z.cancel()
+// Close releases all resources.
+func (sc *StaticCamera) Close() error {
+	sc.logger.Info("closing static camera")
+	sc.Cancel()
 	return nil
 }

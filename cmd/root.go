@@ -20,17 +20,23 @@ import (
 const (
 	// defaultHost is the IP address the server binds to (0.0.0.0 = all interfaces).
 	defaultHost = "0.0.0.0"
+
 	// defaultPort is the TCP port the server listens on.
 	defaultPort = "8080"
+
 	// shutdownTimeout is the maximum time allowed for the server to complete a graceful shutdown.
 	shutdownTimeout = 10 * time.Second
+
 	// readTimeout is the maximum duration for reading the entire request.
 	readTimeout = 15 * time.Second
-	// writeTimeout is the maximum duration before timing out writes of the response.
-	// Set very high to accommodate long-running stream connections (Like our streams).
+
+	// writeTimeout is the maximum duration before timing out writes of the response
+	// Set very high to accommodate long-running stream connections.
 	writeTimeout = 999 * time.Second
+
 	// idleTimeout is the maximum amount of time to wait for the next request.
 	idleTimeout = 60 * time.Second
+
 	// readHeaderTimeout is the amount of time allowed to read request headers.
 	readHeaderTimeout = 5 * time.Second
 )
@@ -40,26 +46,16 @@ const (
 //
 // Process:
 //  1. Sets up signal handling for graceful shutdown
-//  2. Initializes the logger and camera stream managers
+//  2. Initializes the logger and camera system
 //  3. Creates and configures the HTTP server with appropriate timeouts
 //  4. Starts the server and monitors for shutdown signals
 //  5. Performs graceful shutdown when terminated
-//
-// Parameters:
-//   - ctx: Parent context for controlling the application lifecycle
-//   - onStart: Callback function executed after server initialization but
-//
-// before accepting connections
-//
-// It returns any unexpected error encountered during server startup or shutdown.
-func Run(
-	ctx context.Context,
-	onStart func(),
-) error {
+func Run(ctx context.Context, onStart func()) error {
+	// Use a WaitGroup to track background goroutines
 	var wg sync.WaitGroup
-
 	start := time.Now()
 
+	// Create a context with signal handling
 	innerCtx, cancel := signal.NotifyContext(
 		context.Background(), // Fresh Context
 		os.Interrupt,
@@ -70,24 +66,18 @@ func Run(
 	)
 	defer cancel()
 
+	// Initialize logger
 	logger := logger.NewLogger()
 
-	camera.SetLeftCamera(ctx,
-		&camera.Camera{
-			Camer: camera.NewStaticCamera("./testdata/L_00001.png", camera.LeftCh()),
-		})
-	camera.SetRightCamera(ctx,
-		&camera.Camera{
-			Camer: camera.NewStaticCamera("./testdata/R_00001.png", camera.RightCh()),
-		})
-	camera.SetOutputCamera(ctx,
-		camera.NewOutputCamera())
+	// Initialize camera system
+	initCameras(ctx)
 	defer func() {
-		CloseErr := camera.CloseAll()
-		if CloseErr != nil {
-			fmt.Println("Failed to close left camera" + CloseErr.Error())
+		if err := camera.CloseAll(); err != nil {
+			slog.Error("Failed to close cameras", "err", err)
 		}
 	}()
+
+	// Create HTTP server
 	handler, err := NewServer(
 		ctx,
 		&logger,
@@ -110,28 +100,35 @@ func Run(
 		ReadHeaderTimeout: readHeaderTimeout,
 	}
 
+	// Channel for server errors
 	serverErrors := make(chan error, 1)
 
-	// Start server
+	// Start server in a goroutine
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
 		slog.Info(
 			"server starting",
-			slog.String("address", httpServer.Addr),
-			slog.String("setup-time", time.Since(start).String()),
+			"address", httpServer.Addr,
+			"setup_time", time.Since(start).String(),
 		)
+
+		// Execute the onStart callback
 		onStart()
+
+		// Start the server
 		err := httpServer.ListenAndServe()
 		if err != nil && !errors.Is(err, http.ErrServerClosed) {
 			serverErrors <- fmt.Errorf("server error: %w", err)
 		}
 	}()
 
-	select { // Wait for either server error or shutdown signal
+	// Wait for shutdown signal or error
+	select {
 	case err := <-serverErrors:
 		return fmt.Errorf("server error: %w", err)
-	case <-innerCtx.Done(): // Signal received, initiate graceful shutdown
+
+	case <-innerCtx.Done():
 		slog.Info("shutdown signal received, shutting down server...")
 		return gracefulShutdown(
 			innerCtx,
@@ -139,7 +136,8 @@ func Run(
 			&wg,
 			httpServer,
 		)
-	case <-ctx.Done(): // Parent context cancelled
+
+	case <-ctx.Done():
 		slog.Info("parent context cancelled, shutting down...")
 		return gracefulShutdown(
 			ctx,
@@ -148,6 +146,59 @@ func Run(
 			httpServer,
 		)
 	}
+}
+
+// initCameras initializes the camera system with default cameras.
+func initCameras(ctx context.Context) {
+	// Initialize left camera with static test image
+	leftCam := camera.NewStaticCamera("./testdata/L_00001.png", camera.LeftCameraType)
+	err := camera.SetCamera(ctx, camera.LeftCameraType, leftCam)
+	if err != nil {
+		slog.Error("failed to initialize left camera", "error", err)
+		return
+	}
+
+	// Initialize right camera with static test image
+	rightCam := camera.NewStaticCamera("./testdata/R_00001.png", camera.RightCameraType)
+	err = camera.SetCamera(ctx, camera.RightCameraType, rightCam)
+	if err != nil {
+		slog.Error("failed to initialize right camera", "error", err)
+		return
+	}
+
+	// Initialize output camera for depth mapping
+	outputCam := camera.NewOutputCamera()
+	err = camera.SetCamera(ctx, camera.OutputCameraType, outputCam)
+	if err != nil {
+		slog.Error("failed to initialize output camera", "error", err)
+		return
+	}
+
+	slog.Info("camera system initialized")
+}
+
+// gracefulShutdown manages the orderly shutdown of the HTTP server.
+//
+// It creates a timeout context for the shutdown operation, attempts to close all active
+// connections, and waits for all background goroutines to complete before returning.
+func gracefulShutdown(
+	ctx context.Context,
+	shutdownTimeout time.Duration,
+	wg *sync.WaitGroup,
+	server *http.Server,
+) error {
+	// Create timeout context for shutdown
+	shutdownCtx, cancel := context.WithTimeout(ctx, shutdownTimeout)
+	defer cancel()
+
+	// Attempt to shut down the server
+	if err := server.Shutdown(shutdownCtx); err != nil {
+		return fmt.Errorf("error during server shutdown: %w", err)
+	}
+
+	// Wait for all goroutines to finish
+	wg.Wait()
+	return nil
 }
 
 // NewServer creates a new web-ui server with all necessary routes and handlers configured.
@@ -189,39 +240,8 @@ func NewServer(
 					slog.String("pattern", r.Pattern),
 				)
 			}
-
 			mux.ServeHTTP(w, r)
 		})
 	var handler http.Handler = slogLogHandler
 	return handler, nil
-}
-
-// gracefulShutdown manages the orderly shutdown of the HTTP server.
-//
-// It creates a timeout context for the shutdown operation, attempts to close all active
-// connections, and waits for all background goroutines to complete before returning.
-//
-// Parameters:
-//   - ctx: Context that may be canceled to abort the shutdown
-//   - shutdownTimeout: Maximum duration to wait for connections to close
-//   - wg: WaitGroup tracking background goroutines
-//   - server: The HTTP server to shut down
-//
-// Returns an error if the server fails to shut down cleanly within the timeout period.
-func gracefulShutdown(
-	ctx context.Context,
-	shutdownTimeout time.Duration,
-	wg *sync.WaitGroup,
-	server *http.Server,
-) error {
-	ctx, cancel := context.WithTimeout(ctx, shutdownTimeout)
-	defer cancel()
-
-	if err := server.Shutdown(ctx); err != nil {
-		return fmt.Errorf("error during server shutdown: %w", err)
-	}
-
-	// Wait for all goroutines to finish
-	wg.Wait()
-	return nil
 }
