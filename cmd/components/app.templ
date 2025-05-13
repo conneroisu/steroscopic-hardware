@@ -353,9 +353,10 @@ templ cameraStatus(
 					<h3 class="text-sm font-medium text-gray-400">
 						Static Image Upload
 					</h3>
-					<div id={ string(typeOf) + "-upload-form-container" } class="space-y-2">
+					<div id={ string(typeOf) + "-upload-form-container" } class="space-y-2" data-camera-type={ string(typeOf) }>
 						<form
 							id={ string(typeOf) + "-upload-form" }
+							class="camera-upload-form"
 							hx-encoding="multipart/form-data"
 							hx-post={ "/" + string(typeOf) + "/upload" }
 							hx-target={ "#" + string(typeOf) + "-upload-form-container" }
@@ -368,27 +369,34 @@ templ cameraStatus(
 									<div class="relative">
 										<input
 											id={ string(typeOf) + "-file-input" }
+											class="file-input absolute inset-0 opacity-0 w-full cursor-pointer z-10"
 											type="file"
 											name="file"
-											class="absolute inset-0 opacity-0 w-full cursor-pointer z-10"
+											accept="image/*"
+											data-camera-type={ string(typeOf) }
 										/>
 										<div class="bg-gray-700 text-gray-200 rounded px-3 py-1 text-sm border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 w-48 truncate">
-											<span id={ string(typeOf) + "-file-name" } class="text-gray-400">No file selected</span>
+											<span class="file-name text-gray-400" data-camera-type={ string(typeOf) }>No file selected</span>
 										</div>
 									</div>
 									<button
 										type="button"
-										class="bg-gray-600 hover:bg-gray-700 text-white rounded p-1"
-										@click={ "document.getElementById('" + string(typeOf) + "-file-input').click()" }
-										title="Select file"
+										class="bg-gray-600 hover:bg-gray-700 text-white rounded p-1 file-select-btn"
+										data-camera-type={ string(typeOf) }
 									>
 										@web.FileIcon
 									</button>
 								</div>
 							</div>
+							<!-- Image preview container - initially hidden -->
+							<div class="image-preview-container hidden mt-3 mb-3" data-camera-type={ string(typeOf) }>
+								<div class="w-full h-48 bg-black rounded flex items-center justify-center">
+									<img class="image-preview max-h-full max-w-full object-contain" alt="Preview" data-camera-type={ string(typeOf) }/>
+								</div>
+							</div>
 							<div class="mt-4">
 								<div class="w-full bg-gray-700 rounded-full h-2 mb-2">
-									<div id={ string(typeOf) + "-progress-bar" } class="bg-blue-500 h-2 rounded-full w-0 transition-all duration-200"></div>
+									<div id={ string(typeOf) + "-progress-bar" } class="progress-bar bg-blue-500 h-2 rounded-full w-0 transition-all duration-200" data-camera-type={ string(typeOf) }></div>
 								</div>
 							</div>
 							<div class="flex justify-end mt-2 items-center">
@@ -407,32 +415,64 @@ templ cameraStatus(
 								</button>
 							</div>
 						</form>
-					</div>
-					<script>
-						document.addEventListener('DOMContentLoaded', function() {
-							const fileInput = document.getElementById('{ string(typeOf) + "-file-input" }');
-							const fileName = document.getElementById('{ string(typeOf) + "-file-name" }');
-							
-							if (fileInput && fileName) {
-								fileInput.addEventListener('change', function() {
-									if (this.files && this.files[0]) {
-										fileName.textContent = this.files[0].name;
-										fileName.classList.remove('text-gray-400');
-										fileName.classList.add('text-gray-200');
-									} else {
-										fileName.textContent = 'No file selected';
-										fileName.classList.remove('text-gray-200');
-										fileName.classList.add('text-gray-400');
-									}
+						<script>
+							document.addEventListener('DOMContentLoaded', function() {
+								// Handle file upload preview for all camera types
+								document.querySelectorAll('.file-input').forEach(function(fileInput) {
+									fileInput.addEventListener('change', function() {
+										const cameraType = this.getAttribute('data-camera-type');
+										const fileName = document.querySelector('.file-name[data-camera-type="' + cameraType + '"]');
+										const imagePreviewContainer = document.querySelector('.image-preview-container[data-camera-type="' + cameraType + '"]');
+										const imagePreview = document.querySelector('.image-preview[data-camera-type="' + cameraType + '"]');
+										
+										if (this.files && this.files[0]) {
+											// Update filename display
+											fileName.textContent = this.files[0].name;
+											fileName.classList.remove('text-gray-400');
+											fileName.classList.add('text-gray-200');
+											
+											// Create image preview
+											const file = this.files[0];
+											if (file.type.match('image.*')) {
+												const reader = new FileReader();
+												
+												reader.onload = function(e) {
+													imagePreview.src = e.target.result;
+													imagePreviewContainer.classList.remove('hidden');
+												};
+												
+												reader.readAsDataURL(file);
+											}
+										} else {
+											// Reset form when no file is selected
+											fileName.textContent = 'No file selected';
+											fileName.classList.remove('text-gray-200');
+											fileName.classList.add('text-gray-400');
+											imagePreviewContainer.classList.add('hidden');
+											imagePreview.src = '';
+										}
+									});
 								});
-							}
-							
-							htmx.on('{ "#" + string(typeOf) + "-upload-form" }', 'htmx:xhr:progress', function(evt) {
-								const percentComplete = evt.detail.loaded / evt.detail.total * 100;
-								document.getElementById('{ string(typeOf) + "-progress-bar" }').style.width = percentComplete + '%';
+								
+								// Handle file select button clicks
+								document.querySelectorAll('.file-select-btn').forEach(function(btn) {
+									btn.addEventListener('click', function() {
+										const cameraType = this.getAttribute('data-camera-type');
+										document.querySelector('.file-input[data-camera-type="' + cameraType + '"]').click();
+									});
+								});
+								
+								// Progress updates for all upload forms
+								document.querySelectorAll('.camera-upload-form').forEach(function(form) {
+									htmx.on(form, 'htmx:xhr:progress', function(evt) {
+										const cameraType = form.closest('[data-camera-type]').getAttribute('data-camera-type');
+										const percentComplete = evt.detail.loaded / evt.detail.total * 100;
+										document.querySelector('.progress-bar[data-camera-type="' + cameraType + '"]').style.width = percentComplete + '%';
+									});
+								});
 							});
-						});
-					</script>
+						</script>
+					</div>
 				</div>
 			</div>
 		</div>

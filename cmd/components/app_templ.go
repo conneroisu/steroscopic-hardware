@@ -431,111 +431,137 @@ func cameraStatus(
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 29, "\" class=\"space-y-2\"><form id=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 29, "\" class=\"space-y-2\" data-camera-type=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var23 string
-		templ_7745c5c3_Var23, templ_7745c5c3_Err = templ.JoinStringErrs(string(typeOf) + "-upload-form")
+		templ_7745c5c3_Var23, templ_7745c5c3_Err = templ.JoinStringErrs(string(typeOf))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/components/app.templ`, Line: 358, Col: 43}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/components/app.templ`, Line: 356, Col: 110}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var23))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 30, "\" hx-encoding=\"multipart/form-data\" hx-post=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 30, "\"><form id=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var24 string
-		templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.JoinStringErrs("/" + string(typeOf) + "/upload")
+		templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.JoinStringErrs(string(typeOf) + "-upload-form")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/components/app.templ`, Line: 360, Col: 49}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/components/app.templ`, Line: 358, Col: 43}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var24))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 31, "\" hx-target=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 31, "\" class=\"camera-upload-form\" hx-encoding=\"multipart/form-data\" hx-post=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var25 string
-		templ_7745c5c3_Var25, templ_7745c5c3_Err = templ.JoinStringErrs("#" + string(typeOf) + "-upload-form-container")
+		templ_7745c5c3_Var25, templ_7745c5c3_Err = templ.JoinStringErrs("/" + string(typeOf) + "/upload")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/components/app.templ`, Line: 361, Col: 66}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/components/app.templ`, Line: 361, Col: 49}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var25))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 32, "\" hx-swap=\"outerHTML\" hx-indicator=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 32, "\" hx-target=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var26 string
-		templ_7745c5c3_Var26, templ_7745c5c3_Err = templ.JoinStringErrs("#" + string(typeOf) + "-upload-indicator")
+		templ_7745c5c3_Var26, templ_7745c5c3_Err = templ.JoinStringErrs("#" + string(typeOf) + "-upload-form-container")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/components/app.templ`, Line: 363, Col: 64}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/components/app.templ`, Line: 362, Col: 66}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var26))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 33, "\"><div class=\"flex items-center justify-between mb-2\"><label for=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 33, "\" hx-swap=\"outerHTML\" hx-indicator=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var27 string
-		templ_7745c5c3_Var27, templ_7745c5c3_Err = templ.JoinStringErrs(string(typeOf) + "-file-input")
+		templ_7745c5c3_Var27, templ_7745c5c3_Err = templ.JoinStringErrs("#" + string(typeOf) + "-upload-indicator")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/components/app.templ`, Line: 366, Col: 51}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/components/app.templ`, Line: 364, Col: 64}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var27))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 34, "\" class=\"text-sm text-gray-300\">Image:</label><div class=\"flex items-center gap-2\"><div class=\"relative\"><input id=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 34, "\"><div class=\"flex items-center justify-between mb-2\"><label for=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var28 string
 		templ_7745c5c3_Var28, templ_7745c5c3_Err = templ.JoinStringErrs(string(typeOf) + "-file-input")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/components/app.templ`, Line: 370, Col: 46}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/components/app.templ`, Line: 367, Col: 51}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var28))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 35, "\" type=\"file\" name=\"file\" class=\"absolute inset-0 opacity-0 w-full cursor-pointer z-10\"><div class=\"bg-gray-700 text-gray-200 rounded px-3 py-1 text-sm border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 w-48 truncate\"><span id=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 35, "\" class=\"text-sm text-gray-300\">Image:</label><div class=\"flex items-center gap-2\"><div class=\"relative\"><input id=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var29 string
-		templ_7745c5c3_Var29, templ_7745c5c3_Err = templ.JoinStringErrs(string(typeOf) + "-file-name")
+		templ_7745c5c3_Var29, templ_7745c5c3_Err = templ.JoinStringErrs(string(typeOf) + "-file-input")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/components/app.templ`, Line: 376, Col: 51}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/components/app.templ`, Line: 371, Col: 46}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var29))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 36, "\" class=\"text-gray-400\">No file selected</span></div></div><button type=\"button\" class=\"bg-gray-600 hover:bg-gray-700 text-white rounded p-1\" @click=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 36, "\" class=\"file-input absolute inset-0 opacity-0 w-full cursor-pointer z-10\" type=\"file\" name=\"file\" accept=\"image/*\" data-camera-type=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var30 string
-		templ_7745c5c3_Var30, templ_7745c5c3_Err = templ.JoinStringErrs("document.getElementById('" + string(typeOf) + "-file-input').click()")
+		templ_7745c5c3_Var30, templ_7745c5c3_Err = templ.JoinStringErrs(string(typeOf))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/components/app.templ`, Line: 382, Col: 89}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/components/app.templ`, Line: 376, Col: 44}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var30))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 37, "\" title=\"Select file\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 37, "\"><div class=\"bg-gray-700 text-gray-200 rounded px-3 py-1 text-sm border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 w-48 truncate\"><span class=\"file-name text-gray-400\" data-camera-type=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var31 string
+		templ_7745c5c3_Var31, templ_7745c5c3_Err = templ.JoinStringErrs(string(typeOf))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/components/app.templ`, Line: 379, Col: 82}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var31))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 38, "\">No file selected</span></div></div><button type=\"button\" class=\"bg-gray-600 hover:bg-gray-700 text-white rounded p-1 file-select-btn\" data-camera-type=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var32 string
+		templ_7745c5c3_Var32, templ_7745c5c3_Err = templ.JoinStringErrs(string(typeOf))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/components/app.templ`, Line: 385, Col: 43}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var32))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 39, "\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -543,33 +569,72 @@ func cameraStatus(
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 38, "</button></div></div><div class=\"mt-4\"><div class=\"w-full bg-gray-700 rounded-full h-2 mb-2\"><div id=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 40, "</button></div></div><!-- Image preview container - initially hidden --><div class=\"image-preview-container hidden mt-3 mb-3\" data-camera-type=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var31 string
-		templ_7745c5c3_Var31, templ_7745c5c3_Err = templ.JoinStringErrs(string(typeOf) + "-progress-bar")
+		var templ_7745c5c3_Var33 string
+		templ_7745c5c3_Var33, templ_7745c5c3_Err = templ.JoinStringErrs(string(typeOf))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/components/app.templ`, Line: 391, Col: 51}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/components/app.templ`, Line: 392, Col: 94}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var31))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 39, "\" class=\"bg-blue-500 h-2 rounded-full w-0 transition-all duration-200\"></div></div></div><div class=\"flex justify-end mt-2 items-center\"><div id=\"")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var33))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var32 string
-		templ_7745c5c3_Var32, templ_7745c5c3_Err = templ.JoinStringErrs(string(typeOf) + "-upload-indicator")
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/components/app.templ`, Line: 395, Col: 54}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var32))
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 41, "\"><div class=\"w-full h-48 bg-black rounded flex items-center justify-center\"><img class=\"image-preview max-h-full max-w-full object-contain\" alt=\"Preview\" data-camera-type=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 40, "\" class=\"htmx-indicator mr-2 flex items-center\"><svg class=\"animate-spin h-4 w-4 text-blue-400 mr-1\" xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\"><circle class=\"opacity-25\" cx=\"12\" cy=\"12\" r=\"10\" stroke=\"currentColor\" stroke-width=\"4\"></circle> <path class=\"opacity-75\" fill=\"currentColor\" d=\"M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z\"></path></svg> <span class=\"text-xs text-blue-400\">Uploading...</span></div><button type=\"submit\" class=\"bg-blue-600 hover:bg-blue-700 text-white rounded px-3 py-1 text-sm\">Upload/Configure</button></div></form></div><script>\n\t\t\t\t\t\tdocument.addEventListener('DOMContentLoaded', function() {\n\t\t\t\t\t\t\tconst fileInput = document.getElementById('{ string(typeOf) + \"-file-input\" }');\n\t\t\t\t\t\t\tconst fileName = document.getElementById('{ string(typeOf) + \"-file-name\" }');\n\t\t\t\t\t\t\t\n\t\t\t\t\t\t\tif (fileInput && fileName) {\n\t\t\t\t\t\t\t\tfileInput.addEventListener('change', function() {\n\t\t\t\t\t\t\t\t\tif (this.files && this.files[0]) {\n\t\t\t\t\t\t\t\t\t\tfileName.textContent = this.files[0].name;\n\t\t\t\t\t\t\t\t\t\tfileName.classList.remove('text-gray-400');\n\t\t\t\t\t\t\t\t\t\tfileName.classList.add('text-gray-200');\n\t\t\t\t\t\t\t\t\t} else {\n\t\t\t\t\t\t\t\t\t\tfileName.textContent = 'No file selected';\n\t\t\t\t\t\t\t\t\t\tfileName.classList.remove('text-gray-200');\n\t\t\t\t\t\t\t\t\t\tfileName.classList.add('text-gray-400');\n\t\t\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\t\t});\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\t\n\t\t\t\t\t\t\thtmx.on('{ \"#\" + string(typeOf) + \"-upload-form\" }', 'htmx:xhr:progress', function(evt) {\n\t\t\t\t\t\t\t\tconst percentComplete = evt.detail.loaded / evt.detail.total * 100;\n\t\t\t\t\t\t\t\tdocument.getElementById('{ string(typeOf) + \"-progress-bar\" }').style.width = percentComplete + '%';\n\t\t\t\t\t\t\t});\n\t\t\t\t\t\t});\n\t\t\t\t\t</script></div></div></div></div>")
+		var templ_7745c5c3_Var34 string
+		templ_7745c5c3_Var34, templ_7745c5c3_Err = templ.JoinStringErrs(string(typeOf))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/components/app.templ`, Line: 394, Col: 120}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var34))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 42, "\"></div></div><div class=\"mt-4\"><div class=\"w-full bg-gray-700 rounded-full h-2 mb-2\"><div id=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var35 string
+		templ_7745c5c3_Var35, templ_7745c5c3_Err = templ.JoinStringErrs(string(typeOf) + "-progress-bar")
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/components/app.templ`, Line: 399, Col: 51}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var35))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 43, "\" class=\"progress-bar bg-blue-500 h-2 rounded-full w-0 transition-all duration-200\" data-camera-type=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var36 string
+		templ_7745c5c3_Var36, templ_7745c5c3_Err = templ.JoinStringErrs(string(typeOf))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/components/app.templ`, Line: 399, Col: 169}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var36))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 44, "\"></div></div></div><div class=\"flex justify-end mt-2 items-center\"><div id=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var37 string
+		templ_7745c5c3_Var37, templ_7745c5c3_Err = templ.JoinStringErrs(string(typeOf) + "-upload-indicator")
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/components/app.templ`, Line: 403, Col: 54}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var37))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 45, "\" class=\"htmx-indicator mr-2 flex items-center\"><svg class=\"animate-spin h-4 w-4 text-blue-400 mr-1\" xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\"><circle class=\"opacity-25\" cx=\"12\" cy=\"12\" r=\"10\" stroke=\"currentColor\" stroke-width=\"4\"></circle> <path class=\"opacity-75\" fill=\"currentColor\" d=\"M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z\"></path></svg> <span class=\"text-xs text-blue-400\">Uploading...</span></div><button type=\"submit\" class=\"bg-blue-600 hover:bg-blue-700 text-white rounded px-3 py-1 text-sm\">Upload/Configure</button></div></form><script>\n\t\t\t\t\t\t\tdocument.addEventListener('DOMContentLoaded', function() {\n\t\t\t\t\t\t\t\t// Handle file upload preview for all camera types\n\t\t\t\t\t\t\t\tdocument.querySelectorAll('.file-input').forEach(function(fileInput) {\n\t\t\t\t\t\t\t\t\tfileInput.addEventListener('change', function() {\n\t\t\t\t\t\t\t\t\t\tconst cameraType = this.getAttribute('data-camera-type');\n\t\t\t\t\t\t\t\t\t\tconst fileName = document.querySelector('.file-name[data-camera-type=\"' + cameraType + '\"]');\n\t\t\t\t\t\t\t\t\t\tconst imagePreviewContainer = document.querySelector('.image-preview-container[data-camera-type=\"' + cameraType + '\"]');\n\t\t\t\t\t\t\t\t\t\tconst imagePreview = document.querySelector('.image-preview[data-camera-type=\"' + cameraType + '\"]');\n\t\t\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t\t\tif (this.files && this.files[0]) {\n\t\t\t\t\t\t\t\t\t\t\t// Update filename display\n\t\t\t\t\t\t\t\t\t\t\tfileName.textContent = this.files[0].name;\n\t\t\t\t\t\t\t\t\t\t\tfileName.classList.remove('text-gray-400');\n\t\t\t\t\t\t\t\t\t\t\tfileName.classList.add('text-gray-200');\n\t\t\t\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t\t\t\t// Create image preview\n\t\t\t\t\t\t\t\t\t\t\tconst file = this.files[0];\n\t\t\t\t\t\t\t\t\t\t\tif (file.type.match('image.*')) {\n\t\t\t\t\t\t\t\t\t\t\t\tconst reader = new FileReader();\n\t\t\t\t\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t\t\t\t\treader.onload = function(e) {\n\t\t\t\t\t\t\t\t\t\t\t\t\timagePreview.src = e.target.result;\n\t\t\t\t\t\t\t\t\t\t\t\t\timagePreviewContainer.classList.remove('hidden');\n\t\t\t\t\t\t\t\t\t\t\t\t};\n\t\t\t\t\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t\t\t\t\treader.readAsDataURL(file);\n\t\t\t\t\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\t\t\t\t} else {\n\t\t\t\t\t\t\t\t\t\t\t// Reset form when no file is selected\n\t\t\t\t\t\t\t\t\t\t\tfileName.textContent = 'No file selected';\n\t\t\t\t\t\t\t\t\t\t\tfileName.classList.remove('text-gray-200');\n\t\t\t\t\t\t\t\t\t\t\tfileName.classList.add('text-gray-400');\n\t\t\t\t\t\t\t\t\t\t\timagePreviewContainer.classList.add('hidden');\n\t\t\t\t\t\t\t\t\t\t\timagePreview.src = '';\n\t\t\t\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\t\t\t});\n\t\t\t\t\t\t\t\t});\n\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t// Handle file select button clicks\n\t\t\t\t\t\t\t\tdocument.querySelectorAll('.file-select-btn').forEach(function(btn) {\n\t\t\t\t\t\t\t\t\tbtn.addEventListener('click', function() {\n\t\t\t\t\t\t\t\t\t\tconst cameraType = this.getAttribute('data-camera-type');\n\t\t\t\t\t\t\t\t\t\tdocument.querySelector('.file-input[data-camera-type=\"' + cameraType + '\"]').click();\n\t\t\t\t\t\t\t\t\t});\n\t\t\t\t\t\t\t\t});\n\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t// Progress updates for all upload forms\n\t\t\t\t\t\t\t\tdocument.querySelectorAll('.camera-upload-form').forEach(function(form) {\n\t\t\t\t\t\t\t\t\thtmx.on(form, 'htmx:xhr:progress', function(evt) {\n\t\t\t\t\t\t\t\t\t\tconst cameraType = form.closest('[data-camera-type]').getAttribute('data-camera-type');\n\t\t\t\t\t\t\t\t\t\tconst percentComplete = evt.detail.loaded / evt.detail.total * 100;\n\t\t\t\t\t\t\t\t\t\tdocument.querySelector('.progress-bar[data-camera-type=\"' + cameraType + '\"]').style.width = percentComplete + '%';\n\t\t\t\t\t\t\t\t\t});\n\t\t\t\t\t\t\t\t});\n\t\t\t\t\t\t\t});\n\t\t\t\t\t\t</script></div></div></div></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
