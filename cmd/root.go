@@ -151,7 +151,7 @@ func Run(ctx context.Context, onStart func()) error {
 // initCameras initializes the camera system with default cameras.
 func initCameras(ctx context.Context) {
 	// Initialize left camera with static test image
-	leftCam := camera.NewStaticCamera("./testdata/L_00001.png", camera.LeftCameraType)
+	leftCam := camera.NewStaticCamera(ctx, "./testdata/L_00001.png", camera.LeftCameraType)
 	err := camera.SetCamera(ctx, camera.LeftCameraType, leftCam)
 	if err != nil {
 		slog.Error("failed to initialize left camera", "error", err)
@@ -159,7 +159,7 @@ func initCameras(ctx context.Context) {
 	}
 
 	// Initialize right camera with static test image
-	rightCam := camera.NewStaticCamera("./testdata/R_00001.png", camera.RightCameraType)
+	rightCam := camera.NewStaticCamera(ctx, "./testdata/R_00001.png", camera.RightCameraType)
 	err = camera.SetCamera(ctx, camera.RightCameraType, rightCam)
 	if err != nil {
 		slog.Error("failed to initialize right camera", "error", err)
@@ -167,7 +167,7 @@ func initCameras(ctx context.Context) {
 	}
 
 	// Initialize output camera for depth mapping
-	outputCam := camera.NewOutputCamera()
+	outputCam := camera.NewOutputCamera(ctx)
 	err = camera.SetCamera(ctx, camera.OutputCameraType, outputCam)
 	if err != nil {
 		slog.Error("failed to initialize output camera", "error", err)

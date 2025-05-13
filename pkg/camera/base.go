@@ -16,10 +16,10 @@ type BaseCamera struct {
 }
 
 // NewBaseCamera creates a new BaseCamera with the specified type.
-func NewBaseCamera(cType Type) BaseCamera {
-	ctx, cancel := context.WithCancel(context.Background())
+func NewBaseCamera(ctx context.Context, cType Type) BaseCamera {
+	childCtx, cancel := context.WithCancel(ctx)
 	return BaseCamera{
-		ctx:    ctx,
+		ctx:    childCtx,
 		cancel: cancel,
 		cType:  cType,
 		config: Config{},

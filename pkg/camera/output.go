@@ -21,9 +21,9 @@ type OutputCamera struct {
 }
 
 // NewOutputCamera creates a new output camera for disparity mapping.
-func NewOutputCamera() *OutputCamera {
+func NewOutputCamera(ctx context.Context) *OutputCamera {
 	oc := &OutputCamera{
-		BaseCamera: NewBaseCamera(OutputCameraType),
+		BaseCamera: NewBaseCamera(ctx, OutputCameraType),
 		logger:     slog.Default().WithGroup("output-camera"),
 	}
 
@@ -73,6 +73,9 @@ func (oc *OutputCamera) Stream(ctx context.Context, outCh ImageChannel) {
 				return
 			case <-oc.Context().Done():
 				return
+			default:
+				// If channel is full, log and continue
+				oc.logger.Debug("output channel full, dropping frame")
 			}
 		}
 	}
