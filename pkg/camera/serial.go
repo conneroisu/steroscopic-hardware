@@ -200,8 +200,9 @@ func (sc *SerialCamera) initializeStream(ctx context.Context, errChan chan error
 					case <-sc.Context().Done():
 						return
 					default:
-						// If channel is full, log and continue
+						// If channel is full, log and introduce a short delay to prevent rapid looping
 						sc.logger.Debug("output channel full, dropping frame")
+						time.Sleep(10 * time.Millisecond)
 					}
 				}
 			}
