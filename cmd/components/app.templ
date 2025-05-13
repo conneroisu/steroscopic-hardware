@@ -260,7 +260,13 @@ templ cameraStatus(
 								id={ string(typeOf) + "-baud" }
 								name="baudrate"
 								type="number"
-								value={ strconv.Itoa(cam.Config().BaudRate) }
+								value={ func() string {
+									b := strconv.Itoa(cam.Config().BaudRate)
+									if b == "" || b == "0" {
+										b = "115200"
+									}
+									return b
+								}() }
 								class="bg-gray-700 text-gray-200 rounded px-3 py-1 text-sm border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 w-24"
 							/>
 						</div>
