@@ -379,7 +379,7 @@ templ cameraStatus(
 									<button
 										type="button"
 										class="bg-gray-600 hover:bg-gray-700 text-white rounded p-1"
-										onclick={ "document.getElementById('" + string(typeOf) + "-file-input').click()" }
+										@click={ "document.getElementById('" + string(typeOf) + "-file-input').click()" }
 										title="Select file"
 									>
 										@web.FileIcon
