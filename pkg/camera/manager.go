@@ -1,5 +1,3 @@
-// Package camera provides interfaces and implementations for managing multiple camera
-// types (static, serial, output) and their data channels in a stereoscopic hardware system.
 package camera
 
 import (

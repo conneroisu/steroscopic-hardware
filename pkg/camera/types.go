@@ -1,5 +1,3 @@
-// Package camera defines types and interfaces for camera devices and their configuration
-// in a stereoscopic hardware system.
 package camera
 
 import (
