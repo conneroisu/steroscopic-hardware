@@ -10,7 +10,7 @@
 #define UNSHIFTED_SYMBOL_MASK ((uint32_t)(SYMBOL_SIZE - 1))
 
 // ANDing an integer with this value gives the most significant symbol shifted all the way to the left.
-#define MOST_SIG_SYMBOL_MASK ((uint32_t)((SYMBOL_SIZE - 1) << (32 / BITS_PER_SYMBOL)))
+#define MOST_SIG_SYMBOL_MASK ((uint32_t)((SYMBOL_SIZE - 1) << (32 - BITS_PER_SYMBOL)))
 
 // This is the most significant symbol position in a byte. For example, if you have 4 bits per symbol, there
 // are two valid symbol locations in the byte: 0 and 1. The constant would be 1 in this case since it is the most
@@ -86,6 +86,13 @@ size_t range_code(uint8_t* uncoded, uint8_t* coded, size_t size, int adjustment_
     // Zeroize the counts
     memset(symbol_counts, 0, sizeof(counts_t) * SYMBOL_SIZE);
 
+    
+    // Set symbol values
+    for(int i = 0; i < SYMBOL_SIZE; ++i)
+    {
+        symbol_counts[i].symbol = i;
+    }
+
     // Count the bytes
     for(size_t i = 0; i < size; ++i)
     {
@@ -95,7 +102,6 @@ size_t range_code(uint8_t* uncoded, uint8_t* coded, size_t size, int adjustment_
             uint8_t byte = uncoded[i];
             int symbol = (byte & (UNSHIFTED_SYMBOL_MASK << (BITS_PER_SYMBOL * j))) >> (BITS_PER_SYMBOL * j);
             symbol_counts[symbol].current_count++;
-            symbol_counts[symbol].symbol = symbol;
         }
     }
 
@@ -146,7 +152,7 @@ size_t range_code(uint8_t* uncoded, uint8_t* coded, size_t size, int adjustment_
         size_t range_size = range.high - range.low;
         // Iterate through each symbol in the byte.
         // Most significant symbols should be first.
-        for(int j = (8 / BITS_PER_SYMBOL); j >= 0; --j)
+        for(int j = (8 / BITS_PER_SYMBOL) - 1; j >= 0; --j)
         {
             // Calculate the next range
             range_size = range.high - range.low;
@@ -169,26 +175,24 @@ size_t range_code(uint8_t* uncoded, uint8_t* coded, size_t size, int adjustment_
             uint32_t low_symbol_value = range.low & MOST_SIG_SYMBOL_MASK;
             uint32_t high_symbol_value = range.high & MOST_SIG_SYMBOL_MASK;
             range_size = range.high - range.low;
-            while(low_symbol_value == high_symbol_value || range_size < adjustment_threshold)
+            while(low_symbol_value == high_symbol_value || (range_size < adjustment_threshold && low_symbol_value != high_symbol_value))
             {
-                if(range_size < adjustment_threshold)
+                if(range_size < adjustment_threshold && low_symbol_value != high_symbol_value)
                 {
-                    // TODO: Update so that the most significant symbols equal, not just the
-                    // most significant bytes.
-                    uint32_t new_high = (low_symbol_value + (1 << 24)) - 1;
+                    uint32_t new_high = (low_symbol_value + (1 << (32 - BITS_PER_SYMBOL))) - 1;
                     uint32_t delta = range.high - new_high;
                     range.low -= delta;
                     range.high = new_high;
                 }
                 else
                 {
-                    uint8_t shifted_symbol_value = (uint8_t) (low_symbol_value & (UNSHIFTED_SYMBOL_MASK >> (32 / BITS_PER_SYMBOL)));
-                    byte_to_shift |= (UNSHIFTED_SYMBOL_MASK << ((MOST_SIG_SYMBOL_POS_IN_BYTE - byte_pack_symbol_count) * BITS_PER_SYMBOL));
+                    uint8_t shifted_symbol_value = (uint8_t) (low_symbol_value >> (32 - BITS_PER_SYMBOL));
+                    byte_to_shift |= (shifted_symbol_value << ((MOST_SIG_SYMBOL_POS_IN_BYTE - byte_pack_symbol_count) * BITS_PER_SYMBOL));
                     range.low = range.low << BITS_PER_SYMBOL;
                     range.high = range.high << BITS_PER_SYMBOL;
 
                     // If we have packed the byte, shift it off.
-                    if(byte_pack_symbol_count == MOST_SIG_SYMBOL_MASK)
+                    if(byte_pack_symbol_count == MOST_SIG_SYMBOL_POS_IN_BYTE)
                     {
                         if(leading_zeros && byte_to_shift)
                         {
@@ -204,6 +208,7 @@ size_t range_code(uint8_t* uncoded, uint8_t* coded, size_t size, int adjustment_
                         }
 
                         byte_to_shift = 0;
+                        byte_pack_symbol_count = 0;
                     }
                     else
                     {

@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <errno.h>
 
-#define TEST_MODE 1
+#define TEST_MODE 0
 
 #define SIZE 2073600U
 #define CHUNK_SIZE 32400U
