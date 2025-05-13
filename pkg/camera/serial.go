@@ -2,10 +2,10 @@ package camera
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"image"
 	"image/color"
-	"log"
 	"log/slog"
 	"sync"
 	"time"
@@ -17,73 +17,50 @@ import (
 var (
 	// DefaultStartSeq is the default start marker for image data.
 	DefaultStartSeq = []byte{0xff, 0xd8}
+
 	// DefaultEndSeq is the default end marker for image data.
 	DefaultEndSeq = []byte{0xff, 0xd9}
+
 	// DefaultImageWidth is the default expected image width in pixels.
 	DefaultImageWidth = 1920
+
 	// DefaultImageHeight is the default expected image height in pixels.
 	DefaultImageHeight = 1080
-
-	_ Camer = (*SerialCamera)(nil)
 )
 
-type (
-	// SerialCamera represents a camera connected via serial port.
-	SerialCamera struct {
-		mu          sync.Mutex
-		ctx         context.Context
-		cancel      context.CancelFunc
-		port        serial.Port
-		StartSeq    []byte // Byte sequence indicating start of image data
-		EndSeq      []byte // Byte sequence indicating end of image data
-		ImageWidth  int    // Expected image width in pixels
-		ImageHeight int    // Expected image height in pixels
-		logger      *slog.Logger
-		config      Config
-		OnClose     func()
-		ch          chan *image.Gray
-		paused      bool
-	}
-)
+// SerialCamera represents a camera connected via serial port.
+type SerialCamera struct {
+	BaseCamera
+	port        serial.Port
+	startSeq    []byte
+	endSeq      []byte
+	imageWidth  int
+	imageHeight int
+	logger      *slog.Logger
+	onClose     func()
+	streamMu    sync.Mutex
+}
 
 // NewSerialCamera creates a new SerialCamera instance.
-func NewSerialCamera(
-	typ Type,
-	portName string,
-	baudRate int,
-	compression int,
-) (*SerialCamera, error) {
-	var err error
-	switch typ {
-	case LeftCameraType:
-		err = defaultLeftCamera.Load().Close()
-		if err != nil {
-			return nil, err
-		}
-	case RightCameraType:
-		err = defaultRightCamera.Load().Close()
-		if err != nil {
-			return nil, err
-		}
+func NewSerialCamera(typ Type, portName string, baudRate int, compression int) (*SerialCamera, error) {
+	base := NewBaseCamera(typ)
+
+	// Configure the camera
+	base.SetConfig(Config{
+		Port:        portName,
+		BaudRate:    baudRate,
+		Compression: compression,
+	})
+
+	sc := &SerialCamera{
+		BaseCamera:  base,
+		startSeq:    DefaultStartSeq,
+		endSeq:      DefaultEndSeq,
+		imageWidth:  DefaultImageWidth,
+		imageHeight: DefaultImageHeight,
+		logger:      slog.Default().WithGroup(fmt.Sprintf("serial-camera-%s", typ)),
 	}
-	ctx, cancel := context.WithCancel(context.Background())
-	// Open the port
-	sc := SerialCamera{
-		ctx:         ctx,
-		cancel:      cancel,
-		StartSeq:    DefaultStartSeq,
-		EndSeq:      DefaultEndSeq,
-		ImageWidth:  DefaultImageWidth,
-		ImageHeight: DefaultImageHeight,
-		port:        nil,
-		mu:          sync.Mutex{},
-		config: Config{
-			Port:        portName,
-			BaudRate:    baudRate,
-			Compression: compression,
-		},
-		logger: slog.Default().WithGroup("serial-port-" + string(typ)),
-	}
+
 	// Configure serial port
 	mode := &serial.Mode{
 		BaudRate: baudRate,
@@ -92,217 +69,242 @@ func NewSerialCamera(
 		StopBits: serial.OneStopBit,
 	}
 
-	sc.logger.Info("opening serial port", "port", portName)
-	sc.port, err = serial.Open(sc.config.Port, mode)
+	sc.logger.Info("opening serial port", "port", portName, "baudRate", baudRate)
+	port, err := serial.Open(portName, mode)
 	if err != nil {
-		return nil, fmt.Errorf("failed to open serial port %s: %v", portName, err)
+		return nil, fmt.Errorf("failed to open serial port %s: %w", portName, err)
 	}
+
+	sc.port = port
+
 	// Set read timeout
 	err = sc.port.SetReadTimeout(serial.NoTimeout)
 	if err != nil {
 		sc.port.Close()
-		return nil, fmt.Errorf("failed to set read timeout: %v", err)
+		return nil, fmt.Errorf("failed to set read timeout: %w", err)
 	}
-	go sc.Stream(sc.ctx, sc.ch)
 
-	return &sc, nil
+	return sc, nil
 }
 
-// Config returns the current configuration of the camera.
-func (sc *SerialCamera) Config() *Config { return &sc.config }
+// Stream reads images from the camera and sends them to the provided channel.
+func (sc *SerialCamera) Stream(ctx context.Context, outCh ImageChannel) {
+	sc.logger.Debug("SerialCamera.Stream started")
+	defer sc.logger.Debug("SerialCamera.Stream completed")
 
-// Close closes the serial connection.
-func (sc *SerialCamera) Close() error {
-	sc.mu.Lock()
-	defer sc.mu.Unlock()
+	// Create error channel for internal communication
+	errChan := make(chan error, 1)
 
-	if sc.OnClose != nil {
-		sc.OnClose()
-	}
-	sc.cancel()
-	err := sc.port.Close()
+	// Start the initial stream
+	readFn, err := sc.initializeStream(ctx, errChan, outCh)
 	if err != nil {
-		return err
-	}
-	return nil
-}
-
-// Stream reads images from the camera and sends them to the channel.
-func (sc *SerialCamera) Stream(
-	ctx context.Context,
-	ch chan *image.Gray,
-) {
-	sc.logger.Debug("SerialCamera.Stream()")
-	defer sc.logger.Debug("SerialCamera.Stream() done")
-
-	sc.ch = ch
-	var errChan = make(chan error, 1)
-	readFn, err := sc.start(ctx, errChan, ch)
-	if err != nil {
-		sc.logger.Error("failed to read image data", "err", err)
+		sc.logger.Error("failed to initialize image stream", "err", err)
 		return
 	}
 
+	// Launch the reading goroutine
 	go readFn()
 
+	// Monitor for errors and cancellation
 	for {
-		if sc.paused {
-			continue
-		}
 		select {
 		case <-ctx.Done():
-			sc.logger.Debug("context done, stopping read")
+			sc.logger.Debug("context canceled, stopping stream")
 			return
-		case <-sc.ctx.Done():
-			sc.logger.Debug("inner context done, stopping read")
+		case <-sc.Context().Done():
+			sc.logger.Debug("camera context canceled, stopping stream")
 			return
 		case err := <-errChan:
-			sc.logger.Debug("error reading image", "err", err)
+			sc.logger.Error("error in image stream", "err", err)
+			// Could implement reconnection logic here if needed
 		}
 	}
 }
 
-// readImageData reads image data from the serial port.
-func (sc *SerialCamera) start(
-	ctx context.Context,
-	errChan chan error,
-	imgCh chan *image.Gray,
-) (func(), error) {
+// initializeStream sets up the serial connection and prepares for streaming.
+func (sc *SerialCamera) initializeStream(ctx context.Context, errChan chan error, imgCh ImageChannel) (func(), error) {
 	var tries = 0
+
 	for {
-		sc.logger.Info("SerialCamera.read()")
-		defer sc.logger.Info("SerialCamera.read() done")
+		sc.logger.Debug("initializing camera stream")
 
-		// Temporary read buffer
-		tempBuf := make([]byte, 1024)
+		// Send the start sequence to request an image
+		_, err := sc.port.Write(sc.startSeq)
+		if err != nil {
+			return nil, fmt.Errorf("failed to send start sequence: %w", err)
+		}
 
-		// Send the start sequence
-		_, err := sc.port.Write(sc.StartSeq)
+		// Read acknowledgement byte
+		ackBuffer := make([]byte, 1)
+		length, err := sc.port.Read(ackBuffer)
 		if err != nil {
-			return nil, fmt.Errorf("failed to send start sequence: %v", err)
+			return nil, fmt.Errorf("failed to read acknowledgement: %w", err)
 		}
-		// After sending the start sequence, we should receive a 1-byte acknowledgement
-		length, err := sc.port.Read(tempBuf)
-		if err != nil {
-			return nil, fmt.Errorf("failed to read acknowledgement: %v", err)
-		}
+
 		if length != 1 {
-			// If we didn't receive a byte, try again by first sending the end sequence
+			// If we didn't receive exactly one byte, try again
 			tries++
 			if tries > 4 {
-				return nil, fmt.Errorf("unexpected acknowledgement length: %d", length)
+				return nil, fmt.Errorf("camera not responding properly after %d attempts", tries)
 			}
-			n, err := sc.port.Write(sc.EndSeq)
+
+			// Send end sequence to reset the camera
+			_, err := sc.port.Write(sc.endSeq)
 			if err != nil {
-				return nil, fmt.Errorf("failed to send end sequence: %v", err)
+				return nil, fmt.Errorf("failed to send end sequence: %w", err)
 			}
-			if n != len(sc.EndSeq) {
-				return nil, fmt.Errorf("failed to send end sequence: sent %d bytes, expected %d", n, len(sc.EndSeq))
-			}
+
+			time.Sleep(100 * time.Millisecond)
 			continue
 		}
 
-		sc.OnClose = func() {
-			sc.logger.Debug("sending end sequence")
-			_, err := sc.port.Write(sc.EndSeq)
+		// Set up the cleanup function
+		sc.onClose = func() {
+			sc.logger.Debug("sending end sequence to camera")
+			_, err := sc.port.Write(sc.endSeq)
 			if err != nil {
-				log.Printf("failed to send end sequence: %v", err)
+				sc.logger.Error("failed to send end sequence", "err", err)
 			}
 		}
 
+		// Return the reading function
 		return func() {
 			for {
 				select {
 				case <-ctx.Done():
-					sc.logger.Debug("context done, stopping read")
+					return
+				case <-sc.Context().Done():
 					return
 				default:
-					sc.readFn(ctx, errChan, imgCh)
+					if sc.IsPaused() {
+						time.Sleep(100 * time.Millisecond)
+						continue
+					}
+
+					// Lock to ensure we don't have multiple reads happening simultaneously
+					sc.streamMu.Lock()
+					img, err := sc.readFrame()
+					sc.streamMu.Unlock()
+
+					if err != nil {
+						errChan <- err
+						time.Sleep(500 * time.Millisecond) // Delay before retry
+						continue
+					}
+
+					select {
+					case imgCh <- img:
+						sc.logger.Debug("image sent to channel")
+					case <-ctx.Done():
+						return
+					case <-sc.Context().Done():
+						return
+					}
 				}
 			}
 		}, nil
 	}
 }
 
-func (sc *SerialCamera) readFn(
-	ctx context.Context,
-	errChan chan error,
-	imgCh chan *image.Gray,
-) {
-	sc.logger.Debug("----------------------------")
-	defer sc.logger.Debug("----------------------------")
-	var (
-		tempBuf = []byte{}
-		total   int
-	)
+// readFrame reads a single image frame from the serial port.
+func (sc *SerialCamera) readFrame() (*image.Gray, error) {
+	sc.logger.Debug("reading image frame")
 
-	expectedLength := DefaultImageWidth * DefaultImageHeight
+	// Use a timeout for the read operation
+	readCtx, cancel := context.WithTimeout(sc.Context(), 30*time.Second)
+	defer cancel()
 
-	sc.mu.Lock()
-	defer sc.mu.Unlock()
+	// Buffer to store image data
+	var buffer []byte
+	expectedLength := sc.imageWidth * sc.imageHeight
 
-	doneCh := make(chan struct{})
+	// Monitor the read progress
+	progressDone := make(chan struct{})
 	go func() {
 		start := time.Now()
+		ticker := time.NewTicker(5 * time.Second)
+		defer ticker.Stop()
+
 		for {
 			select {
-			case <-time.After(time.Second * 30):
-				// note to self that we are still working
-				sc.logger.Info("still working", "time", time.Since(start))
-			case <-ctx.Done():
-				sc.logger.Debug("context done, stopping read")
+			case <-ticker.C:
+				sc.logger.Info("reading image data",
+					"progress", fmt.Sprintf("%d/%d bytes (%.1f%%)",
+						len(buffer), expectedLength,
+						float64(len(buffer))/float64(expectedLength)*100),
+					"elapsed", time.Since(start))
+			case <-progressDone:
 				return
-			case <-doneCh:
+			case <-readCtx.Done():
 				return
 			}
 		}
 	}()
 
-	for {
-		var buf = make([]byte, 100)
-		length, err := sc.port.Read(buf)
+	// Read the image data in chunks
+	for len(buffer) < expectedLength {
+		chunk := make([]byte, 1024)
+		n, err := sc.port.Read(chunk)
 		if err != nil {
-			sc.logger.Error("error reading from serial port", "error", err)
-			errChan <- fmt.Errorf("error reading from serial port: %v", err)
-			return
+			close(progressDone)
+			return nil, fmt.Errorf("error reading from serial port: %w", err)
 		}
-		tempBuf = append(tempBuf, buf[:length]...)
-		total += length
-		if total >= sc.ImageWidth*sc.ImageHeight {
-			break
+
+		if n > 0 {
+			buffer = append(buffer, chunk[:n]...)
 		}
-	}
-	doneCh <- struct{}{}
-	sc.logger.Info("read", "total", total, "expected", expectedLength)
 
-	img := image.NewGray(image.Rect(0, 0, sc.ImageWidth, sc.ImageHeight))
-
-	// Grayscale format (1 byte per pixel)
-	for y := range sc.ImageHeight { // y := 0; y < sc.config.ImageHeight; y++
-		for x := range sc.ImageWidth { // x := 0; x < sc.config.ImageWidth; x++
-			i := y*sc.ImageWidth + x
-			gray := tempBuf[i]
-			img.SetGray(x, y, color.Gray{Y: gray})
+		// Check if the context has been canceled
+		select {
+		case <-readCtx.Done():
+			close(progressDone)
+			return nil, errors.New("read operation timed out or was canceled")
+		default:
+			// Continue reading
 		}
 	}
 
-	// save image to homedir using pkg.homedir
+	close(progressDone)
+	sc.logger.Info("image data read complete", "size", len(buffer))
+
+	// Create grayscale image from the buffer
+	img := image.NewGray(image.Rect(0, 0, sc.imageWidth, sc.imageHeight))
+
+	// Copy buffer data to image
+	for y := range sc.imageHeight {
+		for x := range sc.imageWidth {
+			i := y*sc.imageWidth + x
+			if i < len(buffer) {
+				img.SetGray(x, y, color.Gray{Y: buffer[i]})
+			}
+		}
+	}
+
+	// Save a copy of the image for debugging
 	err := homedir.SaveImage(img)
 	if err != nil {
-		sc.logger.Error("failed to save image", "err", err)
+		sc.logger.Error("failed to save debug image", "err", err)
 	}
 
-	select {
-	case <-ctx.Done():
-		sc.logger.Debug("context done, stopping read")
-		return
-	case imgCh <- img:
-		sc.logger.Debug("image sent to channel")
-	}
+	return img, nil
 }
 
-// Pause pauses the camera.
-func (sc *SerialCamera) Pause() { sc.paused = true }
+// Close releases all resources used by the camera.
+func (sc *SerialCamera) Close() error {
+	sc.logger.Info("closing serial camera")
 
-// Resume resumes the camera.
-func (sc *SerialCamera) Resume() { sc.paused = false }
+	// Cancel the context to stop all operations
+	sc.Cancel()
+
+	// Execute onClose handler if set
+	if sc.onClose != nil {
+		sc.onClose()
+	}
+
+	// Close the serial port
+	if sc.port != nil {
+		return sc.port.Close()
+	}
+
+	return nil
+}

@@ -18,107 +18,88 @@ const (
 	ctxKeyConfig CtxKey = "config"
 )
 
-// ConfigureMiddleware handles client requests to configure all camera parameters.
+// ConfigureMiddleware parses camera configuration from form data.
 func ConfigureMiddleware(apiFn APIFn) APIFn {
 	return func(w http.ResponseWriter, r *http.Request) error {
-		var (
-			compression    int
-			baudRate       int
-			portStr        string
-			baudStr        string
-			compressionStr string
-			config         camera.Config
-		)
-
 		// Parse form data
-		err := r.ParseForm()
-		if err != nil {
+		if err := r.ParseForm(); err != nil {
 			return fmt.Errorf("failed to parse form data: %w", err)
 		}
 
-		// Get all camera parameters
-		portStr = r.FormValue("port")
-		baudStr = r.FormValue("baudrate")
-		compressionStr = r.FormValue("compression")
+		// Get form values
+		portStr := r.FormValue("port")
+		baudStr := r.FormValue("baudrate")
+		compressionStr := r.FormValue("compression")
 
-		// CONFIGURE port if provided
+		// Validate port
 		if portStr == "" {
 			return errors.New("port not provided")
 		}
-		config.Port = portStr
 
-		// CONFIGURE baud rate if provided
+		// Validate and convert baud rate
 		if baudStr == "" {
 			return errors.New("baud rate not provided")
 		}
-		baudRate, err = strconv.Atoi(baudStr)
+		baudRate, err := strconv.Atoi(baudStr)
 		if err != nil {
-			return fmt.Errorf("invalid baud value: %w", err)
+			return fmt.Errorf("invalid baud rate value: %w", err)
 		}
-		config.BaudRate = baudRate
 
-		// CONFIGURE compression if provided
+		// Validate and convert compression
 		if compressionStr == "" {
 			return errors.New("compression not provided")
 		}
-		compression, err = strconv.Atoi(compressionStr)
+		compression, err := strconv.Atoi(compressionStr)
 		if err != nil {
 			return fmt.Errorf("invalid compression value: %w", err)
 		}
-		config.Compression = compression
-		return apiFn(w, r.WithContext(context.WithValue(r.Context(), ctxKeyConfig, config)))
+
+		// Create config
+		config := camera.Config{
+			Port:        portStr,
+			BaudRate:    baudRate,
+			Compression: compression,
+		}
+
+		// Add to request context
+		ctx := context.WithValue(r.Context(), ctxKeyConfig, config)
+
+		// Call the next handler
+		return apiFn(w, r.WithContext(ctx))
 	}
 }
 
-// ConfigureCamera handles client requests to configure all camera parameters
-// at once.
-func ConfigureCamera(
-	ctx context.Context,
-	typ camera.Type,
-) APIFn {
-	var logger = slog.Default().WithGroup("configure-camera")
-	return func(_ http.ResponseWriter, r *http.Request) error {
-		config := r.Context().Value(ctxKeyConfig).(camera.Config)
+// ConfigureCamera handles client requests to configure camera parameters.
+func ConfigureCamera(ctx context.Context, typ camera.Type) APIFn {
+	logger := slog.Default().WithGroup("configure-camera")
 
-		// Log Configuration
+	return func(_ http.ResponseWriter, r *http.Request) error {
+		// Get config from context
+		config, ok := r.Context().Value(ctxKeyConfig).(camera.Config)
+		if !ok {
+			return errors.New("camera configuration not found in request context")
+		}
+
+		// Log configuration
 		logger.Info(
-			"setting",
-			"stream",
-			string(typ),
-			"port",
-			config.Port,
-			"baud",
-			config.BaudRate,
-			"compression",
-			config.Compression,
+			"configuring camera",
+			"type", string(typ),
+			"port", config.Port,
+			"baud", config.BaudRate,
+			"compression", config.Compression,
 		)
 
-		switch typ {
-		case camera.LeftCameraType:
-			cam, err := camera.NewSerialCamera(
-				typ,
-				config.Port,
-				config.BaudRate,
-				config.Compression,
-			)
-			if err != nil {
-				return err
-			}
-			camera.SetLeftCamera(ctx, cam)
-		case camera.RightCameraType:
-			cam, err := camera.NewSerialCamera(
-				typ,
-				config.Port,
-				config.BaudRate,
-				config.Compression,
-			)
-			if err != nil {
-				return err
-			}
-			camera.SetRightCamera(ctx, cam)
-		default:
-			return fmt.Errorf("unsupported camera type: %v", typ)
+		// Create and configure the camera
+		cam, err := camera.NewSerialCamera(typ, config.Port, config.BaudRate, config.Compression)
+		if err != nil {
+			return fmt.Errorf("failed to create serial camera: %w", err)
 		}
+
+		// Set the camera in the manager
+		if err := camera.SetCamera(ctx, typ, cam); err != nil {
+			return fmt.Errorf("failed to set camera: %w", err)
+		}
+
 		return nil
 	}
 }

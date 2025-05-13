@@ -9,95 +9,147 @@ import (
 	"github.com/conneroisu/steroscopic-hardware/pkg/despair"
 )
 
-var _ Camer = (*OutputCamera)(nil)
+// DefaultNumWorkers is the default number of worker goroutines for disparity calculations.
+const DefaultNumWorkers = 32
 
-const defaultNumWorkers = 32
-
-// OutputCamera represents a the camera output of a sad output.
+// OutputCamera processes left and right camera images to generate a depth map.
 type OutputCamera struct {
-	Params   *despair.Parameters
-	InputCh  chan<- despair.InputChunk  // InputCh sends input chunks to sad.
-	OutputCh <-chan despair.OutputChunk // OutputCh receives output chunks from sad algo.
+	BaseCamera
+	inputCh  chan<- despair.InputChunk
+	outputCh <-chan despair.OutputChunk
 	logger   *slog.Logger
-	paused   bool
 }
 
-// NewOutputCamera creates a new OutputCamera.
+// NewOutputCamera creates a new output camera for disparity mapping.
 func NewOutputCamera() *OutputCamera {
-	oC := &OutputCamera{
-		logger: slog.Default().WithGroup("output-camera"),
+	oc := &OutputCamera{
+		BaseCamera: NewBaseCamera(OutputCameraType),
+		logger:     slog.Default().WithGroup("output-camera"),
 	}
-	oC.InputCh, oC.OutputCh = despair.SetupConcurrentSAD(
-		defaultNumWorkers,
-	)
-	return oC
+
+	// Initialize the disparity processing pipeline
+	oc.inputCh, oc.outputCh = despair.SetupConcurrentSAD(DefaultNumWorkers)
+
+	return oc
 }
 
-// :GoImpl o *OutputCamera camera.Camer
+// Stream processes input images and generates depth maps.
+func (oc *OutputCamera) Stream(ctx context.Context, outCh ImageChannel) {
+	oc.logger.Info("starting output camera stream")
+	defer oc.logger.Info("output camera stream stopped")
 
-// Stream streams the output "camera", the sad output.
-func (o *OutputCamera) Stream(
-	ctx context.Context,
-	outCh chan *image.Gray,
-) {
 	for {
-		if o.paused {
-			continue
-		}
 		select {
 		case <-ctx.Done():
-			slog.Debug("stopping stream")
+			oc.logger.Debug("context canceled, stopping stream")
 			return
-		case img := <-o.read():
-			if img == nil {
+		case <-oc.Context().Done():
+			oc.logger.Debug("camera context canceled, stopping stream")
+			return
+		default:
+			if oc.IsPaused() {
+				time.Sleep(100 * time.Millisecond)
 				continue
 			}
-			outCh <- img
+
+			// Generate depth map from input channels
+			img, err := oc.processDepthMap(DefaultManager().GetOutputChannel(LeftCameraType), DefaultManager().GetOutputChannel(RightCameraType))
+			if err != nil {
+				oc.logger.Error("error processing depth map", "err", err)
+				time.Sleep(100 * time.Millisecond)
+				continue
+			}
+
+			if img == nil {
+				time.Sleep(100 * time.Millisecond)
+				continue
+			}
+
+			// Send processed image to output channel
+			select {
+			case outCh <- img:
+				oc.logger.Debug("depth map sent to channel")
+			case <-ctx.Done():
+				return
+			case <-oc.Context().Done():
+				return
+			}
 		}
 	}
 }
 
-// Config returns the current configuration of the output camera.
-//
-// It is not used, but is required by the Camer interface.
-func (o *OutputCamera) Config() *Config { return &Config{} }
+// processDepthMap generates a depth map from left and right camera images.
+func (oc *OutputCamera) processDepthMap(leftCh, rightCh ImageChannel) (*image.Gray, error) {
+	// Try to receive images from both channels
+	var leftImg, rightImg *image.Gray
 
-func (o *OutputCamera) read() <-chan *image.Gray {
-	mkdCh := make(chan *image.Gray, 1)
-	leftImg := <-LeftOutputCh()
-	rightImg := <-RightOutputCh()
+	// Create a timeout context for receiving images
+	timeoutCtx, cancel := context.WithTimeout(oc.Context(), 1*time.Second)
+	defer cancel()
 
-	chunkSize := max(1, leftImg.Rect.Dy()/(defaultNumWorkers*4))
-	numChunks := (leftImg.Rect.Dy() + chunkSize - 1) / chunkSize
-
-	start := time.Now()
-	for y := leftImg.Rect.Min.Y; y < leftImg.Rect.Max.Y; y += chunkSize {
-		o.InputCh <- despair.InputChunk{
-			Left:  leftImg,
-			Right: rightImg,
-			Region: image.Rect(
-				leftImg.Rect.Min.X,
-				y,
-				leftImg.Rect.Max.X,
-				min(y+chunkSize, leftImg.Rect.Max.Y),
-			),
-		}
+	// Try to receive left image
+	select {
+	case img := <-leftCh:
+		leftImg = img
+	case <-timeoutCtx.Done():
+		return nil, nil // No image available yet
 	}
-	got := despair.AssembleDisparityMap(o.OutputCh, leftImg.Rect, numChunks)
-	end := time.Now()
-	o.logger.Debug("Elapsed time", "took", end.Sub(start))
-	mkdCh <- got
-	return mkdCh
+
+	// Try to receive right image
+	select {
+	case img := <-rightCh:
+		rightImg = img
+	case <-timeoutCtx.Done():
+		return nil, nil // No image available yet
+	}
+
+	// Process images if both are available
+	if leftImg != nil && rightImg != nil {
+		startTime := time.Now()
+
+		// Get current parameters
+		params := despair.DefaultParams()
+
+		// Divide image into chunks for parallel processing
+		chunkSize := max(1, leftImg.Rect.Dy()/(DefaultNumWorkers*4))
+		numChunks := (leftImg.Rect.Dy() + chunkSize - 1) / chunkSize
+
+		// Send chunks to processing pipeline
+		for y := leftImg.Rect.Min.Y; y < leftImg.Rect.Max.Y; y += chunkSize {
+			oc.inputCh <- despair.InputChunk{
+				Left:  leftImg,
+				Right: rightImg,
+				Region: image.Rect(
+					leftImg.Rect.Min.X,
+					y,
+					leftImg.Rect.Max.X,
+					min(y+chunkSize, leftImg.Rect.Max.Y),
+				),
+			}
+		}
+
+		// Assemble the resulting disparity map
+		disparityMap := despair.AssembleDisparityMap(oc.outputCh, leftImg.Rect, numChunks)
+
+		elapsedTime := time.Since(startTime)
+		oc.logger.Info("depth map generated",
+			"elapsed", elapsedTime,
+			"blockSize", params.BlockSize,
+			"maxDisparity", params.MaxDisparity)
+
+		return disparityMap, nil
+	}
+
+	return nil, nil
 }
 
-// Close closes the output camera.
-func (o *OutputCamera) Close() error {
-	close(o.InputCh)
+// Close releases all resources.
+func (oc *OutputCamera) Close() error {
+	oc.logger.Info("closing output camera")
+	oc.Cancel()
+
+	// Close the input channel to stop workers
+	close(oc.inputCh)
+
 	return nil
 }
-
-// Pause pauses the output camera.
-func (o *OutputCamera) Pause() { o.paused = true }
-
-// Resume resumes the output camera.
-func (o *OutputCamera) Resume() { o.paused = false }
