@@ -40,7 +40,8 @@ func UploadHandler(appCtx context.Context, typ camera.Type) APIFn {
 		// Save file to temporary directory
 		dir := os.TempDir()
 		path := filepath.Join(dir, header.Filename)
-		if err := os.WriteFile(path, body, 0644); err != nil {
+		err = os.WriteFile(path, body, 0644)
+		if err != nil {
 			return fmt.Errorf("failed to save file: %w", err)
 		}
 
@@ -50,7 +51,8 @@ func UploadHandler(appCtx context.Context, typ camera.Type) APIFn {
 		staticCam := camera.NewStaticCamera(appCtx, path, typ)
 
 		// Set camera in manager - Using the application context
-		if err := camera.SetCamera(appCtx, typ, staticCam); err != nil {
+		err = camera.SetCamera(appCtx, typ, staticCam)
+		if err != nil {
 			return fmt.Errorf("failed to set static camera: %w", err)
 		}
 
