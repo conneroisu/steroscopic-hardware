@@ -1,4 +1,3 @@
-// pkg/camera/camera.go
 // Package camera provides interfaces and implementations for cameras.
 package camera
 
@@ -80,17 +79,25 @@ func RightCh() chan *image.Gray { return *defaultRightCh.Load() }
 // This is the channel that the output camera reads from.
 func RightOutputCh() chan *image.Gray { return *defaultRightOutputCh.Load() }
 
-// Left returns the left camera.
-func Left() Camer { return defaultLeftCamera.Load() }
-
-// Right returns the right camera.
-func Right() Camer { return defaultRightCamera.Load() }
+// CloseAll closes all cameras.
+func CloseAll() error {
+	err := defaultLeftCamera.Load().Close()
+	if err != nil {
+		return err
+	}
+	err = defaultRightCamera.Load().Close()
+	if err != nil {
+		return err
+	}
+	err = defaultOutputCamera.Load().Close()
+	if err != nil {
+		return err
+	}
+	return nil
+}
 
 // OutputCh returns the output channel.
 func OutputCh() chan *image.Gray { return *defaultOutputCh.Load() }
-
-// Output returns the output camera.
-func Output() Camer { return defaultOutputCamera.Load() }
 
 // SetOutputCamera sets the output camera.
 func SetOutputCamera(

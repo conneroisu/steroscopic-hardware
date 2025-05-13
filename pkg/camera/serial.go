@@ -55,12 +55,12 @@ func NewSerialCamera(
 	var err error
 	switch typ {
 	case LeftCameraType:
-		err = Left().Close()
+		err = defaultLeftCamera.Load().Close()
 		if err != nil {
 			return nil, err
 		}
 	case RightCameraType:
-		err = Right().Close()
+		err = defaultRightCamera.Load().Close()
 		if err != nil {
 			return nil, err
 		}

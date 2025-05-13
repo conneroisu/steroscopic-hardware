@@ -84,17 +84,9 @@ func Run(
 	camera.SetOutputCamera(ctx,
 		camera.NewOutputCamera(despair.DefaultParams()))
 	defer func() {
-		CloseErr := camera.Left().Close()
+		CloseErr := camera.CloseAll()
 		if CloseErr != nil {
 			fmt.Println("Failed to close left camera" + CloseErr.Error())
-		}
-		CloseErr = camera.Right().Close()
-		if CloseErr != nil {
-			fmt.Println("Failed to close right camera" + CloseErr.Error())
-		}
-		CloseErr = camera.Output().Close()
-		if CloseErr != nil {
-			fmt.Println("Failed to close output camera" + CloseErr.Error())
 		}
 	}()
 	handler, err := NewServer(
