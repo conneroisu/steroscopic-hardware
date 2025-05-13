@@ -6,13 +6,10 @@
 // Outputs a calculated SAD value of that window
 module SAD #(
     parameter WIN = 15,
-    localparam WIN_SIZE = WIN * WIN,
     parameter DATA_SIZE = 8,
-    // Max dec from window = window_size * (2^data_size - 1)
-    // parameter MAX_SIZE = WIN_SIZE * ((1 << DATA_SIZE) - 1),
-    // // Dec to bin for output width
-    // parameter SAD_SIZE = $clog2(MAX_SIZE + 1) 
-    localparam SAD_SIZE = $clog2(WIN_SIZE * ((1 << DATA_SIZE) - 1) + 1)
+    //\\ Otherwise parameters //\\
+    parameter WIN_SIZE = WIN * WIN,
+    parameter SAD_SIZE = 16; // $clog2(WIN_SIZE * ((1 << DATA_SIZE) - 1) + 1)
     )(
     // input wire clk
     // Flattened input since 2001 doesn't allow for port arrays
@@ -66,17 +63,18 @@ endmodule
 module compute_max_disp #(
     parameter WIN = 15,             // Window size/block size; Win * Win
     parameter DATA_SIZE = 8,        // Data size in bits
-    parameter IMG_W = 64,          // Imwage resolution width
+    parameter IMG_W = 64,           // Imwage resolution width
     parameter MAX_DISP = 64,        // Max disparity for each pixel
-    parameter DISP_THREADS = 16,    // Number of disparities in parallel (MAX_DISP has to be divisible by this)
-    // Calculated parameters \\
-    localparam G = MAX_DISP / DISP_THREADS, // How many iterations we need to do
-    localparam WIN_SIZE = WIN * WIN,
-    localparam SAD_BITS = $clog2(WIN_SIZE * ((1 << DATA_SIZE) - 1) + 1),
-    localparam DISP_BITS = $clog2(MAX_DISP),
-    localparam CYCLE_BITS = $clog2(G),
-    localparam IMG_W_ARR = $clog2(IMG_W),
-    localparam CMP_IDX_T = $clog2(DISP_THREADS)
+    parameter DISP_THREADS = 8,    // Number of disparities in parallel (MAX_DISP has to be divisible by this)
+    //\\ Calculated parameters //\\
+    //\\ Otherwise parameters //\\
+    parameter G = MAX_DISP / DISP_THREADS, // How many iterations we need to do
+    parameter WIN_SIZE = WIN * WIN,
+    parameter SAD_BITS = 16 // $clog2(WIN_SIZE * ((1 << DATA_SIZE) - 1) + 1),
+    parameter DISP_BITS = 6; // $clog2(MAX_DISP),
+    parameter CYCLE_BITS = 3; // $clog2(G),
+    parameter IMG_W_ARR = 6; // $clog2(IMG_W),
+    parameter CMP_IDX_T = 3; // $clog2(DISP_THREADS)
 )(
     input wire [DATA_SIZE * IMG_W * WIN - 1 : 0] input_array_L,
     input wire [DATA_SIZE * IMG_W * WIN - 1 : 0] input_array_R,
@@ -200,8 +198,6 @@ module compute_max_disp #(
                     end else begin
                         cmp_idx <= cmp_idx + 1;
                     end
-
-                    
                 end // END COMPUTE
 
                 DONE: begin
@@ -249,3 +245,34 @@ module compute_max_disp #(
 
         end
 endmodule
+
+// module top_disparity #(
+//     parameter WIN = 15,             // Window size/block size; Win * Win
+//     parameter DATA_SIZE = 8,        // Data size in bits
+//     parameter IMG_W = 64,           // Imwage resolution width
+//     parameter MAX_DISP = 64,        // Max disparity for each pixel
+//     parameter DISP_THREADS = 16,    // Number of disparities in parallel (MAX_DISP has to be divisible by this)
+//     // Calculated parameters \\
+//     parameter G = MAX_DISP / DISP_THREADS, // How many iterations we need to do
+//     parameter WIN_SIZE = WIN * WIN,
+//     parameter SAD_BITS = $clog2(WIN_SIZE * ((1 << DATA_SIZE) - 1) + 1),
+//     parameter DISP_BITS = $clog2(MAX_DISP),
+//     parameter CYCLE_BITS = $clog2(G),
+//     parameter IMG_W_ARR = $clog2(IMG_W),
+//     parameter CMP_IDX_T = $clog2(DISP_THREADS)
+// )(
+//     input wire [DATA_SIZE * IMG_W * WIN - 1 : 0] input_array_L,
+//     input wire [DATA_SIZE * IMG_W * WIN - 1 : 0] input_array_R,
+//     input wire clk,
+//     input wire rst, 
+//     // input wire input_ready,
+//     // input wire [IMG_W_ARR - 1 : 0] col_index,
+//     output reg [DATA_SIZE * IMG_W : 0] output_row,
+//     output reg done
+// );
+
+
+
+
+
+// endmodule
