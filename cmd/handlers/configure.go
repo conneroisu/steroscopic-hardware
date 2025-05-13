@@ -96,7 +96,8 @@ func ConfigureCamera(ctx context.Context, typ camera.Type) APIFn {
 		}
 
 		// Set the camera in the manager
-		if err := camera.SetCamera(ctx, typ, cam); err != nil {
+		err = camera.SetCamera(ctx, typ, cam)
+		if err != nil {
 			return fmt.Errorf("failed to set camera: %w", err)
 		}
 
