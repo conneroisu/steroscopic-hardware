@@ -13,7 +13,8 @@ module compute_max_disp_tb;
   localparam WIN_SIZE     = WIN * WIN;
   localparam SAD_BITS     = $clog2(WIN_SIZE * ((1<<DATA_SIZE)-1) + 1);
   localparam DISP_BITS    = $clog2(MAX_DISP);
-  localparam col_index    = 0;
+  localparam IMG_W_ARR    = $clog2(IMG_W);
+//   localparam col_index    = 0;
 
   localparam TEST_CASES   = 1;  // ← number of test vectors
 
@@ -26,6 +27,7 @@ module compute_max_disp_tb;
   reg [DATA_SIZE*IMG_W*WIN-1:0] input_array_R;
   wire [DISP_BITS-1:0] output_disp;
   wire done;
+  reg [IMG_W_ARR-1:0] col_index;
 
   // Memory arrays for vectors
   reg [DATA_SIZE-1:0] memL [0:TEST_CASES*IMG_W*WIN-1];
@@ -62,6 +64,7 @@ module compute_max_disp_tb;
   // INITIAL: load all .mem files
   //------------------------------------------------------------------------------
   initial begin
+    col_index = 0;
     $readmemh("C://Users//jaxie//Desktop//cpre488//steroscopic-hardware//left_image.mem",  memL);
     $readmemh("C://Users//jaxie//Desktop//cpre488//steroscopic-hardware//right_image.mem", memR);
     $readmemh("C://Users//jaxie//Desktop//cpre488//steroscopic-hardware//exp_disp.mem",    exp_disp);

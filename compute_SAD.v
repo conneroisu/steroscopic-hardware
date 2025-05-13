@@ -72,7 +72,7 @@ module compute_max_disp #(
     parameter MAX_DISP = 64,        // Max disparity for each pixel
     parameter DISP_THREADS = 16,    // Number of disparities in parallel (MAX_DISP has to be divisible by this)
     // Calculated parameters \\
-    localparam G = MAX_DISP / DISP_THREADS,
+    localparam G = MAX_DISP / DISP_THREADS, // How many iterations we need to do
     localparam WIN_SIZE = WIN * WIN,
     localparam SAD_BITS = $clog2(WIN_SIZE * ((1 << DATA_SIZE) - 1) + 1),
     localparam DISP_BITS = $clog2(MAX_DISP),
@@ -83,11 +83,27 @@ module compute_max_disp #(
     input wire [DATA_SIZE * IMG_W * WIN - 1 : 0] input_array_R,
     input wire clk,
     input wire rst, 
-    input reg col_index, 
+    input  wire [IMG_W_ARR - 1 : 0] col_index,
     output reg [DISP_BITS - 1 : 0] output_disp,
     output reg done
 );
 
+    // FSM parameters
+    typedef enum logic [1:0] {
+        IDLE,          // wait for start
+        PREPROC,       // unpack & flatten windows
+        COMPUTE,       // let SAD engines settle
+        COMPARE        // scan SAD results, update best
+    } state_t;
+
+    reg input_ready, proc_ready, comp_ready, min_ready;
+
+    reg [CYCLE_BITS - 1 : 0] group_idx;
+    reg [SAD_BITS - 1 : 0] best_sad;
+    reg [DISP_BITS - 1 : 0] best_disp;
+    reg [4 : 0] cmp_idx; 
+
+    //// PREPROCESSING (Unpacking and shit)
     // Unpack input_array into a 2D image block: img_block[row][col]
     wire [DATA_SIZE - 1 : 0] img_block_L [0 : WIN - 1][0 : IMG_W - 1];
     wire [DATA_SIZE - 1 : 0] img_block_R [0 : WIN - 1][0 : IMG_W - 1];
@@ -105,7 +121,7 @@ module compute_max_disp #(
             end
         end
     endgenerate
-    
+
     // Flatten refence (left in our case) window buffer
     wire [DATA_SIZE * WIN_SIZE - 1 : 0] winL_flat; 
     
@@ -149,38 +165,108 @@ module compute_max_disp #(
             );
         end
     endgenerate
+    //// END PREPROCESSING
 
-    // Find minimum SAD value between disparities
-    reg [SAD_BITS - 1 : 0] best_sad;
-    reg [DISP_BITS - 1 : 0] best_disp;
-    integer i;
-    always @(posedge clk) begin
+    // Logic to iterate FSM
+    always @(posedge clk or posedge rst) begin
         if (rst) begin
-            group_idx <= 0;
-            best_sad <= {SAD_BITS{1'b1}};
-            best_disp <= 0;
+            state <= IDLE;
             done <= 0;
+            output_disp <= 0;
         end else begin
-            // Compare batch of Threads
-            for (i = 0; i < DISP_THREADS; i = i + 1) begin
-                if (sad_val[i] < best_sad) begin
-                    best_sad <= sad_val[i];
-                    best_disp <= base_disp + i;
-                end
-            end
-
-            // Once last group was processed, exit
-            // Or if best_disp finds a min value - 0 in this case
-            if (group_idx == G-1 || best_sad == 0) begin
-                output_disp <= best_disp;
-                done <= 1;
-                group_idx <= 0;
-            end else begin
-                group_idx <= group_idx + 1;
-            end
-
+            state <= next_state;
         end
+    end 
+
+    // Combinational FSM
+    always @(input_ready, proc_ready, comp_ready, min_ready) begin 
+        // Defaults
+        next_state <= state;
+        
+        case(state)
+            IDLE: begin
+                if (input_ready) begin
+                    next_state = PREPROC;
+                    input_ready <= 0;
+                    comp_ready <= 0;
+                    min_ready <= 0;
+                    done <= 0;
+                end
+            end // END IDLE
+
+            COMPUTE: begin
+                if (comp_ready == 1) begin
+
+                    reg [SAD_BITS - 1 : 0] best_sad;
+                    reg [DISP_BITS - 1 : 0] best_disp;
+
+
+                    next_state = COMPARE;
+                    input_ready <= 0;
+                    comp_ready <= 0;
+                    min_ready <= 1;
+                    done <= 0;
+                end
+            end // END PROC
+
+            COMPARE: begin
+                if (min_ready <= 1) begin
+                    
+
+                    if () begin
+                        next_state = COMPUTE;
+                        input_ready <= 0;
+                        comp_ready <= 1;
+                        min_ready <= 0;
+                        done <= 0;
+                    end else begin
+                        // OUTPUT LOGIC
+                        next_state = IDLE;
+                        input_ready <= 0;
+                        comp_ready <= 0;
+                        min_ready <= 0;
+                        done <= 1;
+                    end
+                end
+            end // END COMPARE
+        endcase
     end
+
+   
+
+
+
+    // // Find minimum SAD value between disparities
+    // reg [SAD_BITS - 1 : 0] best_sad;
+    // reg [DISP_BITS - 1 : 0] best_disp;
+    // integer i;
+    // always @(posedge clk) begin
+    //     if (rst) begin
+    //         group_idx <= 0;
+    //         best_sad <= {SAD_BITS{1'b1}};
+    //         best_disp <= 0;
+    //         done <= 0;
+    //     end else begin
+    //         // Compare batch of Threads
+    //         for (i = 0; i < DISP_THREADS; i = i + 1) begin
+    //             if (sad_val[i] < best_sad) begin
+    //                 best_sad <= sad_val[i];
+    //                 best_disp <= base_disp + i;
+    //             end
+    //         end
+
+    //         // Once last group was processed, exit
+    //         // Or if best_disp finds a min value - 0 in this case
+    //         if (group_idx == G-1 || best_sad == 0) begin
+    //             output_disp <= best_disp;
+    //             done <= 1;
+    //             group_idx <= 0;
+    //         end else begin
+    //             group_idx <= group_idx + 1;
+    //         end
+
+    //     end
+    // end
 
 
 endmodule
