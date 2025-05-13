@@ -74,9 +74,10 @@ func UploadHandler(appCtx context.Context, typ camera.Type) APIFn {
 				<button 
 					hx-get="/"
 					hx-push-url="true"
+					hx-target="#app"
 					class="bg-blue-600 hover:bg-blue-700 text-white rounded px-3 py-1 text-sm"
 				>
-					Return to Main View
+					Reload UI
 				</button>
 			</div>
 		</div>`, string(typ), header.Filename)
