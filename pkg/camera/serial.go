@@ -30,7 +30,7 @@ var (
 
 // SerialCamera represents a camera connected via serial port.
 type SerialCamera struct {
-	BaseCamera
+	*BaseCamera
 	port        serial.Port
 	startSeq    []byte
 	endSeq      []byte
@@ -53,7 +53,7 @@ func NewSerialCamera(ctx context.Context, typ Type, portName string, baudRate in
 	})
 
 	sc := &SerialCamera{
-		BaseCamera:  base,
+		BaseCamera:  &base,
 		startSeq:    DefaultStartSeq,
 		endSeq:      DefaultEndSeq,
 		imageWidth:  DefaultImageWidth,
@@ -169,6 +169,12 @@ func (sc *SerialCamera) initializeStream(ctx context.Context, errChan chan error
 
 		// Return the reading function
 		return func() {
+			// Backoff parameters
+			initialBackoff := 10 * time.Millisecond
+			maxBackoff := 1 * time.Second
+			backoff := initialBackoff
+			consecutiveFailures := 0
+
 			for {
 				select {
 				case <-ctx.Done():
@@ -195,14 +201,32 @@ func (sc *SerialCamera) initializeStream(ctx context.Context, errChan chan error
 					select {
 					case imgCh <- img:
 						sc.logger.Debug("image sent to channel")
+						// Reset backoff on success
+						backoff = initialBackoff
+						consecutiveFailures = 0
 					case <-ctx.Done():
 						return
 					case <-sc.Context().Done():
 						return
 					default:
-						// If channel is full, log and introduce a short delay to prevent rapid looping
-						sc.logger.Debug("output channel full, dropping frame")
-						time.Sleep(10 * time.Millisecond)
+						// Channel is full, apply backoff
+						consecutiveFailures++
+
+						// Only log at certain thresholds to prevent log spam
+						if consecutiveFailures == 1 || consecutiveFailures%10 == 0 {
+							sc.logger.Debug("output channel full, applying backoff",
+								"consecutiveFailures", consecutiveFailures,
+								"currentBackoff", backoff)
+						}
+
+						// Apply backoff delay
+						time.Sleep(backoff)
+
+						// Exponential backoff with a maximum cap
+						backoff = time.Duration(float64(backoff) * 1.5)
+						if backoff > maxBackoff {
+							backoff = maxBackoff
+						}
 					}
 				}
 			}

@@ -38,6 +38,12 @@ func (oc *OutputCamera) Stream(ctx context.Context, outCh ImageChannel) {
 	oc.logger.Info("starting output camera stream")
 	defer oc.logger.Info("output camera stream stopped")
 
+	// Backoff parameters
+	initialBackoff := 10 * time.Millisecond
+	maxBackoff := 1 * time.Second
+	backoff := initialBackoff
+	consecutiveFailures := 0
+
 	for {
 		select {
 		case <-ctx.Done():
@@ -69,13 +75,32 @@ func (oc *OutputCamera) Stream(ctx context.Context, outCh ImageChannel) {
 			select {
 			case outCh <- img:
 				oc.logger.Debug("depth map sent to channel")
+				// Reset backoff on success
+				backoff = initialBackoff
+				consecutiveFailures = 0
 			case <-ctx.Done():
 				return
 			case <-oc.Context().Done():
 				return
 			default:
-				// If channel is full, log and continue
-				oc.logger.Debug("output channel full, dropping frame")
+				// Channel is full, apply backoff
+				consecutiveFailures++
+
+				// Only log at certain thresholds to prevent log spam
+				if consecutiveFailures == 1 || consecutiveFailures%10 == 0 {
+					oc.logger.Debug("output channel full, applying backoff",
+						"consecutiveFailures", consecutiveFailures,
+						"currentBackoff", backoff)
+				}
+
+				// Apply backoff delay
+				time.Sleep(backoff)
+
+				// Exponential backoff with a maximum cap
+				backoff = time.Duration(float64(backoff) * 1.5)
+				if backoff > maxBackoff {
+					backoff = maxBackoff
+				}
 			}
 		}
 	}

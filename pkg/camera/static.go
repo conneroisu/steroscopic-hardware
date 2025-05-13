@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"image"
 	"image/color"
+	"image/png"
 	"log/slog"
 	"os"
 	"path/filepath"
 	"time"
 
-	"github.com/conneroisu/steroscopic-hardware/pkg/despair"
 	"github.com/conneroisu/steroscopic-hardware/pkg/homedir"
 )
 
@@ -42,6 +42,12 @@ func (sc *StaticCamera) Stream(ctx context.Context, outCh ImageChannel) {
 	ticker := time.NewTicker(100 * time.Millisecond)
 	defer ticker.Stop()
 
+	// Backoff parameters
+	initialBackoff := 10 * time.Millisecond
+	maxBackoff := 1 * time.Second
+	backoff := initialBackoff
+	consecutiveFailures := 0
+
 	for {
 		select {
 		case <-ctx.Done():
@@ -71,15 +77,29 @@ func (sc *StaticCamera) Stream(ctx context.Context, outCh ImageChannel) {
 			select {
 			case outCh <- img:
 				sc.logger.Debug("image sent to channel")
+				// Reset backoff on success
+				backoff = initialBackoff
+				consecutiveFailures = 0
 			case <-ctx.Done():
 				return
 			case <-sc.Context().Done():
 				return
 			default:
-				// If channel is full, we'll try again next tick
-				sc.logger.Debug("output channel full, dropping frame")
-				time.Sleep(10 * time.Millisecond) // Prevent busy-loop with a brief delay
+				// Channel is full, apply backoff
+				consecutiveFailures++
 
+				// Only log at certain thresholds to prevent log spam
+				if consecutiveFailures == 1 || consecutiveFailures%10 == 0 {
+					sc.logger.Debug("output channel full, applying backoff",
+						"consecutiveFailures", consecutiveFailures,
+						"currentBackoff", backoff)
+				}
+
+				// Apply backoff delay
+				time.Sleep(backoff)
+
+				// Exponential backoff with a maximum cap
+				backoff = min(time.Duration(float64(backoff)*1.5), maxBackoff)
 			}
 		}
 	}
@@ -88,31 +108,78 @@ func (sc *StaticCamera) Stream(ctx context.Context, outCh ImageChannel) {
 // loadImage reads and processes the image file.
 func (sc *StaticCamera) loadImage() (*image.Gray, error) {
 	// Check if file exists
-	if _, err := os.Stat(sc.path); os.IsNotExist(err) {
+	_, err := os.Stat(sc.path)
+	if os.IsNotExist(err) {
 		return nil, fmt.Errorf("image file not found: %s", sc.path)
 	}
 
 	// Determine image format based on extension
 	ext := filepath.Ext(sc.path)
-	var grayImg *image.Gray
-	var err error
+	var (
+		grayImg *image.Gray
+		file    *os.File
+		img     image.Image
+	)
 
 	switch ext {
 	case ".png":
-		grayImg, err = despair.LoadPNG(sc.path)
+		file, err = os.Open(sc.path)
 		if err != nil {
-			return nil, fmt.Errorf("error loading PNG: %w", err)
+			return nil, err
+		}
+		defer file.Close()
+
+		img, err = png.Decode(file)
+		if err != nil {
+			return nil, err
+		}
+		bounds := img.Bounds()
+		grayImg = image.NewGray(bounds)
+
+		// Direct access to pixel data
+		grayPix := grayImg.Pix
+		stride := grayImg.Stride
+
+		// Optimize by checking image type
+		switch img := img.(type) {
+		case *image.Gray:
+			return img, nil
+		case *image.RGBA:
+			for y := bounds.Min.Y; y < bounds.Max.Y; y++ {
+				rowStart := (y - bounds.Min.Y) * stride
+				for x := bounds.Min.X; x < bounds.Max.X; x++ {
+					i := img.PixOffset(x, y)
+					r := img.Pix[i]
+					g := img.Pix[i+1]
+					b := img.Pix[i+2]
+
+					// Use integer arithmetic
+					grayPix[rowStart+x-bounds.Min.X] = uint8((19595*uint32(r) +
+						38470*uint32(g) +
+						7471*uint32(b) + 1<<15) >> 24)
+				}
+			}
+		default:
+			for y := bounds.Min.Y; y < bounds.Max.Y; y++ {
+				rowStart := (y - bounds.Min.Y) * stride
+				for x := bounds.Min.X; x < bounds.Max.X; x++ {
+					r, g, b, _ := img.At(x, y).RGBA()
+					grayPix[rowStart+x-bounds.Min.X] = uint8((19595*r +
+						38470*g +
+						7471*b + 1<<15) >> 24)
+				}
+			}
 		}
 	case ".jpg", ".jpeg":
 		// Open the file
-		file, err := os.Open(sc.path)
+		file, err = os.Open(sc.path)
 		if err != nil {
 			return nil, fmt.Errorf("error opening image file: %w", err)
 		}
 		defer file.Close()
 
 		// Decode the image
-		img, _, err := image.Decode(file)
+		img, _, err = image.Decode(file)
 		if err != nil {
 			return nil, fmt.Errorf("error decoding image: %w", err)
 		}
