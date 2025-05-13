@@ -54,15 +54,48 @@ This package serves as the interface layer between the web UI and the underlying
 
 ## Index
 
+- [func HandleLeftStream\(w http.ResponseWriter, r \*http.Request\) error](<#HandleLeftStream>)
+- [func HandleOutputStream\(w http.ResponseWriter, r \*http.Request\) error](<#HandleOutputStream>)
+- [func HandleRightStream\(w http.ResponseWriter, r \*http.Request\) error](<#HandleRightStream>)
 - [func Make\(fn APIFn\) http.HandlerFunc](<#Make>)
 - [func MorphableHandler\(wrapper func\(templ.Component\) templ.Component, morph templ.Component\) http.HandlerFunc](<#MorphableHandler>)
 - [type APIFn](<#APIFn>)
   - [func ConfigureCamera\(ctx context.Context, typ camera.Type\) APIFn](<#ConfigureCamera>)
+  - [func ConfigureMiddleware\(apiFn APIFn\) APIFn](<#ConfigureMiddleware>)
   - [func ErrorHandler\(fn APIFn\) APIFn](<#ErrorHandler>)
   - [func GetPorts\(logger \*logger.Logger\) APIFn](<#GetPorts>)
+  - [func HandleCameraStream\(camType camera.Type, useOutputChannel bool\) APIFn](<#HandleCameraStream>)
   - [func ParametersHandler\(\) APIFn](<#ParametersHandler>)
-  - [func StreamHandlerFn\(typ camera.Type\) APIFn](<#StreamHandlerFn>)
+  - [func UploadHandler\(appCtx context.Context, typ camera.Type\) APIFn](<#UploadHandler>)
+- [type CtxKey](<#CtxKey>)
 
+
+<a name="HandleLeftStream"></a>
+## func [HandleLeftStream](<https://github.com/conneroisu/steroscopic-hardware/blob/main/cmd/handlers/stream.go#L136>)
+
+```go
+func HandleLeftStream(w http.ResponseWriter, r *http.Request) error
+```
+
+HandleLeftStream returns a handler for streaming the left camera.
+
+<a name="HandleOutputStream"></a>
+## func [HandleOutputStream](<https://github.com/conneroisu/steroscopic-hardware/blob/main/cmd/handlers/stream.go#L146>)
+
+```go
+func HandleOutputStream(w http.ResponseWriter, r *http.Request) error
+```
+
+HandleOutputStream returns a handler for streaming the output camera.
+
+<a name="HandleRightStream"></a>
+## func [HandleRightStream](<https://github.com/conneroisu/steroscopic-hardware/blob/main/cmd/handlers/stream.go#L141>)
+
+```go
+func HandleRightStream(w http.ResponseWriter, r *http.Request) error
+```
+
+HandleRightStream returns a handler for streaming the right camera.
 
 <a name="Make"></a>
 ## func [Make](<https://github.com/conneroisu/steroscopic-hardware/blob/main/cmd/handlers/api.go#L15>)
@@ -92,13 +125,22 @@ type APIFn func(w http.ResponseWriter, r *http.Request) error
 ```
 
 <a name="ConfigureCamera"></a>
-### func [ConfigureCamera](<https://github.com/conneroisu/steroscopic-hardware/blob/main/cmd/handlers/configure.go#L16-L19>)
+### func [ConfigureCamera](<https://github.com/conneroisu/steroscopic-hardware/blob/main/cmd/handlers/configure.go#L73>)
 
 ```go
 func ConfigureCamera(ctx context.Context, typ camera.Type) APIFn
 ```
 
-ConfigureCamera handles client requests to configure all camera parameters at once.
+ConfigureCamera handles client requests to configure camera parameters.
+
+<a name="ConfigureMiddleware"></a>
+### func [ConfigureMiddleware](<https://github.com/conneroisu/steroscopic-hardware/blob/main/cmd/handlers/configure.go#L22>)
+
+```go
+func ConfigureMiddleware(apiFn APIFn) APIFn
+```
+
+ConfigureMiddleware parses camera configuration from form data.
 
 <a name="ErrorHandler"></a>
 ### func [ErrorHandler](<https://github.com/conneroisu/steroscopic-hardware/blob/main/cmd/handlers/api.go#L63-L65>)
@@ -118,6 +160,15 @@ func GetPorts(logger *logger.Logger) APIFn
 
 GetPorts handles client requests to configure the camera.
 
+<a name="HandleCameraStream"></a>
+### func [HandleCameraStream](<https://github.com/conneroisu/steroscopic-hardware/blob/main/cmd/handlers/stream.go#L57>)
+
+```go
+func HandleCameraStream(camType camera.Type, useOutputChannel bool) APIFn
+```
+
+HandleCameraStream is a generic handler for streaming camera images.
+
 <a name="ParametersHandler"></a>
 ### func [ParametersHandler](<https://github.com/conneroisu/steroscopic-hardware/blob/main/cmd/handlers/params.go#L14>)
 
@@ -125,20 +176,25 @@ GetPorts handles client requests to configure the camera.
 func ParametersHandler() APIFn
 ```
 
-ParametersHandler handles client requests to change the parameters of the desparity map generator.
+ParametersHandler handles client requests to update disparity algorithm parameters.
 
-<a name="StreamHandlerFn"></a>
-### func [StreamHandlerFn](<https://github.com/conneroisu/steroscopic-hardware/blob/main/cmd/handlers/stream.go#L23-L25>)
+<a name="UploadHandler"></a>
+### func [UploadHandler](<https://github.com/conneroisu/steroscopic-hardware/blob/main/cmd/handlers/upload.go#L16>)
 
 ```go
-func StreamHandlerFn(typ camera.Type) APIFn
+func UploadHandler(appCtx context.Context, typ camera.Type) APIFn
 ```
 
-StreamHandlerFn returns a handler for streaming camera images to multiple clients.
+UploadHandler handles the upload of static image files for camera simulation.
 
-It uses a buffered channel to send images to clients, and a ticker to control frame rate.
+<a name="CtxKey"></a>
+## type [CtxKey](<https://github.com/conneroisu/steroscopic-hardware/blob/main/cmd/handlers/configure.go#L15>)
 
-As input, it expects a camera.Stream struct, which is used to manage the camera stream.
+CtxKey is a type alias for context keys used to store camera configuration.
+
+```go
+type CtxKey string
+```
 
 Generated by [gomarkdoc](<https://github.com/princjef/gomarkdoc>)
 

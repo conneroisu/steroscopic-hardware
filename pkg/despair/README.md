@@ -82,7 +82,7 @@ despair.MustSavePNG("depth_map.png", disparityMap)
 - [func RunSad\(left, right \*image.Gray, blockSize, maxDisparity int\) \*image.Gray](<#RunSad>)
 - [func SavePNG\(filename string, img image.Image\) error](<#SavePNG>)
 - [func SetDefaultParams\(params Parameters\)](<#SetDefaultParams>)
-- [func SetupConcurrentSAD\(params \*Parameters, numWorkers int\) \(chan\<\- InputChunk, \<\-chan OutputChunk\)](<#SetupConcurrentSAD>)
+- [func SetupConcurrentSAD\(numWorkers int\) \(chan\<\- InputChunk, \<\-chan OutputChunk\)](<#SetupConcurrentSAD>)
 - [func SumAbsoluteDifferences\(left, right \*image.Gray, leftX, leftY, rightX, rightY, blockSize int\) int](<#SumAbsoluteDifferences>)
 - [type InputChunk](<#InputChunk>)
 - [type OutputChunk](<#OutputChunk>)
@@ -91,7 +91,7 @@ despair.MustSavePNG("depth_map.png", disparityMap)
 
 
 <a name="AssembleDisparityMap"></a>
-## func [AssembleDisparityMap](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/despair/sad.go#L169-L173>)
+## func [AssembleDisparityMap](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/despair/sad.go#L172-L176>)
 
 ```go
 func AssembleDisparityMap(outputChan <-chan OutputChunk, dimensions image.Rectangle, chunks int) *image.Gray
@@ -127,7 +127,7 @@ func MustSavePNG(filename string, img image.Image)
 MustSavePNG saves a PNG image with optimizations to the given filename and panics if an error occurs.
 
 <a name="RunSad"></a>
-## func [RunSad](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/despair/sad.go#L117-L120>)
+## func [RunSad](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/despair/sad.go#L119-L122>)
 
 ```go
 func RunSad(left, right *image.Gray, blockSize, maxDisparity int) *image.Gray
@@ -147,7 +147,7 @@ func SavePNG(filename string, img image.Image) error
 SavePNG saves a PNG image with optimizations to the given filename and returns an error if one occurs.
 
 <a name="SetDefaultParams"></a>
-## func [SetDefaultParams](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/despair/params.go#L19>)
+## func [SetDefaultParams](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/despair/params.go#L21>)
 
 ```go
 func SetDefaultParams(params Parameters)
@@ -156,10 +156,10 @@ func SetDefaultParams(params Parameters)
 SetDefaultParams sets the default stereoscopic algorithm parameters.
 
 <a name="SetupConcurrentSAD"></a>
-## func [SetupConcurrentSAD](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/despair/sad.go#L29-L32>)
+## func [SetupConcurrentSAD](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/despair/sad.go#L29-L31>)
 
 ```go
-func SetupConcurrentSAD(params *Parameters, numWorkers int) (chan<- InputChunk, <-chan OutputChunk)
+func SetupConcurrentSAD(numWorkers int) (chan<- InputChunk, <-chan OutputChunk)
 ```
 
 SetupConcurrentSAD sets up a concurrent SAD processing pipeline.
@@ -169,7 +169,7 @@ It returns an input channel to feed image chunks into and an output channel to r
 If the input channel is closed, the processing pipeline will stop.
 
 <a name="SumAbsoluteDifferences"></a>
-## func [SumAbsoluteDifferences](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/despair/sad.go#L202-L205>)
+## func [SumAbsoluteDifferences](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/despair/sad.go#L205-L208>)
 
 ```go
 func SumAbsoluteDifferences(left, right *image.Gray, leftX, leftY, rightX, rightY, blockSize int) int
@@ -202,7 +202,7 @@ type OutputChunk struct {
 ```
 
 <a name="Parameters"></a>
-## type [Parameters](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/despair/params.go#L30-L33>)
+## type [Parameters](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/despair/params.go#L34-L37>)
 
 Parameters is a struct that holds the parameters for the stereoscopic image processing.
 
@@ -214,7 +214,7 @@ type Parameters struct {
 ```
 
 <a name="DefaultParams"></a>
-### func [DefaultParams](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/despair/params.go#L24>)
+### func [DefaultParams](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/despair/params.go#L28>)
 
 ```go
 func DefaultParams() *Parameters

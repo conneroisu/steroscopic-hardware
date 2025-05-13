@@ -12,15 +12,17 @@ import (
 // DefaultNumWorkers is the default number of worker goroutines for disparity calculations.
 const DefaultNumWorkers = 32
 
-// OutputCamera processes left and right camera images to generate a depth map.
+// OutputCamera processes left and right camera images to generate a depth map using
+// a concurrent sum of absolute differences (SAD) algorithm. It is used for stereo vision output.
 type OutputCamera struct {
 	BaseCamera
-	inputCh  chan<- despair.InputChunk
-	outputCh <-chan despair.OutputChunk
-	logger   *slog.Logger
+	inputCh  chan<- despair.InputChunk // Channel for input image chunks
+	outputCh <-chan despair.OutputChunk // Channel for processed output chunks
+	logger   *slog.Logger              // Logger for output camera events
 }
 
-// NewOutputCamera creates a new output camera for disparity mapping.
+// NewOutputCamera creates a new output camera for disparity mapping. It initializes
+// the disparity processing pipeline and returns the OutputCamera instance.
 func NewOutputCamera(ctx context.Context) *OutputCamera {
 	oc := &OutputCamera{
 		BaseCamera: NewBaseCamera(ctx, OutputCameraType),
@@ -33,7 +35,8 @@ func NewOutputCamera(ctx context.Context) *OutputCamera {
 	return oc
 }
 
-// Stream processes input images and generates depth maps.
+// Stream processes input images and generates depth maps. It reads from the left and right
+// camera channels, computes the depth map, and sends the result to the output channel.
 func (oc *OutputCamera) Stream(ctx context.Context, outCh ImageChannel) {
 	oc.logger.Info("starting output camera stream")
 	defer oc.logger.Info("output camera stream stopped")
@@ -106,7 +109,8 @@ func (oc *OutputCamera) Stream(ctx context.Context, outCh ImageChannel) {
 	}
 }
 
-// processDepthMap generates a depth map from left and right camera images.
+// processDepthMap generates a depth map from left and right camera images. It divides the
+// images into chunks for parallel processing and assembles the resulting disparity map.
 func (oc *OutputCamera) processDepthMap(leftCh, rightCh ImageChannel) (*image.Gray, error) {
 	// Try to receive images from both channels
 	var leftImg, rightImg *image.Gray
@@ -171,7 +175,7 @@ func (oc *OutputCamera) processDepthMap(leftCh, rightCh ImageChannel) (*image.Gr
 	return nil, nil
 }
 
-// Close releases all resources.
+// Close releases all resources used by the output camera and stops the processing pipeline.
 func (oc *OutputCamera) Close() error {
 	oc.logger.Info("closing output camera")
 	oc.Cancel()

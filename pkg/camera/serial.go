@@ -28,20 +28,22 @@ var (
 	DefaultImageHeight = 1080
 )
 
-// SerialCamera represents a camera connected via serial port.
+// SerialCamera represents a camera connected via serial port. It handles communication
+// with hardware cameras over a serial interface, including image acquisition and streaming.
 type SerialCamera struct {
 	*BaseCamera
-	port        serial.Port
-	startSeq    []byte
-	endSeq      []byte
-	imageWidth  int
-	imageHeight int
-	logger      *slog.Logger
-	onClose     func()
-	streamMu    sync.Mutex
+	port        serial.Port    // Serial port interface
+	startSeq    []byte         // Start sequence for image data
+	endSeq      []byte         // End sequence for image data
+	imageWidth  int            // Expected image width in pixels
+	imageHeight int            // Expected image height in pixels
+	logger      *slog.Logger   // Logger for serial camera events
+	onClose     func()         // Cleanup function for closing the camera
+	streamMu    sync.Mutex     // Mutex for synchronizing streaming
 }
 
-// NewSerialCamera creates a new SerialCamera instance.
+// NewSerialCamera creates a new SerialCamera instance for the given type, port, baud rate,
+// and compression setting. It opens the serial port and prepares the camera for streaming.
 func NewSerialCamera(ctx context.Context, typ Type, portName string, baudRate int, compression int) (*SerialCamera, error) {
 	base := NewBaseCamera(ctx, typ)
 
@@ -87,7 +89,8 @@ func NewSerialCamera(ctx context.Context, typ Type, portName string, baudRate in
 	return sc, nil
 }
 
-// Stream reads images from the camera and sends them to the provided channel.
+// Stream reads images from the camera and sends them to the provided channel. It manages
+// the streaming lifecycle, error handling, and reconnection logic.
 func (sc *SerialCamera) Stream(ctx context.Context, outCh ImageChannel) {
 	sc.logger.Debug("SerialCamera.Stream started")
 	defer sc.logger.Debug("SerialCamera.Stream completed")
@@ -121,7 +124,8 @@ func (sc *SerialCamera) Stream(ctx context.Context, outCh ImageChannel) {
 	}
 }
 
-// initializeStream sets up the serial connection and prepares for streaming.
+// initializeStream sets up the serial connection and prepares for streaming. It returns a
+// function that continuously reads frames and sends them to the image channel.
 func (sc *SerialCamera) initializeStream(ctx context.Context, errChan chan error, imgCh ImageChannel) (func(), error) {
 	var tries = 0
 
@@ -234,7 +238,8 @@ func (sc *SerialCamera) initializeStream(ctx context.Context, errChan chan error
 	}
 }
 
-// readFrame reads a single image frame from the serial port.
+// readFrame reads a single image frame from the serial port, converts it to grayscale,
+// and returns it as an image.Gray. It handles timeouts and progress reporting.
 func (sc *SerialCamera) readFrame() (*image.Gray, error) {
 	sc.logger.Debug("reading image frame")
 
@@ -317,7 +322,8 @@ func (sc *SerialCamera) readFrame() (*image.Gray, error) {
 	return img, nil
 }
 
-// Close releases all resources used by the camera.
+// Close releases all resources used by the camera, including closing the serial port and
+// canceling the context.
 func (sc *SerialCamera) Close() error {
 	sc.logger.Info("closing serial camera")
 

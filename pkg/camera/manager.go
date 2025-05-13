@@ -6,34 +6,35 @@ import (
 	"sync"
 )
 
-// Manager handles all cameras and their associated channels.
+// Manager handles all cameras and their associated channels. It provides methods to
+// retrieve, configure, and control cameras and their image channels.
 type Manager interface {
-	// GetCamera retrieves a camera by type
+	// GetCamera retrieves a camera by type (left, right, output).
 	GetCamera(typ Type) Camera
-	// SetCamera configures and starts a new camera of the specified type
+	// SetCamera configures and starts a new camera of the specified type.
 	SetCamera(ctx context.Context, typ Type, cam Camera) error
-	// GetChannel returns the input channel for the specified camera type
+	// GetChannel returns the input channel for the specified camera type.
 	GetChannel(typ Type) ImageChannel
-	// GetOutputChannel returns the output channel for the specified camera type
+	// GetOutputChannel returns the output channel for the specified camera type.
 	GetOutputChannel(typ Type) ImageChannel
-	// CloseAll closes all cameras and releases their resources
+	// CloseAll closes all cameras and releases their resources.
 	CloseAll() error
-	// DrainAll empties all camera channels
+	// DrainAll empties all camera channels.
 	DrainAll()
 }
 
 // channelBufferSize defines how many images each channel can buffer.
 const channelBufferSize = 20 // Increased from 5 to 20 to prevent blocking
 
-// manager implements the Manager interface.
+// manager implements the Manager interface for camera management.
 type manager struct {
-	cameras     map[Type]Camera
-	channels    map[Type]ImageChannel
-	outChannels map[Type]ImageChannel
-	mu          sync.RWMutex
+	cameras     map[Type]Camera      // Map of camera type to camera instance
+	channels    map[Type]ImageChannel // Input channels for each camera
+	outChannels map[Type]ImageChannel // Output channels for each camera
+	mu          sync.RWMutex         // Mutex for concurrent access
 }
 
-// NewManager creates a new camera manager instance.
+// NewManager creates a new camera manager instance with initialized channels.
 func NewManager() Manager {
 	m := &manager{
 		cameras:     make(map[Type]Camera),
@@ -41,7 +42,7 @@ func NewManager() Manager {
 		outChannels: make(map[Type]ImageChannel),
 	}
 
-	// Initialize channels
+	// Initialize channels for each camera type
 	m.channels[LeftCameraType] = make(ImageChannel, channelBufferSize)
 	m.channels[RightCameraType] = make(ImageChannel, channelBufferSize)
 	m.channels[OutputCameraType] = make(ImageChannel, channelBufferSize)
@@ -53,14 +54,15 @@ func NewManager() Manager {
 	return m
 }
 
-// GetCamera retrieves a camera by type.
+// GetCamera retrieves a camera by type (left, right, output).
 func (m *manager) GetCamera(typ Type) Camera {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
 	return m.cameras[typ]
 }
 
-// SetCamera configures and starts a new camera of the specified type.
+// SetCamera configures and starts a new camera of the specified type. It pauses other cameras,
+// closes any existing camera of the same type, drains channels, and starts the new camera.
 func (m *manager) SetCamera(ctx context.Context, typ Type, cam Camera) error {
 	m.mu.Lock()
 	defer m.mu.Unlock()
@@ -85,7 +87,7 @@ func (m *manager) SetCamera(ctx context.Context, typ Type, cam Camera) error {
 		}
 	}
 
-	// Drain channels
+	// Drain channels to clear old data
 	m.drainChannels()
 
 	// Store and start new camera
@@ -138,7 +140,7 @@ func (m *manager) DrainAll() {
 	m.drainChannels()
 }
 
-// drainChannels non-blocking drain of all channels.
+// drainChannels non-blocking drain of all channels to clear any buffered images.
 func (m *manager) drainChannels() {
 	for {
 		allEmpty := true
@@ -165,15 +167,15 @@ func (m *manager) drainChannels() {
 	}
 }
 
-// Global manager instance.
+// Global manager instance for default usage.
 var defaultManager = NewManager()
 
-// DefaultManager returns the default camera manager.
+// DefaultManager returns the default camera manager instance.
 func DefaultManager() Manager {
 	return defaultManager
 }
 
-// SetDefaultManager replaces the default camera manager.
+// SetDefaultManager replaces the default camera manager with the provided one.
 func SetDefaultManager(m Manager) {
 	defaultManager = m
 }

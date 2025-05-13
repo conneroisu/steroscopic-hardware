@@ -54,6 +54,12 @@ var CircleQuestion = templ.Raw(circleQuestion)
 var CircleX = templ.Raw(circleX)
 ```
 
+<a name="FileIcon"></a>FileIcon is a template for the SVG file\-icon icon.
+
+```go
+var FileIcon = templ.Raw(fileIcon)
+```
+
 <a name="GreenUp"></a>GreenUp is a template for the SVG green\-up icon.
 
 ```go
