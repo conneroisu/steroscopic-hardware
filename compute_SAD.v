@@ -62,9 +62,7 @@ endmodule
 
 // Compute disparity of a pixel
 // Perform SAD computation in parallel
-// MAX_DISP windows must be searched serially - could be chunked later
-/// I think the likelyhood of an earlier disparity map to match is pretty high - so probs just do a simple comparator for now
-///     and exit if 0 is found
+// MAX_DISP windows must be searched serially - chunked into G = MAX_DISP / DIPS_THREADS
 module compute_max_disp #(
     parameter WIN = 15,             // Window size/block size; Win * Win
     parameter DATA_SIZE = 8,        // Data size in bits
@@ -77,31 +75,29 @@ module compute_max_disp #(
     localparam SAD_BITS = $clog2(WIN_SIZE * ((1 << DATA_SIZE) - 1) + 1),
     localparam DISP_BITS = $clog2(MAX_DISP),
     localparam CYCLE_BITS = $clog2(G),
-    localparam IMG_W_ARR = $clog2(IMG_W)
+    localparam IMG_W_ARR = $clog2(IMG_W),
+    localparam CMP_IDX_T = $clog2(DISP_THREADS)
 )(
     input wire [DATA_SIZE * IMG_W * WIN - 1 : 0] input_array_L,
     input wire [DATA_SIZE * IMG_W * WIN - 1 : 0] input_array_R,
     input wire clk,
     input wire rst, 
-    input  wire [IMG_W_ARR - 1 : 0] col_index,
+    input wire input_ready,
+    input wire [IMG_W_ARR - 1 : 0] col_index,
     output reg [DISP_BITS - 1 : 0] output_disp,
     output reg done
 );
 
     // FSM parameters
-    typedef enum logic [1:0] {
-        IDLE,          // wait for start
-        PREPROC,       // unpack & flatten windows
-        COMPUTE,       // let SAD engines settle
-        COMPARE        // scan SAD results, update best
-    } state_t;
+    reg [1:0] state, next_state;
+    localparam IDLE = 2'd0;
+    localparam COMPUTE = 2'd1;
+    localparam COMPARE = 2'd2;
+    localparam DONE = 2'd3;
 
-    reg input_ready, proc_ready, comp_ready, min_ready;
-
-    reg [CYCLE_BITS - 1 : 0] group_idx;
+    reg [$clog2(DISP_THREADS) - 1 : 0] cmp_idx;
     reg [SAD_BITS - 1 : 0] best_sad;
     reg [DISP_BITS - 1 : 0] best_disp;
-    reg [4 : 0] cmp_idx; 
 
     //// PREPROCESSING (Unpacking and shit)
     // Unpack input_array into a 2D image block: img_block[row][col]
@@ -171,102 +167,85 @@ module compute_max_disp #(
     always @(posedge clk or posedge rst) begin
         if (rst) begin
             state <= IDLE;
+            // next_state <= IDLE;
+            cmp_idx <= 0;
+            best_sad <= {SAD_BITS{1'b1}};
+            best_disp <= 0;
+            best_disp <= 0;
+            group_idx <= 0;
             done <= 0;
-            output_disp <= 0;
         end else begin
             state <= next_state;
+            case (state)
+                IDLE: begin
+                    // Do nothing in sequential
+                    // Waiting for input_ready signal
+                end // END IDLE
+
+                COMPUTE: begin
+                    // Do nothing - give SAD a cycle
+                end
+
+                COMPARE: begin
+                    // Perform comparison
+                    if (sad_val[cmp_idx] < best_sad) begin
+                        best_sad <= sad_val[cmp_idx];
+                        best_disp <= base_disp + cmp_idx;
+                    end
+                    
+                    // Batch comparisons finished (End of batch or min pixel found)
+                    if (cmp_idx == DISP_THREADS - 1 || best_sad == 0 ) begin
+                        group_idx <= group_idx + 1;
+                        cmp_idx <= 0;
+                    end else begin
+                        cmp_idx <= cmp_idx + 1;
+                    end
+
+                    
+                end // END COMPUTE
+
+                DONE: begin
+                    output_disp <= best_disp;
+                    done <= 1;
+                end // END COMPARE
+            endcase
         end
     end 
 
     // Combinational FSM
-    always @(input_ready, proc_ready, comp_ready, min_ready) begin 
-        // Defaults
-        next_state <= state;
-        
+    always @* begin
+        // Default values
+        next_state  = state;
+
         case(state)
             IDLE: begin
                 if (input_ready) begin
-                    next_state = PREPROC;
-                    input_ready <= 0;
-                    comp_ready <= 0;
-                    min_ready <= 0;
-                    done <= 0;
+                    next_state = COMPUTE;
                 end
             end // END IDLE
 
             COMPUTE: begin
-                if (comp_ready == 1) begin
-
-                    reg [SAD_BITS - 1 : 0] best_sad;
-                    reg [DISP_BITS - 1 : 0] best_disp;
-
-
-                    next_state = COMPARE;
-                    input_ready <= 0;
-                    comp_ready <= 0;
-                    min_ready <= 1;
-                    done <= 0;
-                end
-            end // END PROC
+                // Do nothing - give SAD a cycle
+                next_state = COMPARE;
+            end
 
             COMPARE: begin
-                if (min_ready <= 1) begin
-                    
 
-                    if () begin
-                        next_state = COMPUTE;
-                        input_ready <= 0;
-                        comp_ready <= 1;
-                        min_ready <= 0;
-                        done <= 0;
+                // Batch comparisons finished (End of batch or min pixel found)
+                if (cmp_idx == DISP_THREADS - 1 || best_sad == 0 ) begin
+                    // Exit conditions for pixel (End of group or min pixel found)
+                    if (group_idx == G - 1 || best_sad == 0) begin
+                        next_state = DONE;
                     end else begin
-                        // OUTPUT LOGIC
-                        next_state = IDLE;
-                        input_ready <= 0;
-                        comp_ready <= 0;
-                        min_ready <= 0;
-                        done <= 1;
+                        next_state = COMPUTE;
                     end
-                end
+                end 
+            end // END PROC
+
+            DONE: begin
+                // No loop to IDLE, just wait for reset
             end // END COMPARE
         endcase
-    end
 
-   
-
-
-
-    // // Find minimum SAD value between disparities
-    // reg [SAD_BITS - 1 : 0] best_sad;
-    // reg [DISP_BITS - 1 : 0] best_disp;
-    // integer i;
-    // always @(posedge clk) begin
-    //     if (rst) begin
-    //         group_idx <= 0;
-    //         best_sad <= {SAD_BITS{1'b1}};
-    //         best_disp <= 0;
-    //         done <= 0;
-    //     end else begin
-    //         // Compare batch of Threads
-    //         for (i = 0; i < DISP_THREADS; i = i + 1) begin
-    //             if (sad_val[i] < best_sad) begin
-    //                 best_sad <= sad_val[i];
-    //                 best_disp <= base_disp + i;
-    //             end
-    //         end
-
-    //         // Once last group was processed, exit
-    //         // Or if best_disp finds a min value - 0 in this case
-    //         if (group_idx == G-1 || best_sad == 0) begin
-    //             output_disp <= best_disp;
-    //             done <= 1;
-    //             group_idx <= 0;
-    //         end else begin
-    //             group_idx <= group_idx + 1;
-    //         end
-
-    //     end
-    // end
-
-
+        end
 endmodule
