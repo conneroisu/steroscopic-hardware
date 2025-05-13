@@ -14,14 +14,16 @@ import (
 	"github.com/conneroisu/steroscopic-hardware/pkg/homedir"
 )
 
-// StaticCamera represents a camera that loads images from files.
+// StaticCamera represents a camera that loads images from files. It is useful for testing
+// and development when a real hardware camera is not available.
 type StaticCamera struct {
 	BaseCamera
-	path   string
-	logger *slog.Logger
+	path   string        // Path to the static image file
+	logger *slog.Logger  // Logger for static camera events
 }
 
-// NewStaticCamera creates a new static camera that reads from the specified file path.
+// NewStaticCamera creates a new static camera that reads from the specified file path and
+// associates it with the given camera type.
 func NewStaticCamera(ctx context.Context, path string, typ Type) *StaticCamera {
 	return &StaticCamera{
 		BaseCamera: NewBaseCamera(ctx, typ),
@@ -30,7 +32,8 @@ func NewStaticCamera(ctx context.Context, path string, typ Type) *StaticCamera {
 	}
 }
 
-// Stream continuously reads the static image and sends it to the output channel.
+// Stream continuously reads the static image and sends it to the output channel at a fixed
+// interval. Useful for simulating a live camera feed.
 func (sc *StaticCamera) Stream(ctx context.Context, outCh ImageChannel) {
 	sc.logger.Info("starting static camera stream", "path", sc.path)
 	defer sc.logger.Info("static camera stream stopped")
@@ -58,7 +61,7 @@ func (sc *StaticCamera) Stream(ctx context.Context, outCh ImageChannel) {
 			sc.logger.Error("error in static camera", "err", err)
 			time.Sleep(1 * time.Second) // Delay before retry
 		case <-ticker.C:
-			if sc.IsPaused() {
+			if (sc.IsPaused()) {
 				continue
 			}
 
@@ -105,7 +108,7 @@ func (sc *StaticCamera) Stream(ctx context.Context, outCh ImageChannel) {
 	}
 }
 
-// loadImage reads and processes the image file.
+// loadImage reads and processes the image file, converting it to grayscale. Supports PNG and JPEG.
 func (sc *StaticCamera) loadImage() (*image.Gray, error) {
 	// Check if file exists
 	_, err := os.Stat(sc.path)
@@ -205,7 +208,7 @@ func (sc *StaticCamera) loadImage() (*image.Gray, error) {
 	return grayImg, nil
 }
 
-// Close releases all resources.
+// Close releases all resources used by the static camera and cancels its context.
 func (sc *StaticCamera) Close() error {
 	sc.logger.Info("closing static camera")
 	sc.Cancel()
