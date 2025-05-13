@@ -73,7 +73,7 @@ func ConfigureMiddleware(apiFn APIFn) APIFn {
 func ConfigureCamera(ctx context.Context, typ camera.Type) APIFn {
 	logger := slog.Default().WithGroup("configure-camera")
 
-	return func(_ http.ResponseWriter, r *http.Request) error {
+	return func(w http.ResponseWriter, r *http.Request) error {
 		// Get config from context
 		config, ok := r.Context().Value(ctxKeyConfig).(camera.Config)
 		if !ok {
@@ -89,8 +89,8 @@ func ConfigureCamera(ctx context.Context, typ camera.Type) APIFn {
 			"compression", config.Compression,
 		)
 
-		// Create and configure the camera
-		cam, err := camera.NewSerialCamera(typ, config.Port, config.BaudRate, config.Compression)
+		// Create and configure the camera - using the application context instead of request context
+		cam, err := camera.NewSerialCamera(ctx, typ, config.Port, config.BaudRate, config.Compression)
 		if err != nil {
 			return fmt.Errorf("failed to create serial camera: %w", err)
 		}
@@ -98,6 +98,16 @@ func ConfigureCamera(ctx context.Context, typ camera.Type) APIFn {
 		// Set the camera in the manager
 		if err := camera.SetCamera(ctx, typ, cam); err != nil {
 			return fmt.Errorf("failed to set camera: %w", err)
+		}
+
+		// Return success HTML
+		successHTML := `
+		<span class="inline-block w-3 h-3 bg-green-500 rounded-full"></span>
+		<span class="text-sm">Connected successfully!</span>
+		`
+		_, err = w.Write([]byte(successHTML))
+		if err != nil {
+			return fmt.Errorf("failed to write success HTML: %w", err)
 		}
 
 		return nil

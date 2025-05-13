@@ -22,9 +22,9 @@ type StaticCamera struct {
 }
 
 // NewStaticCamera creates a new static camera that reads from the specified file path.
-func NewStaticCamera(path string, typ Type) *StaticCamera {
+func NewStaticCamera(ctx context.Context, path string, typ Type) *StaticCamera {
 	return &StaticCamera{
-		BaseCamera: NewBaseCamera(typ),
+		BaseCamera: NewBaseCamera(ctx, typ),
 		path:       path,
 		logger:     slog.Default().WithGroup(fmt.Sprintf("static-camera-%s", typ)),
 	}
@@ -75,6 +75,9 @@ func (sc *StaticCamera) Stream(ctx context.Context, outCh ImageChannel) {
 				return
 			case <-sc.Context().Done():
 				return
+			default:
+				// If channel is full, we'll try again next tick
+				sc.logger.Debug("output channel full, skipping frame")
 			}
 		}
 	}

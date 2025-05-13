@@ -30,7 +30,7 @@ var (
 
 // SerialCamera represents a camera connected via serial port.
 type SerialCamera struct {
-	*BaseCamera
+	BaseCamera
 	port        serial.Port
 	startSeq    []byte
 	endSeq      []byte
@@ -42,8 +42,8 @@ type SerialCamera struct {
 }
 
 // NewSerialCamera creates a new SerialCamera instance.
-func NewSerialCamera(typ Type, portName string, baudRate int, compression int) (*SerialCamera, error) {
-	base := NewBaseCamera(typ)
+func NewSerialCamera(ctx context.Context, typ Type, portName string, baudRate int, compression int) (*SerialCamera, error) {
+	base := NewBaseCamera(ctx, typ)
 
 	// Configure the camera
 	base.SetConfig(Config{
@@ -53,7 +53,7 @@ func NewSerialCamera(typ Type, portName string, baudRate int, compression int) (
 	})
 
 	sc := &SerialCamera{
-		BaseCamera:  &base,
+		BaseCamera:  base,
 		startSeq:    DefaultStartSeq,
 		endSeq:      DefaultEndSeq,
 		imageWidth:  DefaultImageWidth,
@@ -199,6 +199,9 @@ func (sc *SerialCamera) initializeStream(ctx context.Context, errChan chan error
 						return
 					case <-sc.Context().Done():
 						return
+					default:
+						// If channel is full, log and continue
+						sc.logger.Debug("output channel full, dropping frame")
 					}
 				}
 			}

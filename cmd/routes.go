@@ -84,7 +84,7 @@ func AddRoutes(
 		"POST /left/upload",
 		handlers.Make(
 			handlers.ErrorHandler(
-				handlers.UploadHandler(camera.LeftCameraType))),
+				handlers.UploadHandler(ctx, camera.LeftCameraType))),
 	)
 
 	// Right camera configuration and upload endpoints
@@ -102,7 +102,7 @@ func AddRoutes(
 		"POST /right/upload",
 		handlers.Make(
 			handlers.ErrorHandler(
-				handlers.UploadHandler(camera.RightCameraType))),
+				handlers.UploadHandler(ctx, camera.RightCameraType))),
 	)
 
 	// Available ports endpoint

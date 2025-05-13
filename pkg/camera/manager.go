@@ -23,7 +23,7 @@ type Manager interface {
 }
 
 // channelBufferSize defines how many images each channel can buffer.
-const channelBufferSize = 5
+const channelBufferSize = 20 // Increased from 5 to 20 to prevent blocking
 
 // manager implements the Manager interface.
 type manager struct {
