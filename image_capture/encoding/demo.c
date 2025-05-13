@@ -5,7 +5,6 @@
 #define TEST_MODE 1
 
 #define SIZE 2073600U
-#define CHUNK_SIZE 32400U
 
 int main()
 {
@@ -33,23 +32,7 @@ int main()
         return errno;
     }
 
-    uint8_t* current_data = data;
-    uint8_t* current_coded = coded;
-
-    for(int i = 0; i < (SIZE / CHUNK_SIZE); ++i)
-    {
-        size_t new_result = range_code(current_data, current_coded, CHUNK_SIZE, 32768);
-        current_coded += (new_result / 8);
-        current_data += CHUNK_SIZE;
-
-        if(!new_result)
-        {
-            printf("Error: Adjustment factor of %d is too small!\n", 32768);
-        }
-
-        result += new_result;
-    }
-
+    result = range_code(data, coded, SIZE, 32768);
 
 
     free(data);
