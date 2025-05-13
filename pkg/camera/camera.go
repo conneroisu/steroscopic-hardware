@@ -40,11 +40,6 @@ var (
 	defaultRightOutputCh = atomic.Pointer[chan *image.Gray]{}
 	defaultOutputCamera  = atomic.Pointer[Camera]{}
 	defaultOutputCh      = atomic.Pointer[chan *image.Gray]{}
-	defaultConfig        = Config{
-		Port:        "/dev/ttyUSB0",
-		BaudRate:    115200,
-		Compression: 0,
-	}
 )
 
 // Buffer size for camera channels. Adjust as needed.
@@ -125,6 +120,3 @@ func SetRightCamera(
 	defaultRightCamera.Store(&Camera{cam})
 	go cam.Stream(ctx, RightCh())
 }
-
-// DefaultCameraConfig returns default camera configuration.
-func DefaultCameraConfig() Config { return defaultConfig }

@@ -63,7 +63,7 @@ Parameters:
 Returns any error encountered during route configuration.
 
 <a name="NewServer"></a>
-## func [NewServer](<https://github.com/conneroisu/steroscopic-hardware/blob/main/cmd/root.go#L176-L180>)
+## func [NewServer](<https://github.com/conneroisu/steroscopic-hardware/blob/main/cmd/root.go#L168-L172>)
 
 ```go
 func NewServer(ctx context.Context, logger *logger.Logger, cancel context.CancelFunc) (http.Handler, error)
