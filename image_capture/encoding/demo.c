@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <errno.h>
 
-#define TEST_MODE 0
+#define TEST_MODE 1
 
 #define SIZE 2073600U
 #define CHUNK_SIZE 32400U
@@ -32,7 +32,7 @@ int main()
         perror("Could not close image file!");
         return errno;
     }
-    
+
     uint8_t* current_data = data;
     uint8_t* current_coded = coded;
 
@@ -74,12 +74,12 @@ int main()
     printf("Result: %ld\n", result);
 
 #else
-    uint8_t data[10] = { 130, 55, 39, 55, 130, 72, 72, 9, 72, 8 };
-    uint8_t coded[10];
+    uint8_t data[16] = { 130, 55, 39, 55, 130, 72, 72, 9, 72, 8, 80, 76, 125, 130, 72, 9 };
+    uint8_t coded[16];
 
-    memset(coded, 0, 10);
+    memset(coded, 0, 16);
 
-    size_t result = range_code(data, coded, 10, 32);
+    size_t result = range_code(data, coded, 16, 32);
 
     printf("Result: %ld\n", result);
 #endif
