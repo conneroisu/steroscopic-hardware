@@ -522,24 +522,20 @@ func cameraStatus(
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 36, "\" class=\"text-gray-400\">No file selected</span></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 36, "\" class=\"text-gray-400\">No file selected</span></div></div><button type=\"button\" class=\"bg-gray-600 hover:bg-gray-700 text-white rounded p-1\" @click=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templ.RenderScriptItems(ctx, templ_7745c5c3_Buffer, "document.getElementById('"+string(typeOf)+"-file-input').click()")
+		var templ_7745c5c3_Var30 string
+		templ_7745c5c3_Var30, templ_7745c5c3_Err = templ.JoinStringErrs("document.getElementById('" + string(typeOf) + "-file-input').click()")
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/components/app.templ`, Line: 382, Col: 89}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var30))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 37, "<button type=\"button\" class=\"bg-gray-600 hover:bg-gray-700 text-white rounded p-1\" onclick=\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var30 templ.ComponentScript = "document.getElementById('" + string(typeOf) + "-file-input').click()"
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var30.Call)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 38, "\" title=\"Select file\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 37, "\" title=\"Select file\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -547,7 +543,7 @@ func cameraStatus(
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 39, "</button></div></div><div class=\"mt-4\"><div class=\"w-full bg-gray-700 rounded-full h-2 mb-2\"><div id=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 38, "</button></div></div><div class=\"mt-4\"><div class=\"w-full bg-gray-700 rounded-full h-2 mb-2\"><div id=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -560,7 +556,7 @@ func cameraStatus(
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 40, "\" class=\"bg-blue-500 h-2 rounded-full w-0 transition-all duration-200\"></div></div></div><div class=\"flex justify-end mt-2 items-center\"><div id=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 39, "\" class=\"bg-blue-500 h-2 rounded-full w-0 transition-all duration-200\"></div></div></div><div class=\"flex justify-end mt-2 items-center\"><div id=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -573,7 +569,7 @@ func cameraStatus(
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 41, "\" class=\"htmx-indicator mr-2 flex items-center\"><svg class=\"animate-spin h-4 w-4 text-blue-400 mr-1\" xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\"><circle class=\"opacity-25\" cx=\"12\" cy=\"12\" r=\"10\" stroke=\"currentColor\" stroke-width=\"4\"></circle> <path class=\"opacity-75\" fill=\"currentColor\" d=\"M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z\"></path></svg> <span class=\"text-xs text-blue-400\">Uploading...</span></div><button type=\"submit\" class=\"bg-blue-600 hover:bg-blue-700 text-white rounded px-3 py-1 text-sm\">Upload/Configure</button></div></form></div><script>\n\t\t\t\t\t\tdocument.addEventListener('DOMContentLoaded', function() {\n\t\t\t\t\t\t\tconst fileInput = document.getElementById('{ string(typeOf) + \"-file-input\" }');\n\t\t\t\t\t\t\tconst fileName = document.getElementById('{ string(typeOf) + \"-file-name\" }');\n\t\t\t\t\t\t\t\n\t\t\t\t\t\t\tif (fileInput && fileName) {\n\t\t\t\t\t\t\t\tfileInput.addEventListener('change', function() {\n\t\t\t\t\t\t\t\t\tif (this.files && this.files[0]) {\n\t\t\t\t\t\t\t\t\t\tfileName.textContent = this.files[0].name;\n\t\t\t\t\t\t\t\t\t\tfileName.classList.remove('text-gray-400');\n\t\t\t\t\t\t\t\t\t\tfileName.classList.add('text-gray-200');\n\t\t\t\t\t\t\t\t\t} else {\n\t\t\t\t\t\t\t\t\t\tfileName.textContent = 'No file selected';\n\t\t\t\t\t\t\t\t\t\tfileName.classList.remove('text-gray-200');\n\t\t\t\t\t\t\t\t\t\tfileName.classList.add('text-gray-400');\n\t\t\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\t\t});\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\t\n\t\t\t\t\t\t\thtmx.on('{ \"#\" + string(typeOf) + \"-upload-form\" }', 'htmx:xhr:progress', function(evt) {\n\t\t\t\t\t\t\t\tconst percentComplete = evt.detail.loaded / evt.detail.total * 100;\n\t\t\t\t\t\t\t\tdocument.getElementById('{ string(typeOf) + \"-progress-bar\" }').style.width = percentComplete + '%';\n\t\t\t\t\t\t\t});\n\t\t\t\t\t\t});\n\t\t\t\t\t</script></div></div></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 40, "\" class=\"htmx-indicator mr-2 flex items-center\"><svg class=\"animate-spin h-4 w-4 text-blue-400 mr-1\" xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\"><circle class=\"opacity-25\" cx=\"12\" cy=\"12\" r=\"10\" stroke=\"currentColor\" stroke-width=\"4\"></circle> <path class=\"opacity-75\" fill=\"currentColor\" d=\"M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z\"></path></svg> <span class=\"text-xs text-blue-400\">Uploading...</span></div><button type=\"submit\" class=\"bg-blue-600 hover:bg-blue-700 text-white rounded px-3 py-1 text-sm\">Upload/Configure</button></div></form></div><script>\n\t\t\t\t\t\tdocument.addEventListener('DOMContentLoaded', function() {\n\t\t\t\t\t\t\tconst fileInput = document.getElementById('{ string(typeOf) + \"-file-input\" }');\n\t\t\t\t\t\t\tconst fileName = document.getElementById('{ string(typeOf) + \"-file-name\" }');\n\t\t\t\t\t\t\t\n\t\t\t\t\t\t\tif (fileInput && fileName) {\n\t\t\t\t\t\t\t\tfileInput.addEventListener('change', function() {\n\t\t\t\t\t\t\t\t\tif (this.files && this.files[0]) {\n\t\t\t\t\t\t\t\t\t\tfileName.textContent = this.files[0].name;\n\t\t\t\t\t\t\t\t\t\tfileName.classList.remove('text-gray-400');\n\t\t\t\t\t\t\t\t\t\tfileName.classList.add('text-gray-200');\n\t\t\t\t\t\t\t\t\t} else {\n\t\t\t\t\t\t\t\t\t\tfileName.textContent = 'No file selected';\n\t\t\t\t\t\t\t\t\t\tfileName.classList.remove('text-gray-200');\n\t\t\t\t\t\t\t\t\t\tfileName.classList.add('text-gray-400');\n\t\t\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\t\t});\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\t\n\t\t\t\t\t\t\thtmx.on('{ \"#\" + string(typeOf) + \"-upload-form\" }', 'htmx:xhr:progress', function(evt) {\n\t\t\t\t\t\t\t\tconst percentComplete = evt.detail.loaded / evt.detail.total * 100;\n\t\t\t\t\t\t\t\tdocument.getElementById('{ string(typeOf) + \"-progress-bar\" }').style.width = percentComplete + '%';\n\t\t\t\t\t\t\t});\n\t\t\t\t\t\t});\n\t\t\t\t\t</script></div></div></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
