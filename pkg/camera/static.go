@@ -77,7 +77,9 @@ func (sc *StaticCamera) Stream(ctx context.Context, outCh ImageChannel) {
 				return
 			default:
 				// If channel is full, we'll try again next tick
-				sc.logger.Debug("output channel full, skipping frame")
+				sc.logger.Debug("output channel full, dropping frame")
+				time.Sleep(10 * time.Millisecond) // Prevent busy-loop with a brief delay
+
 			}
 		}
 	}
