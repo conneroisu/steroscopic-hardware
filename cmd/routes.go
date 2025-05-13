@@ -47,10 +47,7 @@ func AddRoutes(
 	cancel context.CancelFunc,
 ) error {
 	mux.HandleFunc("GET /checkhealth", func(_ http.ResponseWriter, _ *http.Request) {})
-	mux.Handle(
-		"GET /",
-		http.FileServer(http.FS(static)), // adds `/static/*` to path
-	)
+	mux.Handle("GET /", http.FileServer(http.FS(static)))
 	mux.HandleFunc("GET /exit", func(w http.ResponseWriter, _ *http.Request) {
 		_, err := w.Write(logger.Bytes())
 		if err != nil {
@@ -68,24 +65,34 @@ func AddRoutes(
 	)
 	mux.HandleFunc(
 		"GET /stream/left", // Left Camera
-		handlers.Make(handlers.StreamHandlerFn(camera.LeftCameraType)),
+		handlers.Make(handlers.HandleLeftStream),
 	)
 	mux.HandleFunc(
 		"GET /stream/right", // Right Camera
-		handlers.Make(handlers.StreamHandlerFn(camera.RightCameraType)),
+		handlers.Make(handlers.HandleRightStream),
 	)
 	mux.HandleFunc(
 		"GET /stream/out", // Depth Map
-		handlers.Make(handlers.StreamHandlerFn(camera.OutputCameraType)),
+		handlers.Make(handlers.HandleOutputStream),
 	)
 	mux.HandleFunc(
 		"POST /left/configure",
-		handlers.Make(handlers.ErrorHandler(
-			handlers.ConfigureCamera(ctx, camera.LeftCameraType))))
+		handlers.Make(
+			handlers.ErrorHandler(
+				handlers.ConfigureMiddleware(
+					handlers.ConfigureCamera(
+						ctx,
+						camera.LeftCameraType,
+					)))))
 	mux.HandleFunc(
 		"POST /right/configure",
-		handlers.Make(handlers.ErrorHandler(
-			handlers.ConfigureCamera(ctx, camera.RightCameraType))))
+		handlers.Make(
+			handlers.ErrorHandler(
+				handlers.ConfigureMiddleware(
+					handlers.ConfigureCamera(
+						ctx,
+						camera.RightCameraType,
+					)))))
 	mux.HandleFunc("GET /ports", handlers.Make(handlers.GetPorts(logger)))
 	return nil
 }

@@ -27,7 +27,6 @@ type OutputChunk struct {
 //
 // If the input channel is closed, the processing pipeline will stop.
 func SetupConcurrentSAD(
-	params *Parameters,
 	numWorkers int, // Allow configurable worker count
 ) (chan<- InputChunk, <-chan OutputChunk) {
 	if numWorkers <= 0 {
@@ -49,6 +48,9 @@ func SetupConcurrentSAD(
 				data := make([]uint8,
 					chunk.Region.Dx()*chunk.Region.Dy(),
 				)
+				defaultParamsMu.Lock()
+				params := *defaultParams.Load()
+				defaultParamsMu.Unlock()
 				// Process each row in the region
 				for y := range chunk.Region.Dy() { // y := 0; y < height; y++
 					globalY := chunk.Region.Min.Y + y
@@ -118,15 +120,16 @@ func RunSad(
 	left, right *image.Gray,
 	blockSize, maxDisparity int,
 ) *image.Gray {
+	SetDefaultParams(Parameters{
+		BlockSize:    blockSize,
+		MaxDisparity: maxDisparity,
+	})
 	// Determine number of workers and chunks
 	numWorkers := runtime.NumCPU() * 4
 	numChunks := numWorkers * 4
 
 	// Set up the processing pipeline
-	inputChan, outputChan := SetupConcurrentSAD(&Parameters{
-		BlockSize:    blockSize,
-		MaxDisparity: maxDisparity,
-	}, numWorkers)
+	inputChan, outputChan := SetupConcurrentSAD(numWorkers)
 
 	// Split the images into chunks
 	var dims = left.Rect

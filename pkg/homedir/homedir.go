@@ -1,3 +1,5 @@
+// Package homedir provides functions for getting the user's home directory and for
+// reading and writing files from the user's home directory.
 package homedir
 
 import (

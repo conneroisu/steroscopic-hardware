@@ -14,7 +14,7 @@ import (
 func GetPorts(
 	logger *logger.Logger,
 ) APIFn {
-	return func(w http.ResponseWriter, r *http.Request) error {
+	return func(w http.ResponseWriter, _ *http.Request) error {
 		var (
 			strBuilder strings.Builder
 			tries      int

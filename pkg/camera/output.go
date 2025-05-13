@@ -22,12 +22,12 @@ type OutputCamera struct {
 }
 
 // NewOutputCamera creates a new OutputCamera.
-func NewOutputCamera(params *despair.Parameters) *OutputCamera {
+func NewOutputCamera() *OutputCamera {
 	oC := &OutputCamera{
 		logger: slog.Default().WithGroup("output-camera"),
 	}
 	oC.InputCh, oC.OutputCh = despair.SetupConcurrentSAD(
-		params, defaultNumWorkers,
+		defaultNumWorkers,
 	)
 	return oC
 }

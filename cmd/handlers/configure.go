@@ -11,14 +11,16 @@ import (
 	"github.com/conneroisu/steroscopic-hardware/pkg/camera"
 )
 
-// ConfigureCamera handles client requests to configure all camera parameters
-// at once.
-func ConfigureCamera(
-	ctx context.Context,
-	typ camera.Type,
-) APIFn {
-	var logger = slog.Default().WithGroup("configure-camera")
-	return func(_ http.ResponseWriter, r *http.Request) error {
+// CtxKey is a type alias for context keys used to store camera configuration.
+type CtxKey string
+
+const (
+	ctxKeyConfig CtxKey = "config"
+)
+
+// ConfigureMiddleware handles client requests to configure all camera parameters.
+func ConfigureMiddleware(apiFn APIFn) APIFn {
+	return func(w http.ResponseWriter, r *http.Request) error {
 		var (
 			compression    int
 			baudRate       int
@@ -64,6 +66,19 @@ func ConfigureCamera(
 			return fmt.Errorf("invalid compression value: %w", err)
 		}
 		config.Compression = compression
+		return apiFn(w, r.WithContext(context.WithValue(r.Context(), ctxKeyConfig, config)))
+	}
+}
+
+// ConfigureCamera handles client requests to configure all camera parameters
+// at once.
+func ConfigureCamera(
+	ctx context.Context,
+	typ camera.Type,
+) APIFn {
+	var logger = slog.Default().WithGroup("configure-camera")
+	return func(_ http.ResponseWriter, r *http.Request) error {
+		config := r.Context().Value(ctxKeyConfig).(camera.Config)
 
 		// Log Configuration
 		logger.Info(
@@ -80,13 +95,23 @@ func ConfigureCamera(
 
 		switch typ {
 		case camera.LeftCameraType:
-			cam, err := camera.NewSerialCamera(typ, portStr, baudRate, compression)
+			cam, err := camera.NewSerialCamera(
+				typ,
+				config.Port,
+				config.BaudRate,
+				config.Compression,
+			)
 			if err != nil {
 				return err
 			}
 			camera.SetLeftCamera(ctx, cam)
 		case camera.RightCameraType:
-			cam, err := camera.NewSerialCamera(typ, portStr, baudRate, compression)
+			cam, err := camera.NewSerialCamera(
+				typ,
+				config.Port,
+				config.BaudRate,
+				config.Compression,
+			)
 			if err != nil {
 				return err
 			}

@@ -1,137 +1,37 @@
 package handlers
 
 import (
-	"bytes"
 	"fmt"
 	"image"
 	"image/jpeg"
 	"io"
 	"log"
-	"log/slog"
 	"net/http"
-	"sync"
 	"time"
 
 	"github.com/conneroisu/steroscopic-hardware/pkg/camera"
 )
 
-// StreamHandlerFn returns a handler for streaming camera images to multiple clients.
-//
-// It uses a buffered channel to send images to clients, and a ticker to control frame rate.
-//
-// As input, it expects a camera.Stream struct, which is used to manage the camera stream.
-func StreamHandlerFn(
-	typ camera.Type,
-) APIFn {
-	var getStream func() chan *image.Gray
-	var putStream func() chan *image.Gray
+const (
+	streamTimeout = 60 * time.Minute
+	frameRate     = time.Second / 10 // 10 FPS max
+)
 
-	switch typ {
-	case camera.LeftCameraType:
-		getStream = camera.LeftCh
-		putStream = camera.LeftOutputCh
-	case camera.RightCameraType:
-		getStream = camera.RightCh
-		putStream = camera.RightOutputCh
-	case camera.OutputCameraType:
-		getStream = camera.OutputCh
-	}
-	var jpegPool = sync.Pool{
-		New: func() any {
-			return &jpeg.Options{Quality: 75} // Lower quality for faster encoding
-		},
-	}
+var encodeOpts = &jpeg.Options{Quality: 75}
 
-	return func(w http.ResponseWriter, r *http.Request) error {
-		// Set headers for MJPEG stream
-		w.Header().Set("Content-Type", "multipart/x-mixed-replace; boundary=frame")
-		w.Header().Set("Cache-Control", "no-cache")
-		w.Header().Set("Connection", "close")
-		w.Header().Set("Pragma", "no-cache")
-
-		// Set a reasonable timeout for the connection
-		timeout := time.After(30 * time.Minute)
-
-		// Create a buffer to avoid reallocating for each frame
-		buffer := new(bytes.Buffer)
-		buffer.Grow(camera.DefaultImageHeight * camera.DefaultImageWidth) // Pre-allocate (Height * Width) bytes
-		// Control frame rate - don't send more than X frames per second
-		ticker := time.NewTicker(time.Second / 10) // 10 FPS max
-		defer ticker.Stop()
-
-		for {
-			select {
-			case <-timeout:
-				return nil
-			case <-r.Context().Done():
-				return nil
-			case <-ticker.C:
-				slog.Debug("StreamHandlerFn", "tick", "tick")
-				// Only process on tick to control frame rate
-				select {
-				case img, ok := <-getStream():
-					slog.Debug("StreamHandlerFn", "tick", "got image")
-					if !ok {
-						return nil // Channel closed
-					}
-					err := processImg(
-						img,
-						buffer,
-						&jpegPool,
-						w,
-					)
-					if err != nil {
-						return err
-					}
-					if putStream != nil {
-						putStream() <- img
-					}
-				case <-timeout:
-					return nil
-				case <-r.Context().Done():
-					return nil
-				}
-			}
-		}
-	}
-}
-
-func processImg(
-	img *image.Gray,
-	buffer *bytes.Buffer,
-	jpegPool *sync.Pool,
-	w io.Writer,
-) error {
-	slog.Debug("processImg", "tick", "got image")
-	// Clear buffer and reuse
-	buffer.Reset()
-
-	// Get encoder options from pool
-	opts := jpegPool.Get().(*jpeg.Options)
-
+func processImg(img *image.Gray, w io.Writer) error {
 	// Write frame boundary to buffer
-	_, err := fmt.Fprintf(buffer, "--frame\r\nContent-Type: image/jpeg\r\n\r\n")
+	_, err := fmt.Fprintf(w, "--frame\r\nContent-Type: image/jpeg\r\n\r\n")
 	if err != nil {
 		return err
 	}
 
 	// Encode image to buffer - consider using a worker pool for this
-	err = jpeg.Encode(buffer, img, opts)
+	err = jpeg.Encode(w, img, encodeOpts)
 	if err != nil {
-		jpegPool.Put(opts)
 		log.Printf("Error encoding JPEG: %v", err)
 		// Skip this frame instead of failing
 		return nil
-	}
-
-	// Return options to pool
-	jpegPool.Put(opts)
-
-	// Write the entire frame at once instead of in chunks
-	_, err = w.Write(buffer.Bytes())
-	if err != nil {
-		log.Printf("Error writing to client: %v", err)
-		return fmt.Errorf("error writing to client: %v", err)
 	}
 
 	// Flush after writing complete frame
@@ -141,4 +41,94 @@ func processImg(
 	}
 
 	return nil
+}
+
+// HandleLeftStream returns a handler for streaming the left camera image to a
+// client.
+func HandleLeftStream(w http.ResponseWriter, r *http.Request) error {
+	// Set headers for MJPEG stream
+	w.Header().Set("Content-Type", "multipart/x-mixed-replace; boundary=frame")
+	w.Header().Set("Cache-Control", "no-cache")
+	w.Header().Set("Connection", "close")
+	w.Header().Set("Pragma", "no-cache")
+	ticker := time.NewTicker(frameRate)
+	defer ticker.Stop()
+	for {
+		select {
+		case <-r.Context().Done():
+			return nil
+		case <-ticker.C:
+			// Only process on tick to control frame rate
+			select {
+			case img, ok := <-camera.LeftCh():
+				if !ok {
+					return nil // Channel closed
+				}
+				err := processImg(img, w)
+				if err != nil {
+					return err
+				}
+				camera.LeftOutputCh() <- img
+			case <-r.Context().Done():
+				return nil
+			}
+		}
+	}
+}
+
+// HandleRightStream returns a handler for streaming the right camera image to a
+// client.
+func HandleRightStream(w http.ResponseWriter, r *http.Request) error {
+	// Set headers for MJPEG stream
+	w.Header().Set("Content-Type", "multipart/x-mixed-replace; boundary=frame")
+	w.Header().Set("Cache-Control", "no-cache")
+	w.Header().Set("Connection", "close")
+	w.Header().Set("Pragma", "no-cache")
+	ticker := time.NewTicker(frameRate)
+	defer ticker.Stop()
+	for {
+		select {
+		case <-r.Context().Done():
+			return nil
+		case <-ticker.C:
+			// Only process on tick to control frame rate
+			select {
+			case img, ok := <-camera.RightCh():
+				if !ok {
+					return nil // Channel closed
+				}
+				err := processImg(img, w)
+				if err != nil {
+					return err
+				}
+				camera.RightOutputCh() <- img
+			case <-r.Context().Done():
+				return nil
+			}
+		}
+	}
+}
+
+// HandleOutputStream returns a handler for streaming the output camera image to a
+// client.
+func HandleOutputStream(w http.ResponseWriter, r *http.Request) error {
+	// Set headers for MJPEG stream
+	w.Header().Set("Content-Type", "multipart/x-mixed-replace; boundary=frame")
+	w.Header().Set("Cache-Control", "no-cache")
+	w.Header().Set("Connection", "close")
+	w.Header().Set("Pragma", "no-cache")
+	for {
+		select {
+		case <-r.Context().Done():
+			return nil
+		case img, ok := <-camera.OutputCh():
+			if !ok {
+				return nil // Channel closed
+			}
+			err := processImg(img, w)
+			if err != nil {
+				return err
+			}
+		}
+	}
 }

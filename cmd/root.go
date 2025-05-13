@@ -14,7 +14,6 @@ import (
 	"time"
 
 	"github.com/conneroisu/steroscopic-hardware/pkg/camera"
-	"github.com/conneroisu/steroscopic-hardware/pkg/despair"
 	"github.com/conneroisu/steroscopic-hardware/pkg/logger"
 )
 
@@ -82,7 +81,7 @@ func Run(
 			Camer: camera.NewStaticCamera("./testdata/R_00001.png", camera.RightCh()),
 		})
 	camera.SetOutputCamera(ctx,
-		camera.NewOutputCamera(despair.DefaultParams()))
+		camera.NewOutputCamera())
 	defer func() {
 		CloseErr := camera.CloseAll()
 		if CloseErr != nil {

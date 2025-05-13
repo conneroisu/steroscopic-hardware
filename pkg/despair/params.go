@@ -1,11 +1,13 @@
 package despair
 
 import (
+	"sync"
 	"sync/atomic"
 )
 
 var (
-	defaultParams = atomic.Pointer[Parameters]{}
+	defaultParams   = atomic.Pointer[Parameters]{}
+	defaultParamsMu sync.Mutex
 )
 
 func init() {
@@ -17,6 +19,8 @@ func init() {
 
 // SetDefaultParams sets the default stereoscopic algorithm parameters.
 func SetDefaultParams(params Parameters) {
+	defaultParamsMu.Lock()
+	defer defaultParamsMu.Unlock()
 	defaultParams.Store(&params)
 }
 
