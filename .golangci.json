@@ -15,6 +15,7 @@
       "godot",
       "errname",
       "copyloopvar",
+      "errname",
       "goconst",
       "iface",
       "intrange",
