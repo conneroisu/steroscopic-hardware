@@ -1,7 +1,22 @@
 #include "range_code.h"
+
+// Constants used for math and data manipulation.
 #define MAX_RANGE UINT32_MAX
 #define SYMBOL_SIZE ((uint8_t) 16)
 #define BITS_PER_SYMBOL ((uint8_t) 4)
+
+// This is the mask used to isolate a symbol, it has not been shifted yet, so ANDing with a value gives the
+// least significant symbol.
+#define UNSHIFTED_SYMBOL_MASK ((uint32_t)(SYMBOL_SIZE - 1))
+
+// ANDing an integer with this value gives the most significant symbol shifted all the way to the left.
+#define MOST_SIG_SYMBOL_MASK ((uint32_t)((SYMBOL_SIZE - 1) << (32 / BITS_PER_SYMBOL)))
+
+// This is the most significant symbol position in a byte. For example, if you have 4 bits per symbol, there
+// are two valid symbol locations in the byte: 0 and 1. The constant would be 1 in this case since it is the most
+// significant
+#define MOST_SIG_SYMBOL_POS_IN_BYTE ((uint32_t)((8 / BITS_PER_SYMBOL) - 1))
+
 
 typedef struct
 {
@@ -48,6 +63,10 @@ typedef struct
 */
 size_t range_code(uint8_t* uncoded, uint8_t* coded, size_t size, int adjustment_threshold)
 {
+    // Keeps track of how many symbols we have put into a byte to be shifted off.
+    int byte_pack_symbol_count = 0;
+    uint8_t byte_to_shift = 0;
+
     // Size is in byte, calculate the number of symbols using size.
     size_t total_symbol_count = (8 / BITS_PER_SYMBOL) * size;
 
@@ -74,7 +93,7 @@ size_t range_code(uint8_t* uncoded, uint8_t* coded, size_t size, int adjustment_
         for(int j = 0; j < (8 / BITS_PER_SYMBOL); ++j)
         {
             uint8_t byte = uncoded[i];
-            int symbol = (byte & ((SYMBOL_SIZE - 1) << (BITS_PER_SYMBOL * j))) >> (BITS_PER_SYMBOL * j);
+            int symbol = (byte & (UNSHIFTED_SYMBOL_MASK << (BITS_PER_SYMBOL * j))) >> (BITS_PER_SYMBOL * j);
             symbol_counts[symbol].current_count++;
             symbol_counts[symbol].symbol = symbol;
         }
@@ -126,63 +145,75 @@ size_t range_code(uint8_t* uncoded, uint8_t* coded, size_t size, int adjustment_
 
         size_t range_size = range.high - range.low;
         // Iterate through each symbol in the byte.
-        for(int j = 0; j < (8 / BITS_PER_SYMBOL); ++j)
+        // Most significant symbols should be first.
+        for(int j = (8 / BITS_PER_SYMBOL); j >= 0; --j)
         {
             // Calculate the next range
             range_size = range.high - range.low;
 
-            int symbol = (*next_uncoded & ((SYMBOL_SIZE - 1) << (BITS_PER_SYMBOL * j))) >> (BITS_PER_SYMBOL * j);
+            int symbol = (*next_uncoded & (UNSHIFTED_SYMBOL_MASK << (BITS_PER_SYMBOL * j))) >> (BITS_PER_SYMBOL * j);
 
             counts_t count = symbol_counts[symbol];
 
             range.low += (uint32_t) ((count.previous_count_sum * range_size) / total_symbol_count);
             range.high = ((uint32_t) ((count.current_count * range_size) / total_symbol_count)) + range.low;
 
+
+            // Shift off symbols if we can.
+            /*
+                Edge Case:
+                If the range is less than adjustment_threshold and the most significant symbol on the low and high
+                parts of the range don't match, then we need to adjust the range such that they do match so they can
+                be shifted off. Otherwise, the range gets too small and the low and high range values will eventually equal, which is no good!
+            */
+            uint32_t low_symbol_value = range.low & MOST_SIG_SYMBOL_MASK;
+            uint32_t high_symbol_value = range.high & MOST_SIG_SYMBOL_MASK;
             range_size = range.high - range.low;
-
-            // Emit digits. Max of 3.
-            for(int k = 0; k < 3; ++k)
+            while(low_symbol_value == high_symbol_value || range_size < adjustment_threshold)
             {
-
-                // See if we can shift off bytes.
-                uint32_t low_byte_value = range.low & 0xFF000000;
-                uint32_t high_byte_value = range.high & 0xFF000000;
-
-                /*
-                    Edge Case:
-                    If the range is less than adjustment_threshold and the SET low and high MSBs don't match, we need
-                    to shift the range such that they do match. Otherwise, we run out of range to get the resolution we need.
-                    This is done by shifting BOTH low and high until high is the last possible number with the MSB equal to low's MSB.
-                */
-                range_size = range.high - range.low;
-                if(range_size < adjustment_threshold && low_byte_value != high_byte_value)
+                if(range_size < adjustment_threshold)
                 {
-                    uint32_t new_high = (low_byte_value + (1 << 24)) - 1;
+                    // TODO: Update so that the most significant symbols equal, not just the
+                    // most significant bytes.
+                    uint32_t new_high = (low_symbol_value + (1 << 24)) - 1;
                     uint32_t delta = range.high - new_high;
                     range.low -= delta;
                     range.high = new_high;
                 }
-
-                if(low_byte_value == high_byte_value)
+                else
                 {
-                    uint8_t result_byte = (uint8_t) (low_byte_value >> 24);
+                    uint8_t shifted_symbol_value = (uint8_t) (low_symbol_value & (UNSHIFTED_SYMBOL_MASK >> (32 / BITS_PER_SYMBOL)));
+                    byte_to_shift |= (UNSHIFTED_SYMBOL_MASK << ((MOST_SIG_SYMBOL_POS_IN_BYTE - byte_pack_symbol_count) * BITS_PER_SYMBOL));
+                    range.low = range.low << BITS_PER_SYMBOL;
+                    range.high = range.high << BITS_PER_SYMBOL;
 
-                    if(leading_zeros && result_byte)
+                    // If we have packed the byte, shift it off.
+                    if(byte_pack_symbol_count == MOST_SIG_SYMBOL_MASK)
                     {
-                        leading_zeros = 0;
+                        if(leading_zeros && byte_to_shift)
+                        {
+                            leading_zeros = 0;
+                        }
+
+                        *next_coded = byte_to_shift;
+                        next_coded++;
+
+                        if(!leading_zeros)
+                        {
+                            result += 8;
+                        }
+
+                        byte_to_shift = 0;
                     }
-
-                    *next_coded = result_byte;
-                    next_coded++;
-
-                    if(!leading_zeros)
+                    else
                     {
-                        result += 8;
-
-                        range.low = range.low << 24;
-                        range.high = range.high << 24;
+                        byte_pack_symbol_count++;
                     }
                 }
+
+                low_symbol_value = range.low & MOST_SIG_SYMBOL_MASK;
+                high_symbol_value = range.high & MOST_SIG_SYMBOL_MASK;
+                range_size = range.high - range.low;
             }
 
             // If the ranges ever equal, we did not have enough resolution!
