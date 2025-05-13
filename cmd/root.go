@@ -181,12 +181,14 @@ func NewServer(
 	}
 	slogLogHandler := http.HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
-			logger.Info(
-				"request",
-				slog.String("method", r.Method),
-				slog.String("url", r.URL.String()),
-				slog.String("pattern", r.Pattern),
-			)
+			if r.Method == http.MethodGet && r.URL.Path == "/healthcheck" {
+				logger.Info(
+					"request",
+					slog.String("method", r.Method),
+					slog.String("url", r.URL.String()),
+					slog.String("pattern", r.Pattern),
+				)
+			}
 
 			mux.ServeHTTP(w, r)
 		})

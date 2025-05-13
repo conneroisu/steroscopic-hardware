@@ -20,7 +20,11 @@ type StaticCamera struct {
 }
 
 // NewStaticCamera creates a new ZedBoard camera.
-func NewStaticCamera(path string, ch chan *image.Gray) *StaticCamera {
+func NewStaticCamera(
+	path string,
+	ch chan *image.Gray,
+) *StaticCamera {
+	slog.Debug("NewStaticCamera", "path", path)
 	ctx, cancel := context.WithCancel(context.Background())
 	sc := &StaticCamera{
 		Path:   path,
@@ -39,7 +43,9 @@ func (z *StaticCamera) Stream(ctx context.Context, outCh chan *image.Gray) {
 	for {
 		select {
 		case <-ctx.Done():
-			slog.Debug("stopping stream")
+			z.cancel()
+			return
+		case <-z.ctx.Done():
 			return
 		case err := <-errChan:
 			slog.Error("Error reading image", "err", err)
@@ -49,7 +55,6 @@ func (z *StaticCamera) Stream(ctx context.Context, outCh chan *image.Gray) {
 			if img == nil {
 				continue
 			}
-			slog.Debug("sending image")
 			outCh <- img
 		}
 	}
@@ -59,7 +64,6 @@ func (z *StaticCamera) Stream(ctx context.Context, outCh chan *image.Gray) {
 func (z *StaticCamera) Config() *Config { return &Config{} }
 
 func (z *StaticCamera) read(errChan chan error) <-chan *image.Gray {
-	slog.Debug("reading image: " + z.Path)
 	mkdCh := make(chan *image.Gray, 1)
 	img, err := z.getImage()
 	if err != nil {
@@ -72,7 +76,6 @@ func (z *StaticCamera) read(errChan chan error) <-chan *image.Gray {
 }
 
 func (z *StaticCamera) getImage() (*image.Gray, error) {
-	slog.Debug("getting image: " + z.Path)
 	// Open the image file
 	file, err := os.Open(z.Path)
 	if err != nil {
@@ -113,5 +116,6 @@ func (z *StaticCamera) getImage() (*image.Gray, error) {
 
 // Close closes the camera.
 func (z *StaticCamera) Close() error {
+	z.cancel()
 	return nil
 }

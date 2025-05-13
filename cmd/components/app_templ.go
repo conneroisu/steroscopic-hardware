@@ -254,14 +254,14 @@ func cameraStatus(
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "</div></div><!-- spacer --><br><div class=\"space-y-4\"><!-- Camera Configuration --><div class=\"space-y-2\"><h3 class=\"text-sm font-medium text-gray-400\">Configuration</h3><!-- Configuration Form --><form id=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "</div></div><!-- spacer --><br><div class=\"tab-wrapper border-b border-gray-700 mb-4\" x-data=\"{ activeTab:  0 }\"><div class=\"flex border-b border-gray-700\"><label @click=\"activeTab = 0\" class=\"tab-control px-4 py-2 text-sm font-medium cursor-pointer transition-colors duration-200 ease-in-out\" :class=\"{ &#39;active&#39;: activeTab === 0, &#39;text-blue-400 border-b-2 border-blue-400&#39;: activeTab === 0, &#39;text-gray-400 hover:text-gray-300 hover:bg-gray-700&#39;: activeTab !== 0 }\">Serial</label> <span class=\"w-2\"></span> <label @click=\"activeTab = 1\" class=\"tab-control px-4 py-2 text-sm font-medium cursor-pointer transition-colors duration-200 ease-in-out\" :class=\"{ &#39;active&#39;: activeTab === 1, &#39;text-blue-400 border-b-2 border-blue-400&#39;: activeTab === 1, &#39;text-gray-400 hover:text-gray-300 hover:bg-gray-700&#39;: activeTab !== 1 }\">Static</label></div><div class=\"tab-panel pt-4\" :class=\"{ &#39;active&#39;: activeTab === 0 }\" x-show.transition.in.opacity.duration.600=\"activeTab === 0\"><div class=\"space-y-4\"><!-- Camera Configuration --><div class=\"space-y-2\"><h3 class=\"text-sm font-medium text-gray-400\">Configuration</h3><!-- Configuration Form --><form id=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var10 string
 		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(string(typeOf) + "-config-form")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/components/app.templ`, Line: 215, Col: 41}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/components/app.templ`, Line: 234, Col: 43}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 		if templ_7745c5c3_Err != nil {
@@ -274,7 +274,7 @@ func cameraStatus(
 		var templ_7745c5c3_Var11 string
 		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs("/" + string(typeOf) + "/configure")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/components/app.templ`, Line: 216, Col: 50}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/components/app.templ`, Line: 235, Col: 52}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 		if templ_7745c5c3_Err != nil {
@@ -287,7 +287,7 @@ func cameraStatus(
 		var templ_7745c5c3_Var12 string
 		templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs("#" + string(typeOf) + "-status")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/components/app.templ`, Line: 217, Col: 49}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/components/app.templ`, Line: 236, Col: 51}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 		if templ_7745c5c3_Err != nil {
@@ -300,7 +300,7 @@ func cameraStatus(
 		var templ_7745c5c3_Var13 string
 		templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs("#" + string(typeOf) + "-loading-indicator")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/components/app.templ`, Line: 218, Col: 63}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/components/app.templ`, Line: 237, Col: 65}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 		if templ_7745c5c3_Err != nil {
@@ -313,7 +313,7 @@ func cameraStatus(
 		var templ_7745c5c3_Var14 string
 		templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(string(typeOf) + "-port")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/components/app.templ`, Line: 222, Col: 43}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/components/app.templ`, Line: 241, Col: 45}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 		if templ_7745c5c3_Err != nil {
@@ -326,7 +326,7 @@ func cameraStatus(
 		var templ_7745c5c3_Var15 string
 		templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(string(typeOf) + "-port")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/components/app.templ`, Line: 225, Col: 37}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/components/app.templ`, Line: 244, Col: 39}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 		if templ_7745c5c3_Err != nil {
@@ -339,7 +339,7 @@ func cameraStatus(
 		var templ_7745c5c3_Var16 string
 		templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs("#" + string(typeOf) + "-port")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/components/app.templ`, Line: 238, Col: 50}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/components/app.templ`, Line: 257, Col: 52}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
 		if templ_7745c5c3_Err != nil {
@@ -360,7 +360,7 @@ func cameraStatus(
 		var templ_7745c5c3_Var17 string
 		templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(string(typeOf) + "-baud")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/components/app.templ`, Line: 251, Col: 37}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/components/app.templ`, Line: 270, Col: 39}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 		if templ_7745c5c3_Err != nil {
@@ -373,7 +373,7 @@ func cameraStatus(
 		var templ_7745c5c3_Var18 string
 		templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(string(typeOf) + "-baud")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/components/app.templ`, Line: 258, Col: 37}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/components/app.templ`, Line: 277, Col: 39}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 		if templ_7745c5c3_Err != nil {
@@ -386,7 +386,7 @@ func cameraStatus(
 		var templ_7745c5c3_Var19 string
 		templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs(string(typeOf) + "-compression")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/components/app.templ`, Line: 271, Col: 44}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/components/app.templ`, Line: 290, Col: 46}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
 		if templ_7745c5c3_Err != nil {
@@ -399,7 +399,7 @@ func cameraStatus(
 		var templ_7745c5c3_Var20 string
 		templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinStringErrs(string(typeOf) + "-status")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/components/app.templ`, Line: 289, Col: 38}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/components/app.templ`, Line: 308, Col: 40}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var20))
 		if templ_7745c5c3_Err != nil {
@@ -412,13 +412,26 @@ func cameraStatus(
 		var templ_7745c5c3_Var21 string
 		templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinStringErrs(string(typeOf) + "-loading-indicator")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/components/app.templ`, Line: 307, Col: 49}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/components/app.templ`, Line: 326, Col: 51}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var21))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 28, "\" class=\"htmx-indicator mr-2 flex items-center\"><svg class=\"animate-spin h-4 w-4 text-blue-400 mr-1\" xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\"><circle class=\"opacity-25\" cx=\"12\" cy=\"12\" r=\"10\" stroke=\"currentColor\" stroke-width=\"4\"></circle> <path class=\"opacity-75\" fill=\"currentColor\" d=\"M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z\"></path></svg> <span class=\"text-xs text-blue-400\">Connecting...</span></div><button type=\"submit\" class=\"bg-blue-600 hover:bg-blue-700 text-white rounded px-3 py-1 text-sm\">Connect/Configure</button></div></form></div></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 28, "\" class=\"htmx-indicator mr-2 flex items-center\"><svg class=\"animate-spin h-4 w-4 text-blue-400 mr-1\" xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\"><circle class=\"opacity-25\" cx=\"12\" cy=\"12\" r=\"10\" stroke=\"currentColor\" stroke-width=\"4\"></circle> <path class=\"opacity-75\" fill=\"currentColor\" d=\"M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z\"></path></svg> <span class=\"text-xs text-blue-400\">Connecting...</span></div><button type=\"submit\" class=\"bg-blue-600 hover:bg-blue-700 text-white rounded px-3 py-1 text-sm\">Connect/Configure</button></div></form></div></div><br></div><div class=\"tab-panel pt-4\" :class=\"{ &#39;active&#39;: activeTab === 1 }\" x-show.transition.in.opacity.duration.600=\"activeTab === 1\"><form id=\"form\" hx-encoding=\"multipart/form-data\" hx-post=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var22 string
+		templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinStringErrs("/" + string(typeOf) + "/upload")
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `cmd/components/app.templ`, Line: 355, Col: 47}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var22))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 29, "\"><input type=\"file\" name=\"file\"> <button type=\"submit\" class=\"bg-blue-600 hover:bg-blue-700 text-white rounded px-3 py-1 text-sm\">Upload/Configure</button> <progress id=\"progress\" value=\"0\" max=\"100\"></progress></form><script>\n\t\t\t\t\thtmx.on('#form', 'htmx:xhr:progress', function(evt) {\n\t\t\t\t\t  htmx.find('#progress').setAttribute('value', evt.detail.loaded/evt.detail.total * 100)\n\t\t\t\t\t});\n\t\t\t\t</script></div></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

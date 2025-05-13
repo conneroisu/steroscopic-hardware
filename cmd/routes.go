@@ -85,6 +85,11 @@ func AddRoutes(
 						camera.LeftCameraType,
 					)))))
 	mux.HandleFunc(
+		"POST /left/upload",
+		handlers.Make(
+			handlers.ErrorHandler(
+				handlers.UploadHandler(camera.LeftCameraType))))
+	mux.HandleFunc(
 		"POST /right/configure",
 		handlers.Make(
 			handlers.ErrorHandler(
@@ -93,6 +98,11 @@ func AddRoutes(
 						ctx,
 						camera.RightCameraType,
 					)))))
+	mux.HandleFunc(
+		"POST /right/upload",
+		handlers.Make(
+			handlers.ErrorHandler(
+				handlers.UploadHandler(camera.RightCameraType))))
 	mux.HandleFunc("GET /ports", handlers.Make(handlers.GetPorts(logger)))
 	return nil
 }

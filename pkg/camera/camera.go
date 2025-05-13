@@ -3,6 +3,7 @@ package camera
 
 import (
 	"context"
+	"fmt"
 	"image"
 	"sync/atomic"
 )
@@ -91,6 +92,22 @@ func CloseAll() error {
 	return nil
 }
 
+// DrainAll drains all camera channels.
+func DrainAll() {
+L:
+	for {
+		select {
+		case <-OutputCh():
+		case <-LeftCh():
+		case <-RightCh():
+		case <-LeftOutputCh():
+		case <-RightOutputCh():
+		default:
+			break L
+		}
+	}
+}
+
 // OutputCh returns the output channel.
 func OutputCh() chan *image.Gray { return *defaultOutputCh.Load() }
 
@@ -99,6 +116,14 @@ func SetOutputCamera(
 	ctx context.Context,
 	cam Camer,
 ) {
+	old := defaultOutputCamera.Load()
+	if old != nil {
+		err := old.Close()
+		if err != nil {
+			panic(fmt.Errorf("failed to close old output camera: %w", err))
+		}
+	}
+	DrainAll()
 	defaultOutputCamera.Store(&Camera{cam})
 	go cam.Stream(ctx, OutputCh())
 }
@@ -108,6 +133,14 @@ func SetLeftCamera(
 	ctx context.Context,
 	cam Camer,
 ) {
+	old := defaultLeftCamera.Load()
+	if old != nil {
+		err := old.Close()
+		if err != nil {
+			panic(fmt.Errorf("failed to close old left camera: %w", err))
+		}
+	}
+	DrainAll()
 	defaultLeftCamera.Store(&Camera{cam})
 	go cam.Stream(ctx, LeftCh())
 }
@@ -117,6 +150,14 @@ func SetRightCamera(
 	ctx context.Context,
 	cam Camer,
 ) {
+	old := defaultRightCamera.Load()
+	if old != nil {
+		err := old.Close()
+		if err != nil {
+			panic(fmt.Errorf("failed to close old right camera: %w", err))
+		}
+	}
+	DrainAll()
 	defaultRightCamera.Store(&Camera{cam})
 	go cam.Stream(ctx, RightCh())
 }
