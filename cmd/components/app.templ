@@ -349,28 +349,91 @@ templ cameraStatus(
 				:class="{ 'active': activeTab === 1 }"
 				x-show.transition.in.opacity.duration.600="activeTab === 1"
 			>
-				<form
-					id="form"
-					hx-encoding="multipart/form-data"
-					hx-post={ "/" + string(typeOf) + "/upload" }
-				>
-					<input
-						type="file"
-						name="file"
-					/>
-					<button
-						type="submit"
-						class="bg-blue-600 hover:bg-blue-700 text-white rounded px-3 py-1 text-sm"
-					>
-						Upload/Configure
-					</button>
-					<progress id="progress" value="0" max="100"></progress>
-				</form>
-				<script>
-					htmx.on('#form', 'htmx:xhr:progress', function(evt) {
-					  htmx.find('#progress').setAttribute('value', evt.detail.loaded/evt.detail.total * 100)
-					});
-				</script>
+				<div class="space-y-4">
+					<h3 class="text-sm font-medium text-gray-400">
+						Static Image Upload
+					</h3>
+					<div id={ string(typeOf) + "-upload-form-container" } class="space-y-2">
+						<form
+							id={ string(typeOf) + "-upload-form" }
+							hx-encoding="multipart/form-data"
+							hx-post={ "/" + string(typeOf) + "/upload" }
+							hx-target={ "#" + string(typeOf) + "-upload-form-container" }
+							hx-swap="outerHTML"
+							hx-indicator={ "#" + string(typeOf) + "-upload-indicator" }
+						>
+							<div class="flex items-center justify-between mb-2">
+								<label for={ string(typeOf) + "-file-input" } class="text-sm text-gray-300">Image:</label>
+								<div class="flex items-center gap-2">
+									<div class="relative">
+										<input
+											id={ string(typeOf) + "-file-input" }
+											type="file"
+											name="file"
+											class="absolute inset-0 opacity-0 w-full cursor-pointer z-10"
+										/>
+										<div class="bg-gray-700 text-gray-200 rounded px-3 py-1 text-sm border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 w-48 truncate">
+											<span id={ string(typeOf) + "-file-name" } class="text-gray-400">No file selected</span>
+										</div>
+									</div>
+									<button
+										type="button"
+										class="bg-gray-600 hover:bg-gray-700 text-white rounded p-1"
+										onclick={ "document.getElementById('" + string(typeOf) + "-file-input').click()" }
+										title="Select file"
+									>
+										@web.FileIcon
+									</button>
+								</div>
+							</div>
+							<div class="mt-4">
+								<div class="w-full bg-gray-700 rounded-full h-2 mb-2">
+									<div id={ string(typeOf) + "-progress-bar" } class="bg-blue-500 h-2 rounded-full w-0 transition-all duration-200"></div>
+								</div>
+							</div>
+							<div class="flex justify-end mt-2 items-center">
+								<div id={ string(typeOf) + "-upload-indicator" } class="htmx-indicator mr-2 flex items-center">
+									<svg class="animate-spin h-4 w-4 text-blue-400 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+										<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+										<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+									</svg>
+									<span class="text-xs text-blue-400">Uploading...</span>
+								</div>
+								<button
+									type="submit"
+									class="bg-blue-600 hover:bg-blue-700 text-white rounded px-3 py-1 text-sm"
+								>
+									Upload/Configure
+								</button>
+							</div>
+						</form>
+					</div>
+					<script>
+						document.addEventListener('DOMContentLoaded', function() {
+							const fileInput = document.getElementById('{ string(typeOf) + "-file-input" }');
+							const fileName = document.getElementById('{ string(typeOf) + "-file-name" }');
+							
+							if (fileInput && fileName) {
+								fileInput.addEventListener('change', function() {
+									if (this.files && this.files[0]) {
+										fileName.textContent = this.files[0].name;
+										fileName.classList.remove('text-gray-400');
+										fileName.classList.add('text-gray-200');
+									} else {
+										fileName.textContent = 'No file selected';
+										fileName.classList.remove('text-gray-200');
+										fileName.classList.add('text-gray-400');
+									}
+								});
+							}
+							
+							htmx.on('{ "#" + string(typeOf) + "-upload-form" }', 'htmx:xhr:progress', function(evt) {
+								const percentComplete = evt.detail.loaded / evt.detail.total * 100;
+								document.getElementById('{ string(typeOf) + "-progress-bar" }').style.width = percentComplete + '%';
+							});
+						});
+					</script>
+				</div>
 			</div>
 		</div>
 	</div>

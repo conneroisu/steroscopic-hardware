@@ -19,6 +19,7 @@ type OutputCamera struct {
 	InputCh  chan<- despair.InputChunk  // InputCh sends input chunks to sad.
 	OutputCh <-chan despair.OutputChunk // OutputCh receives output chunks from sad algo.
 	logger   *slog.Logger
+	paused   bool
 }
 
 // NewOutputCamera creates a new OutputCamera.
@@ -40,6 +41,9 @@ func (o *OutputCamera) Stream(
 	outCh chan *image.Gray,
 ) {
 	for {
+		if o.paused {
+			continue
+		}
 		select {
 		case <-ctx.Done():
 			slog.Debug("stopping stream")
@@ -91,3 +95,9 @@ func (o *OutputCamera) Close() error {
 	close(o.InputCh)
 	return nil
 }
+
+// Pause pauses the output camera.
+func (o *OutputCamera) Pause() { o.paused = true }
+
+// Resume resumes the output camera.
+func (o *OutputCamera) Resume() { o.paused = false }

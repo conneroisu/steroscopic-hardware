@@ -8,6 +8,8 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
+	"sync"
+	"time"
 
 	"github.com/conneroisu/steroscopic-hardware/pkg/despair"
 )
@@ -17,6 +19,8 @@ type StaticCamera struct {
 	Path   string
 	ctx    context.Context
 	cancel context.CancelFunc
+	paused bool
+	mu     sync.Mutex
 }
 
 // NewStaticCamera creates a new ZedBoard camera.
@@ -41,6 +45,12 @@ var _ Camer = (*StaticCamera)(nil)
 func (z *StaticCamera) Stream(ctx context.Context, outCh chan *image.Gray) {
 	var errChan = make(chan error, 1)
 	for {
+		z.mu.Lock()
+		defer z.mu.Unlock()
+		if z.paused {
+			time.Sleep(time.Second)
+			continue
+		}
 		select {
 		case <-ctx.Done():
 			z.cancel()
@@ -118,4 +128,18 @@ func (z *StaticCamera) getImage() (*image.Gray, error) {
 func (z *StaticCamera) Close() error {
 	z.cancel()
 	return nil
+}
+
+// Pause pauses the camera.
+func (z *StaticCamera) Pause() {
+	z.mu.Lock()
+	defer z.mu.Unlock()
+	z.paused = true
+}
+
+// Resume resumes the camera.
+func (z *StaticCamera) Resume() {
+	z.mu.Lock()
+	defer z.mu.Unlock()
+	z.paused = false
 }

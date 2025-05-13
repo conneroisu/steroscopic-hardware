@@ -42,6 +42,7 @@ type (
 		config      Config
 		OnClose     func()
 		ch          chan *image.Gray
+		paused      bool
 	}
 )
 
@@ -145,6 +146,9 @@ func (sc *SerialCamera) Stream(
 	go readFn()
 
 	for {
+		if sc.paused {
+			continue
+		}
 		select {
 		case <-ctx.Done():
 			sc.logger.Debug("context done, stopping read")
@@ -296,3 +300,9 @@ func (sc *SerialCamera) readFn(
 		sc.logger.Debug("image sent to channel")
 	}
 }
+
+// Pause pauses the camera.
+func (sc *SerialCamera) Pause() { sc.paused = true }
+
+// Resume resumes the camera.
+func (sc *SerialCamera) Resume() { sc.paused = false }
