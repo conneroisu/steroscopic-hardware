@@ -30,6 +30,84 @@ typedef struct
     uint64_t high;
 } range_t;
 
+int to_positive_int(uint8_t byte)
+{
+    return (int) ((uint16_t) byte);
+}
+
+int max(int a, int b)
+{
+    return a > b ? a : b;
+}
+
+
+void compute_previous_counts(counts_t* counts)
+{
+    for(int i = 1; i < SYMBOL_SIZE; ++i)
+    {
+        counts[i].previous_count_sum = counts[i - 1].previous_count_sum + counts[i - 1].current_count;
+    }
+}
+
+// prob_reduction is in units of percents
+void adjust_probabilities(counts_t* counts, size_t size, uint8_t byte, int prob_reduction)
+{
+    // So we don't have to worry about negatives later, convert byte to a postiive integer.
+    int i_byte = to_positive_int(byte);
+
+    // Calculate how many entries to the left and right of "byte" we will be increasing.
+    int left_entries = byte < 8 ? byte : 8;
+    int right_entries = (byte + 8) > 255 ? 255 - byte : 8;
+
+    size_t percent_count = ((size / 100) * prob_reduction) / (256 - (left_entries + right_entries));
+
+    // 0.01% is the min
+    size_t min_percent_count = size / (10000);
+
+    // Attempt to reduce all the probabilities that are not within 8 of "byte" by "percent_count"
+    // However, probabilities that are not zero should not be brought down to zero and
+    // we need to keep track of how many counts we reduced so we can increase the counts 8 away from
+    // "byte" to keep the probability dist 1.
+
+    size_t reduction = 0;
+
+    // Attempt to reduce the probabilities of the symbols that are NOT 8 away from "byte"
+    for(int i = 0; i < SYMBOL_SIZE; ++i)
+    {
+        if(i < (i_byte - 8) || i > (i_byte + 8))
+        {
+            size_t count = counts[i].current_count;
+
+            if(count < min_percent_count)
+            {
+                continue;
+            }
+            else if(count < percent_count)
+            {
+                counts[i].current_count = min_percent_count;
+                reduction += count - min_percent_count;
+            }
+            else
+            {
+                counts[i].current_count -= percent_count;
+                reduction += percent_count;
+            }
+        }
+    }
+
+    size_t count_increase = reduction / 16;
+
+    for(int i = max(i_byte - 8, 0); (i <= i_byte + 8) && (i < SYMBOL_SIZE); ++i)
+    {
+        if(i >= 0)
+        {
+            counts[i].current_count += count_increase;
+        }
+    }
+
+    // Recompute previous counts
+    compute_previous_counts(counts);
+}
 
 /*
     Basic Description:
@@ -98,10 +176,7 @@ size_t range_code(uint8_t* uncoded, uint8_t* coded, size_t size, int adjustment_
     }
 
     // Calculate the previous counts
-    for(int i = 1; i < SYMBOL_SIZE; ++i)
-    {
-        symbol_counts[i].previous_count_sum = symbol_counts[i - 1].previous_count_sum + symbol_counts[i - 1].current_count;
-    }
+    compute_previous_counts(symbol_counts);
 
     // Iterate through all bytes
     for(size_t i = 0; i < size; ++i)
@@ -185,6 +260,11 @@ size_t range_code(uint8_t* uncoded, uint8_t* coded, size_t size, int adjustment_
                     return 0;
                 }
             }
+        }
+        // Adjust every 128 pixels
+        if(!(i % 128))
+        {
+            adjust_probabilities(symbol_counts, size, *next_uncoded, 10);
         }
         next_uncoded++;
 
