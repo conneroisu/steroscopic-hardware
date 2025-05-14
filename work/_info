@@ -1,11 +1,17 @@
 m255
 K4
 z2
-Z0 !s12c _opt1
+Z0 !s12c _opt
 Z1 !s99 nomlopt
 R0
 R1
-!s12c _opt
+!s12c _opt2
+R1
+Z2 !s12c _opt1
+R1
+R2
+R1
+R0
 R1
 !s11f vlog 2024.2 2024.05, May 20 2024
 13
@@ -14,104 +20,188 @@ R1
 !i10e 25
 !i10f 100
 cModel Technology
-Z2 d/home/jaxie963/steroscopic-hardware
+Z3 d/home/jaxie963/steroscopic-hardware
 T_opt
-!s110 1747245792
-VokkJ9UNDEmeFZ0aSe709^3
-Z3 04 19 4 work compute_max_disp_tb fast 0
-=1-0050569b1012-6824dadf-d9041-43fb
+!s110 1747247973
+V<>S[N9CkVF3KLf4=JkcbR2
+Z4 04 23 4 work compute_max_disp_tb_old fast 0
+=2-0050569b1012-6824e365-aa1b5-4ee2
 R1
-Z4 !s12f OEM100
-Z5 !s12b OEM100
-Z6 !s124 OEM100
-Z7 !s135 nogc
-o-quiet -auto_acc_if_foreign -work work
-Z8 tCvgOpt 0
+Z5 !s12f OEM100
+Z6 !s12b OEM100
+Z7 !s124 OEM100
+Z8 !s135 nogc
+Z9 o-quiet -auto_acc_if_foreign -work work +acc
+Z10 tCvgOpt 0
 n@_opt
-Z9 OL;O;2024.2;79
-R2
+Z11 OL;O;2024.2;79
 T_opt1
 !s110 1747245899
 VNhH2Y>6nzV4S`aXUN:b?o0
-R3
+04 19 4 work compute_max_disp_tb fast 0
 =2-0050569b1012-6824db4b-735ac-4460
 R1
-R4
 R5
 R6
 R7
-o-quiet -auto_acc_if_foreign -work work +acc
 R8
-n@_opt1
 R9
-R2
+R10
+n@_opt1
+R11
+R3
+T_opt2
+!s110 1747247906
+V]^Sjhdo1cnf^@7lf;AoFe0
+R4
+=1-0050569b1012-6824e322-45da7-4e86
+R1
+R5
+R6
+R7
+R8
+o-quiet -auto_acc_if_foreign -work work
+R10
+n@_opt2
+R11
+R3
 vcompute_max_disp
-Z10 2/home/jaxie963/steroscopic-hardware/Hardware_shit/compute_SAD_single_linux.v
-Z11 !s110 1747247629
+Z12 2/home/jaxie963/steroscopic-hardware/Hardware_shit/compute_SAD.v
+Z13 !s110 1747247971
 !i10b 1
-!s100 G<bk_j?O2ON^h^Xk54Lje3
-I?zQ_[SgXGf]N9SJI`I9fP2
-R2
-Z12 w1747244935
-Z13 8/home/jaxie963/steroscopic-hardware/Hardware_shit/compute_SAD_single_linux.v
-Z14 F/home/jaxie963/steroscopic-hardware/Hardware_shit/compute_SAD_single_linux.v
-!i122 7
-L0 64 163
-Z15 VDg1SIo80bB@j0V0VzS_@n1
-Z16 OL;L;2024.2;79
+!s100 b<:n^LC_k>Xd1>Pl0d`<Q3
+IA@eT2C]gdT^AB=6n?5M]o3
+R3
+Z14 w1747247411
+Z15 8/home/jaxie963/steroscopic-hardware/Hardware_shit/compute_SAD.v
+Z16 F/home/jaxie963/steroscopic-hardware/Hardware_shit/compute_SAD.v
+!i122 18
+L0 63 305
+Z17 VDg1SIo80bB@j0V0VzS_@n1
+Z18 OL;L;2024.2;79
 r1
 !s85 0
 31
-Z17 !s108 1747247629.000000
-Z18 !s107 /home/jaxie963/steroscopic-hardware/Hardware_shit/compute_SAD_single_linux.v|
-Z19 !s90 -reportprogress|300|-work|work|-vopt|-stats=none|/home/jaxie963/steroscopic-hardware/Hardware_shit/compute_SAD_single_linux.v|
+Z19 !s108 1747247970.000000
+Z20 !s107 /home/jaxie963/steroscopic-hardware/Hardware_shit/compute_SAD.v|
+Z21 !s90 -reportprogress|300|-work|work|-vopt|-stats=none|/home/jaxie963/steroscopic-hardware/Hardware_shit/compute_SAD.v|
 !i113 0
-Z20 o-work work -L mtiAvm -L mtiRnm -L mtiOvm -L mtiUvm -L mtiUPF -L infact
-R8
-vcompute_max_disp_tb
-2/home/jaxie963/steroscopic-hardware/Hardware_shit/ez_tb_single_linux.v
-R11
+Z22 o-work work -L mtiAvm -L mtiRnm -L mtiOvm -L mtiUvm -L mtiUPF -L infact
+R10
+vcompute_max_disp_old
+Z23 2/home/jaxie963/steroscopic-hardware/Hardware_shit/compute_SAD_single_linux.v
+R13
 !i10b 1
-!s100 UXHcBN33UQ?OQj7_kf<I30
-IP92dKoDOjRRI[Q9kIdmQN0
-R2
-w1747245893
+!s100 9]T4Z^A5E93Yc><;3D01k0
+IbHG:>_R:fSc7bAChbQPXJ0
+R3
+Z24 w1747247877
+Z25 8/home/jaxie963/steroscopic-hardware/Hardware_shit/compute_SAD_single_linux.v
+Z26 F/home/jaxie963/steroscopic-hardware/Hardware_shit/compute_SAD_single_linux.v
+!i122 19
+L0 64 163
+R17
+R18
+r1
+!s85 0
+31
+Z27 !s108 1747247971.000000
+Z28 !s107 /home/jaxie963/steroscopic-hardware/Hardware_shit/compute_SAD_single_linux.v|
+Z29 !s90 -reportprogress|300|-work|work|-vopt|-stats=none|/home/jaxie963/steroscopic-hardware/Hardware_shit/compute_SAD_single_linux.v|
+!i113 0
+R22
+R10
+vcompute_max_disp_tb
+2/home/jaxie963/steroscopic-hardware/Hardware_shit/ez_tb.v
+R13
+!i10b 1
+!s100 IM6b7FBIWaFPkYkT=l3R?0
+IZjWH3X9MC7@gVgT^MlXm73
+R3
+w1747247471
+8/home/jaxie963/steroscopic-hardware/Hardware_shit/ez_tb.v
+F/home/jaxie963/steroscopic-hardware/Hardware_shit/ez_tb.v
+!i122 20
+Z30 L0 3 122
+R17
+R18
+r1
+!s85 0
+31
+R27
+!s107 /home/jaxie963/steroscopic-hardware/Hardware_shit/ez_tb.v|
+!s90 -reportprogress|300|-work|work|-vopt|-stats=none|/home/jaxie963/steroscopic-hardware/Hardware_shit/ez_tb.v|
+!i113 0
+R22
+R10
+vcompute_max_disp_tb_old
+2/home/jaxie963/steroscopic-hardware/Hardware_shit/ez_tb_single_linux.v
+R13
+!i10b 1
+!s100 9ae58e^i;6@oL_6@lf_<z2
+IEF9gJ;TSWzPkaVB8K7Ndm3
+R3
+w1747247966
 8/home/jaxie963/steroscopic-hardware/Hardware_shit/ez_tb_single_linux.v
 F/home/jaxie963/steroscopic-hardware/Hardware_shit/ez_tb_single_linux.v
-!i122 9
-L0 3 122
-R15
-R16
+!i122 21
+R30
+R17
+R18
 r1
 !s85 0
 31
-R17
+R27
 !s107 /home/jaxie963/steroscopic-hardware/Hardware_shit/ez_tb_single_linux.v|
 !s90 -reportprogress|300|-work|work|-vopt|-stats=none|/home/jaxie963/steroscopic-hardware/Hardware_shit/ez_tb_single_linux.v|
 !i113 0
-R20
-R8
-vSAD
+R22
 R10
-R11
-!i10b 1
-!s100 JeO`YhM^=2cYI]ikK2FJ_0
-I_4R5]AZ7P_`?^UAWf3HZR2
-R2
+vSAD
 R12
 R13
+!i10b 1
+!s100 Vjf@KcMiH2OZa>gGcbf013
+IQG5N`_Nn>ibWlEzW;5oDc1
+R3
 R14
-!i122 7
-L0 7 53
 R15
 R16
+!i122 18
+L0 7 52
+R17
+R18
 r1
 !s85 0
 31
+R19
+R20
+R21
+!i113 0
+R22
+R10
+n@s@a@d
+vSAD_old
+R23
+R13
+!i10b 1
+!s100 IGXI6MYG3^m20n4OH`7R81
+I0cXS4;Zlad_zdn<DE81]62
+R3
+R24
+R25
+R26
+!i122 19
+L0 7 53
 R17
 R18
-R19
+r1
+!s85 0
+31
+R27
+R28
+R29
 !i113 0
-R20
-R8
-n@s@a@d
+R22
+R10
+n@s@a@d_old

@@ -4,7 +4,7 @@
 //  3,4,5,
 //  6,7,8]
 // Outputs a calculated SAD value of that window
-module SAD #(
+module SAD_old #(
     parameter WIN = 15,
     parameter DATA_SIZE = 8,
     //\\ Otherwise parameters //\\
@@ -61,7 +61,7 @@ endmodule
 // Compute disparity of a pixel
 // Perform SAD computation in parallel
 // MAX_DISP windows must be searched serially - chunked into G = MAX_DISP / DIPS_THREADS
-module compute_max_disp #(
+module compute_max_disp_old #(
     parameter WIN = 15,             // Window size/block size; Win * Win
     parameter DATA_SIZE = 8,        // Data size in bits
     parameter IMG_W = 64,           // Imwage resolution width // TODO: MIGHT HAVE TO CHANGE LATER TO CHUNK SIZE

@@ -1,1 +1,25 @@
+/home/jaxie963/steroscopic-hardware/Hardware_shit/compute_SAD_single_linux.v {1 {vlog -work work -vopt -stats=none /home/jaxie963/steroscopic-hardware/Hardware_shit/compute_SAD_single_linux.v
+QuestaSim-64 vlog 2024.2 Compiler 2024.05 May 20 2024
+-- Compiling module SAD_old
+-- Compiling module compute_max_disp_old
 
+Top level modules:
+	SAD_old
+	compute_max_disp_old
+
+} {} {}} /home/jaxie963/steroscopic-hardware/Hardware_shit/ez_tb.v {1 {vlog -work work -vopt -stats=none /home/jaxie963/steroscopic-hardware/Hardware_shit/ez_tb.v
+QuestaSim-64 vlog 2024.2 Compiler 2024.05 May 20 2024
+-- Compiling module compute_max_disp_tb
+
+Top level modules:
+	compute_max_disp_tb
+
+} {} {}} /home/jaxie963/steroscopic-hardware/Hardware_shit/compute_SAD.v {1 {vlog -work work -vopt -stats=none /home/jaxie963/steroscopic-hardware/Hardware_shit/compute_SAD.v
+QuestaSim-64 vlog 2024.2 Compiler 2024.05 May 20 2024
+-- Compiling module SAD
+-- Compiling module compute_max_disp
+
+Top level modules:
+	compute_max_disp
+
+} {} {}}

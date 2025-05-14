@@ -18,3 +18,96 @@
 # Compile of ez_tb.v was successful.
 # Compile of ez_tb_single_linux.v was successful.
 # 4 compiles, 0 failed with no errors.
+# Compile of compute_SAD.v was successful.
+# Compile of compute_SAD_single_linux.v was successful.
+# Compile of ez_tb.v was successful.
+# Compile of ez_tb_single_linux.v was successful.
+# 4 compiles, 0 failed with no errors.
+# Load canceled
+# Compile of compute_SAD.v was successful.
+# Compile of compute_SAD_single_linux.v was successful.
+# Compile of ez_tb.v was successful.
+# Compile of ez_tb_single_linux.v was successful.
+# 4 compiles, 0 failed with no errors.
+vsim work.compute_max_disp_tb_old
+# vsim work.compute_max_disp_tb_old 
+# Start time: 13:38:26 on May 14,2025
+# ** Note: (vsim-3812) Design is being optimized...
+# Loading work.compute_max_disp_tb_old(fast)
+vsim work.compute_max_disp_tb_old -voptargs=+acc
+# End time: 13:38:42 on May 14,2025, Elapsed time: 0:00:16
+# Errors: 0, Warnings: 8
+# vsim work.compute_max_disp_tb_old -voptargs="+acc" 
+# Start time: 13:38:42 on May 14,2025
+# ** Note: (vsim-3812) Design is being optimized...
+# ** Warning: (vopt-10587) Some optimizations are turned off because the +acc switch is in effect. This will cause your simulation to run slowly. Please use -access/-debug to maintain needed visibility. The +acc switch would be deprecated in a future release.
+# ** Note: (vopt-143) Recognized 1 FSM in module "compute_max_disp_old(fast)".
+# ** Note: (vsim-12126) Error and warning message counts have been restored: Errors=0, Warnings=1.
+# Loading work.compute_max_disp_tb_old(fast)
+# Loading work.compute_max_disp_old(fast)
+# Loading work.SAD(fast)
+add wave -position insertpoint  \
+sim:/compute_max_disp_tb_old/dut/input_array_L \
+sim:/compute_max_disp_tb_old/dut/input_array_R \
+sim:/compute_max_disp_tb_old/dut/clk \
+sim:/compute_max_disp_tb_old/dut/rst \
+sim:/compute_max_disp_tb_old/dut/input_ready \
+sim:/compute_max_disp_tb_old/dut/col_index \
+sim:/compute_max_disp_tb_old/dut/output_disp \
+sim:/compute_max_disp_tb_old/dut/done \
+sim:/compute_max_disp_tb_old/dut/state \
+sim:/compute_max_disp_tb_old/dut/next_state \
+sim:/compute_max_disp_tb_old/dut/best_sad \
+sim:/compute_max_disp_tb_old/dut/best_disp \
+sim:/compute_max_disp_tb_old/dut/disp_idx \
+sim:/compute_max_disp_tb_old/dut/img_block_L \
+sim:/compute_max_disp_tb_old/dut/img_block_R \
+sim:/compute_max_disp_tb_old/dut/winL_flat \
+sim:/compute_max_disp_tb_old/dut/winR_flat \
+sim:/compute_max_disp_tb_old/dut/sad_val
+run -all
+# ** Warning: (vsim-7) Failed to open readmem file "//home//jaxie963//steroscopic-hardware//left_image.mem" in read mode.
+# No such file or directory. (errno = ENOENT)    : /home/jaxie963/steroscopic-hardware/Hardware_shit/ez_tb_single_linux.v(69)
+#    Time: 0 ps  Iteration: 0  Instance: /compute_max_disp_tb_old
+# ** Warning: (vsim-7) Failed to open readmem file "//home//jaxie963//steroscopic-hardware//right_image.mem" in read mode.
+# No such file or directory. (errno = ENOENT)    : /home/jaxie963/steroscopic-hardware/Hardware_shit/ez_tb_single_linux.v(70)
+#    Time: 0 ps  Iteration: 0  Instance: /compute_max_disp_tb_old
+# ** Warning: (vsim-7) Failed to open readmem file "//home//jaxie963//steroscopic-hardware//exp_disp.mem" in read mode.
+# No such file or directory. (errno = ENOENT)    : /home/jaxie963/steroscopic-hardware/Hardware_shit/ez_tb_single_linux.v(71)
+#    Time: 0 ps  Iteration: 0  Instance: /compute_max_disp_tb_old
+# ** Error: FAIL case 0: got_disp=0 expected_disp=x
+#    Time: 1336 ns  Scope: compute_max_disp_tb_old File: /home/jaxie963/steroscopic-hardware/Hardware_shit/ez_tb_single_linux.v Line: 107
+# ** Error: FAIL case 1: got_disp=0 expected_disp=x
+#    Time: 2666 ns  Scope: compute_max_disp_tb_old File: /home/jaxie963/steroscopic-hardware/Hardware_shit/ez_tb_single_linux.v Line: 107
+# ** Error: FAIL case 2: got_disp=0 expected_disp=x
+#    Time: 3996 ns  Scope: compute_max_disp_tb_old File: /home/jaxie963/steroscopic-hardware/Hardware_shit/ez_tb_single_linux.v Line: 107
+# ** Error: FAIL case 3: got_disp=0 expected_disp=x
+#    Time: 5326 ns  Scope: compute_max_disp_tb_old File: /home/jaxie963/steroscopic-hardware/Hardware_shit/ez_tb_single_linux.v Line: 107
+# All 4 test cases completed.
+# ** Note: $finish    : /home/jaxie963/steroscopic-hardware/Hardware_shit/ez_tb_single_linux.v(121)
+#    Time: 5356 ns  Iteration: 0  Instance: /compute_max_disp_tb_old
+# 1
+# Break in Module compute_max_disp_tb_old at /home/jaxie963/steroscopic-hardware/Hardware_shit/ez_tb_single_linux.v line 121
+# Compile of compute_SAD.v was successful.
+# Compile of compute_SAD_single_linux.v was successful.
+# Compile of ez_tb.v was successful.
+# Compile of ez_tb_single_linux.v was successful.
+# 4 compiles, 0 failed with no errors.
+restart
+# ** Note: (vsim-12125) Error and warning message counts have been reset to '0' because of 'restart'.
+# ** Note: (vsim-3813) Design is being optimized due to module recompilation...
+# ** Warning: (vopt-10587) Some optimizations are turned off because the +acc switch is in effect. This will cause your simulation to run slowly. Please use -access/-debug to maintain needed visibility. The +acc switch would be deprecated in a future release.
+# ** Note: (vsim-12126) Error and warning message counts have been restored: Errors=0, Warnings=1.
+# Loading work.compute_max_disp_tb_old(fast)
+# Loading work.compute_max_disp_old(fast)
+# Loading work.SAD(fast)
+run -all
+# PASS case 0: got 27 and expected 27
+# PASS case 1: got 19 and expected 19
+# PASS case 2: got 6 and expected 6
+# PASS case 3: got 26 and expected 26
+# All 4 test cases completed.
+# ** Note: $finish    : /home/jaxie963/steroscopic-hardware/Hardware_shit/ez_tb_single_linux.v(121)
+#    Time: 1876 ns  Iteration: 0  Instance: /compute_max_disp_tb_old
+# 1
+# Break in Module compute_max_disp_tb_old at /home/jaxie963/steroscopic-hardware/Hardware_shit/ez_tb_single_linux.v line 121

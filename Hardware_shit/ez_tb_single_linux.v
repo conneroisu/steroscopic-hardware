@@ -1,6 +1,6 @@
 `timescale 1ns/1ps
 
-module compute_max_disp_tb;
+module compute_max_disp_tb_old;
   //--------------------------------------------------------------------------
   //  PARAMETERS
   //--------------------------------------------------------------------------
@@ -46,7 +46,7 @@ module compute_max_disp_tb;
   //--------------------------------------------------------------------------
   //  DUT INSTANTIATION
   //--------------------------------------------------------------------------
-  compute_max_disp #(
+  compute_max_disp_old #(
     .WIN(WIN),
     .DATA_SIZE(DATA_SIZE),
     .IMG_W(IMG_W),
@@ -66,9 +66,9 @@ module compute_max_disp_tb;
   //  LOAD MEM FILES
   //--------------------------------------------------------------------------
   initial begin
-    $readmemh("//home//jaxie963//steroscopic-hardware//left_image.mem",  memL);
-    $readmemh("//home//jaxie963//steroscopic-hardware//right_image.mem", memR);
-    $readmemh("//home//jaxie963//steroscopic-hardware//exp_disp.mem",    exp_disp);
+    $readmemh("//home//jaxie963//steroscopic-hardware//Hardware_shit//left_image.mem",  memL);
+    $readmemh("//home//jaxie963//steroscopic-hardware//Hardware_shit//right_image.mem", memR);
+    $readmemh("//home//jaxie963//steroscopic-hardware//Hardware_shit//exp_disp.mem",    exp_disp);
     // $readmemh("C://Users//jaxie//Desktop//cpre488//steroscopic-hardware//exp_sad.mem",    exp_sad);
   end
 
