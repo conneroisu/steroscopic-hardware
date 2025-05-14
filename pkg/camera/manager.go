@@ -76,8 +76,10 @@ func (m *manager) SetCamera(ctx context.Context, typ Type, cam Camera) error {
 	}
 
 	// Close existing camera if any
-	if oldCam, exists := m.cameras[typ]; exists {
-		if err := oldCam.Close(); err != nil {
+	oldCam, exists := m.cameras[typ]
+	if exists {
+		err := oldCam.Close()
+		if err != nil {
 			// Resume other cameras before returning
 			for t, c := range m.cameras {
 				if t != typ {
