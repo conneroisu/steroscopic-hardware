@@ -178,7 +178,8 @@ var deleteOnce sync.Once
 // schema: stero-image-<timestamp>.png
 func SaveImage(
 	typ string,
-	img *image.Gray) error {
+	img *image.Gray,
+) error {
 	dir, err := Dir()
 	if err != nil {
 		return err
@@ -186,15 +187,15 @@ func SaveImage(
 
 	deleteOnce.Do(func() {
 		// remove the old images
-		ls, err := os.ReadDir(dir)
-		if err != nil {
+		ls, Rerr := os.ReadDir(dir)
+		if Rerr != nil {
 			slog.Error("error reading dir", "err", err)
 		}
 		for _, f := range ls {
 			if strings.HasPrefix(f.Name(), "stero-image-") {
-				err := os.Remove(filepath.Join(dir, f.Name()))
-				if err != nil {
-					slog.Error("error removing image", "err", err)
+				Rerr = os.Remove(filepath.Join(dir, f.Name()))
+				if Rerr != nil {
+					slog.Error("error removing image", "err", Rerr)
 				}
 			}
 		}
@@ -206,4 +207,40 @@ func SaveImage(
 	defer f.Close()
 
 	return png.Encode(f, img)
+}
+
+// SaveFile saves a file to the home directory.
+// schema: stero-file-<timestamp>.txt
+func SaveFile(
+	typ string,
+	data []byte,
+) error {
+	dir, err := Dir()
+	if err != nil {
+		return err
+	}
+
+	deleteOnce.Do(func() {
+		// remove the old images
+		ls, Rerr := os.ReadDir(dir)
+		if Rerr != nil {
+			slog.Error("error reading dir", "err", Rerr)
+		}
+		for _, f := range ls {
+			if strings.HasPrefix(f.Name(), "stero-file-") {
+				Rerr = os.Remove(filepath.Join(dir, f.Name()))
+				if Rerr != nil {
+					slog.Error("error removing image", "err", Rerr)
+				}
+			}
+		}
+	})
+	f, err := os.Create(filepath.Join(dir, "stero-file-"+typ+"-"+time.Now().Format("2006-01-02-15-04-05")+".txt"))
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	_, err = f.Write(data)
+	return err
 }
