@@ -1,0 +1,117 @@
+m255
+K4
+z2
+Z0 !s12c _opt1
+Z1 !s99 nomlopt
+R0
+R1
+!s12c _opt
+R1
+!s11f vlog 2024.2 2024.05, May 20 2024
+13
+!s112 1.1
+!i10d 8192
+!i10e 25
+!i10f 100
+cModel Technology
+Z2 d/home/jaxie963/steroscopic-hardware
+T_opt
+!s110 1747245792
+VokkJ9UNDEmeFZ0aSe709^3
+Z3 04 19 4 work compute_max_disp_tb fast 0
+=1-0050569b1012-6824dadf-d9041-43fb
+R1
+Z4 !s12f OEM100
+Z5 !s12b OEM100
+Z6 !s124 OEM100
+Z7 !s135 nogc
+o-quiet -auto_acc_if_foreign -work work
+Z8 tCvgOpt 0
+n@_opt
+Z9 OL;O;2024.2;79
+R2
+T_opt1
+!s110 1747245899
+VNhH2Y>6nzV4S`aXUN:b?o0
+R3
+=2-0050569b1012-6824db4b-735ac-4460
+R1
+R4
+R5
+R6
+R7
+o-quiet -auto_acc_if_foreign -work work +acc
+R8
+n@_opt1
+R9
+R2
+vcompute_max_disp
+Z10 2/home/jaxie963/steroscopic-hardware/Hardware_shit/compute_SAD_single_linux.v
+Z11 !s110 1747247629
+!i10b 1
+!s100 G<bk_j?O2ON^h^Xk54Lje3
+I?zQ_[SgXGf]N9SJI`I9fP2
+R2
+Z12 w1747244935
+Z13 8/home/jaxie963/steroscopic-hardware/Hardware_shit/compute_SAD_single_linux.v
+Z14 F/home/jaxie963/steroscopic-hardware/Hardware_shit/compute_SAD_single_linux.v
+!i122 7
+L0 64 163
+Z15 VDg1SIo80bB@j0V0VzS_@n1
+Z16 OL;L;2024.2;79
+r1
+!s85 0
+31
+Z17 !s108 1747247629.000000
+Z18 !s107 /home/jaxie963/steroscopic-hardware/Hardware_shit/compute_SAD_single_linux.v|
+Z19 !s90 -reportprogress|300|-work|work|-vopt|-stats=none|/home/jaxie963/steroscopic-hardware/Hardware_shit/compute_SAD_single_linux.v|
+!i113 0
+Z20 o-work work -L mtiAvm -L mtiRnm -L mtiOvm -L mtiUvm -L mtiUPF -L infact
+R8
+vcompute_max_disp_tb
+2/home/jaxie963/steroscopic-hardware/Hardware_shit/ez_tb_single_linux.v
+R11
+!i10b 1
+!s100 UXHcBN33UQ?OQj7_kf<I30
+IP92dKoDOjRRI[Q9kIdmQN0
+R2
+w1747245893
+8/home/jaxie963/steroscopic-hardware/Hardware_shit/ez_tb_single_linux.v
+F/home/jaxie963/steroscopic-hardware/Hardware_shit/ez_tb_single_linux.v
+!i122 9
+L0 3 122
+R15
+R16
+r1
+!s85 0
+31
+R17
+!s107 /home/jaxie963/steroscopic-hardware/Hardware_shit/ez_tb_single_linux.v|
+!s90 -reportprogress|300|-work|work|-vopt|-stats=none|/home/jaxie963/steroscopic-hardware/Hardware_shit/ez_tb_single_linux.v|
+!i113 0
+R20
+R8
+vSAD
+R10
+R11
+!i10b 1
+!s100 JeO`YhM^=2cYI]ikK2FJ_0
+I_4R5]AZ7P_`?^UAWf3HZR2
+R2
+R12
+R13
+R14
+!i122 7
+L0 7 53
+R15
+R16
+r1
+!s85 0
+31
+R17
+R18
+R19
+!i113 0
+R20
+R8
+n@s@a@d

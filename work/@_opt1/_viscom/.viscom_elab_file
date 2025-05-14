@@ -1,0 +1,1 @@
+/usr/local/mentor/questasim/linux_x86_64/VisualizerRls/bin/viscom -nolock -quiet -jmem_size 344352 work.compute_max_disp_tb(fast) -quiet -auto_acc_if_foreign -work work +acc -allow_unnamed -o _opt1 -id 2-0050569b1012-6824db4b-735ac-4460 +__design_bin_path+/home/jaxie963/steroscopic-hardware +__betafsm
