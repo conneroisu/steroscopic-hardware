@@ -29,6 +29,8 @@ templ Live() {
 							class="w-full h-64 bg-black rounded-lg overflow-hidden relative"
 						>
 							<iframe
+								width="200"
+								height="64"
 								id="left-camera-feed-iframe"
 								class="absolute inset-0 w-full h-full"
 								src="/stream/left"
@@ -49,6 +51,8 @@ setInterval(() => {
 							class="w-full h-64 bg-black rounded-lg overflow-hidden relative"
 						>
 							<iframe
+								width="200"
+								height="64"
 								id="right-camera-feed-iframe"
 								class="absolute inset-0 w-full h-full"
 								src="/stream/right"
@@ -80,6 +84,8 @@ setInterval(() => {
 						class="w-full h-96 bg-black rounded-lg overflow-hidden relative"
 					>
 						<iframe
+							width="200"
+							height="96"
 							id="depth-map-iframe"
 							class="absolute inset-0 w-full h-full"
 							src="/stream/out"
