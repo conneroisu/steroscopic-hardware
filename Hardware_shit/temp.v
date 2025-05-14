@@ -266,28 +266,217 @@ module compute_max_disp #(
 endmodule
 
 // Read inputs from framebuffer and compile disparity map
-module compute_max_disp #(
-   parameter WIN = 15,             // Window size/block size; Win * Win
-   parameter DATA_SIZE = 8,        // Data size in bits
-   parameter IMG_W = 640,
-   parameter IMG_H = 480
-   parameter MAX_DISP = 64,        // Max disparity for each pixel
-   //\\ Calculated parameters  //\\
-   //\\ Otherwise localparam   //\\
-   parameter WIN_SIZE = 225,       // WIN * WIN,
-   parameter SAD_BITS = 16,        // $clog2(WIN_SIZE * ((1 << DATA_SIZE) - 1) + 1),
-   parameter DISP_BITS = 6,        // $clog2(MAX_DISP),
-   // parameter IMG_W_ARR = 6         // $clog2(IMG_W),
+module disparity_top #(
+    parameter WIN = 15,
+    parameter DATA_SIZE = 8,
+    parameter MAX_DISP = 64,
+    parameter IMG_W = 640,
+    parameter IMG_H = 480,
+    parameter HALF_WIN = 7,
+    parameter DISP_BITS = 6
 )(
-   input wire [DATA_SIZE * IMG_W * WIN - 1 : 0] input_array_L,
-   input wire [DATA_SIZE * IMG_W * WIN - 1 : 0] input_array_R,
-   input wire clk,
-   input wire rst, 
-   input wire input_ready,
-   input wire [IMG_W_ARR - 1 : 0] col_index,
-   output reg [DISP_BITS - 1 : 0] output_disp,
-   output reg done
+    input wire clk,
+    input wire rst,
+
+    // VDMA S2MM AXI handshake stuff
+    input wire s_axis_tvalid,
+    output reg s_axis_tready,
+    input wire [7:0] s_axis_tdata,
+    input wire s_axis_tlast,      
+
+    // VDMA MM2S handshake stuff
+    output reg m_axis_tvalid,
+    input wire m_axis_tready,
+    output reg [7:0] m_axis_tdata,
+    output reg m_axis_tlast
 );
+
+    // FSM parameters
+    reg [2:0] state, next_state;
+    localparam IDLE = 3'd0;
+    localparam READ_ROW_BUFFER = 3'd1;
+    localparam SLIDE = 3'd2;
+    localparam START_PIXEL_PROCESS = 3'd3;
+    localparam WAIT_FOR_PIXEL = 3'd4;
+    localparam OUTPUT_BURST = 3'd5;
+
+    // clog2(IMG_W) = 9.3 -> 10
+    reg [9:0] row_cnt, col_cnt;
+
+    reg [DATA_SIZE - 1 : 0] linebuf_L [0 : WIN - 2][0 : IMG_W - 1];
+    reg [DATA_SIZE - 1 : 0] linebuf_R [0 : WIN - 2][0 : IMG_W - 1];
+    reg [DATA_SIZE - 1 : 0] shiftreg_L [0 : WIN - 1][0 : WIN - 1];
+    reg [DATA_SIZE - 1 : 0] shiftreg_R [0 : WIN - 1][0 : WIN - 1];
+
+    // Generate windows for padding
+    wire [DATA_SIZE * WIN * WIN - 1 : 0] win_L_flat;
+    wire [DATA_SIZE * WIN * WIN - 1 : 0] win_R_flat;
+    genvar r, c;
+    generate
+        for (r = 0; r < WIN; r = r + 1) begin: row_unpack_top
+            for (c = 0; c < WIN; c = c + 1) begin: col_unpack_top
+                assign win_L_flat[DATA_SIZE * (r * WIN + c) +: DATA_SIZE] = shiftreg_L[r][c];
+                assign win_R_flat[DATA_SIZE * (r * WIN + c) +: DATA_SIZE] = shiftreg_R[r][c];
+            end
+        end
+    endgenerate
+
+    // Pad pixels if out of bounds
+    wire [DATA_SIZE - 1 : 0] pixel_in = (row_cnt < IMG_H && col_cnt < IMG_W) ? s_axis_tdata : 8'd0;
+
+    // Instantiate disparity calculator
+    wire [DISP_BITS-1:0] disp_out;
+    wire done; 
+    reg [DISP_BITS-1:0] col_index;
+    reg input_ready; 
+    compute_max_disp #(
+        .WIN(WIN),
+        .DATA_SIZE(DATA_SIZE),
+        .MAX_DISP(MAX_DISP)
+    ) u_cmax (
+        .clk (clk),
+        .rst (rst),
+        .input_array_L (win_flat),
+        .input_array_R (win_flat),
+        .input_ready (input_ready),
+        .col_index (col_index),
+        .output_disp (disp_out),
+        .done (done)
+    );
+
+    // Clocked block to shift line buffer and shift regs
+    integer h, b;
+    always @(posedge clk) if (s_axis_tvalid && s_axis_tready) begin
+        // shift the WIN–1 BRAM rows down
+        for (h = 0; h < WIN - 1; h = h + 1) begin
+            linebuf[h + 1][col_cnt] <= linebuf[h][col_cnt];
+        end
+        linebuf[0][col_cnt] <= pixel_in;
+
+        // build the WIN×WIN window
+        for (h = 0; h < WIN; h = h + 1) begin
+            for (b = 0; b < WIN - 1; b = b + 1) begin
+                shiftreg[h][b] <= shiftreg[h][b + 1];
+            end
+            // take from the appropriate linebuf row
+            shiftreg[h][WIN - 1] <= linebuf[h][col_cnt];
+        end
+    end
+
+    // Drive next_state and outputs
+    always @* begin
+        next_state = state;
+        // default outputs
+        s_axis_tready = 0;
+        input_ready = 0;
+        // m_axis_tready = 0;
+        // col_index = col_cnt - HALF_WIN;
+        m_axis_tdata = disp_out;
+        m_axis_tlast = 0;
+
+        col_index = (col_cnt < HALF_WIN) ? 0 : (col_cnt - HALF_WIN);
+
+        case(state)
+            IDLE: begin 
+                s_axis_tready = 1'b1;
+                if (s_axis_tvalid) begin
+                    next_state = READ_ROW_BUFFER;
+                end
+            end // END IDLE
+
+            READ_ROW_BUFFER: begin
+                s_axis_tready = 1'b1;
+                if (row_cnt == HALF_WIN - 1 && col_cnt == IMG_W - 1) begin
+                    next_state = SLIDE;
+                end
+            end // END READ_ROW_BUFFER
+                        
+            SLIDE: begin
+                s_axis_tready = 1;
+                if (s_axis_tvalid) begin 
+                    next_state = START_PIXEL_PROCESS;
+                end    
+            end // END SLIDE
+
+            START_PIXEL_PROCESS: begin 
+                input_ready = 1;
+                next_state = WAIT_FOR_PIXEL;
+            end // START_PIXEL_PROCESS
+
+            WAIT_FOR_PIXEL: begin
+                if (done) begin
+                    next_state = OUTPUT_BURST;
+                end
+            end // END WAIT_FOR_PIXEL
+            
+            OUTPUT_BURST: begin
+                m_axis_tvalid = 1;
+                if (m_axis_tready) begin
+                    // Close row after last real col
+                    if (col_cnt == IMG_W - 1) begin
+                        m_axis_tlast = 1;
+                        // Restart on next row or end process
+                        next_state = (row_cnt < IMG_H - 1) ? READ_ROW_BUFFER : IDLE;
+                    end else begin 
+                        next_state = SLIDE;
+                    end
+                end 
+
+            end // END OUTPUT_BURST
+
+        endcase
+    end
+
+
+    // Clocked - update row/col counters
+    always @(posedge clk or posedge rst) begin
+        if (rst) begin 
+            state <= IDLE;
+            row_cnt <= 0;
+            col_cnt <= 0;
+        end else begin
+            state <= next_state;
+
+            case (state)
+                IDLE: begin 
+                    row_cnt = 0;
+                    col_cnt = 0;
+                end // IDLE
+
+                READ_ROW_BUFFER: begin
+                    if (col_cnt == IMG_W - 1) begin
+                        col_cnt <= 0;
+                        row_cnt <= row_cnt + 1;
+                    end else begin
+                        col_cnt <= col_cnt + 1;
+                    end
+                end // READ_ROW_BUFFER
+
+                SLIDE: begin
+                    col_cnt <= col_cnt + 1;
+                end // END SLIDE
+
+                START_PIXEL_PROCESS: begin
+
+                end // END START_PIXEL_PROCESS
+
+                WAIT_FOR_PIXEL: begin
+
+                end // END WAIT_FOR_PIXEL
+
+                OUTPUT_BURST: begin
+                    col_cnt <= (col_cnt == IMG_W - 1) ? 0 : col_cnt + 1;
+                    if (col_cnt == IMG_W - 1) begin
+                        row_cnt <= row_cnt + 1;
+                    end
+                end // END OUTPUT
+
+                default: ; // TODO - if that ever happens T^T
+
+            endcase
+        end
+    end
+
 
 
 
