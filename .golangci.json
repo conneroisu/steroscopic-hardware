@@ -8,6 +8,8 @@
   "linters": {
     "enable": [
       "asasalint",
+      "exhaustive",
+      "godox",
       "bidichk",
       "bodyclose",
       "dupl",
