@@ -143,8 +143,6 @@ void camera_loop(camera_config_t *config)
 			int terminate_send = 0;
 			while(!terminate_send)
 			{
-				empty_uart_fifo();
-
 				// Save a snapshot to frame 0.
 				set_park_frame(&(config->vdma_hdmi), 0, XAXIVDMA_WRITE);
 
@@ -166,16 +164,25 @@ void camera_loop(camera_config_t *config)
 				// If we receive the IMAGE_STOP_STREAM opcode, then stop streaming the image.
 				int bytes_read = 0;
 
+				empty_uart_fifo();
+
 				// Only check op when two bytes have been read
-				for(int i = 0; i < (IMAGE_WIDTH * IMAGE_HEIGHT) && !terminate_send; i++)
+				for(int i = 0; i < (IMAGE_HEIGHT * IMAGE_WIDTH) && !terminate_send; i++)
 				{
 					outbyte((char) (snapshot[i] & 0xFF));
+
+					// Check for stop sequence after everything has been sent happens outside this loop
+					if(i == (IMAGE_HEIGHT * IMAGE_WIDTH - 1))
+					{
+						continue;
+					}
 
 					if(XUartPs_IsReceiveData(STDIN_BASEADDRESS))
 					{
 						if(!bytes_read)
 						{
 							msb = inbyte();
+							bytes_read = 1;
 						}
 						else
 						{
@@ -193,8 +200,31 @@ void camera_loop(camera_config_t *config)
 					}
 				}
 
-				empty_uart_fifo();
+				usleep(100000);
+
+				// See if we got the stop symbol
+				if(XUartPs_IsReceiveData(STDIN_BASEADDRESS))
+				{
+					msb = inbyte();
+
+					if(XUartPs_IsReceiveData(STDIN_BASEADDRESS))
+					{
+						lsb = inbyte();
+
+						uint16_t op = (((uint16_t) msb) << 8) | lsb;
+
+						// Check opcode.
+						if(op == IMAGE_STREAM_STOP)
+						{
+							empty_uart_fifo();
+							terminate_send = 1;
+						}
+
+					}
+				}
 			}
+
+			empty_uart_fifo();
 		}
 		else
 		{

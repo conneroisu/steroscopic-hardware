@@ -3,7 +3,7 @@
 	<name>Image_Capture</name>
 	<comment>Created by Vitis v2020.1</comment>
 	<projects>
-		<project>me_HW</project>
+		<project>Image_Capture_HW</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="ASCII"?>
-<systemproject:SystemProject xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:sdkproject="http://www.xilinx.com/sdkproject" xmlns:systemproject="http://www.xilinx.com/systemproject" name="Image_Capture_system" platform="C:/Users/connero/Downloads/steroscopic-hardware/image_capture/Vitis/eclipse_workspace/me_HW/export/me_HW/me_HW.xpfm" platformUID="xilinx:zed::0.0(custom)" sysConfig="me_HW" runtime="cpp" dimmRepoPath="" rootFSLocation="" linuxImage="" sysroot="">
+<systemproject:SystemProject xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:sdkproject="http://www.xilinx.com/sdkproject" xmlns:systemproject="http://www.xilinx.com/systemproject" name="Image_Capture_system" platform="C:/Users/neastbur/steroscopic-hardware/Vitis/eclipse_workspace/Image_Capture_HW/export/Image_Capture_HW/Image_Capture_HW.xpfm" platformUID="xilinx:zed::0.0(custom)" sysConfig="Image_Capture_HW" runtime="cpp" dimmRepoPath="" rootFSLocation="" linuxImage="" sysroot="">
   <configuration name="Debug">
     <configBuildOptions xsi:type="systemproject:SystemOptions">
       <applications name="Image_Capture" domainName="standalone_domain" domainPrettyName="standalone on ps7_cortexa9_0" appBuildConfig="Debug"/>

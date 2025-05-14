@@ -12,7 +12,7 @@
     <stringAttribute key="com.xilinx.sdk.tcf.debug.uicrosstrigger.bpcontainer" value="{&quot;arch&quot;:&quot;zynq&quot;,&quot;isSelected&quot;:false,&quot;breakPoints&quot;:[]}"/>
     <stringAttribute key="com.xilinx.sdk.tcf.debug.uidebug.type" value="STANDALONE_DEBUG"/>
     <booleanAttribute key="com.xilinx.sdk.tcf.debug.uienable.crosstrigger" value="false"/>
-    <stringAttribute key="com.xilinx.sdk.tcf.debug.uifpga.device" value="Auto Detect"/>
+    <stringAttribute key="com.xilinx.sdk.tcf.debug.uifpga.device" value="Digilent Zed 210248B18B1E/3-xc7z020"/>
     <stringAttribute key="com.xilinx.sdk.tcf.debug.uihw.bit.file" value="_ide/bitstream/digital_camera_wrapper.bit"/>
     <stringAttribute key="com.xilinx.sdk.tcf.debug.uihw.init.tcl" value="_ide/psinit/ps7_init.tcl"/>
     <booleanAttribute key="com.xilinx.sdk.tcf.debug.uipl.powerup" value="false"/>
@@ -20,7 +20,7 @@
     <stringAttribute key="com.xilinx.sdk.tcf.debug.uiproc.selection" value="ps7_cortexa9_0"/>
     <booleanAttribute key="com.xilinx.sdk.tcf.debug.uiprogram.fpga" value="true"/>
     <stringAttribute key="com.xilinx.sdk.tcf.debug.uiproject.name" value="Image_Capture"/>
-    <stringAttribute key="com.xilinx.sdk.tcf.debug.uips.device" value="Auto Detect"/>
+    <stringAttribute key="com.xilinx.sdk.tcf.debug.uips.device" value="Digilent Zed 210248B18B1E/2-arm_dap"/>
     <booleanAttribute key="com.xilinx.sdk.tcf.debug.uips7.init" value="true"/>
     <booleanAttribute key="com.xilinx.sdk.tcf.debug.uips7.post" value="true"/>
     <booleanAttribute key="com.xilinx.sdk.tcf.debug.uireset.apu" value="false"/>
@@ -41,13 +41,19 @@
     <stringAttribute key="com.xilinx.sdx.sdsoc.debug.ui.ingore.peer.conflict" value="false"/>
     <stringAttribute key="com.xilinx.sdx.sdsoc.debug.ui.launch.work.dir" value=""/>
     <stringAttribute key="com.xilinx.sdx.sdsoc.debug.ui.performance.analysis" value="false"/>
-    <stringAttribute key="com.xilinx.sdx.sdsoc.debug.ui.performance.analysis.linux.hw.target" value=""/>
+    <stringAttribute key="com.xilinx.sdx.sdsoc.debug.ui.performance.analysis.linux.hw.target" value="Local"/>
     <stringAttribute key="com.xilinx.sdx.sdsoc.debug.ui.sdsoc.project" value="Image_Capture"/>
     <stringAttribute key="com.xilinx.sdx.sdsoc.debug.ui.trace" value="false"/>
     <stringAttribute key="com.xilinx.sdx.sdsoc.debug.ui.versal.system.emulation" value="false"/>
     <stringAttribute key="ide.launch.pdi.path" value=""/>
     <stringAttribute key="ide.launch.program.device" value="false"/>
     <stringAttribute key="launch.version" value="2020.1"/>
+    <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
+        <listEntry value="/Image_Capture"/>
+    </listAttribute>
+    <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_TYPES">
+        <listEntry value="4"/>
+    </listAttribute>
     <booleanAttribute key="org.eclipse.tcf.debug.AttachChildren" value="true"/>
     <booleanAttribute key="org.eclipse.tcf.debug.DisconnectOnCtxExit" value="false"/>
     <booleanAttribute key="org.eclipse.tcf.debug.StopAtEntry" value="false"/>
