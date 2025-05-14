@@ -74,7 +74,7 @@ void adjust_probabilities(counts_t* counts, size_t size, uint8_t byte, int prob_
     // Attempt to reduce the probabilities of the symbols that are NOT 8 away from "byte"
     for(int i = 0; i < SYMBOL_SIZE; ++i)
     {
-        if(i < (i_byte - 8) || i > (i_byte + 8))
+        if(i < (i_byte - 8) || i >(i_byte + 8))
         {
             size_t count = counts[i].current_count;
 
@@ -85,7 +85,7 @@ void adjust_probabilities(counts_t* counts, size_t size, uint8_t byte, int prob_
             else if(count < percent_count)
             {
                 counts[i].current_count = min_percent_count;
-                reduction += count - min_percent_count;
+                reduction += (count - min_percent_count);
             }
             else
             {
@@ -95,13 +95,21 @@ void adjust_probabilities(counts_t* counts, size_t size, uint8_t byte, int prob_
         }
     }
 
-    size_t count_increase = reduction / 16;
+    size_t count_increase = reduction / (left_entries + right_entries);
+    size_t extra = reduction % (left_entries + right_entries);
 
     for(int i = max(i_byte - 8, 0); (i <= i_byte + 8) && (i < SYMBOL_SIZE); ++i)
     {
         if(i >= 0)
         {
-            counts[i].current_count += count_increase;
+            if(i == i_byte)
+            {
+                counts[i].current_count += extra;
+            }
+            else
+            {
+                counts[i].current_count += count_increase;
+            }
         }
     }
 
