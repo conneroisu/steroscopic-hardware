@@ -176,7 +176,9 @@ var deleteOnce sync.Once
 
 // SaveImage saves an image to the home directory.
 // schema: stero-image-<timestamp>.png
-func SaveImage(img *image.Gray) error {
+func SaveImage(
+	typ string,
+	img *image.Gray) error {
 	dir, err := Dir()
 	if err != nil {
 		return err
@@ -197,7 +199,7 @@ func SaveImage(img *image.Gray) error {
 			}
 		}
 	})
-	f, err := os.Create(filepath.Join(dir, "stero-image-"+time.Now().Format("2006-01-02-15-04-05")+".png"))
+	f, err := os.Create(filepath.Join(dir, "stero-image-"+typ+"-"+time.Now().Format("2006-01-02-15-04-05")+".png"))
 	if err != nil {
 		return err
 	}

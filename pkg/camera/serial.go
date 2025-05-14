@@ -40,6 +40,7 @@ type SerialCamera struct {
 	logger      *slog.Logger // Logger for serial camera events
 	onClose     func()       // Cleanup function for closing the camera
 	streamMu    sync.Mutex   // Mutex for synchronizing streaming
+	cameraType  Type         // Type of camera
 }
 
 // NewSerialCamera creates a new SerialCamera instance for the given type, port, baud rate,
@@ -61,6 +62,7 @@ func NewSerialCamera(ctx context.Context, typ Type, portName string, baudRate in
 		imageWidth:  DefaultImageWidth,
 		imageHeight: DefaultImageHeight,
 		logger:      slog.Default().WithGroup(fmt.Sprintf("serial-camera-%s", typ)),
+		cameraType:  typ,
 	}
 
 	// Configure serial port
@@ -311,7 +313,7 @@ func (sc *SerialCamera) readFrame() (*image.Gray, error) {
 	}
 
 	// Save a copy of the image for debugging
-	err := homedir.SaveImage(img)
+	err := homedir.SaveImage(string(sc.cameraType), img)
 	if err != nil {
 		sc.logger.Error("failed to save debug image", "err", err)
 	}

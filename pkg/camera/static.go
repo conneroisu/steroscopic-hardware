@@ -10,16 +10,14 @@ import (
 	"os"
 	"path/filepath"
 	"time"
-
-	"github.com/conneroisu/steroscopic-hardware/pkg/homedir"
 )
 
 // StaticCamera represents a camera that loads images from files. It is useful for testing
 // and development when a real hardware camera is not available.
 type StaticCamera struct {
 	BaseCamera
-	path   string        // Path to the static image file
-	logger *slog.Logger  // Logger for static camera events
+	path   string       // Path to the static image file
+	logger *slog.Logger // Logger for static camera events
 }
 
 // NewStaticCamera creates a new static camera that reads from the specified file path and
@@ -61,7 +59,7 @@ func (sc *StaticCamera) Stream(ctx context.Context, outCh ImageChannel) {
 			sc.logger.Error("error in static camera", "err", err)
 			time.Sleep(1 * time.Second) // Delay before retry
 		case <-ticker.C:
-			if (sc.IsPaused()) {
+			if sc.IsPaused() {
 				continue
 			}
 
@@ -197,12 +195,6 @@ func (sc *StaticCamera) loadImage() (*image.Gray, error) {
 		}
 	default:
 		return nil, fmt.Errorf("unsupported image format: %s", ext)
-	}
-
-	// Save a copy for debugging
-	err = homedir.SaveImage(grayImg)
-	if err != nil {
-		sc.logger.Error("failed to save debug image", "err", err)
 	}
 
 	return grayImg, nil
