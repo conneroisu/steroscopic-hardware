@@ -68,7 +68,6 @@ func (oc *OutputCamera) Stream(ctx context.Context, outCh ImageChannel) {
 				continue
 			}
 
-			slog.Debug("generating depth map")
 			// Generate depth map from input channels
 			img, err := oc.processDepthMap()
 			if err != nil {
