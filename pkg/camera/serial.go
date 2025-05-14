@@ -244,7 +244,7 @@ func (sc *SerialCamera) readFrame() (*image.Gray, error) {
 	sc.logger.Debug("reading image frame")
 
 	// Use a timeout for the read operation
-	readCtx, cancel := context.WithTimeout(sc.Context(), 3*time.Minute)
+	readCtx, cancel := context.WithTimeout(sc.Context(), 4*time.Minute)
 	defer cancel()
 
 	// Buffer to store image data
