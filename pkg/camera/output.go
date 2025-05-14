@@ -1,12 +1,16 @@
 package camera
 
 import (
+	"bytes"
 	"context"
 	"image"
+	"image/color"
+	"image/png"
 	"log/slog"
 	"time"
 
 	"github.com/conneroisu/steroscopic-hardware/pkg/despair"
+	"github.com/conneroisu/steroscopic-hardware/pkg/homedir"
 )
 
 // DefaultNumWorkers is the default number of worker goroutines for disparity calculations.
@@ -64,8 +68,9 @@ func (oc *OutputCamera) Stream(ctx context.Context, outCh ImageChannel) {
 				continue
 			}
 
+			slog.Debug("generating depth map")
 			// Generate depth map from input channels
-			img, err := oc.processDepthMap(DefaultManager().GetOutputChannel(LeftCameraType), DefaultManager().GetOutputChannel(RightCameraType))
+			img, err := oc.processDepthMap()
 			if err != nil {
 				oc.logger.Error("error processing depth map", "err", err)
 				time.Sleep(100 * time.Millisecond)
@@ -74,11 +79,20 @@ func (oc *OutputCamera) Stream(ctx context.Context, outCh ImageChannel) {
 			}
 
 			if img == nil {
+				slog.Debug("no depth map generated")
 				time.Sleep(100 * time.Millisecond)
 
 				continue
 			}
 
+			// save to $HOME/output.png
+			err = homedir.SaveImage("output.png", img)
+			if err != nil {
+				oc.logger.Error("error saving image", "err", err)
+				time.Sleep(100 * time.Millisecond)
+
+				continue
+			}
 			// Send processed image to output channel
 			select {
 			case outCh <- img:
@@ -105,10 +119,7 @@ func (oc *OutputCamera) Stream(ctx context.Context, outCh ImageChannel) {
 				time.Sleep(backoff)
 
 				// Exponential backoff with a maximum cap
-				backoff = time.Duration(float64(backoff) * 1.5)
-				if backoff > maxBackoff {
-					backoff = maxBackoff
-				}
+				backoff = min(time.Duration(float64(backoff)*1.5), maxBackoff)
 			}
 		}
 	}
@@ -116,28 +127,39 @@ func (oc *OutputCamera) Stream(ctx context.Context, outCh ImageChannel) {
 
 // processDepthMap generates a depth map from left and right camera images. It divides the
 // images into chunks for parallel processing and assembles the resulting disparity map.
-func (oc *OutputCamera) processDepthMap(leftCh, rightCh ImageChannel) (*image.Gray, error) {
+func (oc *OutputCamera) processDepthMap() (*image.Gray, error) {
 	// Try to receive images from both channels
 	var leftImg, rightImg *image.Gray
 
-	// Create a timeout context for receiving images
-	timeoutCtx, cancel := context.WithTimeout(oc.Context(), 1*time.Second)
-	defer cancel()
-
-	// Try to receive left image
-	select {
-	case img := <-leftCh:
-		leftImg = img
-	case <-timeoutCtx.Done():
-		return nil, nil // No image available yet
+	// Get Image fron $HOME/left.png
+	leftImgBytes, err := homedir.ReadFile("left.png")
+	if err != nil {
+		return nil, err
 	}
-
-	// Try to receive right image
-	select {
-	case img := <-rightCh:
-		rightImg = img
-	case <-timeoutCtx.Done():
-		return nil, nil // No image available yet
+	leftImgFull, err := png.Decode(bytes.NewReader(leftImgBytes))
+	if err != nil {
+		return nil, err
+	}
+	leftImg = image.NewGray(leftImgFull.Bounds())
+	for x := leftImgFull.Bounds().Min.X; x < leftImgFull.Bounds().Max.X; x++ {
+		for y := leftImgFull.Bounds().Min.Y; y < leftImgFull.Bounds().Max.Y; y++ {
+			leftImg.Set(x, y, color.GrayModel.Convert(leftImgFull.At(x, y)))
+		}
+	}
+	// Get Image fron $HOME/right.png
+	rightImgBytes, err := homedir.ReadFile("right.png")
+	if err != nil {
+		return nil, err
+	}
+	rightImgFull, err := png.Decode(bytes.NewReader(rightImgBytes))
+	if err != nil {
+		return nil, err
+	}
+	rightImg = image.NewGray(rightImgFull.Bounds())
+	for x := rightImgFull.Bounds().Min.X; x < rightImgFull.Bounds().Max.X; x++ {
+		for y := rightImgFull.Bounds().Min.Y; y < rightImgFull.Bounds().Max.Y; y++ {
+			rightImg.Set(x, y, color.GrayModel.Convert(rightImgFull.At(x, y)))
+		}
 	}
 
 	// Process images if both are available
@@ -167,6 +189,14 @@ func (oc *OutputCamera) processDepthMap(leftCh, rightCh ImageChannel) (*image.Gr
 
 		// Assemble the resulting disparity map
 		disparityMap := despair.AssembleDisparityMap(oc.outputCh, leftImg.Rect, numChunks)
+
+		// Save to $HOME/output.png
+		err := homedir.SaveImage("output.png", disparityMap)
+		if err != nil {
+			slog.Error("could not save output image", "err", err)
+
+			return nil, err
+		}
 
 		elapsedTime := time.Since(startTime)
 		oc.logger.Info("depth map generated",

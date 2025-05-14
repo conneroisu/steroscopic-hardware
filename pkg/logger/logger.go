@@ -52,7 +52,7 @@ func NewLogWriter(w io.Writer) slog.Handler {
 	// consoleHandler is a default logger.
 	return slog.NewTextHandler(w, &slog.HandlerOptions{
 		AddSource: true,
-		Level:     slog.LevelInfo,
+		Level:     slog.LevelDebug,
 		ReplaceAttr: func(_ []string, a slog.Attr) slog.Attr {
 			if a.Key == slog.SourceKey {
 				a.Key = "src"

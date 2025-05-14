@@ -47,6 +47,11 @@ func UploadHandler(appCtx context.Context, typ camera.Type) APIFn {
 
 		logger.Info("file saved", "path", path, "size", len(body))
 
+		old := camera.GetCamera(typ)
+		err = old.Close()
+		if err != nil {
+			return err
+		}
 		// Create static camera - Using the application context
 		staticCam := camera.NewStaticCamera(appCtx, path, typ)
 

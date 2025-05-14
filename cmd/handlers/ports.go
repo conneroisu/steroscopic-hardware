@@ -25,7 +25,7 @@ func GetPorts(
 		for {
 			ports, err = enumerator.GetDetailedPortsList()
 			if err != nil || len(ports) == 0 {
-				if tries > 10 {
+				if tries > 3 {
 					return errors.New("no serial ports found")
 				}
 				logger.Error(

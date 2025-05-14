@@ -28,10 +28,16 @@ templ Live() {
 							id="left-camera-feed"
 							class="w-full h-64 bg-black rounded-lg overflow-hidden relative"
 						>
-							<img
-								class="absolute inset-0 flex items-center justify-center text-gray-500"
+							<iframe
+								id="left-camera-feed-iframe"
+								class="absolute inset-0 w-full h-full"
 								src="/stream/left"
-							/>
+							></iframe>
+							<script>
+setInterval(() => {
+  document.getElementById('left-camera-feed-iframe').contentWindow.location.reload();
+}, 1_000);
+</script>
 						</div>
 					</div>
 					<div class="flex flex-col items-center">
@@ -42,10 +48,16 @@ templ Live() {
 							id="right-camera-feed"
 							class="w-full h-64 bg-black rounded-lg overflow-hidden relative"
 						>
-							<img
-								class="absolute inset-0 flex items-center justify-center text-gray-500"
+							<iframe
+								id="right-camera-feed-iframe"
+								class="absolute inset-0 w-full h-full"
 								src="/stream/right"
-							/>
+							></iframe>
+							<script>
+setInterval(() => {
+  document.getElementById('right-camera-feed-iframe').contentWindow.location.reload();
+}, 1_000);
+</script>
 						</div>
 					</div>
 				</div>
@@ -67,10 +79,16 @@ templ Live() {
 						id="depth-map-image"
 						class="w-full h-96 bg-black rounded-lg overflow-hidden relative"
 					>
-						<img
-							class="absolute inset-0 w-full h-full object-contain"
+						<iframe
+							id="depth-map-iframe"
+							class="absolute inset-0 w-full h-full"
 							src="/stream/out"
-						/>
+						></iframe>
+						<script>
+setInterval(() => {
+  document.getElementById('depth-map-iframe').contentWindow.location.reload();
+}, 1_000);
+</script>
 					</div>
 				</div>
 			</div>
