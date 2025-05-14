@@ -48,6 +48,7 @@ func TestLoadPNG(t *testing.T) {
 			got, err := LoadPNG(tt.filename)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("LoadPNG() error = %v, wantErr %v", err, tt.wantErr)
+
 				return
 			}
 			if !tt.wantErr && got == nil {
@@ -128,6 +129,7 @@ func TestSavePNG(t *testing.T) {
 					err,
 					tt.wantErr,
 				)
+
 				return
 			}
 
@@ -148,6 +150,7 @@ func TestSavePNG(t *testing.T) {
 						"SavePNG() created file that can't be opened: %v",
 						err,
 					)
+
 					return
 				}
 				defer file.Close()

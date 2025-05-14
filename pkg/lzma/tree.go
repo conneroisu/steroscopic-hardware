@@ -95,6 +95,7 @@ func newBinTree(
 	}
 
 	bt.iw.reduceOffsets(0xFFFFFFFF)
+
 	return bt, nil
 }
 
@@ -129,6 +130,7 @@ func (bt *binTree) movePos() error {
 	if bt.iw.pos == kMaxValForNormalize {
 		bt.normalize()
 	}
+
 	return nil
 }
 
@@ -143,6 +145,7 @@ func (bt *binTree) getMatches(distances []uint32) (uint32, error) {
 			if err != nil {
 				return 0, err
 			}
+
 			return 0, nil
 		}
 	}
@@ -223,6 +226,7 @@ func (bt *binTree) getMatches(distances []uint32) (uint32, error) {
 		if curMatch <= matchMinPos || count == 0 {
 			bt.son[ptr1] = kEmptyHashValue
 			bt.son[ptr0] = kEmptyHashValue
+
 			break
 		}
 		count--
@@ -251,6 +255,7 @@ func (bt *binTree) getMatches(distances []uint32) (uint32, error) {
 				if length == lenLimit {
 					bt.son[ptr1] = bt.son[cyclicPos]
 					bt.son[ptr0] = bt.son[cyclicPos+1]
+
 					break
 				}
 			}
@@ -272,6 +277,7 @@ func (bt *binTree) getMatches(distances []uint32) (uint32, error) {
 	if err != nil {
 		return 0, err
 	}
+
 	return offset, nil
 }
 
@@ -288,6 +294,7 @@ func (bt *binTree) skip(num uint32) error {
 				if err != nil {
 					return err
 				}
+
 				continue
 			}
 		}
@@ -320,6 +327,7 @@ func (bt *binTree) skip(num uint32) error {
 			if curMatch <= matchMinPos || count == 0 {
 				bt.son[ptr1] = kEmptyHashValue
 				bt.son[ptr0] = kEmptyHashValue
+
 				break
 			}
 			count--
@@ -342,6 +350,7 @@ func (bt *binTree) skip(num uint32) error {
 				if length == lenLimit {
 					bt.son[ptr1] = bt.son[cyclicPos]
 					bt.son[ptr0] = bt.son[cyclicPos+1]
+
 					break
 				}
 			}
@@ -358,8 +367,10 @@ func (bt *binTree) skip(num uint32) error {
 				len0 = length
 			}
 		}
+
 		return bt.movePos()
 	}
+
 	return nil
 }
 
@@ -401,6 +412,7 @@ func (rc *rangeBitTreeCoder) decode(rd *rangeDecoder) (uint32, error) {
 		res = res<<1 + bit
 	}
 	res -= 1 << rc.numBitLevels
+
 	return res, nil
 }
 
@@ -417,6 +429,7 @@ func (rc *rangeBitTreeCoder) reverseDecode(rd *rangeDecoder) (uint32, error) {
 		index += bit
 		res |= bit << bitIndex
 	}
+
 	return res, nil
 }
 
@@ -437,6 +450,7 @@ func reverseDecodeIndex(
 		index += bit
 		res |= bit << bitIndex
 	}
+
 	return
 }
 
@@ -470,6 +484,7 @@ func (rc *rangeBitTreeCoder) getPrice(symbol uint32) (res uint32) {
 		res += getPrice(rc.models[m], bit)
 		m = m<<1 + bit
 	}
+
 	return
 }
 
@@ -482,6 +497,7 @@ func (rc *rangeBitTreeCoder) reverseGetPrice(symbol uint32) (res uint32) {
 		res += getPrice(rc.models[m], bit)
 		m = m<<1 | bit
 	}
+
 	return
 }
 
@@ -497,6 +513,7 @@ func reverseGetPriceIndex(
 		res += getPrice(models[startIndex+m], bit)
 		m = m<<1 | bit
 	}
+
 	return
 }
 

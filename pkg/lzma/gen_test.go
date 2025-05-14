@@ -135,6 +135,7 @@ func testDecoder(t *testing.T, tt generatedTest) {
 				if decodedData[i] != rawData[i] {
 					t.Errorf("First difference at position %d: got %02x, expected %02x",
 						i, decodedData[i], rawData[i])
+
 					break
 				}
 			}
@@ -201,6 +202,7 @@ func testEncoder(t *testing.T, tt generatedTest) {
 				if decodedData[i] != rawData[i] {
 					t.Errorf("First difference at position %d: got %02x, expected %02x",
 						i, decodedData[i], rawData[i])
+
 					break
 				}
 			}
@@ -259,6 +261,7 @@ func testRoundTrip(t *testing.T, tt generatedTest) {
 				if decompressedData[i] != rawData[i] {
 					t.Errorf("First difference at position %d: got %02x, expected %02x",
 						i, decompressedData[i], rawData[i])
+
 					break
 				}
 			}

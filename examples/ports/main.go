@@ -24,6 +24,7 @@ func doStuff() {
 		if len(ports) == 0 {
 			fmt.Println("No serial ports found!")
 			time.Sleep(1 * time.Second)
+
 			continue
 		}
 		fmt.Printf("Found %d serial ports\n", len(ports))

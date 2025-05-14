@@ -21,6 +21,7 @@ func newLenCoder(
 		lc.lowCoder[i] = newRangeBitTreeCoder(kNumLowLenBits)
 		lc.midCoder[i] = newRangeBitTreeCoder(kNumMidLenBits)
 	}
+
 	return lc
 }
 
@@ -35,6 +36,7 @@ func (lc *lenCoder) decode(rd *rangeDecoder, posState uint32) (uint32, error) {
 		if err != nil {
 			return 0, err
 		}
+
 		return res, nil
 	}
 	res = kNumLowLenSymbols
@@ -48,6 +50,7 @@ func (lc *lenCoder) decode(rd *rangeDecoder, posState uint32) (uint32, error) {
 			return 0, err
 		}
 		res += k
+
 		return res, nil
 	}
 	l, err := lc.highCoder.decode(rd)
@@ -55,6 +58,7 @@ func (lc *lenCoder) decode(rd *rangeDecoder, posState uint32) (uint32, error) {
 		return 0, err
 	}
 	res = res + kNumMidLenSymbols + l
+
 	return res, nil
 }
 
@@ -119,6 +123,7 @@ func newLenPriceTableCoder(tableSize, numPosStates uint32) *lenPriceTableCoder {
 	for ; posState < numPosStates; posState++ {
 		pc.updateTable(posState)
 	}
+
 	return pc
 }
 

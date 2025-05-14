@@ -32,6 +32,7 @@ func NewLogger() Logger {
 		),
 	)
 	slog.SetDefault(logger)
+
 	return Logger{
 		buffer: &buffer,
 		Logger: logger,
@@ -66,6 +67,7 @@ func NewLogWriter(w io.Writer) slog.Handler {
 					)
 				}
 			}
+
 			return a
 		}})
 }

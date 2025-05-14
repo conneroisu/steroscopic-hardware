@@ -47,6 +47,7 @@ func NewWriterSizeLevel(w io.Writer, size int64, level int) (io.WriteCloser, err
 			throw(fmt.Errorf("lzma.NewWriterSizeLevel failed to close: %w", err))
 		}
 	}()
+
 	return pw, nil
 }
 
@@ -145,6 +146,7 @@ func getPosSlot(pos uint32) uint32 {
 	if pos < 1<<21 {
 		return uint32(gFastPos[pos>>10] + 20)
 	}
+
 	return uint32(gFastPos[pos>>20] + 40)
 }
 
@@ -155,6 +157,7 @@ func getPosSlot2(pos uint32) uint32 {
 	if pos < 1<<27 {
 		return uint32(gFastPos[pos>>16] + 32)
 	}
+
 	return uint32(gFastPos[pos>>26] + 52)
 }
 
@@ -266,14 +269,17 @@ func (z *encoder) readMatchDistances() (uint32, error) {
 		}
 	}
 	z.additionalOffset++
+
 	return lenRes, nil
 }
 
 func (z *encoder) movePos(num uint32) error {
 	if num > 0 {
 		z.additionalOffset += num
+
 		return z.mf.skip(num)
 	}
+
 	return nil
 }
 
@@ -290,12 +296,14 @@ func (z *encoder) getPureRepPrice(repIndex, state, posState uint32) (price uint3
 			price += getPrice(z.isRepG2[state], repIndex-2)
 		}
 	}
+
 	return
 }
 
 func (z *encoder) getRepPrice(repIndex, length, state, posState uint32) (price uint32) {
 	price = z.repMatchLenCoder.getPrice(length-kMatchMinLen, posState)
 	price += z.getPureRepPrice(repIndex, state, posState)
+
 	return
 }
 
@@ -307,6 +315,7 @@ func (z *encoder) getPosLenPrice(pos, length, posState uint32) (price uint32) {
 		price = z.posSlotPrices[lenToPosState<<kNumPosSlotBits+getPosSlot2(pos)] + z.alignPrices[pos&kAlignMask]
 	}
 	price += z.lenCoder.getPrice(length-kMatchMinLen, posState)
+
 	return
 }
 
@@ -339,6 +348,7 @@ func (z *encoder) backward(cur uint32) uint32 {
 	}
 	z.backRes = z.optimum[0].backPrev
 	z.optimumCurrentIndex = z.optimum[0].posPrev
+
 	return z.optimumCurrentIndex
 }
 
@@ -347,6 +357,7 @@ func (z *encoder) getOptimum(position uint32) (uint32, error) {
 		lenRes := z.optimum[z.optimumCurrentIndex].posPrev - z.optimumCurrentIndex
 		z.backRes = z.optimum[z.optimumCurrentIndex].backPrev
 		z.optimumCurrentIndex = z.optimum[z.optimumCurrentIndex].posPrev
+
 		return lenRes, nil
 	}
 
@@ -369,6 +380,7 @@ func (z *encoder) getOptimum(position uint32) (uint32, error) {
 	availableBytes := z.mf.iw.getNumAvailableBytes() + 1
 	if availableBytes < 2 {
 		z.backRes = 0xFFFFFFFF
+
 		return 1, nil
 	}
 
@@ -384,12 +396,14 @@ func (z *encoder) getOptimum(position uint32) (uint32, error) {
 		z.backRes = repMaxIndex
 		lenRes := z.repLens[repMaxIndex]
 		err = z.movePos(lenRes - 1)
+
 		return lenRes, err
 	}
 
 	if lenMain >= z.cl.fastBytes {
 		z.backRes = z.matchDistances[distancePairs-1] + kNumRepDistances
 		err = z.movePos(lenMain - 1)
+
 		return lenMain, err
 	}
 
@@ -397,6 +411,7 @@ func (z *encoder) getOptimum(position uint32) (uint32, error) {
 	matchByte := z.mf.iw.getIndexByte(0 - int32(z.repDistances[0]) - 1 - 1)
 	if lenMain < 2 && curByte != matchByte && z.repLens[repMaxIndex] < 2 {
 		z.backRes = 0xFFFFFFFF
+
 		return 1, nil
 	}
 
@@ -419,6 +434,7 @@ func (z *encoder) getOptimum(position uint32) (uint32, error) {
 	lenEnd := max(lenMain, z.repLens[repMaxIndex])
 	if lenEnd < 2 {
 		z.backRes = z.optimum[1].backPrev
+
 		return 1, nil
 	}
 
@@ -489,6 +505,7 @@ DoWhile1:
 		cur++
 		if cur == lenEnd {
 			res = z.backward(cur)
+
 			return res, nil
 		}
 
@@ -501,6 +518,7 @@ DoWhile1:
 			z.longestMatchLen = newLen
 			z.longestMatchFound = true
 			res = z.backward(cur)
+
 			return res, nil
 		}
 
@@ -719,6 +737,7 @@ DoWhile1:
 				if newLen > z.matchDistances[distancePairs] {
 					distancePairs += 2
 				}
+
 				break
 			}
 			z.matchDistances[distancePairs] = newLen
@@ -867,6 +886,7 @@ func (z *encoder) codeOneBlock() {
 	if z.nowPos == 0 {
 		if z.mf.iw.getNumAvailableBytes() == 0 {
 			z.flush(uint32(z.nowPos))
+
 			return
 		}
 		_, err := z.readMatchDistances()
@@ -883,6 +903,7 @@ func (z *encoder) codeOneBlock() {
 	}
 	if z.mf.iw.getNumAvailableBytes() == 0 {
 		z.flush(uint32(z.nowPos))
+
 		return
 	}
 	for {
@@ -991,10 +1012,12 @@ func (z *encoder) codeOneBlock() {
 			}
 			if z.mf.iw.getNumAvailableBytes() == 0 {
 				z.flush(uint32(z.nowPos))
+
 				return
 			}
 			if z.nowPos-progressPosValuePrev >= 1<<12 {
 				z.finished = false
+
 				return
 			}
 		}
@@ -1155,6 +1178,7 @@ func (z *encoder) encoder(
 	z.fillAlignPrices()
 
 	z.doEncode()
+
 	return
 }
 

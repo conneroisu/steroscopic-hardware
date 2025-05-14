@@ -16,6 +16,7 @@ func main() {
 	err := cmd.Run(context.Background(), openBrowser)
 	if err != nil {
 		fmt.Println(err)
+
 		return
 	}
 }

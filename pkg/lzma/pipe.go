@@ -11,6 +11,7 @@ type syncPipeReader struct {
 func (sr *syncPipeReader) CloseWithError(err error) error {
 	retErr := sr.PipeReader.CloseWithError(err)
 	sr.closeChan <- true // finish writer close
+
 	return retErr
 }
 
@@ -24,6 +25,7 @@ type syncPipeWriter struct {
 func (sw *syncPipeWriter) Close() error {
 	err := sw.PipeWriter.Close()
 	<-sw.closeChan // wait for reader close
+
 	return err
 }
 
@@ -32,5 +34,6 @@ func newSyncPipe() (*syncPipeReader, *syncPipeWriter) {
 	r, w := io.Pipe()
 	sr := &syncPipeReader{r, make(chan bool, 1)}
 	sw := &syncPipeWriter{w, sr.closeChan}
+
 	return sr, sw
 }

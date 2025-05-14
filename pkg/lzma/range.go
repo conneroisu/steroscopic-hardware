@@ -36,6 +36,7 @@ func makeReader(r io.Reader) Reader {
 	if rr, ok := r.(Reader); ok {
 		return rr
 	}
+
 	return bufio.NewReader(r)
 }
 
@@ -53,6 +54,7 @@ func newRangeDecoder(r io.Reader) (*rangeDecoder, error) {
 	for i := range buf {
 		rd.code = rd.code<<8 | uint32(buf[i])
 	}
+
 	return rd, nil
 }
 
@@ -77,6 +79,7 @@ func (rd *rangeDecoder) decodeDirectBits(numTotalBits uint32) (uint32, error) {
 			rd.rrange <<= 8
 		}
 	}
+
 	return res, nil
 }
 
@@ -113,6 +116,7 @@ func (rd *rangeDecoder) decodeBit(
 		}
 		res = 1
 	}
+
 	return
 }
 
@@ -123,6 +127,7 @@ func initBitModels(length uint32) (probs []uint16) {
 	for ; i < length; i++ {
 		probs[i] = val // 1 << 10
 	}
+
 	return
 }
 
@@ -149,6 +154,7 @@ func makeWriter(w io.Writer) Writer {
 	if ww, ok := w.(Writer); ok {
 		return ww
 	}
+
 	return bufio.NewWriter(w)
 }
 
@@ -175,6 +181,7 @@ func (re *rangeEncoder) flush() error {
 	if err != nil {
 		return err
 	}
+
 	return nil
 }
 
@@ -197,6 +204,7 @@ func (re *rangeEncoder) shiftLow() error {
 	}
 	re.cacheSize++
 	re.low = uint64(uint32(re.low) << 8)
+
 	return nil
 }
 

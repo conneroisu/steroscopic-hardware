@@ -239,5 +239,6 @@ func SumAbsoluteDifferences(
 			sad += diff
 		}
 	}
+
 	return sad
 }

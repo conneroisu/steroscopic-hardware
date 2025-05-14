@@ -16,9 +16,9 @@ const DefaultNumWorkers = 32
 // a concurrent sum of absolute differences (SAD) algorithm. It is used for stereo vision output.
 type OutputCamera struct {
 	BaseCamera
-	inputCh  chan<- despair.InputChunk // Channel for input image chunks
+	inputCh  chan<- despair.InputChunk  // Channel for input image chunks
 	outputCh <-chan despair.OutputChunk // Channel for processed output chunks
-	logger   *slog.Logger              // Logger for output camera events
+	logger   *slog.Logger               // Logger for output camera events
 }
 
 // NewOutputCamera creates a new output camera for disparity mapping. It initializes
@@ -51,13 +51,16 @@ func (oc *OutputCamera) Stream(ctx context.Context, outCh ImageChannel) {
 		select {
 		case <-ctx.Done():
 			oc.logger.Debug("context canceled, stopping stream")
+
 			return
 		case <-oc.Context().Done():
 			oc.logger.Debug("camera context canceled, stopping stream")
+
 			return
 		default:
 			if oc.IsPaused() {
 				time.Sleep(100 * time.Millisecond)
+
 				continue
 			}
 
@@ -66,11 +69,13 @@ func (oc *OutputCamera) Stream(ctx context.Context, outCh ImageChannel) {
 			if err != nil {
 				oc.logger.Error("error processing depth map", "err", err)
 				time.Sleep(100 * time.Millisecond)
+
 				continue
 			}
 
 			if img == nil {
 				time.Sleep(100 * time.Millisecond)
+
 				continue
 			}
 

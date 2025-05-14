@@ -28,10 +28,10 @@ const channelBufferSize = 20 // Increased from 5 to 20 to prevent blocking
 
 // manager implements the Manager interface for camera management.
 type manager struct {
-	cameras     map[Type]Camera      // Map of camera type to camera instance
+	cameras     map[Type]Camera       // Map of camera type to camera instance
 	channels    map[Type]ImageChannel // Input channels for each camera
 	outChannels map[Type]ImageChannel // Output channels for each camera
-	mu          sync.RWMutex         // Mutex for concurrent access
+	mu          sync.RWMutex          // Mutex for concurrent access
 }
 
 // NewManager creates a new camera manager instance with initialized channels.
@@ -58,6 +58,7 @@ func NewManager() Manager {
 func (m *manager) GetCamera(typ Type) Camera {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
+
 	return m.cameras[typ]
 }
 
@@ -83,6 +84,7 @@ func (m *manager) SetCamera(ctx context.Context, typ Type, cam Camera) error {
 					c.Resume()
 				}
 			}
+
 			return fmt.Errorf("failed to close existing %s camera: %w", typ, err)
 		}
 	}
@@ -108,6 +110,7 @@ func (m *manager) SetCamera(ctx context.Context, typ Type, cam Camera) error {
 func (m *manager) GetChannel(typ Type) ImageChannel {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
+
 	return m.channels[typ]
 }
 
@@ -115,6 +118,7 @@ func (m *manager) GetChannel(typ Type) ImageChannel {
 func (m *manager) GetOutputChannel(typ Type) ImageChannel {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
+
 	return m.outChannels[typ]
 }
 

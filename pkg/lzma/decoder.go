@@ -51,6 +51,7 @@ func NewReader(r io.Reader) io.ReadCloser {
 		err := z.decoder(r, pw)
 		pw.CloseWithError(err)
 	}()
+
 	return pr
 }
 
@@ -124,6 +125,7 @@ func (p *props) decodeProps(buf []byte) error {
 	for i := range 4 {
 		p.dictSize += uint32(buf[i+1]) << uint32(i*8)
 	}
+
 	return nil
 }
 
@@ -161,6 +163,7 @@ func (z *decoder) doDecode() error {
 			z.outWin.putByte(prevByte)
 			state = stateUpdateChar(state)
 			nowPos++
+
 			continue
 		}
 
@@ -213,6 +216,7 @@ func (z *decoder) doDecode() error {
 						if repr0 == 0xFFFFFFFF {
 							break
 						}
+
 						return &StreamError{
 							msg: fmt.Sprintf(
 								"invalid rep0 value: %d",
@@ -300,6 +304,7 @@ func (z *decoder) doDecode() error {
 		prevByte = z.outWin.getByte(0)
 	}
 	z.outWin.flush()
+
 	return nil
 }
 
@@ -354,6 +359,7 @@ func (z *decoder) decoder(r io.Reader, w io.Writer) (err error) {
 	if err != nil {
 		return err
 	}
+
 	return
 }
 
@@ -364,6 +370,7 @@ func stateUpdateChar(index uint32) uint32 {
 	if index < 10 {
 		return index - 3
 	}
+
 	return index - 6
 }
 
@@ -371,6 +378,7 @@ func stateUpdateMatch(index uint32) uint32 {
 	if index < 7 {
 		return 7
 	}
+
 	return 10
 }
 
@@ -378,6 +386,7 @@ func stateUpdateRep(index uint32) uint32 {
 	if index < 7 {
 		return 8
 	}
+
 	return 11
 }
 
@@ -385,6 +394,7 @@ func stateUpdateShortRep(index uint32) uint32 {
 	if index < 7 {
 		return 9
 	}
+
 	return 11
 }
 
@@ -395,5 +405,6 @@ func getLenToPosState(length uint32) uint32 {
 	if length < kNumLenToPosStates {
 		return length
 	}
+
 	return kNumLenToPosStates - 1
 }

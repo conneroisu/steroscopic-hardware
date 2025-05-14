@@ -46,6 +46,7 @@ func MustLoadPNG(filename string) *image.Gray {
 	if err != nil {
 		panic(err)
 	}
+
 	return img
 }
 
@@ -60,6 +61,7 @@ func SavePNG(filename string, img image.Image) error {
 
 	// Use best compression for speed
 	encoder := png.Encoder{CompressionLevel: png.BestSpeed}
+
 	return encoder.Encode(file, img)
 }
 

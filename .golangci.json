@@ -10,6 +10,7 @@
       "asasalint",
       "exhaustive",
       "godox",
+      "nlreturn",
       "bidichk",
       "bodyclose",
       "dupl",

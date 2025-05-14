@@ -85,6 +85,7 @@ func NewSerialCamera(ctx context.Context, typ Type, portName string, baudRate in
 	err = sc.port.SetReadTimeout(serial.NoTimeout)
 	if err != nil {
 		sc.port.Close()
+
 		return nil, fmt.Errorf("failed to set read timeout: %w", err)
 	}
 
@@ -104,6 +105,7 @@ func (sc *SerialCamera) Stream(ctx context.Context, outCh ImageChannel) {
 	readFn, err := sc.initializeStream(ctx, errChan, outCh)
 	if err != nil {
 		sc.logger.Error("failed to initialize image stream", "err", err)
+
 		return
 	}
 
@@ -115,9 +117,11 @@ func (sc *SerialCamera) Stream(ctx context.Context, outCh ImageChannel) {
 		select {
 		case <-ctx.Done():
 			sc.logger.Debug("context canceled, stopping stream")
+
 			return
 		case <-sc.Context().Done():
 			sc.logger.Debug("camera context canceled, stopping stream")
+
 			return
 		case err := <-errChan:
 			sc.logger.Error("error in image stream", "err", err)
@@ -161,6 +165,7 @@ func (sc *SerialCamera) initializeStream(ctx context.Context, errChan chan error
 			}
 
 			time.Sleep(100 * time.Millisecond)
+
 			continue
 		}
 
@@ -190,6 +195,7 @@ func (sc *SerialCamera) initializeStream(ctx context.Context, errChan chan error
 				default:
 					if sc.IsPaused() {
 						time.Sleep(100 * time.Millisecond)
+
 						continue
 					}
 
@@ -201,6 +207,7 @@ func (sc *SerialCamera) initializeStream(ctx context.Context, errChan chan error
 					if err != nil {
 						errChan <- err
 						time.Sleep(500 * time.Millisecond) // Delay before retry
+
 						continue
 					}
 
@@ -279,6 +286,7 @@ func (sc *SerialCamera) readFrame() (*image.Gray, error) {
 		n, err := sc.port.Read(chunk)
 		if err != nil {
 			close(progressDone)
+
 			return nil, fmt.Errorf("error reading from serial port: %w", err)
 		}
 
@@ -290,6 +298,7 @@ func (sc *SerialCamera) readFrame() (*image.Gray, error) {
 		select {
 		case <-readCtx.Done():
 			close(progressDone)
+
 			return nil, errors.New("read operation timed out or was canceled")
 		default:
 			// Continue reading

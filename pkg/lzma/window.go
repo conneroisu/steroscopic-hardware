@@ -41,6 +41,7 @@ func (ow *outWindow) flush() error {
 		ow.pos = 0
 	}
 	ow.streamPos = ow.pos
+
 	return nil
 }
 
@@ -75,6 +76,7 @@ func (ow *outWindow) getByte(distance uint32) byte {
 	if pos >= ow.winSize {
 		pos += ow.winSize
 	}
+
 	return ow.buf[pos]
 }
 
@@ -146,6 +148,7 @@ func (iw *inWindow) readBlock() error {
 				iw.posLimit = iw.lastSafePos - iw.bufOffset
 			}
 			iw.streamEnd = true
+
 			return nil
 		}
 		iw.streamPos += uint32(n)
@@ -167,6 +170,7 @@ func (iw *inWindow) movePos() error {
 			return err
 		}
 	}
+
 	return nil
 }
 
@@ -191,6 +195,7 @@ func (iw *inWindow) getMatchLen(
 	for ; res < limit && iw.buf[pby+res] == iw.buf[pby+res-distance]; res++ {
 		continue
 	}
+
 	return res
 }
 

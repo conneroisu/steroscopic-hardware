@@ -42,6 +42,7 @@ func processImg(img *image.Gray, w io.Writer) error {
 	// Encode image
 	if err := jpeg.Encode(w, img, encodeOpts); err != nil {
 		slog.Error("Error encoding JPEG", "err", err)
+
 		return nil // Skip this frame instead of failing the stream
 	}
 
@@ -93,6 +94,7 @@ func HandleCameraStream(camType camera.Type, useOutputChannel bool) APIFn {
 			select {
 			case <-ctx.Done():
 				logger.Debug("stream context done", "reason", ctx.Err())
+
 				return nil
 
 			case <-ticker.C:
@@ -101,6 +103,7 @@ func HandleCameraStream(camType camera.Type, useOutputChannel bool) APIFn {
 				case img, ok := <-inputCh:
 					if !ok {
 						logger.Debug("camera channel closed")
+
 						return nil
 					}
 
@@ -108,6 +111,7 @@ func HandleCameraStream(camType camera.Type, useOutputChannel bool) APIFn {
 					err := processImg(img, w)
 					if err != nil {
 						logger.Error("error processing image", "err", err)
+
 						return err
 					}
 
@@ -122,6 +126,7 @@ func HandleCameraStream(camType camera.Type, useOutputChannel bool) APIFn {
 
 				case <-ctx.Done():
 					logger.Debug("stream context done while waiting for frame", "reason", ctx.Err())
+
 					return nil
 
 				default:

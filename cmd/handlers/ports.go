@@ -35,6 +35,7 @@ func GetPorts(
 				)
 				time.Sleep(time.Second)
 				tries++
+
 				continue
 			}
 			logger.Info(
@@ -53,6 +54,7 @@ func GetPorts(
 			if err != nil {
 				return err
 			}
+
 			return nil
 		}
 	}

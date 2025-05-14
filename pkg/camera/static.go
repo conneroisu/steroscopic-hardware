@@ -71,6 +71,7 @@ func (sc *StaticCamera) Stream(ctx context.Context, outCh ImageChannel) {
 				default:
 					sc.logger.Error("error loading image", "err", err)
 				}
+
 				continue
 			}
 
@@ -204,5 +205,6 @@ func (sc *StaticCamera) loadImage() (*image.Gray, error) {
 func (sc *StaticCamera) Close() error {
 	sc.logger.Info("closing static camera")
 	sc.Cancel()
+
 	return nil
 }

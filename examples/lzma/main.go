@@ -49,6 +49,7 @@ func setByUser(name string) (isSet bool) {
 			isSet = true
 		}
 	})
+
 	return
 }
 

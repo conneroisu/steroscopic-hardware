@@ -11,18 +11,19 @@ import (
 // context management, pausing, and configuration storage. It is intended to be embedded
 // in concrete camera types.
 type BaseCamera struct {
-	ctx    context.Context      // Context for cancellation and lifecycle management
-	cancel context.CancelFunc   // Function to cancel the context
-	paused bool                 // Indicates if the camera is paused
-	cType  Type                 // The camera type (left, right, output)
-	mu     sync.Mutex           // Mutex for synchronizing access
-	config Config               // Current camera configuration
+	ctx    context.Context    // Context for cancellation and lifecycle management
+	cancel context.CancelFunc // Function to cancel the context
+	paused bool               // Indicates if the camera is paused
+	cType  Type               // The camera type (left, right, output)
+	mu     sync.Mutex         // Mutex for synchronizing access
+	config Config             // Current camera configuration
 }
 
 // NewBaseCamera creates a new BaseCamera with the specified type and parent context.
 // The returned BaseCamera has its own cancellable context.
 func NewBaseCamera(ctx context.Context, cType Type) BaseCamera {
 	childCtx, cancel := context.WithCancel(ctx)
+
 	return BaseCamera{
 		ctx:    childCtx,
 		cancel: cancel,
@@ -59,6 +60,7 @@ func (b *BaseCamera) Resume() {
 func (b *BaseCamera) IsPaused() bool {
 	b.mu.Lock()
 	defer b.mu.Unlock()
+
 	return b.paused
 }
 

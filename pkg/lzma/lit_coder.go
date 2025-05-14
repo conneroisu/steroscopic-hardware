@@ -19,6 +19,7 @@ func (lsc *litSubCoder) decodeNormal(rd *rangeDecoder) (byte, error) {
 		}
 		symbol = symbol<<1 | i
 	}
+
 	return byte(symbol), nil
 }
 
@@ -44,9 +45,11 @@ func (lsc *litSubCoder) decodeWithMatchByte(
 				}
 				symbol = (symbol << 1) | i
 			}
+
 			break
 		}
 	}
+
 	return byte(symbol), nil
 }
 
@@ -98,6 +101,7 @@ func (lsc *litSubCoder) getPrice(matchMode bool, matchByte, symbol byte) uint32 
 			context = context<<1 | bit
 			if matchBit != bit {
 				i--
+
 				break
 			}
 		}
@@ -107,6 +111,7 @@ func (lsc *litSubCoder) getPrice(matchMode bool, matchByte, symbol byte) uint32 
 		price += getPrice(lsc.coders[context], bit)
 		context = context<<1 | bit
 	}
+
 	return price
 }
 
@@ -127,6 +132,7 @@ func newLitCoder(numPosBits, numPrevBits uint32) *litCoder {
 	for ; i < numStates; i++ {
 		lc.coders[i] = newLitSubCoder()
 	}
+
 	return lc
 }
 

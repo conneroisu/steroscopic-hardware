@@ -55,6 +55,7 @@ func Dir() (string, error) {
 		return "", err
 	}
 	homedirCache = result
+
 	return result, nil
 }
 
@@ -241,5 +242,6 @@ func SaveFile(
 	defer f.Close()
 
 	_, err = f.Write(data)
+
 	return err
 }

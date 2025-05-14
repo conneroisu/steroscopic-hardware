@@ -70,10 +70,12 @@ func ErrorHandler(
 			if Werr != nil {
 				return fmt.Errorf("failed to write success response: %w", Werr)
 			}
+
 			return nil
 		}
 		// Return error response
 		_, Werr := w.Write([]byte(`<span class="text-sm text-red-500">Failure: ` + err.Error() + `</span>`))
+
 		return Werr
 	}
 }

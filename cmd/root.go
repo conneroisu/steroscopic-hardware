@@ -136,6 +136,7 @@ func Run(ctx context.Context, onStart func()) error {
 
 	case <-innerCtx.Done():
 		slog.Info("shutdown signal received, shutting down server...")
+
 		return gracefulShutdown(
 			innerCtx,
 			shutdownTimeout,
@@ -145,6 +146,7 @@ func Run(ctx context.Context, onStart func()) error {
 
 	case <-ctx.Done():
 		slog.Info("parent context cancelled, shutting down...")
+
 		return gracefulShutdown(
 			ctx,
 			shutdownTimeout,
@@ -161,6 +163,7 @@ func initCameras(ctx context.Context) {
 	err := camera.SetCamera(ctx, camera.LeftCameraType, leftCam)
 	if err != nil {
 		slog.Error("failed to initialize left camera", "error", err)
+
 		return
 	}
 
@@ -169,6 +172,7 @@ func initCameras(ctx context.Context) {
 	err = camera.SetCamera(ctx, camera.RightCameraType, rightCam)
 	if err != nil {
 		slog.Error("failed to initialize right camera", "error", err)
+
 		return
 	}
 
@@ -177,6 +181,7 @@ func initCameras(ctx context.Context) {
 	err = camera.SetCamera(ctx, camera.OutputCameraType, outputCam)
 	if err != nil {
 		slog.Error("failed to initialize output camera", "error", err)
+
 		return
 	}
 
@@ -204,6 +209,7 @@ func gracefulShutdown(
 
 	// Wait for all goroutines to finish
 	wg.Wait()
+
 	return nil
 }
 
@@ -249,5 +255,6 @@ func NewServer(
 			mux.ServeHTTP(w, r)
 		})
 	var handler http.Handler = slogLogHandler
+
 	return handler, nil
 }
