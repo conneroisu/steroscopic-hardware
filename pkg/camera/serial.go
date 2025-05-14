@@ -227,10 +227,7 @@ func (sc *SerialCamera) initializeStream(ctx context.Context, errChan chan error
 						time.Sleep(backoff)
 
 						// Exponential backoff with a maximum cap
-						backoff = time.Duration(float64(backoff) * 1.5)
-						if backoff > maxBackoff {
-							backoff = maxBackoff
-						}
+						backoff = min(time.Duration(float64(backoff)*1.5), maxBackoff)
 					}
 				}
 			}
