@@ -8,7 +8,6 @@
 *.so
 *.dylib
 *.dll
-*.mod
 *.smod
 *.lai
 *.la
@@ -21,3 +20,28 @@
 .DS_Store
 .vscode
 .idea
+# Added by goreleaser init:
+dist/
+tmp
+node_modules
+.obsidian/workspace.json
+.obsidian/workspaces.json
+.obsidian/zk-prefixer.json
+.obsidian/types.json
+.obsidian/themes/
+.obsidian/plugins/*
+!.obsidian/plugins/settings-profiles
+.obsidian/hotkeys.json
+.obsidian/file-recovery.json
+.obsidian/daily-notes.json
+.obsidian/core-plugins-migration.json
+.obsidian/community-plugins.json
+.obsidian/templates.json
+.obsidian/snippets/
+.obsidian/plugins/
+.obsidian/canvas.json
+.obsidian/bookmarks.json
+.obsidian/command-palette.json
+steroscopic-hardware
+**/.claude/settings.local.json
+**/CLAUDE.local.md

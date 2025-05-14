@@ -1,0 +1,22 @@
+{
+  "name": "steroscopic-hardware",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "devDependencies": {
+    "@types/alpinejs": "^3.13.11",
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.8.3"
+  },
+  "dependencies": {
+    "@alpinejs/collapse": "^3.14.9",
+    "@alpinejs/persist": "^3.14.9",
+    "@types/alpinejs__collapse": "^3.13.4",
+    "@types/alpinejs__persist": "^3.13.4",
+    "alpinejs": "^3.14.9",
+    "htmx.org": "2.0.4",
+    "tailwindcss": "^4.1.5"
+  }
+}

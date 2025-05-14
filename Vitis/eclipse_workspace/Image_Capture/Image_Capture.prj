@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="ASCII"?>
+<sdkproject:SdkProject xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:sdkproject="http://www.xilinx.com/sdkproject" name="Image_Capture" location="E:/ISU/steroscopic-hardware/image_capture/Vitis/eclipse_workspace/Image_Capture" platform="C:/Users/connero/Downloads/steroscopic-hardware/image_capture/Vitis/eclipse_workspace/me_HW/export/me_HW/me_HW.xpfm" platformUID="xilinx:zed::0.0(custom)" systemProject="Image_Capture_system" sysConfig="me_HW" runtime="cpp" cpu="standalone_domain" cpuInstance="ps7_cortexa9_0" os="standalone" dimmRepoPath="" mssSignature="1f78b7d65e824f10e7a5f080ec7a9ed8">
+  <configuration name="Debug" id="xilinx.gnu.armv7.exe.debug.1526521428">
+    <configBuildOptions xsi:type="sdkproject:SdkOptions"/>
+    <lastBuildOptions xsi:type="sdkproject:SdkOptions"/>
+  </configuration>
+  <configuration name="Release" id="xilinx.gnu.armv7.exe.release.2122621531" dirty="true">
+    <configBuildOptions xsi:type="sdkproject:SdkOptions"/>
+  </configuration>
+  <template appTemplateName="hello_world"/>
+</sdkproject:SdkProject>

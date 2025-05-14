@@ -1,0 +1,480 @@
+package components
+
+import (
+	"github.com/conneroisu/steroscopic-hardware/pkg/camera"
+	"github.com/conneroisu/steroscopic-hardware/pkg/web"
+	"runtime/debug"
+)
+
+// AppFn returns a function that wraps the given component with the app template.
+func AppFn(title string) func(templ.Component) templ.Component {
+	return func(c templ.Component) templ.Component {
+		return App(title, c)
+	}
+}
+
+templ App(title string, comp templ.Component) {
+	<!DOCTYPE html>
+	<html>
+		<head>
+			<title>{ title }</title>
+			<script defer src="/static/index.js"></script>
+			<script type="module" src="/static/tw.js"></script>
+			<meta
+				name="viewport"
+				content="width=device-width, initial-scale=1.0"
+			/>
+			<meta
+				name="description"
+				content="ZedBoard Stereo Vision"
+			/>
+			<link
+				rel="icon"
+				href="/static/favicon.ico"
+				type="image/x-icon"
+			/>
+			<link
+				rel="shortcut icon"
+				href="/static/favicon.ico"
+				type="image/x-icon"
+			/>
+		</head>
+		<body
+			class="bg-gray-900 text-gray-200 min-h-screen"
+		>
+			@header()
+			<div
+				id="app"
+				class="pt-4"
+			>
+				@comp
+			</div>
+		</body>
+	</html>
+}
+
+templ header() {
+	<nav
+		class="bg-gray-800 border-b border-gray-700 shadow-md"
+		id="main-nav"
+	>
+		<div
+			class="container mx-auto px-4"
+		>
+			<div
+				class="flex justify-between items-center py-3"
+			>
+				<div
+					class="flex items-center"
+				>
+					<h1
+						class="text-xl font-bold text-blue-400 mr-6"
+					>
+						ZedBoard Stereo Vision
+					</h1>
+				</div>
+				<a
+					href="https://github.com/conneroisu/steroscopic-hardware/issues/new"
+					class="px-4 py-2 rounded-lg transition inline-flex items-center gap-1 text-gray-300 hover:text-white"
+				>
+					@web.CircleQuestion
+					Report a Bug
+				</a>
+				<!-- Exit Button -->
+				<a
+					href="/exit"
+					class="px-4 py-2 rounded-lg transition inline-flex items-center gap-1 text-gray-300 hover:text-white"
+				>
+					@web.CircleX
+					Exit
+				</a>
+				<p>
+					{ func() string {
+					info, ok := debug.ReadBuildInfo()
+					if !ok {
+						return "Unknown"
+					}
+					return info.Main.Version
+				}() }
+				</p>
+				<!-- Checkhealth Button (pings /checkhealth every 10 seconds) -->
+				<span
+					id="checkhealth"
+				>
+					Healthy
+				</span>
+				<script>
+					setInterval(function() {
+						fetch("/checkhealth")
+							.then(function(response) {
+									const now = new Date();
+									const t = now.toLocaleTimeString();
+									const hours = now.getHours();
+									const minutes = now.getMinutes();
+									const seconds = now.getSeconds();
+									const formattedTime = `${hours}:${minutes}:${seconds}`;
+								if (response.status == 200) {
+									document.getElementById("checkhealth").innerHTML = "Healthy@" + formattedTime;
+								} else {
+									document.getElementById("checkhealth").innerHTML = "Unhealthy@" + formattedTime;
+								}
+							})
+							.catch(function(err) {
+								console.error("Error:", err);
+								document.getElementById("checkhealth").innerHTML = "Unhealthy";
+							});
+					}, 1000);
+				</script>
+				<div
+					class="flex space-x-4"
+				>
+					<a
+						hx-get="/"
+						hx-target="#app"
+						hx-push-url="true"
+						class="px-4 py-2 rounded-lg transition bg-blue-700 hover:bg-gray-600"
+					>
+						Live Camera System
+					</a>
+				</div>
+			</div>
+		</div>
+	</nav>
+}
+
+templ status() {
+	<div
+		class="lg:col-span-1 space-y-6"
+		x-data="{ open_stats: true }"
+	>
+		<!-- System Status Panel -->
+		<div
+			class="bg-gray-800 rounded-lg shadow-lg p-4"
+		>
+			<div
+				class="flex justify-between items-center cursor-pointer"
+				@click="open_stats = !open_stats"
+				x-data="{ text: '▶' }"
+				x-on:click="open_stats ? text = '▶' : text = '▼'"
+			>
+				<h2 class="text-xl font-semibold text-gray-200">System Status</h2>
+				<span x-text="text"></span>
+			</div>
+			<div
+				class="mt-4 space-y-2"
+				id={ web.TargetStatusContent.ID }
+				x-show="open_stats"
+				x-collapse
+			>
+				@cameraStatus(camera.LeftCameraType)
+				@cameraStatus(camera.RightCameraType)
+			</div>
+		</div>
+	</div>
+}
+
+templ cameraStatus(
+	typeOf camera.Type,
+) {
+	<div
+		class="bg-gray-800 rounded-lg shadow-lg p-4"
+	>
+		<div
+			class="flex justify-between items-center"
+		>
+			<span
+				hx-get="/ports"
+				hx-target={ "#" + string(typeOf) + "-port" }
+				hx-trigger="load"
+				class="font-medium"
+			>
+				{ typeOf } camera:
+			</span>
+			<div
+				class="flex justify-between items-center cursor-pointer"
+			>
+				@web.SettingsGear
+			</div>
+		</div>
+		<!-- spacer -->
+		<br/>
+		<div class="tab-wrapper border-b border-gray-700 mb-4" x-data="{ activeTab:  0 }">
+			<div class="flex border-b border-gray-700">
+				<label
+					@click="activeTab = 0"
+					class="tab-control px-4 py-2 text-sm font-medium cursor-pointer transition-colors duration-200 ease-in-out"
+					:class="{ 'active': activeTab === 0, 'text-blue-400 border-b-2 border-blue-400': activeTab === 0, 'text-gray-400 hover:text-gray-300 hover:bg-gray-700': activeTab !== 0 }"
+				>Serial</label>
+				<span class="w-2"></span>
+				<label
+					@click="activeTab = 1"
+					class="tab-control px-4 py-2 text-sm font-medium cursor-pointer transition-colors duration-200 ease-in-out"
+					:class="{ 'active': activeTab === 1, 'text-blue-400 border-b-2 border-blue-400': activeTab === 1, 'text-gray-400 hover:text-gray-300 hover:bg-gray-700': activeTab !== 1 }"
+				>Static</label>
+			</div>
+			<div
+				class="tab-panel pt-4"
+				:class="{ 'active': activeTab === 0 }"
+				x-show.transition.in.opacity.duration.600="activeTab === 0"
+			>
+				<div
+					class="space-y-4"
+				>
+					<!-- Camera Configuration -->
+					<div
+						class="space-y-2"
+					>
+						<h3
+							class="text-sm font-medium text-gray-400"
+						>
+							Configuration
+						</h3>
+						<!-- Configuration Form -->
+						<form
+							id={ string(typeOf) + "-config-form" }
+							hx-post={ "/" + string(typeOf) + "/configure" }
+							hx-target={ "#" + string(typeOf) + "-status" }
+							hx-indicator={ "#" + string(typeOf) + "-loading-indicator" }
+						>
+							<!-- Port Selection -->
+							<div class="flex items-center justify-between mb-2">
+								<label for={ string(typeOf) + "-port" } class="text-sm text-gray-300">Port:</label>
+								<div class="flex items-center gap-2">
+									<select
+										id={ string(typeOf) + "-port" }
+										name="port"
+										value="/dev/ttyUSB0"
+										class="bg-gray-700 text-gray-200 rounded px-3 py-1 text-sm border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+									>
+										<option value="">Select port</option>
+										<option value="/dev/ttyUSB0">/dev/ttyUSB0</option>
+										<option value="/dev/ttyUSB1">/dev/ttyUSB1</option>
+										<option value="/dev/ttyS0">/dev/ttyS0</option>
+										<option value="/dev/ttyS1">/dev/ttyS1</option>
+									</select>
+									<button
+										hx-get="/ports"
+										hx-target={ "#" + string(typeOf) + "-port" }
+										hx-trigger="click"
+										class="bg-blue-600 hover:bg-blue-700 text-white rounded p-1"
+										title="Refresh available ports"
+										type="button"
+									>
+										@web.RefreshCw
+									</button>
+								</div>
+							</div>
+							<!-- Baud Rate Setting -->
+							<div class="flex items-center justify-between mb-2">
+								<label
+									for={ string(typeOf) + "-baud" }
+									class="text-sm text-gray-300"
+								>
+									Baud Rate:
+								</label>
+								<div class="flex items-center gap-2">
+									<input
+										id={ string(typeOf) + "-baud" }
+										name="baudrate"
+										type="number"
+										value="115200"
+										class="bg-gray-700 text-gray-200 rounded px-3 py-1 text-sm border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 w-24"
+									/>
+								</div>
+							</div>
+							<!-- Camera Compression -->
+							<div class="flex items-center justify-between mb-2">
+								<span class="text-sm text-gray-300">Compression:</span>
+								<div class="flex items-center gap-2">
+									<select
+										id={ string(typeOf) + "-compression" }
+										name="compression"
+										class="bg-gray-700 text-gray-200 rounded px-3 py-1 text-sm border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 w-24"
+										value="0"
+									>
+										<option value="0">No</option>
+										<option value="1">Yes</option>
+									</select>
+								</div>
+							</div>
+							<!-- Status Indicator -->
+							<div
+								class="flex items-center justify-between mt-2"
+							>
+								<span
+									class="text-sm text-gray-300"
+								>Status:</span>
+								<div
+									id={ string(typeOf) + "-status" }
+									class="flex items-center gap-2"
+								>
+									<span
+										class="inline-block w-3 h-3 bg-red-500 rounded-full"
+									></span>
+									<span
+										class="text-sm"
+									>
+										Disconnected
+									</span>
+								</div>
+							</div>
+							<!-- Connect Button with Loading Indicator -->
+							<div
+								class="flex justify-end mt-2 items-center"
+							>
+								<div
+									id={ string(typeOf) + "-loading-indicator" }
+									class="htmx-indicator mr-2 flex items-center"
+								>
+									<svg class="animate-spin h-4 w-4 text-blue-400 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+										<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+										<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+									</svg>
+									<span class="text-xs text-blue-400">Connecting...</span>
+								</div>
+								<button
+									type="submit"
+									class="bg-blue-600 hover:bg-blue-700 text-white rounded px-3 py-1 text-sm"
+								>
+									Connect/Configure
+								</button>
+							</div>
+						</form>
+					</div>
+				</div>
+				<br/>
+			</div>
+			<div
+				class="tab-panel pt-4"
+				:class="{ 'active': activeTab === 1 }"
+				x-show.transition.in.opacity.duration.600="activeTab === 1"
+			>
+				<div class="space-y-4">
+					<h3 class="text-sm font-medium text-gray-400">
+						Static Image Upload
+					</h3>
+					<div id={ string(typeOf) + "-upload-form-container" } class="space-y-2" data-camera-type={ string(typeOf) }>
+						<form
+							id={ string(typeOf) + "-upload-form" }
+							class="camera-upload-form"
+							hx-encoding="multipart/form-data"
+							hx-post={ "/" + string(typeOf) + "/upload" }
+							hx-target={ "#" + string(typeOf) + "-upload-form-container" }
+							hx-swap="outerHTML"
+							hx-indicator={ "#" + string(typeOf) + "-upload-indicator" }
+						>
+							<div class="flex items-center justify-between mb-2">
+								<label for={ string(typeOf) + "-file-input" } class="text-sm text-gray-300">Image:</label>
+								<div class="flex items-center gap-2">
+									<div class="relative">
+										<input
+											id={ string(typeOf) + "-file-input" }
+											class="file-input absolute inset-0 opacity-0 w-full cursor-pointer z-10"
+											type="file"
+											name="file"
+											accept="image/*"
+											data-camera-type={ string(typeOf) }
+										/>
+										<div class="bg-gray-700 text-gray-200 rounded px-3 py-1 text-sm border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 w-48 truncate">
+											<span class="file-name text-gray-400" data-camera-type={ string(typeOf) }>No file selected</span>
+										</div>
+									</div>
+									<button
+										type="button"
+										class="bg-gray-600 hover:bg-gray-700 text-white rounded p-1 file-select-btn"
+										data-camera-type={ string(typeOf) }
+									>
+										@web.FileIcon
+									</button>
+								</div>
+							</div>
+							<!-- Image preview container - initially hidden -->
+							<div class="image-preview-container hidden mt-3 mb-3" data-camera-type={ string(typeOf) }>
+								<div class="w-full h-48 bg-black rounded flex items-center justify-center">
+									<img class="image-preview max-h-full max-w-full object-contain" alt="Preview" data-camera-type={ string(typeOf) }/>
+								</div>
+							</div>
+							<div class="mt-4">
+								<div class="w-full bg-gray-700 rounded-full h-2 mb-2">
+									<div id={ string(typeOf) + "-progress-bar" } class="progress-bar bg-blue-500 h-2 rounded-full w-0 transition-all duration-200" data-camera-type={ string(typeOf) }></div>
+								</div>
+							</div>
+							<div class="flex justify-end mt-2 items-center">
+								<div id={ string(typeOf) + "-upload-indicator" } class="htmx-indicator mr-2 flex items-center">
+									<svg class="animate-spin h-4 w-4 text-blue-400 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+										<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+										<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+									</svg>
+									<span class="text-xs text-blue-400">Uploading...</span>
+								</div>
+								<button
+									type="submit"
+									class="bg-blue-600 hover:bg-blue-700 text-white rounded px-3 py-1 text-sm"
+								>
+									Upload/Configure
+								</button>
+							</div>
+						</form>
+						<script>
+							document.addEventListener('DOMContentLoaded', function() {
+								// Handle file upload preview for all camera types
+								document.querySelectorAll('.file-input').forEach(function(fileInput) {
+									fileInput.addEventListener('change', function() {
+										const cameraType = this.getAttribute('data-camera-type');
+										const fileName = document.querySelector('.file-name[data-camera-type="' + cameraType + '"]');
+										const imagePreviewContainer = document.querySelector('.image-preview-container[data-camera-type="' + cameraType + '"]');
+										const imagePreview = document.querySelector('.image-preview[data-camera-type="' + cameraType + '"]');
+										
+										if (this.files && this.files[0]) {
+											// Update filename display
+											fileName.textContent = this.files[0].name;
+											fileName.classList.remove('text-gray-400');
+											fileName.classList.add('text-gray-200');
+											
+											// Create image preview
+											const file = this.files[0];
+											if (file.type.match('image.*')) {
+												const reader = new FileReader();
+												
+												reader.onload = function(e) {
+													imagePreview.src = e.target.result;
+													imagePreviewContainer.classList.remove('hidden');
+												};
+												
+												reader.readAsDataURL(file);
+											}
+										} else {
+											// Reset form when no file is selected
+											fileName.textContent = 'No file selected';
+											fileName.classList.remove('text-gray-200');
+											fileName.classList.add('text-gray-400');
+											imagePreviewContainer.classList.add('hidden');
+											imagePreview.src = '';
+										}
+									});
+								});
+								
+								// Handle file select button clicks
+								document.querySelectorAll('.file-select-btn').forEach(function(btn) {
+									btn.addEventListener('click', function() {
+										const cameraType = this.getAttribute('data-camera-type');
+										document.querySelector('.file-input[data-camera-type="' + cameraType + '"]').click();
+									});
+								});
+								
+								// Progress updates for all upload forms
+								document.querySelectorAll('.camera-upload-form').forEach(function(form) {
+									htmx.on(form, 'htmx:xhr:progress', function(evt) {
+										const cameraType = form.closest('[data-camera-type]').getAttribute('data-camera-type');
+										const percentComplete = evt.detail.loaded / evt.detail.total * 100;
+										document.querySelector('.progress-bar[data-camera-type="' + cameraType + '"]').style.width = percentComplete + '%';
+									});
+								});
+							});
+						</script>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+}

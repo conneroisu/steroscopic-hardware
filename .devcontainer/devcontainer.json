@@ -1,0 +1,34 @@
+{
+  "image": "ghcr.io/xtruder/nix-devcontainer:v1",
+  "postCreateCommand": "direnv allow",
+  "features": {
+    "ghcr.io/forwardsoftware/devcontainer-features/go-mod-cache:1": {
+      "go-version": "1.24"
+    }
+  },
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "editor.formatOnSave": true,
+        "editor.lineNumbers": "relative"
+      },
+      "extensions": [
+        "nicolasdschmidt.lunar-pink",
+        "github.copilot",
+        "github.copilot-chat",
+        "JasonMcGhee.claude-debugs-for-you",
+        "golang.Go",
+        "a-h.templ",
+        "Rubymaniac.vscode-direnv",
+        "jnoortheen.nix-ide",
+        "DavidAnson.vscode-markdownlint",
+        "VisualStudioExptTeam.vscodeintellicode",
+        "christian-kohler.path-intellisense",
+        "qwtel.sqlite-viewer",
+        "danprince.vsnetrw",
+        "eamodio.gitlens",
+        "ms-vscode.cpptools-extension-pack"
+      ]
+    }
+  }
+}
