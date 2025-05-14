@@ -203,7 +203,8 @@ func gracefulShutdown(
 	defer cancel()
 
 	// Attempt to shut down the server
-	if err := server.Shutdown(shutdownCtx); err != nil {
+	err := server.Shutdown(shutdownCtx)
+	if err != nil {
 		return fmt.Errorf("error during server shutdown: %w", err)
 	}
 
@@ -244,14 +245,14 @@ func NewServer(
 	}
 	slogLogHandler := http.HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
-			if r.Method == http.MethodGet && r.URL.Path == "/healthcheck" {
-				logger.Info(
-					"request",
-					slog.String("method", r.Method),
-					slog.String("url", r.URL.String()),
-					slog.String("pattern", r.Pattern),
-				)
-			}
+			// if r.Method == http.MethodGet && r.URL.Path == "/healthcheck" {
+			// 	logger.Info(
+			// 		"request",
+			// 		slog.String("method", r.Method),
+			// 		slog.String("url", r.URL.String()),
+			// 		slog.String("pattern", r.Pattern),
+			// 	)
+			// }
 			mux.ServeHTTP(w, r)
 		})
 	var handler http.Handler = slogLogHandler

@@ -31,7 +31,11 @@ var (
 // processImg encodes and writes an image frame to the response writer.
 func processImg(img *image.Gray, w io.Writer) error {
 	// Write frame boundary
-	if _, err := fmt.Fprintf(w, "--frame\r\nContent-Type: image/jpeg\r\n\r\n"); err != nil {
+	_, err := fmt.Fprintf(
+		w,
+		"--frame\r\nContent-Type: image/jpeg\r\n\r\n",
+	)
+	if err != nil {
 		return err
 	}
 
@@ -40,7 +44,8 @@ func processImg(img *image.Gray, w io.Writer) error {
 	defer encodeOptsPool.Put(encodeOpts)
 
 	// Encode image
-	if err := jpeg.Encode(w, img, encodeOpts); err != nil {
+	err = jpeg.Encode(w, img, encodeOpts)
+	if err != nil {
 		slog.Error("Error encoding JPEG", "err", err)
 
 		return nil // Skip this frame instead of failing the stream

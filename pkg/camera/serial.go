@@ -199,10 +199,7 @@ func (sc *SerialCamera) initializeStream(ctx context.Context, errChan chan error
 						continue
 					}
 
-					// Lock to ensure we don't have multiple reads happening simultaneously
-					sc.streamMu.Lock()
 					img, err := sc.readFrame()
-					sc.streamMu.Unlock()
 
 					if err != nil {
 						errChan <- err
