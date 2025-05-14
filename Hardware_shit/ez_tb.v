@@ -49,7 +49,6 @@ module compute_max_disp_tb;
   compute_max_disp #(
     .WIN(WIN),
     .DATA_SIZE(DATA_SIZE),
-    .IMG_W(IMG_W),
     .MAX_DISP(MAX_DISP)
   ) dut (
     .input_array_L(input_array_L),
