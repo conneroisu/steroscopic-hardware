@@ -66,9 +66,9 @@ module compute_max_disp_tb;
   //  LOAD MEM FILES
   //--------------------------------------------------------------------------
   initial begin
-    $readmemh("C://Users//jaxie//Desktop//cpre488//steroscopic-hardware//left_image_n.mem",  memL);
-    $readmemh("C://Users//jaxie//Desktop//cpre488//steroscopic-hardware//right_image_n.mem", memR);
-    $readmemh("C://Users//jaxie//Desktop//cpre488//steroscopic-hardware//exp_disp_n.mem",    exp_disp);
+    $readmemh("C://Users//jaxie//Desktop//cpre488//steroscopic-hardware//Hardware_shit//left_image_n.mem",  memL);
+    $readmemh("C://Users//jaxie//Desktop//cpre488//steroscopic-hardware//Hardware_shit//right_image_n.mem", memR);
+    $readmemh("C://Users//jaxie//Desktop//cpre488//steroscopic-hardware//Hardware_shit//exp_disp_n.mem",    exp_disp);
     // $readmemh("C://Users//jaxie//Desktop//cpre488//steroscopic-hardware//exp_sad.mem",    exp_sad);
   end
 
