@@ -32,14 +32,14 @@ var (
 // with hardware cameras over a serial interface, including image acquisition and streaming.
 type SerialCamera struct {
 	*BaseCamera
-	port        serial.Port    // Serial port interface
-	startSeq    []byte         // Start sequence for image data
-	endSeq      []byte         // End sequence for image data
-	imageWidth  int            // Expected image width in pixels
-	imageHeight int            // Expected image height in pixels
-	logger      *slog.Logger   // Logger for serial camera events
-	onClose     func()         // Cleanup function for closing the camera
-	streamMu    sync.Mutex     // Mutex for synchronizing streaming
+	port        serial.Port  // Serial port interface
+	startSeq    []byte       // Start sequence for image data
+	endSeq      []byte       // End sequence for image data
+	imageWidth  int          // Expected image width in pixels
+	imageHeight int          // Expected image height in pixels
+	logger      *slog.Logger // Logger for serial camera events
+	onClose     func()       // Cleanup function for closing the camera
+	streamMu    sync.Mutex   // Mutex for synchronizing streaming
 }
 
 // NewSerialCamera creates a new SerialCamera instance for the given type, port, baud rate,
@@ -244,7 +244,7 @@ func (sc *SerialCamera) readFrame() (*image.Gray, error) {
 	sc.logger.Debug("reading image frame")
 
 	// Use a timeout for the read operation
-	readCtx, cancel := context.WithTimeout(sc.Context(), 30*time.Second)
+	readCtx, cancel := context.WithTimeout(sc.Context(), 3*time.Minute)
 	defer cancel()
 
 	// Buffer to store image data
