@@ -19,6 +19,10 @@ const (
 )
 
 // ConfigureMiddleware parses camera configuration from form data.
+//
+// It adds the configuration to the request context.
+//
+// This middleware is required for the ConfigureCamera handler.
 func ConfigureMiddleware(apiFn APIFn) APIFn {
 	return func(w http.ResponseWriter, r *http.Request) error {
 		// Parse form data
