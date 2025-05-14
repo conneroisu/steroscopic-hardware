@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/conneroisu/steroscopic-hardware/pkg/camera"
+	"github.com/conneroisu/steroscopic-hardware/pkg/homedir"
 	"github.com/conneroisu/steroscopic-hardware/pkg/logger"
 )
 
@@ -72,8 +73,13 @@ func Run(ctx context.Context, onStart func()) error {
 	// Initialize camera system
 	initCameras(ctx)
 	defer func() {
-		if err := camera.CloseAll(); err != nil {
+		err := camera.CloseAll()
+		if err != nil {
 			slog.Error("Failed to close cameras", "err", err)
+		}
+		err = homedir.SaveFile(logger.Bytes())
+		if err != nil {
+			slog.Error("Failed to save log file", "err", err)
 		}
 	}()
 

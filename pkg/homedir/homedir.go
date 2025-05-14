@@ -212,7 +212,6 @@ func SaveImage(
 // SaveFile saves a file to the home directory.
 // schema: stero-file-<timestamp>.txt
 func SaveFile(
-	typ string,
 	data []byte,
 ) error {
 	dir, err := Dir()
@@ -235,7 +234,7 @@ func SaveFile(
 			}
 		}
 	})
-	f, err := os.Create(filepath.Join(dir, "stero-file-"+typ+"-"+time.Now().Format("2006-01-02-15-04-05")+".txt"))
+	f, err := os.Create(filepath.Join(dir, "stero-file-"+time.Now().Format("2006-01-02-15-04-05")+".txt"))
 	if err != nil {
 		return err
 	}
