@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+<Runs Version="1" Minor="0">
+	<Run Id="design_1_avnet_hdmi_out_0_0_synth_1" LaunchDir="Z:/Vivado/CPRE488_git/cpre488-mp2/project_1/project_1.runs/design_1_avnet_hdmi_out_0_0_synth_1" FlowId="Vivado_Synthesis" FromStepId="vivado" ToStepId="vivado"/>
+	<Run Id="design_1_axi_smc_0_synth_1" LaunchDir="Z:/Vivado/CPRE488_git/cpre488-mp2/project_1/project_1.runs/design_1_axi_smc_0_synth_1" FlowId="Vivado_Synthesis" FromStepId="vivado" ToStepId="vivado"/>
+	<Run Id="design_1_axi_vdma_0_0_synth_1" LaunchDir="Z:/Vivado/CPRE488_git/cpre488-mp2/project_1/project_1.runs/design_1_axi_vdma_0_0_synth_1" FlowId="Vivado_Synthesis" FromStepId="vivado" ToStepId="vivado"/>
+	<Run Id="design_1_axis_subset_converter_0_0_synth_1" LaunchDir="Z:/Vivado/CPRE488_git/cpre488-mp2/project_1/project_1.runs/design_1_axis_subset_converter_0_0_synth_1" FlowId="Vivado_Synthesis" FromStepId="vivado" ToStepId="vivado"/>
+	<Run Id="design_1_clk_wiz_0_0_synth_1" LaunchDir="Z:/Vivado/CPRE488_git/cpre488-mp2/project_1/project_1.runs/design_1_clk_wiz_0_0_synth_1" FlowId="Vivado_Synthesis" FromStepId="vivado" ToStepId="vivado"/>
+	<Run Id="design_1_fmc_imageon_iic_0_0_synth_1" LaunchDir="Z:/Vivado/CPRE488_git/cpre488-mp2/project_1/project_1.runs/design_1_fmc_imageon_iic_0_0_synth_1" FlowId="Vivado_Synthesis" FromStepId="vivado" ToStepId="vivado"/>
+	<Run Id="design_1_processing_system7_0_0_synth_1" LaunchDir="Z:/Vivado/CPRE488_git/cpre488-mp2/project_1/project_1.runs/design_1_processing_system7_0_0_synth_1" FlowId="Vivado_Synthesis" FromStepId="vivado" ToStepId="vivado"/>
+	<Run Id="design_1_rst_ps7_0_100M_0_synth_1" LaunchDir="Z:/Vivado/CPRE488_git/cpre488-mp2/project_1/project_1.runs/design_1_rst_ps7_0_100M_0_synth_1" FlowId="Vivado_Synthesis" FromStepId="vivado" ToStepId="vivado"/>
+	<Run Id="design_1_v_axi4s_vid_out_0_0_synth_1" LaunchDir="Z:/Vivado/CPRE488_git/cpre488-mp2/project_1/project_1.runs/design_1_v_axi4s_vid_out_0_0_synth_1" FlowId="Vivado_Synthesis" FromStepId="vivado" ToStepId="vivado"/>
+	<Run Id="design_1_fmc_ipmi_id_eeprom_0_0_synth_1" LaunchDir="Z:/Vivado/CPRE488_git/cpre488-mp2/project_1/project_1.runs/design_1_fmc_ipmi_id_eeprom_0_0_synth_1" FlowId="Vivado_Synthesis" FromStepId="vivado" ToStepId="vivado"/>
+	<Run Id="design_1_rst_clk_wiz_0_148M_0_synth_1" LaunchDir="Z:/Vivado/CPRE488_git/cpre488-mp2/project_1/project_1.runs/design_1_rst_clk_wiz_0_148M_0_synth_1" FlowId="Vivado_Synthesis" FromStepId="vivado" ToStepId="vivado"/>
+	<Run Id="design_1_v_tc_0_0_synth_1" LaunchDir="Z:/Vivado/CPRE488_git/cpre488-mp2/project_1/project_1.runs/design_1_v_tc_0_0_synth_1" FlowId="Vivado_Synthesis" FromStepId="vivado" ToStepId="vivado"/>
+	<Run Id="design_1_xbar_0_synth_1" LaunchDir="Z:/Vivado/CPRE488_git/cpre488-mp2/project_1/project_1.runs/design_1_xbar_0_synth_1" FlowId="Vivado_Synthesis" FromStepId="vivado" ToStepId="vivado"/>
+	<Run Id="design_1_v_vid_in_axi4s_0_0_synth_1" LaunchDir="Z:/Vivado/CPRE488_git/cpre488-mp2/project_1/project_1.runs/design_1_v_vid_in_axi4s_0_0_synth_1" FlowId="Vivado_Synthesis" FromStepId="vivado" ToStepId="vivado"/>
+	<Run Id="design_1_onsemi_vita_cam_0_0_synth_1" LaunchDir="Z:/Vivado/CPRE488_git/cpre488-mp2/project_1/project_1.runs/design_1_onsemi_vita_cam_0_0_synth_1" FlowId="Vivado_Synthesis" FromStepId="vivado" ToStepId="vivado"/>
+	<Run Id="design_1_onsemi_vita_spi_0_0_synth_1" LaunchDir="Z:/Vivado/CPRE488_git/cpre488-mp2/project_1/project_1.runs/design_1_onsemi_vita_spi_0_0_synth_1" FlowId="Vivado_Synthesis" FromStepId="vivado" ToStepId="vivado"/>
+	<Run Id="design_1_auto_pc_0_synth_1" LaunchDir="Z:/Vivado/CPRE488_git/cpre488-mp2/project_1/project_1.runs/design_1_auto_pc_0_synth_1" FlowId="Vivado_Synthesis" FromStepId="vivado" ToStepId="vivado"/>
+	<Run Id="synth_1" LaunchDir="Z:/Vivado/CPRE488_git/cpre488-mp2/project_1/project_1.runs/synth_1" FlowId="Vivado_Synthesis" FromStepId="vivado" ToStepId="vivado">
+		<Parent Id="design_1_avnet_hdmi_out_0_0_synth_1"/>
+		<Parent Id="design_1_axi_smc_0_synth_1"/>
+		<Parent Id="design_1_axi_vdma_0_0_synth_1"/>
+		<Parent Id="design_1_axis_subset_converter_0_0_synth_1"/>
+		<Parent Id="design_1_clk_wiz_0_0_synth_1"/>
+		<Parent Id="design_1_fmc_imageon_iic_0_0_synth_1"/>
+		<Parent Id="design_1_processing_system7_0_0_synth_1"/>
+		<Parent Id="design_1_rst_ps7_0_100M_0_synth_1"/>
+		<Parent Id="design_1_v_axi4s_vid_out_0_0_synth_1"/>
+		<Parent Id="design_1_fmc_ipmi_id_eeprom_0_0_synth_1"/>
+		<Parent Id="design_1_rst_clk_wiz_0_148M_0_synth_1"/>
+		<Parent Id="design_1_v_tc_0_0_synth_1"/>
+		<Parent Id="design_1_xbar_0_synth_1"/>
+		<Parent Id="design_1_v_vid_in_axi4s_0_0_synth_1"/>
+		<Parent Id="design_1_onsemi_vita_cam_0_0_synth_1"/>
+		<Parent Id="design_1_onsemi_vita_spi_0_0_synth_1"/>
+		<Parent Id="design_1_auto_pc_0_synth_1"/>
+	</Run>
+	<Parameters>
+		<Parameter Name="runs.monitorLSFJobs" Val="true" Type="bool"/>
+		<Parameter Name="runs.enableClusterConf" Val="true" Type="bool"/>
+	</Parameters>
+</Runs>
+
