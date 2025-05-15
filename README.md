@@ -197,7 +197,6 @@ Process:
 
 
 
-  <type>markdown</type>
 # handlers
 
 Http handlers for the web ui can be found here.
@@ -220,11 +219,10 @@ It handles the communication between the web interface and the physical camera h
 
 \#\#\# API Handling Structure
 
-- \`APIFn\` is the fundamental type \- a function signature that processes HTTP requests and returns errors
 - \`Make\(\)\` converts these API functions into standard HTTP handlers, with built\-in error handling
 - \`ErrorHandler\(\)\` wraps API functions to provide formatted HTML error responses \(using color\-coded success/failure messages\)
 
-\#\#\# Key Handlers
+### Key Handlers
 
 1. \*\*Camera Configuration \(\`ConfigureCamera\`\):\*\* \- Processes form data for camera setup \(port, baud rate, compression\) \- Configures either left or right camera streams based on parameters \- Creates new output streams after successful configuration \- Includes validation and error handling for all input parameters
 
@@ -256,15 +254,10 @@ This package serves as the interface layer between the web UI and the underlying
 - [func HandleRightStream\(w http.ResponseWriter, r \*http.Request\) error](<#HandleRightStream>)
 - [func Make\(fn APIFn\) http.HandlerFunc](<#Make>)
 - [func MorphableHandler\(wrapper func\(templ.Component\) templ.Component, morph templ.Component\) http.HandlerFunc](<#MorphableHandler>)
-- [type APIFn](<#APIFn>)
-  - [func ConfigureCamera\(ctx context.Context, typ camera.Type\) APIFn](<#ConfigureCamera>)
   - [func ConfigureMiddleware\(apiFn APIFn\) APIFn](<#ConfigureMiddleware>)
   - [func ErrorHandler\(fn APIFn\) APIFn](<#ErrorHandler>)
   - [func GetPorts\(logger \*logger.Logger\) APIFn](<#GetPorts>)
-  - [func HandleCameraStream\(camType camera.Type\) APIFn](<#HandleCameraStream>)
   - [func ParametersHandler\(\) APIFn](<#ParametersHandler>)
-  - [func UploadHandler\(appCtx context.Context, typ camera.Type\) APIFn](<#UploadHandler>)
-- [type CtxKey](<#CtxKey>)
 
 
 <a name="HandleLeftStream"></a>
@@ -313,19 +306,16 @@ func MorphableHandler(wrapper func(templ.Component) templ.Component, morph templ
 MorphableHandler returns a handler that checks for the presence of the hx\-trigger header and serves either the full or morphed view.
 
 <a name="APIFn"></a>
-## type [APIFn](<https://github.com/conneroisu/steroscopic-hardware/blob/main/cmd/handlers/api.go#L12>)
 
 APIFn is a function that handles an API request.
 
 ```go
-type APIFn func(w http.ResponseWriter, r *http.Request) error
 ```
 
 <a name="ConfigureCamera"></a>
 ### func [ConfigureCamera](<https://github.com/conneroisu/steroscopic-hardware/blob/main/cmd/handlers/configure.go#L77>)
 
 ```go
-func ConfigureCamera(ctx context.Context, typ camera.Type) APIFn
 ```
 
 ConfigureCamera handles client requests to configure camera parameters.
@@ -365,7 +355,6 @@ GetPorts handles client requests to configure the camera.
 ### func [HandleCameraStream](<https://github.com/conneroisu/steroscopic-hardware/blob/main/cmd/handlers/stream.go#L14>)
 
 ```go
-func HandleCameraStream(camType camera.Type) APIFn
 ```
 
 HandleCameraStream is a generic handler for streaming camera images.
@@ -383,22 +372,17 @@ ParametersHandler handles client requests to update disparity algorithm paramete
 ### func [UploadHandler](<https://github.com/conneroisu/steroscopic-hardware/blob/main/cmd/handlers/upload.go#L16>)
 
 ```go
-func UploadHandler(appCtx context.Context, typ camera.Type) APIFn
 ```
 
 
 <a name="CtxKey"></a>
-## type [CtxKey](<https://github.com/conneroisu/steroscopic-hardware/blob/main/cmd/handlers/configure.go#L15>)
 
-CtxKey is a type alias for context keys used to store camera configuration.
 
 ```go
-type CtxKey string
 ```
 
 
 
-  <type>markdown</type>
 
 
 # despair
@@ -443,7 +427,6 @@ Parameters: Configuration settings for the algorithm including:
 The package includes efficient image handling utilities:
 
 - PNG Loading/Saving: Optimized functions for loading and saving grayscale PNG images
-- Type\-Specific Conversions: Specialized routines for different image formats \(Gray, RGBA, generic\)
 - Error Handling: Both standard error\-returning functions and "Must" variants that panic on failure
 
 ### Performance Optimizations
@@ -451,7 +434,6 @@ The package includes efficient image handling utilities:
 - Concurrent Processing: Utilizes Go's concurrency with multiple worker goroutines
 - Chunked Processing: Splits images into smaller regions for parallel processing
 - Direct Pixel Access: Works with underlying pixel arrays rather than the higher\-level interface
-- Type\-Specific Optimizations: Different code paths for different image types
 - Early Termination: Breaks comparison loops when perfect matches are found
 - Optimized Bounds Checking: Reduces redundant checks in inner loops
 - Precomputed Lookup Tables: Uses LUTs for common conversions
@@ -479,9 +461,6 @@ despair.MustSavePNG("depth_map.png", disparityMap)
 - [func SetDefaultParams\(params Parameters\)](<#SetDefaultParams>)
 - [func SetupConcurrentSAD\(numWorkers int\) \(chan\<\- InputChunk, \<\-chan OutputChunk\)](<#SetupConcurrentSAD>)
 - [func SumAbsoluteDifferences\(left, right \*image.Gray, leftX, leftY, rightX, rightY, blockSize int\) int](<#SumAbsoluteDifferences>)
-- [type InputChunk](<#InputChunk>)
-- [type OutputChunk](<#OutputChunk>)
-- [type Parameters](<#Parameters>)
   - [func DefaultParams\(\) \*Parameters](<#DefaultParams>)
 
 
@@ -567,36 +546,30 @@ func SumAbsoluteDifferences(left, right *image.Gray, leftX, leftY, rightX, right
 SumAbsoluteDifferences calculates SAD directly on image data.
 
 <a name="InputChunk"></a>
-## type [InputChunk](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/despair/sad.go#L12-L15>)
 
 InputChunk represents a portion of the image to process.
 
 ```go
-type InputChunk struct {
     Left, Right *image.Gray
     Region      image.Rectangle
 }
 ```
 
 <a name="OutputChunk"></a>
-## type [OutputChunk](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/despair/sad.go#L18-L21>)
 
 OutputChunk represents the processed disparity data for a region.
 
 ```go
-type OutputChunk struct {
     DisparityData []uint8
     Region        image.Rectangle
 }
 ```
 
 <a name="Parameters"></a>
-## type [Parameters](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/despair/params.go#L34-L37>)
 
 Parameters is a struct that holds the parameters for the stereoscopic image processing.
 
 ```go
-type Parameters struct {
     BlockSize    int `json:"blockSize"`
     MaxDisparity int `json:"maxDisparity"`
 }
@@ -613,7 +586,6 @@ DefaultParams returns the default stereoscopic algorithm parameters.
 
 
 
-  <type>markdown</type>
 # logger
 
 Package logger provides a multi faceted logger that
@@ -635,8 +607,6 @@ Allowing for the logging of console messages both to the console and to the brow
 ## Index
 
 - [func NewLogWriter\(w io.Writer\) slog.Handler](<#NewLogWriter>)
-- [type LogEntry](<#LogEntry>)
-- [type Logger](<#Logger>)
   - [func NewLogger\(\) Logger](<#NewLogger>)
   - [func \(l Logger\) Bytes\(\) \[\]byte](<#Logger.Bytes>)
 
@@ -651,12 +621,10 @@ func NewLogWriter(w io.Writer) slog.Handler
 NewLogWriter returns a slog.Handler that writes to a buffer.
 
 <a name="LogEntry"></a>
-## type [LogEntry](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/logger/logger.go#L43-L48>)
 
 LogEntry represents a structured log entry.
 
 ```go
-type LogEntry struct {
     Level   slog.Level
     Time    time.Time
     Message string
@@ -665,12 +633,10 @@ type LogEntry struct {
 ```
 
 <a name="Logger"></a>
-## type [Logger](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/logger/logger.go#L15-L18>)
 
 Logger is a slog.Logger that sends logs to a channel and also to the console.
 
 ```go
-type Logger struct {
     *slog.Logger
     // contains filtered or unexported fields
 }
@@ -696,7 +662,6 @@ Bytes returns the buffered log.
 
 
 
-  <type>markdown</type>
 # lzma
 
 Package lzma package implements reading and writing of LZMA format compressed data.
@@ -773,16 +738,10 @@ io.Copy(os.Stdout, r)
 - [func NewWriterLevel\(w io.Writer, level int\) \(io.WriteCloser, error\)](<#NewWriterLevel>)
 - [func NewWriterSize\(w io.Writer, size int64\) \(io.WriteCloser, error\)](<#NewWriterSize>)
 - [func NewWriterSizeLevel\(w io.Writer, size int64, level int\) \(io.WriteCloser, error\)](<#NewWriterSizeLevel>)
-- [type ArgumentValueError](<#ArgumentValueError>)
   - [func \(e \*ArgumentValueError\) Error\(\) string](<#ArgumentValueError.Error>)
-- [type HeaderError](<#HeaderError>)
   - [func \(e HeaderError\) Error\(\) string](<#HeaderError.Error>)
-- [type NWriteError](<#NWriteError>)
   - [func \(e \*NWriteError\) Error\(\) string](<#NWriteError.Error>)
-- [type Reader](<#Reader>)
-- [type StreamError](<#StreamError>)
   - [func \(e \*StreamError\) Error\(\) string](<#StreamError.Error>)
-- [type Writer](<#Writer>)
 
 
 ## Constants
@@ -874,12 +833,10 @@ If size is \-1, last bytes are encoded in a different way to mark the end of the
 The reason for which size is an argument is that, unlike gzip which appends the size and the checksum at the end of the stream, lzma stores the size before any compressed data. Thus, lzma can compute the size while reading data from pipe.
 
 <a name="ArgumentValueError"></a>
-## type [ArgumentValueError](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/lzma/errors.go#L39-L42>)
 
 An ArgumentValueError reports an error encountered while parsing user provided arguments.
 
 ```go
-type ArgumentValueError struct {
     // contains filtered or unexported fields
 }
 ```
@@ -891,15 +848,12 @@ type ArgumentValueError struct {
 func (e *ArgumentValueError) Error() string
 ```
 
-Error returns the error message and implements the error interface on the ArgumentValueError type.
 
 <a name="HeaderError"></a>
-## type [HeaderError](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/lzma/errors.go#L6-L8>)
 
 HeaderError is returned when the header is corrupt.
 
 ```go
-type HeaderError struct {
     // contains filtered or unexported fields
 }
 ```
@@ -911,15 +865,12 @@ type HeaderError struct {
 func (e HeaderError) Error() string
 ```
 
-Error returns the error message and implements the error interface on the HeaderError type.
 
 <a name="NWriteError"></a>
-## type [NWriteError](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/lzma/errors.go#L28-L30>)
 
 NWriteError is returned when the number of bytes returned by Writer.Write\(\) didn't meet expectances.
 
 ```go
-type NWriteError struct {
     // contains filtered or unexported fields
 }
 ```
@@ -931,29 +882,24 @@ type NWriteError struct {
 func (e *NWriteError) Error() string
 ```
 
-Error returns the error message and implements the error interface on the NWriteError type.
 
 <a name="Reader"></a>
-## type [Reader](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/lzma/range.go#L24-L27>)
 
 Reader is the actual read interface needed by \[NewDecoder\].
 
 If the passed in io.Reader does not also have ReadByte, the \[NewDecoder\] will introduce its own buffering.
 
 ```go
-type Reader interface {
     io.Reader
     ReadByte() (c byte, err error)
 }
 ```
 
 <a name="StreamError"></a>
-## type [StreamError](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/lzma/errors.go#L17-L19>)
 
 StreamError is returned when the stream is corrupt.
 
 ```go
-type StreamError struct {
     // contains filtered or unexported fields
 }
 ```
@@ -965,17 +911,14 @@ type StreamError struct {
 func (e *StreamError) Error() string
 ```
 
-Error returns the error message and implements the error interface on the StreamError type.
 
 <a name="Writer"></a>
-## type [Writer](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/lzma/range.go#L138-L142>)
 
 Writer is the actual write interface needed by \[NewEncoder\].
 
 If the passed in [io.Writer](<https://pkg.go.dev/io/#Writer>) does not also have WriteByte and Flush, the \[NewEncoder\] function will wrap it into a bufio.Writer.
 
 ```go
-type Writer interface {
     io.Writer
     Flush() error
     WriteByte(c byte) error
@@ -984,7 +927,6 @@ type Writer interface {
 
 
 
-  <type>markdown</type>
 
 
 # web
@@ -1001,7 +943,6 @@ SVG templates are used to render SVG icons and text in the web UI. Templates are
 ## Index
 
 - [Variables](<#variables>)
-- [type Target](<#Target>)
 
 
 ## Variables
@@ -1032,10 +973,6 @@ var CircleQuestion = templ.Raw(circleQuestion)
 
 ```go
 var CircleX = templ.Raw(circleX)
-```
-
-
-```go
 ```
 
 <a name="GreenUp"></a>GreenUp is a template for the SVG green\-up icon.
@@ -1072,12 +1009,10 @@ var SettingsGear = templ.Raw(settingsGear)
 ```
 
 <a name="Target"></a>
-## type [Target](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/web/targets.go#L4-L7>)
 
 Target is a struct representing a dom target.
 
 ```go
-type Target struct {
     ID  string `json:"id"`
     Sel string `json:"sel"`
 }
