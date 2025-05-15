@@ -30,7 +30,7 @@ void clear_uart_fifo(struct termios* tty, int port)
 
     while(read(port, &buf, 1))
     {
-        printf("Threw out %d\n", port);
+
     }
 
     // Restore settings
@@ -141,7 +141,87 @@ int main(int argc, char** argv)
 
     if(test_mode)
     {
+        printf("Starting test!\n");
+        uint8_t write_buf[2] = {0xFF, 0xD8};
+        write(port, write_buf, 2);
+        
+        char read_byte;
+        read(port, &read_byte, 1);
 
+        if(read_byte != 1)
+        {
+            printf("Test failed! Sender did not send a 0x1 after image send request! Acutal: %x\n", read_byte);
+            goto exit;
+        }
+        else
+        {
+            printf("Test Case: Sender sends 0x1 after receiving start sequence: Passed!\n");
+        }
+
+        uint8_t bytes[256];
+
+        // Get 256 bytes
+        for(int i = 0; i < 256; ++i)
+        {
+            read(port, &read_byte, 1);
+            bytes[i] = read_byte;
+        }
+
+        // Verify that all the bytes are not all zero.
+        int all_zero = 1;
+        for(int i = 0; i < 256; ++i)
+        {
+            if(bytes[i] != 0)
+            {
+                all_zero = 0;
+                break;
+            }
+        }
+
+        if(all_zero)
+        {
+            printf("Test failed! First 256 from image were all zero! This should never happen! Data is bad!\n");
+            goto exit;
+        }
+        else
+        {
+            printf("Test Case: First 256 bytes are not all zero: Passed!\n");
+        }
+
+        // Send stop signal
+        write_buf[1] = 0xD9;
+        write(port, write_buf, 2);
+
+        // Wait a second:
+        sleep(1);
+
+        // Clear the FIFO:
+        clear_uart_fifo(&tty, port);
+
+        usleep(10000);
+
+        // Verify that the data has stopped.
+        tty.c_cc[VMIN] = 0;
+
+        int status = tcsetattr(port, TCSANOW, &tty);
+        if(status < 0)
+        {
+            perror("Could not apply the tty config!");
+            return errno;
+        }
+
+        if(read(port, &read_byte, 1))
+        {
+            printf("Test failed! A byte was still in the FIFO after a clear and after sending stop sequence, so data is still being sent!\n");
+            goto exit;
+        }
+        else
+        {
+            printf("Test Case: Image data is no longer sent after sender receives stop sequence: Passed!\n");
+        }
+
+        printf("Test passed!\n");
+        goto exit;
     }
     else
     {
@@ -198,18 +278,19 @@ int main(int argc, char** argv)
 
         usleep(10000);
 
-        // Close the port
-        status = close(port);
-
-        if(status < 0)
-        {
-            char str_buf[256];
-            sprintf(str_buf, "ERROR: Failed to close port %s", PORT_NAME);
-            perror(str_buf);
-            return status;
-        }
-
         printf("Finished getting picture!!\n");
+    }
+
+    exit:
+    // Close the port
+    status = close(port);
+
+    if(status < 0)
+    {
+        char str_buf[256];
+        sprintf(str_buf, "ERROR: Failed to close port %s", PORT_NAME);
+        perror(str_buf);
+        return status;
     }
 
     return 0;
