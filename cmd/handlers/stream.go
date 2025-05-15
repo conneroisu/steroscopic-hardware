@@ -12,7 +12,7 @@ import (
 
 // HandleCameraStream is a generic handler for streaming camera images.
 func HandleCameraStream(camType camera.Type) APIFn {
-	return func(w http.ResponseWriter, r *http.Request) error {
+	return func(w http.ResponseWriter, _ *http.Request) error {
 		// read $HOME/{type}.png
 		dir, err := homedir.Dir()
 		if err != nil {
