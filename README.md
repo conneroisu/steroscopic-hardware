@@ -199,7 +199,7 @@ Despite the solid foundation, there are several areas that appear to be works in
 
 3. **UI Refinement**: The web interface has all the necessary components but might benefit from additional user experience improvements.
 
-4. **Testing Coverage**: While there are tests for some components (like the PNG handling in the despair package), comprehensive test coverage across all packages would strengthen the project.
+4. **Testing Coverage**: While there are tests for some components (like the PNG handling in the despair package), comprehensive test coverage (which used to exist before a large refactor) across all packages would strengthen the project.
 
 # cmd
 
