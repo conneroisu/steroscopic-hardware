@@ -171,9 +171,6 @@ Parameters:
 
 - logger: The application logger for recording events and errors
 - params: Stereoscopic algorithm parameters \(block size, max disparity\)
-- leftStream: Stream manager for the left camera
-- rightStream: Stream manager for the right camera
-- outputStream: Stream manager for the generated depth map output
 - cancel: CancelFunc to gracefully shut down the application
 
 Returns an http.Handler and any error encountered during setup.
@@ -905,10 +902,6 @@ If the passed in [io.Writer](<https://pkg.go.dev/io/#Writer>) does not also have
     WriteByte(c byte) error
 }
 ```
-
-
-
-
 
 # web
 

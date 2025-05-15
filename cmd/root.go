@@ -222,9 +222,6 @@ func gracefulShutdown(
 // Parameters:
 //   - logger: The application logger for recording events and errors
 //   - params: Stereoscopic algorithm parameters (block size, max disparity)
-//   - leftStream: Stream manager for the left camera
-//   - rightStream: Stream manager for the right camera
-//   - outputStream: Stream manager for the generated depth map output
 //   - cancel: CancelFunc to gracefully shut down the application
 //
 // Returns an http.Handler and any error encountered during setup.
