@@ -43,7 +43,7 @@ AddRoutes configures all HTTP routes and handlers for the application.
 This function registers endpoints for camera control, streaming, and UI components.
 
 <a name="NewServer"></a>
-## func [NewServer](<https://github.com/conneroisu/steroscopic-hardware/blob/main/cmd/root.go#L231-L235>)
+## func [NewServer](<https://github.com/conneroisu/steroscopic-hardware/blob/main/cmd/root.go#L228-L232>)
 
 ```go
 func NewServer(ctx context.Context, logger *logger.Logger, cancel context.CancelFunc) (http.Handler, error)
@@ -57,9 +57,6 @@ Parameters:
 
 - logger: The application logger for recording events and errors
 - params: Stereoscopic algorithm parameters \(block size, max disparity\)
-- leftStream: Stream manager for the left camera
-- rightStream: Stream manager for the right camera
-- outputStream: Stream manager for the generated depth map output
 - cancel: CancelFunc to gracefully shut down the application
 
 Returns an http.Handler and any error encountered during setup.
