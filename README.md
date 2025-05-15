@@ -215,9 +215,9 @@ This Go package \`handlers\` is part of a stereoscopic hardware system project t
 
 It handles the communication between the web interface and the physical camera hardware.
 
-\#\# Core Components
+## Core Components
 
-\#\#\# API Handling Structure
+### API Handling Structure
 
 - \`Make\(\)\` converts these API functions into standard HTTP handlers, with built\-in error handling
 - \`ErrorHandler\(\)\` wraps API functions to provide formatted HTML error responses \(using color\-coded success/failure messages\)
@@ -232,11 +232,11 @@ It handles the communication between the web interface and the physical camera h
 
 4. \*\*Image Streaming \(\`StreamHandlerFn\`\):\*\* \- Sets up MJPEG streaming with multipart boundaries \- Manages client registration and connection lifecycle \- Implements performance optimizations: \- Buffer pooling to minimize memory allocation \- JPEG quality control and compression \- Frame rate limiting \(10 FPS\) \- Connection timeouts \(30 minutes\) \- Efficient image encoding with reusable buffers
 
-\#\#\# UI Integration
+### UI Integration
 
 - \`MorphableHandler\(\)\` supports HTMX integration by detecting the presence of HX\-Request headers
 
-\#\# Technical Design Highlights
+## Technical Design Highlights
 
 - Thread safety with mutex locks for parameter updates
 - Memory efficiency through object pooling \(JPEG options\)
@@ -367,23 +367,6 @@ func ParametersHandler() APIFn
 ```
 
 ParametersHandler handles client requests to update disparity algorithm parameters.
-
-<a name="UploadHandler"></a>
-### func [UploadHandler](<https://github.com/conneroisu/steroscopic-hardware/blob/main/cmd/handlers/upload.go#L16>)
-
-```go
-```
-
-
-<a name="CtxKey"></a>
-
-
-```go
-```
-
-
-
-
 
 # despair
 
