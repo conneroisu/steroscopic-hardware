@@ -7,7 +7,6 @@ import (
 	"image"
 	"image/color"
 	"log/slog"
-	"sync"
 	"time"
 
 	"github.com/conneroisu/steroscopic-hardware/pkg/homedir"
@@ -39,7 +38,6 @@ type SerialCamera struct {
 	imageHeight int          // Expected image height in pixels
 	logger      *slog.Logger // Logger for serial camera events
 	onClose     func()       // Cleanup function for closing the camera
-	streamMu    sync.Mutex   // Mutex for synchronizing streaming
 	cameraType  Type         // Type of camera
 }
 
