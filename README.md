@@ -3,8 +3,6 @@
 [![built with nix](https://builtwithnix.org/badge.svg)](https://builtwithnix.org)
 <img class="badge" tag="github.com/conneroisu/steroscopic-hardware" src="https://goreportcard.com/badge/github.com/conneroisu/conneroh.com" alt="go report card badge">
 
-<!-- Add more badges as needed -->
-
 ---
 
 ## Overview
@@ -112,14 +110,6 @@ This will allow direnv to automatically load the environment variables and devel
 ## Contributing
 
 Contributions, bug reports, and feature requests are welcome! Please open an issue or submit a pull request.
-
----
-
-## License
-
-This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
-
----
 
 ## Contact
 
