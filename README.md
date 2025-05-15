@@ -440,7 +440,6 @@ The package includes efficient image handling utilities:
 
 Example:
 
-```
 ```go
 // Load stereo image pair
 left := despair.MustLoadPNG("left.png")
@@ -451,7 +450,6 @@ disparityMap := despair.RunSad(left, right, 9, 64)
 
 // Save the result
 despair.MustSavePNG("depth_map.png", disparityMap)
-```
 ```
 
 ## Index
