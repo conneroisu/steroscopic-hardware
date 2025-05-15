@@ -118,7 +118,7 @@ func MustLoadPNG(filename string) *image.Gray
 MustLoadPNG loads a PNG image and converts it to grayscale with optimizations and panics if an error occurs.
 
 <a name="MustSavePNG"></a>
-## func [MustSavePNG](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/despair/png.go#L68>)
+## func [MustSavePNG](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/despair/png.go#L70>)
 
 ```go
 func MustSavePNG(filename string, img image.Image)
@@ -138,7 +138,7 @@ RunSad is a convenience function that sets up the pipeline, feeds the images, an
 This is not used in the web UI, but is useful for testing.
 
 <a name="SavePNG"></a>
-## func [SavePNG](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/despair/png.go#L54>)
+## func [SavePNG](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/despair/png.go#L55>)
 
 ```go
 func SavePNG(filename string, img image.Image) error

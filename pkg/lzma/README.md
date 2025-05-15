@@ -121,7 +121,7 @@ NewReader returns a new [io.ReadCloser](<https://pkg.go.dev/io/#ReadCloser>) tha
 It is the caller's responsibility to call Close on the [io.ReadCloser](<https://pkg.go.dev/io/#ReadCloser>) when finished reading.
 
 <a name="NewWriter"></a>
-## func [NewWriter](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/lzma/encoder.go#L88>)
+## func [NewWriter](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/lzma/encoder.go#L89>)
 
 ```go
 func NewWriter(w io.Writer) (io.WriteCloser, error)
@@ -132,7 +132,7 @@ NewWriter creates a new Writer that compresses data to the given Writer using th
 Same as NewWriterSizeLevel\(w, \-1, DefaultCompression\).
 
 <a name="NewWriterLevel"></a>
-## func [NewWriterLevel](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/lzma/encoder.go#L60>)
+## func [NewWriterLevel](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/lzma/encoder.go#L61>)
 
 ```go
 func NewWriterLevel(w io.Writer, level int) (io.WriteCloser, error)
@@ -145,7 +145,7 @@ Level is any integer value between [lzma.BestSpeed](<#BestSpeed>) and [lzma.Best
 Same as lzma.NewWriterSizeLevel\(w, \-1, level\).
 
 <a name="NewWriterSize"></a>
-## func [NewWriterSize](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/lzma/encoder.go#L80>)
+## func [NewWriterSize](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/lzma/encoder.go#L81>)
 
 ```go
 func NewWriterSize(w io.Writer, size int64) (io.WriteCloser, error)
@@ -277,7 +277,7 @@ func (e *StreamError) Error() string
 Error returns the error message and implements the error interface on the StreamError type.
 
 <a name="Writer"></a>
-## type [Writer](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/lzma/range.go#L133-L137>)
+## type [Writer](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/lzma/range.go#L138-L142>)
 
 Writer is the actual write interface needed by \[NewEncoder\].
 
