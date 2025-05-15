@@ -1,6 +1,6 @@
 package web
 
-// Target is a struct representing a dom target.
+// Target is a struct representing a DOM target.
 type Target struct {
 	ID  string `json:"id"`
 	Sel string `json:"sel"`

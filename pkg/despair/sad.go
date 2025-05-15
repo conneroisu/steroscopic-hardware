@@ -103,7 +103,7 @@ func SetupConcurrentSAD(
 		}()
 	}
 
-	// Goroutine to close output channel when all workers are done
+	// go-routine to close output channel when all workers are done
 	go func() {
 		wg.Wait()
 		close(outputChan)

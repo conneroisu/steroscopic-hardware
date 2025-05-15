@@ -37,7 +37,7 @@ type SerialCamera struct {
 	imageWidth  int          // Expected image width in pixels
 	imageHeight int          // Expected image height in pixels
 	logger      *slog.Logger // Logger for serial camera events
-	onClose     func()       // Cleanup function for closing the camera
+	onClose     func()       // onClose function for closing the camera
 	cameraType  Type         // Type of camera
 }
 

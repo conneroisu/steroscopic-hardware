@@ -12,13 +12,13 @@
 //
 // Example usage:
 //
-//   leftCam := camera.NewStaticCamera(ctx, "./testdata/L_00001.png", camera.LeftCameraType)
-//   rightCam := camera.NewSerialCamera(ctx, camera.RightCameraType, "/dev/ttyUSB0", 115200, 0)
-//   outputCam := camera.NewOutputCamera(ctx)
+//	leftCam := camera.NewStaticCamera(ctx, "./testdata/L_00001.png", camera.LeftCameraType)
+//	rightCam := camera.NewSerialCamera(ctx, camera.RightCameraType, "/dev/ttyUSB0", 115200, 0)
+//	outputCam := camera.NewOutputCamera(ctx)
 //
-//   camera.SetCamera(ctx, camera.LeftCameraType, leftCam)
-//   camera.SetCamera(ctx, camera.RightCameraType, rightCam)
-//   camera.SetCamera(ctx, camera.OutputCameraType, outputCam)
+//	camera.SetCamera(ctx, camera.LeftCameraType, leftCam)
+//	camera.SetCamera(ctx, camera.RightCameraType, rightCam)
+//	camera.SetCamera(ctx, camera.OutputCameraType, outputCam)
 //
 // See the documentation for each type for more details.
 package camera
