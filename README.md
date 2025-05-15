@@ -189,18 +189,6 @@ The project employs modern development practices:
 
 4. **Documentation**: Each package includes comprehensive documentation through Go's standard doc comments, which are processed with gomarkdoc to generate Markdown documentation.
 
-## Current Challenges and Limitations
-
-Despite the solid foundation, there are several areas that appear to be works in progress:
-
-1. **Hardware Integration**: While the code supports hardware cameras through serial connections, the actual integration with specific hardware (like Zedboards) may still be in development.
-
-2. **Algorithm Refinement**: The SAD algorithm is implemented, but there may be opportunities for further optimization or implementation of more advanced algorithms.
-
-3. **UI Refinement**: The web interface has all the necessary components but might benefit from additional user experience improvements.
-
-4. **Testing Coverage**: While there are tests for some components (like the PNG handling in the despair package), comprehensive test coverage (which used to exist before a large refactor) across all packages would strengthen the project.
-
 # cmd
 
 ```go
