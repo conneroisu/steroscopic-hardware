@@ -42,7 +42,7 @@
 //
 // # Performance Optimizations
 //
-//   - Concurrent Processing: Utilizes Go's concurrency with multiple worker goroutines
+//   - Concurrent Processing: Utilizes Go's concurrency with multiple worker go-routines
 //   - Chunked Processing: Splits images into smaller regions for parallel processing
 //   - Direct Pixel Access: Works with underlying pixel arrays rather than the higher-level interface
 //   - Type-Specific Optimizations: Different code paths for different image types

@@ -7,6 +7,7 @@ import (
 	"errors"
 	"image"
 	"image/png"
+	"io"
 	"log/slog"
 	"os"
 	"os/exec"
@@ -178,7 +179,7 @@ var deleteOnce sync.Once
 // SaveImage saves an image to the home directory.
 // schema: stero-image-<timestamp>.png
 func SaveImage(
-	typ string,
+	name string,
 	img *image.Gray,
 ) error {
 	dir, err := Dir()
@@ -201,7 +202,7 @@ func SaveImage(
 			}
 		}
 	})
-	f, err := os.Create(filepath.Join(dir, "stero-image-"+typ+"-"+time.Now().Format("2006-01-02-15-04-05")+".png"))
+	f, err := os.Create(filepath.Join(dir, name))
 	if err != nil {
 		return err
 	}
@@ -244,4 +245,25 @@ func SaveFile(
 	_, err = f.Write(data)
 
 	return err
+}
+
+// ReadFile reads a file from the home directory.
+func ReadFile(filename string) ([]byte, error) {
+	dir, err := os.UserHomeDir()
+	if err != nil {
+		return nil, err
+	}
+
+	f, err := os.Open(filepath.Join(dir, filename))
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+
+	data, err := io.ReadAll(f)
+	if err != nil {
+		return nil, err
+	}
+
+	return data, nil
 }

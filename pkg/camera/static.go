@@ -10,6 +10,8 @@ import (
 	"os"
 	"path/filepath"
 	"time"
+
+	"github.com/conneroisu/steroscopic-hardware/pkg/homedir"
 )
 
 // StaticCamera represents a camera that loads images from files. It is useful for testing
@@ -32,7 +34,7 @@ func NewStaticCamera(ctx context.Context, path string, typ Type) *StaticCamera {
 
 // Stream continuously reads the static image and sends it to the output channel at a fixed
 // interval. Useful for simulating a live camera feed.
-func (sc *StaticCamera) Stream(ctx context.Context, outCh ImageChannel) {
+func (sc *StaticCamera) Stream(ctx context.Context, _ ImageChannel) {
 	sc.logger.Info("starting static camera stream", "path", sc.path)
 	defer sc.logger.Info("static camera stream stopped")
 
@@ -42,12 +44,6 @@ func (sc *StaticCamera) Stream(ctx context.Context, outCh ImageChannel) {
 	// Set up ticker for a reasonable frame rate
 	ticker := time.NewTicker(100 * time.Millisecond)
 	defer ticker.Stop()
-
-	// Backoff parameters
-	initialBackoff := 10 * time.Millisecond
-	maxBackoff := 1 * time.Second
-	backoff := initialBackoff
-	consecutiveFailures := 0
 
 	for {
 		select {
@@ -64,7 +60,7 @@ func (sc *StaticCamera) Stream(ctx context.Context, outCh ImageChannel) {
 			}
 
 			// Load image file
-			img, err := sc.loadImage()
+			_, err := sc.loadImage()
 			if err != nil {
 				select {
 				case errChan <- err:
@@ -73,35 +69,6 @@ func (sc *StaticCamera) Stream(ctx context.Context, outCh ImageChannel) {
 				}
 
 				continue
-			}
-
-			// Send image to output channel
-			select {
-			case outCh <- img:
-				sc.logger.Debug("image sent to channel")
-				// Reset backoff on success
-				backoff = initialBackoff
-				consecutiveFailures = 0
-			case <-ctx.Done():
-				return
-			case <-sc.Context().Done():
-				return
-			default:
-				// Channel is full, apply backoff
-				consecutiveFailures++
-
-				// Only log at certain thresholds to prevent log spam
-				if consecutiveFailures == 1 || consecutiveFailures%10 == 0 {
-					sc.logger.Debug("output channel full, applying backoff",
-						"consecutiveFailures", consecutiveFailures,
-						"currentBackoff", backoff)
-				}
-
-				// Apply backoff delay
-				time.Sleep(backoff)
-
-				// Exponential backoff with a maximum cap
-				backoff = min(time.Duration(float64(backoff)*1.5), maxBackoff)
 			}
 		}
 	}
@@ -172,6 +139,11 @@ func (sc *StaticCamera) loadImage() (*image.Gray, error) {
 				}
 			}
 		}
+		// save to $HOME/{type}.png
+		err = homedir.SaveImage(string(sc.cType)+".png", grayImg)
+		if err != nil {
+			return nil, err
+		}
 	case ".jpg", ".jpeg":
 		// Open the file
 		file, err = os.Open(sc.path)
@@ -193,6 +165,12 @@ func (sc *StaticCamera) loadImage() (*image.Gray, error) {
 			for x := bounds.Min.X; x < bounds.Max.X; x++ {
 				grayImg.Set(x, y, color.GrayModel.Convert(img.At(x, y)))
 			}
+		}
+
+		// Save to $HOME/{type}.jpg
+		err := homedir.SaveImage(string(sc.cType)+".png", grayImg)
+		if err != nil {
+			return nil, err
 		}
 	default:
 		return nil, fmt.Errorf("unsupported image format: %s", ext)

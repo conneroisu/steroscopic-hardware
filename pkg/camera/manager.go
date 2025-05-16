@@ -13,43 +13,21 @@ type Manager interface {
 	GetCamera(typ Type) Camera
 	// SetCamera configures and starts a new camera of the specified type.
 	SetCamera(ctx context.Context, typ Type, cam Camera) error
-	// GetChannel returns the input channel for the specified camera type.
-	GetChannel(typ Type) ImageChannel
-	// GetOutputChannel returns the output channel for the specified camera type.
-	GetOutputChannel(typ Type) ImageChannel
 	// CloseAll closes all cameras and releases their resources.
 	CloseAll() error
-	// DrainAll empties all camera channels.
-	DrainAll()
 }
-
-// channelBufferSize defines how many images each channel can buffer.
-const channelBufferSize = 20 // Increased from 5 to 20 to prevent blocking
 
 // manager implements the Manager interface for camera management.
 type manager struct {
-	cameras     map[Type]Camera       // Map of camera type to camera instance
-	channels    map[Type]ImageChannel // Input channels for each camera
-	outChannels map[Type]ImageChannel // Output channels for each camera
-	mu          sync.RWMutex          // Mutex for concurrent access
+	cameras map[Type]Camera // Map of camera type to camera instance
+	mu      sync.RWMutex    // Mutex for concurrent access
 }
 
 // NewManager creates a new camera manager instance with initialized channels.
 func NewManager() Manager {
 	m := &manager{
-		cameras:     make(map[Type]Camera),
-		channels:    make(map[Type]ImageChannel),
-		outChannels: make(map[Type]ImageChannel),
+		cameras: make(map[Type]Camera),
 	}
-
-	// Initialize channels for each camera type
-	m.channels[LeftCameraType] = make(ImageChannel, channelBufferSize)
-	m.channels[RightCameraType] = make(ImageChannel, channelBufferSize)
-	m.channels[OutputCameraType] = make(ImageChannel, channelBufferSize)
-
-	// Initialize output channels (not needed for output camera)
-	m.outChannels[LeftCameraType] = make(ImageChannel, channelBufferSize)
-	m.outChannels[RightCameraType] = make(ImageChannel, channelBufferSize)
 
 	return m
 }
@@ -76,8 +54,10 @@ func (m *manager) SetCamera(ctx context.Context, typ Type, cam Camera) error {
 	}
 
 	// Close existing camera if any
-	if oldCam, exists := m.cameras[typ]; exists {
-		if err := oldCam.Close(); err != nil {
+	oldCam, exists := m.cameras[typ]
+	if exists {
+		err := oldCam.Close()
+		if err != nil {
 			// Resume other cameras before returning
 			for t, c := range m.cameras {
 				if t != typ {
@@ -89,12 +69,9 @@ func (m *manager) SetCamera(ctx context.Context, typ Type, cam Camera) error {
 		}
 	}
 
-	// Drain channels to clear old data
-	m.drainChannels()
-
 	// Store and start new camera
 	m.cameras[typ] = cam
-	go cam.Stream(ctx, m.channels[typ])
+	go cam.Stream(ctx, nil)
 
 	// Resume other cameras
 	for t, c := range m.cameras {
@@ -104,22 +81,6 @@ func (m *manager) SetCamera(ctx context.Context, typ Type, cam Camera) error {
 	}
 
 	return nil
-}
-
-// GetChannel returns the input channel for the specified camera type.
-func (m *manager) GetChannel(typ Type) ImageChannel {
-	m.mu.RLock()
-	defer m.mu.RUnlock()
-
-	return m.channels[typ]
-}
-
-// GetOutputChannel returns the output channel for the specified camera type.
-func (m *manager) GetOutputChannel(typ Type) ImageChannel {
-	m.mu.RLock()
-	defer m.mu.RUnlock()
-
-	return m.outChannels[typ]
 }
 
 // CloseAll closes all cameras and releases their resources.
@@ -137,52 +98,8 @@ func (m *manager) CloseAll() error {
 	return nil
 }
 
-// DrainAll empties all camera channels.
-func (m *manager) DrainAll() {
-	m.mu.Lock()
-	defer m.mu.Unlock()
-	m.drainChannels()
-}
-
-// drainChannels non-blocking drain of all channels to clear any buffered images.
-func (m *manager) drainChannels() {
-	for {
-		allEmpty := true
-
-		// Try to read from each channel
-		select {
-		case <-m.channels[LeftCameraType]:
-			allEmpty = false
-		case <-m.channels[RightCameraType]:
-			allEmpty = false
-		case <-m.channels[OutputCameraType]:
-			allEmpty = false
-		case <-m.outChannels[LeftCameraType]:
-			allEmpty = false
-		case <-m.outChannels[RightCameraType]:
-			allEmpty = false
-		default:
-			// No more data in any channel
-		}
-
-		if allEmpty {
-			break
-		}
-	}
-}
-
 // Global manager instance for default usage.
 var defaultManager = NewManager()
-
-// DefaultManager returns the default camera manager instance.
-func DefaultManager() Manager {
-	return defaultManager
-}
-
-// SetDefaultManager replaces the default camera manager with the provided one.
-func SetDefaultManager(m Manager) {
-	defaultManager = m
-}
 
 // GetCamera gets a camera by type from the default manager.
 func GetCamera(typ Type) Camera {
@@ -194,22 +111,7 @@ func SetCamera(ctx context.Context, typ Type, cam Camera) error {
 	return defaultManager.SetCamera(ctx, typ, cam)
 }
 
-// GetChannel gets a channel by type from the default manager.
-func GetChannel(typ Type) ImageChannel {
-	return defaultManager.GetChannel(typ)
-}
-
-// GetOutputChannel gets an output channel by type from the default manager.
-func GetOutputChannel(typ Type) ImageChannel {
-	return defaultManager.GetOutputChannel(typ)
-}
-
 // CloseAll closes all cameras in the default manager.
 func CloseAll() error {
 	return defaultManager.CloseAll()
-}
-
-// DrainAll drains all channels in the default manager.
-func DrainAll() {
-	defaultManager.DrainAll()
 }

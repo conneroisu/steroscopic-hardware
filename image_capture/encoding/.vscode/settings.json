@@ -1,0 +1,6 @@
+{
+    "files.associations": {
+        "range_code.h": "c",
+        "stdio.h": "c"
+    }
+}

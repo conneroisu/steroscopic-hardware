@@ -85,7 +85,8 @@ func main() {
 
 	var inFilePath string
 	var outFilePath string
-	if flag.NArg() == 0 || flag.NArg() == 1 && flag.Args()[0] == "-" { // parse args: read from stdin
+	// parse args: read from standard input
+	if flag.NArg() == 0 || flag.NArg() == 1 && flag.Args()[0] == "-" {
 		if !*stdout {
 			exit("reading from stdin, can write only to stdout")
 		}
@@ -129,7 +130,7 @@ func main() {
 			}
 
 			f, err = os.Lstat(outFilePath)
-			if err != nil && f != nil { // should be: ||| if err != nil && err != "file not found" ||| but i can't find the error's id
+			if err != nil && f != nil {
 				log.Fatal(err.Error())
 			}
 			if f != nil && !f.IsDir() {

@@ -1,7 +1,7 @@
 //go:build run
 // +build run
 
-// Package main is an quick way to run the stereoscopic disparity algorithm.
+// Package main is a quick way to run the stereoscopic disparity algorithm.
 package main
 
 import (

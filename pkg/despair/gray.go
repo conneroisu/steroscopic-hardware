@@ -6,7 +6,7 @@ var rgbToGrayLUT [256]uint16
 
 func init() {
 	// Precompute RGB to grayscale conversion factors
-	for i := range 256 { // i := 0; i < 256; i++
+	for i := range 256 {
 		rgbToGrayLUT[i] = uint16(i) * 255
 	}
 }

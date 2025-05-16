@@ -27,9 +27,7 @@ func main() {
 func run() error {
 
 	fmt.Printf("Using %d workers (green threads)\n", numWorkers)
-	fmt.Printf("Block size: %d\n", blockSize)
-	fmt.Printf("Max despair: %d\n", maxDespair)
-	inps, outs := despair.SetupConcurrentSAD(blockSize, maxDespair, numWorkers)
+	inps, outs := despair.SetupConcurrentSAD(numWorkers)
 	defer close(inps)
 
 	for i := 0; i < 10; i++ {

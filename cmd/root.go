@@ -203,7 +203,8 @@ func gracefulShutdown(
 	defer cancel()
 
 	// Attempt to shut down the server
-	if err := server.Shutdown(shutdownCtx); err != nil {
+	err := server.Shutdown(shutdownCtx)
+	if err != nil {
 		return fmt.Errorf("error during server shutdown: %w", err)
 	}
 
@@ -221,9 +222,6 @@ func gracefulShutdown(
 // Parameters:
 //   - logger: The application logger for recording events and errors
 //   - params: Stereoscopic algorithm parameters (block size, max disparity)
-//   - leftStream: Stream manager for the left camera
-//   - rightStream: Stream manager for the right camera
-//   - outputStream: Stream manager for the generated depth map output
 //   - cancel: CancelFunc to gracefully shut down the application
 //
 // Returns an http.Handler and any error encountered during setup.
@@ -244,14 +242,14 @@ func NewServer(
 	}
 	slogLogHandler := http.HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
-			if r.Method == http.MethodGet && r.URL.Path == "/healthcheck" {
-				logger.Info(
-					"request",
-					slog.String("method", r.Method),
-					slog.String("url", r.URL.String()),
-					slog.String("pattern", r.Pattern),
-				)
-			}
+			// if r.Method == http.MethodGet && r.URL.Path == "/healthcheck" {
+			// 	logger.Info(
+			// 		"request",
+			// 		slog.String("method", r.Method),
+			// 		slog.String("url", r.URL.String()),
+			// 		slog.String("pattern", r.Pattern),
+			// 	)
+			// }
 			mux.ServeHTTP(w, r)
 		})
 	var handler http.Handler = slogLogHandler

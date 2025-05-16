@@ -29,7 +29,7 @@ Allowing for the logging of console messages both to the console and to the brow
 
 
 <a name="NewLogWriter"></a>
-## func [NewLogWriter](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/logger/logger.go#L50>)
+## func [NewLogWriter](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/logger/logger.go#L51>)
 
 ```go
 func NewLogWriter(w io.Writer) slog.Handler
@@ -38,7 +38,7 @@ func NewLogWriter(w io.Writer) slog.Handler
 NewLogWriter returns a slog.Handler that writes to a buffer.
 
 <a name="LogEntry"></a>
-## type [LogEntry](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/logger/logger.go#L42-L47>)
+## type [LogEntry](<https://github.com/conneroisu/steroscopic-hardware/blob/main/pkg/logger/logger.go#L43-L48>)
 
 LogEntry represents a structured log entry.
 

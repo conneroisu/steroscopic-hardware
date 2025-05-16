@@ -12,6 +12,8 @@ int main()
     uint8_t* data = calloc(SIZE, sizeof(uint8_t));
     uint8_t* coded = calloc(SIZE, sizeof(uint8_t));
 
+    size_t result = 0;
+
     // Load the image.
     FILE* image = fopen("image.bin", "r");
 
@@ -29,7 +31,8 @@ int main()
         return errno;
     }
 
-    size_t result = range_code(data, coded, SIZE);
+    result = range_code(data, coded, SIZE, 32768);
+
 
     free(data);
     free(coded);
@@ -46,24 +49,19 @@ int main()
         data[i] = i;
     }
 
-    size_t result = range_code(data, coded, 1000);
+    size_t result = range_code(data, coded, 1000, 64);
 
     free(data);
     free(coded);
     printf("Result: %ld\n", result);
-    
+
 #else
-    uint8_t data[10] = {130, 55, 39, 55, 130, 72, 72, 9, 72, 8};
-    uint8_t coded[10];
+    uint8_t data[16] = { 130, 55, 39, 55, 130, 72, 72, 9, 72, 8, 80, 76, 125, 130, 72, 9 };
+    uint8_t coded[16];
 
-    memset(coded, 0, 10);
+    memset(coded, 0, 16);
 
-    for(int i = 0; i < 10; ++i)
-    {
-        data[i] = i;
-    }
-
-    size_t result = range_code(data, coded, 10);
+    size_t result = range_code(data, coded, 16, 32);
 
     printf("Result: %ld\n", result);
 #endif

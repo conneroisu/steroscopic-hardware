@@ -7,7 +7,6 @@ import (
 	"image"
 	"image/color"
 	"log/slog"
-	"sync"
 	"time"
 
 	"github.com/conneroisu/steroscopic-hardware/pkg/homedir"
@@ -38,8 +37,7 @@ type SerialCamera struct {
 	imageWidth  int          // Expected image width in pixels
 	imageHeight int          // Expected image height in pixels
 	logger      *slog.Logger // Logger for serial camera events
-	onClose     func()       // Cleanup function for closing the camera
-	streamMu    sync.Mutex   // Mutex for synchronizing streaming
+	onClose     func()       // onClose function for closing the camera
 	cameraType  Type         // Type of camera
 }
 
@@ -94,7 +92,7 @@ func NewSerialCamera(ctx context.Context, typ Type, portName string, baudRate in
 
 // Stream reads images from the camera and sends them to the provided channel. It manages
 // the streaming lifecycle, error handling, and reconnection logic.
-func (sc *SerialCamera) Stream(ctx context.Context, outCh ImageChannel) {
+func (sc *SerialCamera) Stream(ctx context.Context, _ ImageChannel) {
 	sc.logger.Debug("SerialCamera.Stream started")
 	defer sc.logger.Debug("SerialCamera.Stream completed")
 
@@ -102,7 +100,7 @@ func (sc *SerialCamera) Stream(ctx context.Context, outCh ImageChannel) {
 	errChan := make(chan error, 1)
 
 	// Start the initial stream
-	readFn, err := sc.initializeStream(ctx, errChan, outCh)
+	readFn, err := sc.initializeStream(ctx, errChan)
 	if err != nil {
 		sc.logger.Error("failed to initialize image stream", "err", err)
 
@@ -132,7 +130,7 @@ func (sc *SerialCamera) Stream(ctx context.Context, outCh ImageChannel) {
 
 // initializeStream sets up the serial connection and prepares for streaming. It returns a
 // function that continuously reads frames and sends them to the image channel.
-func (sc *SerialCamera) initializeStream(ctx context.Context, errChan chan error, imgCh ImageChannel) (func(), error) {
+func (sc *SerialCamera) initializeStream(ctx context.Context, errChan chan error) (func(), error) {
 	var tries = 0
 
 	for {
@@ -199,11 +197,7 @@ func (sc *SerialCamera) initializeStream(ctx context.Context, errChan chan error
 						continue
 					}
 
-					// Lock to ensure we don't have multiple reads happening simultaneously
-					sc.streamMu.Lock()
-					img, err := sc.readFrame()
-					sc.streamMu.Unlock()
-
+					_, err := sc.readFrame()
 					if err != nil {
 						errChan <- err
 						time.Sleep(500 * time.Millisecond) // Delay before retry
@@ -212,11 +206,6 @@ func (sc *SerialCamera) initializeStream(ctx context.Context, errChan chan error
 					}
 
 					select {
-					case imgCh <- img:
-						sc.logger.Debug("image sent to channel")
-						// Reset backoff on success
-						backoff = initialBackoff
-						consecutiveFailures = 0
 					case <-ctx.Done():
 						return
 					case <-sc.Context().Done():
@@ -321,8 +310,14 @@ func (sc *SerialCamera) readFrame() (*image.Gray, error) {
 		}
 	}
 
+	// Save to $HOME/{type}.png
+	err := homedir.SaveImage(string(sc.cameraType)+".png", img)
+	if err != nil {
+		return nil, err
+	}
+
 	// Save a copy of the image for debugging
-	err := homedir.SaveImage(string(sc.cameraType), img)
+	err = homedir.SaveImage("stero-image-"+string(sc.cType)+"-"+time.Now().Format("2006-01-02-15-04-05")+".png", img)
 	if err != nil {
 		sc.logger.Error("failed to save debug image", "err", err)
 	}
